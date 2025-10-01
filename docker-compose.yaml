@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://app:app@db:5432/ama
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: ama
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:
