@@ -27,7 +27,7 @@ app.post("/questions", async (req, res) => {
 
 app.get("/questions", async (req, res) => {
   const status = (req.query.status as string)?.toUpperCase();
-  const where = status === "ANSWERED" ? { status: "ANSWERED" } : { status: "OPEN" };
+  const where = status === "ANSWERED" ? { status: "ANSWERED" as const } : { status: "OPEN" as const };
   const list = await prisma.question.findMany({
     where,
     orderBy: [{ upvotes: "desc" }, { createdAt: "asc" }]
