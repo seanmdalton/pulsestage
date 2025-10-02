@@ -21,6 +21,30 @@ export interface Team {
   };
 }
 
+// Tag types
+export interface Tag {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuestionTag {
+  id: string;
+  questionId: string;
+  tagId: string;
+  createdAt: string;
+  tag: Tag;
+}
+
+export interface CreateTagRequest {
+  name: string;
+  description?: string;
+  color?: string;
+}
+
 export interface CreateTeamRequest {
   name: string;
   slug: string;
@@ -47,6 +71,23 @@ const TeamSchema = z.object({
   }).optional()
 });
 
+const TagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  color: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+const QuestionTagSchema = z.object({
+  id: z.string(),
+  questionId: z.string(),
+  tagId: z.string(),
+  createdAt: z.string(),
+  tag: TagSchema,
+});
+
 const QuestionSchema = z.object({
   id: z.string(),
   body: z.string(),
@@ -57,7 +98,8 @@ const QuestionSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   teamId: z.string().nullable(),
-  team: TeamSchema.nullable().optional()
+  team: TeamSchema.nullable().optional(),
+  tags: z.array(QuestionTagSchema).optional()
 });
 
 const CreateQuestionSchema = z.object({
@@ -246,6 +288,48 @@ class ApiClient {
       method: 'DELETE',
       credentials: 'include'
     }, DeleteTeamResponseSchema);
+  }
+
+  // Tag management methods
+  async getTags(): Promise<Tag[]> {
+    return this.request('/tags', {}, z.array(TagSchema));
+  }
+
+  async createTag(data: CreateTagRequest): Promise<Tag> {
+    const CreateTagSchema = z.object({
+      name: z.string().min(1).max(100),
+      description: z.string().max(500).optional(),
+      color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
+    });
+
+    return this.request('/tags', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, TagSchema);
+  }
+
+  async addTagToQuestion(questionId: string, tagId: string): Promise<{ success: boolean }> {
+    const AddTagResponseSchema = z.object({
+      success: z.boolean()
+    });
+
+    return this.request(`/questions/${questionId}/tags`, {
+      method: 'POST',
+      body: JSON.stringify({ tagId }),
+      credentials: 'include'
+    }, AddTagResponseSchema);
+  }
+
+  async removeTagFromQuestion(questionId: string, tagId: string): Promise<{ success: boolean }> {
+    const RemoveTagResponseSchema = z.object({
+      success: z.boolean()
+    });
+
+    return this.request(`/questions/${questionId}/tags/${tagId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    }, RemoveTagResponseSchema);
   }
 }
 

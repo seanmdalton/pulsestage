@@ -50,15 +50,31 @@ export function QuestionModal({ question, isOpen, onClose, onUpvote, upvotedQues
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">Status</h4>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                This question is awaiting an answer from the team.
-              </p>
+              {(() => {
+                const reviewedTag = question.tags?.find(qt => qt.tag.name === 'Reviewed');
+                if (reviewedTag) {
+                  const reviewedDate = new Date(reviewedTag.createdAt).toLocaleDateString();
+                  return (
+                    <p className="text-blue-700 dark:text-blue-300 text-sm">
+                      This question was reviewed on {reviewedDate} during a presentation session. An answer from the team will be submitted soon.
+                    </p>
+                  );
+                } else {
+                  return (
+                    <p className="text-blue-700 dark:text-blue-300 text-sm">
+                      This question is awaiting an answer from the team.
+                    </p>
+                  );
+                }
+              })()}
             </div>
             <div className="flex items-center text-blue-600 dark:text-blue-400">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm font-medium">Pending</span>
+              <span className="text-sm font-medium">
+                {question.tags?.find(qt => qt.tag.name === 'Reviewed') ? 'Reviewed' : 'Pending'}
+              </span>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import type { Question } from '../lib/api';
 import { useAdmin } from '../contexts/AdminContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
+import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminPage() {
   const { isAuthenticated, isLoading: authLoading, logout } = useAdmin();
@@ -15,6 +16,11 @@ export function AdminPage() {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'questions' | 'teams'>('questions');
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(undefined, 'admin');
+  }, []);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -94,12 +100,20 @@ export function AdminPage() {
               Manage questions and teams
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors self-start sm:self-auto"
-          >
-            Logout
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/all/open/present')}
+              className="px-4 py-2 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors self-start sm:self-auto"
+            >
+              Presentation Mode
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors self-start sm:self-auto"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}

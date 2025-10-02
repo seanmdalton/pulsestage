@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { QuestionModal } from '../components/QuestionModal';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
+import { setFormattedPageTitle } from '../utils/titleUtils';
+import { useAdmin } from '../contexts/AdminContext';
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -14,6 +17,13 @@ export function OpenQuestionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { currentTeam } = useTeamFromUrl();
+  const { isAuthenticated } = useAdmin();
+  const navigate = useNavigate();
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(currentTeam?.slug, 'open');
+  }, [currentTeam?.slug]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -114,6 +124,17 @@ export function OpenQuestionsPage() {
             Viewing: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
           </p>
         </div>
+        {isAuthenticated && questions.length > 0 && (
+          <button
+            onClick={() => {
+              const teamSlug = currentTeam?.slug || 'all';
+              navigate(`/${teamSlug}/open/present`);
+            }}
+            className="px-4 py-2 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors self-start sm:self-auto"
+          >
+            Presentation Mode
+          </button>
+        )}
       </div>
       
       {questions.length === 0 ? (
@@ -142,6 +163,21 @@ export function OpenQuestionsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
+              
+              {/* Tags */}
+              {question.tags && question.tags.length > 0 && (
+                <div className="flex items-center space-x-2 mb-3">
+                  {question.tags.map((questionTag) => (
+                    <span
+                      key={questionTag.id}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+                      style={{ backgroundColor: questionTag.tag.color }}
+                    >
+                      {questionTag.tag.name}
+                    </span>
+                  ))}
+                </div>
+              )}
               
               <p className="text-gray-900 dark:text-gray-100 leading-relaxed line-clamp-3 mb-4">
                 {question.body}

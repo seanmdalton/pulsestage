@@ -34,4 +34,27 @@ model Question {
   updatedAt    DateTime       @updatedAt
   teamId       String?
   team         Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  tags         QuestionTag[]
+}
+
+model Tag {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  description String?
+  color       String        @default("#3B82F6") // Default blue color
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  questions   QuestionTag[]
+}
+
+model QuestionTag {
+  id         String   @id @default(uuid())
+  questionId String
+  tagId      String
+  createdAt  DateTime @default(now())
+  
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([questionId, tagId])
 }

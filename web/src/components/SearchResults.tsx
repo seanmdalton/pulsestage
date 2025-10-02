@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import type { Question } from '../lib/api';
+import { QuestionModal } from './QuestionModal';
+import { AnswerModal } from './AnswerModal';
 
 interface SearchResultsProps {
   results: Question[];
@@ -9,6 +12,18 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ results, loading, query, onUpvote, upvotedQuestions = new Set() }: SearchResultsProps) {
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleQuestionClick = (question: Question) => {
+    setSelectedQuestion(question);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedQuestion(null);
+  };
   if (!query || query.trim().length < 2) {
     return null;
   }
@@ -54,7 +69,16 @@ export function SearchResults({ results, loading, query, onUpvote, upvotedQuesti
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <p className="text-sm text-gray-900 dark:text-gray-100 mb-1">{question.body}</p>
+                    <p className="text-sm text-gray-900 dark:text-gray-100 mb-2 line-clamp-3">{question.body}</p>
+                    <button
+                      onClick={() => handleQuestionClick(question)}
+                      className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center mb-2"
+                    >
+                      Read Full Question
+                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {question.upvotes} upvotes • {new Date(question.createdAt).toLocaleDateString()}
                     </div>
@@ -92,15 +116,24 @@ export function SearchResults({ results, loading, query, onUpvote, upvotedQuesti
                 className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
               >
                 <div className="mb-2">
-                  <p className="text-sm text-gray-900 dark:text-gray-100 mb-1">{question.body}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 mb-2 line-clamp-3">{question.body}</p>
+                  <button
+                    onClick={() => handleQuestionClick(question)}
+                    className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center mb-2"
+                  >
+                    Read Full Question
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {question.upvotes} upvotes • Answered {question.respondedAt ? new Date(question.respondedAt).toLocaleDateString() : 'recently'}
                   </div>
                 </div>
                 {question.responseText && (
                   <div className="pt-2 border-t border-green-200 dark:border-green-800">
-                    <p className="text-sm text-green-800 dark:text-green-300 font-medium">Answer:</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 line-clamp-3">
+                    <p className="text-sm text-green-800 dark:text-green-300 font-medium mb-1">Answer:</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
                       {question.responseText.length > 150 
                         ? `${question.responseText.substring(0, 150)}...` 
                         : question.responseText}
@@ -111,6 +144,25 @@ export function SearchResults({ results, loading, query, onUpvote, upvotedQuesti
             ))}
           </div>
         </div>
+      )}
+      
+      {/* Question/Answer Modal */}
+      {selectedQuestion && (
+        selectedQuestion.status === 'ANSWERED' ? (
+          <AnswerModal
+            question={selectedQuestion}
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+          />
+        ) : (
+          <QuestionModal
+            question={selectedQuestion}
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            onUpvote={onUpvote || (() => {})}
+            upvotedQuestions={upvotedQuestions}
+          />
+        )
       )}
     </div>
   );

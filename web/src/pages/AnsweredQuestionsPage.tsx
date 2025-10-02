@@ -5,6 +5,7 @@ import { groupQuestionsByWeek } from '../utils/dateUtils';
 import { AnswerModal } from '../components/AnswerModal';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
+import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AnsweredQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -14,6 +15,11 @@ export function AnsweredQuestionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { currentTeam } = useTeamFromUrl();
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(currentTeam?.slug, 'answered');
+  }, [currentTeam?.slug]);
 
   useEffect(() => {
     const loadQuestions = async () => {

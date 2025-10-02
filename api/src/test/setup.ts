@@ -25,7 +25,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   // Clean up database before each test
+  await testPrisma.questionTag.deleteMany();
   await testPrisma.question.deleteMany();
+  await testPrisma.team.deleteMany();
+  await testPrisma.tag.deleteMany();
 });
 
 afterAll(async () => {

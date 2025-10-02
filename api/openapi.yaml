@@ -16,6 +16,10 @@ tags:
     description: Question management endpoints
   - name: Admin
     description: Protected admin endpoints
+  - name: Teams
+    description: Team management endpoints
+  - name: Tags
+    description: Tag management endpoints
 
 components:
   securitySchemes:
@@ -24,6 +28,11 @@ components:
       in: header
       name: x-admin-key
       description: Admin authentication key
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: connect.sid
+      description: Admin session cookie
 
   schemas:
     Question:
@@ -70,6 +79,154 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+        teamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Associated team ID
+        team:
+          type: object
+          nullable: true
+          description: Associated team information
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            slug:
+              type: string
+            description:
+              type: string
+              nullable: true
+            isActive:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+        tags:
+          type: array
+          description: Associated tags
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              questionId:
+                type: string
+                format: uuid
+              tagId:
+                type: string
+                format: uuid
+              createdAt:
+                type: string
+                format: date-time
+              tag:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  description:
+                    type: string
+                    nullable: true
+                  color:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  updatedAt:
+                    type: string
+                    format: date-time
+
+    Team:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique team identifier
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Team display name
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: URL-friendly team identifier
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Team description
+        isActive:
+          type: boolean
+          description: Whether the team is active
+        createdAt:
+          type: string
+          format: date-time
+          description: Team creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        _count:
+          type: object
+          description: Question count for the team
+          properties:
+            questions:
+              type: integer
+
+    Tag:
+      type: object
+      required:
+        - id
+        - name
+        - color
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique tag identifier
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tag name
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Tag description
+        color:
+          type: string
+          pattern: '^#[0-9A-F]{6}$'
+          description: Hex color code for the tag
+        createdAt:
+          type: string
+          format: date-time
+          description: Tag creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
 
     CreateQuestionRequest:
       type: object
@@ -81,8 +238,13 @@ components:
           minLength: 3
           maxLength: 2000
           description: Question text
+        teamId:
+          type: string
+          format: uuid
+          description: Team ID to associate the question with
       example:
         body: "What inspired you to build this project?"
+        teamId: "550e8400-e29b-41d4-a716-446655440000"
 
     RespondRequest:
       type: object
@@ -96,6 +258,94 @@ components:
           description: Admin response text
       example:
         response: "I wanted to create a simple platform for community engagement."
+
+    CreateTeamRequest:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Team display name
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: '^[a-z0-9-]+$'
+          description: URL-friendly team identifier
+        description:
+          type: string
+          maxLength: 500
+          description: Team description
+      example:
+        name: "Engineering Team"
+        slug: "engineering"
+        description: "Software development and engineering"
+
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tag name
+        description:
+          type: string
+          maxLength: 500
+          description: Tag description
+        color:
+          type: string
+          pattern: '^#[0-9A-F]{6}$'
+          description: Hex color code for the tag
+      example:
+        name: "Currently Presenting"
+        description: "Question is currently being presented"
+        color: "#10B981"
+
+    AddTagRequest:
+      type: object
+      required:
+        - tagId
+      properties:
+        tagId:
+          type: string
+          format: uuid
+          description: Tag ID to add to the question
+      example:
+        tagId: "550e8400-e29b-41d4-a716-446655440000"
+
+    AdminLoginRequest:
+      type: object
+      required:
+        - adminKey
+      properties:
+        adminKey:
+          type: string
+          description: Admin authentication key
+      example:
+        adminKey: "your-admin-key-here"
+
+    AdminLoginResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          description: Login success status
+        message:
+          type: string
+          description: Login result message
+      example:
+        success: true
+        message: "Login successful"
 
     HealthResponse:
       type: object
@@ -148,7 +398,7 @@ paths:
       tags:
         - Questions
       summary: List questions
-      description: Get a list of questions filtered by status
+      description: Get a list of questions filtered by status and team
       operationId: getQuestions
       parameters:
         - name: status
@@ -159,6 +409,13 @@ paths:
             type: string
             enum: [open, answered]
             default: open
+        - name: teamId
+          in: query
+          description: Filter by team ID
+          required: false
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: List of questions
@@ -249,7 +506,7 @@ paths:
       description: Admin endpoint to respond to an open question and mark it as answered
       operationId: respondToQuestion
       security:
-        - AdminKey: []
+        - AdminSession: []
       parameters:
         - name: id
           in: path
@@ -292,3 +549,273 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      summary: Admin login
+      description: Authenticate as admin using admin key
+      operationId: adminLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminLoginResponse'
+        '401':
+          description: Invalid admin key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/logout:
+    post:
+      tags:
+        - Admin
+      summary: Admin logout
+      description: Logout admin session
+      operationId: adminLogout
+      security:
+        - AdminSession: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminLoginResponse'
+
+  /teams:
+    get:
+      tags:
+        - Teams
+      summary: List teams
+      description: Get all active teams
+      operationId: getTeams
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+
+    post:
+      tags:
+        - Teams
+      summary: Create team
+      description: Create a new team (admin only)
+      operationId: createTeam
+      security:
+        - AdminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+      responses:
+        '201':
+          description: Team created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Team with this slug already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tags:
+    get:
+      tags:
+        - Tags
+      summary: List tags
+      description: Get all tags (admin only)
+      operationId: getTags
+      security:
+        - AdminSession: []
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+
+    post:
+      tags:
+        - Tags
+      summary: Create tag
+      description: Create a new tag (admin only)
+      operationId: createTag
+      security:
+        - AdminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Tag with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /questions/{id}/tags:
+    post:
+      tags:
+        - Tags
+      summary: Add tag to question
+      description: Add a tag to a question (admin only)
+      operationId: addTagToQuestion
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTagRequest'
+      responses:
+        '200':
+          description: Tag added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '404':
+          description: Question or tag not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /questions/{id}/tags/{tagId}:
+    delete:
+      tags:
+        - Tags
+      summary: Remove tag from question
+      description: Remove a tag from a question (admin only)
+      operationId: removeTagFromQuestion
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+        - name: tagId
+          in: path
+          required: true
+          description: Tag ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tag removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '404':
+          description: Tag not found on question
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /questions/search:
+    get:
+      tags:
+        - Questions
+      summary: Search questions
+      description: Search questions by text content
+      operationId: searchQuestions
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+        - name: teamId
+          in: query
+          required: false
+          description: Filter by team ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

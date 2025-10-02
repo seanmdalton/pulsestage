@@ -20,35 +20,52 @@ import { OpenQuestionsPage } from './pages/OpenQuestionsPage';
 import { AnsweredQuestionsPage } from './pages/AnsweredQuestionsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
+import { PresentationPage } from './pages/PresentationPage';
 import { Navbar } from './components/Navbar';
 import { AdminProvider } from './contexts/AdminContext';
 import { TeamProvider } from './contexts/TeamContext';
+import { useEffect } from 'react';
+import { getBaseTitle } from './utils/titleUtils';
 
 function App() {
+  // Set default page title
+  useEffect(() => {
+    document.title = getBaseTitle();
+  }, []);
+
   return (
     <Router>
       <AdminProvider>
         <TeamProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-            <Navbar />
-            <main className="container mx-auto px-4 py-8">
-              <Routes>
-                {/* Default routes - redirect to /all */}
-                <Route path="/" element={<Navigate to="/all" replace />} />
-                <Route path="/open" element={<Navigate to="/all/open" replace />} />
-                <Route path="/answered" element={<Navigate to="/all/answered" replace />} />
-                
-                {/* Team-based routes */}
-                <Route path="/:teamSlug" element={<SubmitPage />} />
-                <Route path="/:teamSlug/open" element={<OpenQuestionsPage />} />
-                <Route path="/:teamSlug/answered" element={<AnsweredQuestionsPage />} />
-                
-                {/* Admin routes (not team-scoped) */}
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-              </Routes>
-            </main>
-          </div>
+          <Routes>
+            {/* Presentation routes (no navbar) */}
+            <Route path="/:teamSlug/open/present" element={<PresentationPage />} />
+            <Route path="/all/open/present" element={<PresentationPage />} />
+            
+            {/* Regular routes with navbar */}
+            <Route path="/*" element={
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                <Navbar />
+                <main className="container mx-auto px-4 py-8">
+                  <Routes>
+                    {/* Default routes - redirect to /all */}
+                    <Route path="/" element={<Navigate to="/all" replace />} />
+                    <Route path="/open" element={<Navigate to="/all/open" replace />} />
+                    <Route path="/answered" element={<Navigate to="/all/answered" replace />} />
+                    
+                    {/* Team-based routes */}
+                    <Route path="/:teamSlug" element={<SubmitPage />} />
+                    <Route path="/:teamSlug/open" element={<OpenQuestionsPage />} />
+                    <Route path="/:teamSlug/answered" element={<AnsweredQuestionsPage />} />
+                    
+                    {/* Admin routes (not team-scoped) */}
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin/login" element={<AdminLoginPage />} />
+                  </Routes>
+                </main>
+              </div>
+            } />
+          </Routes>
         </TeamProvider>
       </AdminProvider>
     </Router>

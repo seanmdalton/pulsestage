@@ -1,0 +1,382 @@
+/*
+ * Copyright 2025 Sean M. Dalton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../lib/api';
+import type { Question, Tag } from '../lib/api';
+import { useAdmin } from '../contexts/AdminContext';
+import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
+import { setFormattedPageTitle } from '../utils/titleUtils';
+
+export function PresentationPage() {
+  const { isAuthenticated, isLoading: authLoading } = useAdmin();
+  const { currentTeam } = useTeamFromUrl();
+  const navigate = useNavigate();
+  
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentlyPresentingTag, setCurrentlyPresentingTag] = useState<Tag | null>(null);
+  const [reviewedTag, setReviewedTag] = useState<Tag | null>(null);
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(currentTeam?.slug, 'present');
+  }, [currentTeam?.slug]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/admin/login');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
+  // Load tags
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const tags = await apiClient.getTags();
+        const currentlyPresentingTag = tags.find(t => t.name === 'Currently Presenting');
+        const reviewedTag = tags.find(t => t.name === 'Reviewed');
+        setCurrentlyPresentingTag(currentlyPresentingTag || null);
+        setReviewedTag(reviewedTag || null);
+      } catch (err) {
+        console.error('Failed to load tags:', err);
+      }
+    };
+
+    if (isAuthenticated) {
+      loadTags();
+    }
+  }, [isAuthenticated]);
+
+  // Load questions (filter out reviewed questions)
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
+        
+        // Filter out reviewed questions
+        const unreviewedQuestions = data.filter(question => {
+          const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
+          return !hasReviewedTag;
+        });
+        
+        // Sort by upvotes descending to get highest upvoted first
+        const sortedQuestions = unreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
+        setQuestions(sortedQuestions);
+        setCurrentQuestionIndex(0);
+        
+        // Add "Currently Presenting" tag to the first question if we have questions and the tag
+        if (sortedQuestions.length > 0 && currentlyPresentingTag) {
+          const firstQuestion = sortedQuestions[0];
+          const hasCurrentlyPresentingTag = firstQuestion.tags?.some(
+            qt => qt.tag.id === currentlyPresentingTag.id
+          );
+          
+          if (!hasCurrentlyPresentingTag) {
+            try {
+              await apiClient.addTagToQuestion(firstQuestion.id, currentlyPresentingTag.id);
+              // Refresh questions to get updated tags
+              const updatedData = await apiClient.getQuestions('OPEN', currentTeam?.id);
+              const updatedUnreviewedQuestions = updatedData.filter(question => {
+                const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
+                return !hasReviewedTag;
+              });
+              const updatedSortedQuestions = updatedUnreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
+              setQuestions(updatedSortedQuestions);
+            } catch (err) {
+              console.error('Failed to add Currently Presenting tag:', err);
+            }
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load questions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isAuthenticated && currentlyPresentingTag && reviewedTag) {
+      loadQuestions();
+    }
+  }, [isAuthenticated, currentTeam?.id, currentlyPresentingTag, reviewedTag]);
+
+  // Refresh questions periodically to get updated upvotes (but don't auto-move)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
+        
+        // Filter out reviewed questions
+        const unreviewedQuestions = data.filter(question => {
+          const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
+          return !hasReviewedTag;
+        });
+        
+        const sortedQuestions = unreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
+        
+        // Try to maintain the current question index
+        const currentQuestion = questions[currentQuestionIndex];
+        if (currentQuestion) {
+          const newIndex = sortedQuestions.findIndex(q => q.id === currentQuestion.id);
+          if (newIndex !== -1) {
+            // Current question still exists, update the list and maintain index
+            setQuestions(sortedQuestions);
+            setCurrentQuestionIndex(newIndex);
+          } else {
+            // Current question was removed (likely marked as reviewed), go to first
+            setQuestions(sortedQuestions);
+            setCurrentQuestionIndex(0);
+          }
+        } else {
+          setQuestions(sortedQuestions);
+        }
+      } catch (err) {
+        console.error('Failed to refresh questions:', err);
+      }
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, currentTeam?.id, questions, currentQuestionIndex]);
+
+  const advanceToNext = useCallback(async () => {
+    if (questions.length === 0 || !currentlyPresentingTag) return;
+    
+    try {
+      // Remove "Currently Presenting" tag from current question and add "Reviewed" tag
+      const currentQuestion = questions[currentQuestionIndex];
+      if (currentQuestion) {
+        const hasCurrentlyPresentingTag = currentQuestion.tags?.some(
+          qt => qt.tag.id === currentlyPresentingTag.id
+        );
+        
+        if (hasCurrentlyPresentingTag) {
+          await apiClient.removeTagFromQuestion(currentQuestion.id, currentlyPresentingTag.id);
+        }
+        
+        // Add "Reviewed" tag to mark this question as covered
+        if (reviewedTag) {
+          await apiClient.addTagToQuestion(currentQuestion.id, reviewedTag.id);
+        }
+      }
+      
+      // Move to next question (wrap around to beginning if at end)
+      const newIndex = (currentQuestionIndex + 1) % questions.length;
+      setCurrentQuestionIndex(newIndex);
+      
+      // Add "Currently Presenting" tag to new question
+      const newQuestion = questions[newIndex];
+      if (newQuestion) {
+        await apiClient.addTagToQuestion(newQuestion.id, currentlyPresentingTag.id);
+        
+        // Refresh questions to get updated tags
+        const updatedData = await apiClient.getQuestions('OPEN', currentTeam?.id);
+        const updatedUnreviewedQuestions = updatedData.filter(question => {
+          const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
+          return !hasReviewedTag;
+        });
+        const updatedSortedQuestions = updatedUnreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
+        setQuestions(updatedSortedQuestions);
+        
+        // Update the index to point to the correct question in the sorted list
+        const correctIndex = updatedSortedQuestions.findIndex(q => q.id === newQuestion.id);
+        if (correctIndex !== -1) {
+          setCurrentQuestionIndex(correctIndex);
+        } else {
+          // If the new question was filtered out, go to the first question
+          setCurrentQuestionIndex(0);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to advance to next question:', err);
+    }
+  }, [questions, currentQuestionIndex, currentlyPresentingTag, reviewedTag, currentTeam?.id]);
+
+  const goToHighestUpvoted = useCallback(() => {
+    if (questions.length === 0) return;
+    
+    // Since questions are already filtered and sorted, just go to the first one
+    setCurrentQuestionIndex(0);
+  }, [questions]);
+
+  // Cleanup function to remove "Currently Presenting" tag when exiting
+  const cleanupCurrentTag = useCallback(async () => {
+    if (!currentlyPresentingTag || questions.length === 0) return;
+    
+    try {
+      const currentQuestion = questions[currentQuestionIndex];
+      if (currentQuestion) {
+        const hasCurrentlyPresentingTag = currentQuestion.tags?.some(
+          qt => qt.tag.id === currentlyPresentingTag.id
+        );
+        
+        if (hasCurrentlyPresentingTag) {
+          await apiClient.removeTagFromQuestion(currentQuestion.id, currentlyPresentingTag.id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to cleanup current tag:', err);
+    }
+  }, [questions, currentQuestionIndex, currentlyPresentingTag]);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts (user navigates away)
+      cleanupCurrentTag();
+    };
+  }, [cleanupCurrentTag]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return; // Don't handle shortcuts when typing in input fields
+      }
+
+      switch (e.key) {
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          advanceToNext();
+          break;
+        case 'h':
+        case 'H':
+          e.preventDefault();
+          goToHighestUpvoted();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          cleanupCurrentTag().then(() => {
+            navigate(-1); // Go back to previous page after cleanup
+          });
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [advanceToNext, goToHighestUpvoted, cleanupCurrentTag, navigate]);
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading presentation mode...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-red-400 text-2xl">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-white text-4xl mb-4">No Questions Available</div>
+          <div className="text-gray-400 text-xl">No open questions to present</div>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-8 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header with minimal controls */}
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+        <div className="text-sm text-gray-400">
+          {currentTeam ? currentTeam.name : 'All Teams'} • Question {currentQuestionIndex + 1} of {questions.length}
+        </div>
+        <div className="flex gap-4">
+          <div className="text-sm text-gray-400">
+            Space/Enter: Next • H: Highest Unreviewed • Esc: Exit
+          </div>
+          <button
+            onClick={goToHighestUpvoted}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Go to Highest
+          </button>
+          <button
+            onClick={() => {
+              cleanupCurrentTag().then(() => {
+                navigate(-1);
+              });
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Exit
+          </button>
+        </div>
+      </div>
+
+      {/* Main question display */}
+      <div className="flex items-center justify-center min-h-screen px-8">
+        <div className="max-w-4xl w-full text-center">
+          {/* Upvote count */}
+          <div className="mb-8">
+            <div className="text-6xl font-bold text-blue-400">
+              {currentQuestion.upvotes}
+            </div>
+            <div className="text-xl text-gray-400">
+              upvote{currentQuestion.upvotes !== 1 ? 's' : ''}
+            </div>
+          </div>
+
+          {/* Question text */}
+          <div className="text-4xl md:text-5xl lg:text-6xl font-medium leading-relaxed text-white">
+            {currentQuestion.body}
+          </div>
+
+          {/* Currently presenting indicator */}
+          <div className="mt-12">
+            <div 
+              className="inline-block px-6 py-3 text-white rounded-full text-lg font-medium"
+              style={{ backgroundColor: currentlyPresentingTag?.color || '#10B981' }}
+            >
+              {currentlyPresentingTag?.name || 'Currently Presenting'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom navigation hint */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <div className="text-gray-500 text-sm">
+          Press <span className="font-bold">Space/Enter</span> to advance • Press <span className="font-bold">H</span> for highest unreviewed • Press <span className="font-bold">Esc</span> to exit
+        </div>
+      </div>
+    </div>
+  );
+}

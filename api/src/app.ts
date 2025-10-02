@@ -112,7 +112,12 @@ export function createApp(prisma: PrismaClient) {
     const list = await prisma.question.findMany({
       where,
       include: {
-        team: true
+        team: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
       },
       orderBy: [{ upvotes: "desc" }, { createdAt: "asc" }]
     });
@@ -436,7 +441,12 @@ export function createApp(prisma: PrismaClient) {
         const questions = await prisma.question.findMany({
           where: whereClause,
           include: {
-            team: true
+            team: true,
+            tags: {
+              include: {
+                tag: true
+              }
+            }
           },
           orderBy: [
             { status: 'asc' },
@@ -479,7 +489,12 @@ export function createApp(prisma: PrismaClient) {
       const questions = await prisma.question.findMany({
         where: searchWhereClause,
         include: {
-          team: true
+          team: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
         },
         orderBy: [
           { status: 'asc' }, // OPEN questions first
@@ -528,6 +543,117 @@ export function createApp(prisma: PrismaClient) {
     } catch (error) {
       console.error('Search error:', error);
       res.status(500).json({ error: 'Search failed' });
+    }
+  });
+
+  // Tag endpoints (admin only)
+  
+  // Get all tags
+  app.get("/tags", requireAdminSession, async (_req, res) => {
+    try {
+      const tags = await prisma.tag.findMany({
+        orderBy: { name: 'asc' }
+      });
+      res.json(tags);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+      res.status(500).json({ error: 'Failed to fetch tags' });
+    }
+  });
+
+  // Create a new tag
+  app.post("/tags", requireAdminSession, async (req, res) => {
+    const createTagSchema = z.object({
+      name: z.string().min(1).max(100),
+      description: z.string().max(500).optional(),
+      color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
+    });
+
+    const parse = createTagSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+
+    try {
+      const tag = await prisma.tag.create({
+        data: {
+          name: parse.data.name,
+          description: parse.data.description,
+          color: parse.data.color || '#3B82F6'
+        }
+      });
+      res.status(201).json(tag);
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      if (error instanceof Error && error.message.includes('Unique constraint')) {
+        res.status(409).json({ error: 'Tag with this name already exists' });
+      } else {
+        res.status(500).json({ error: 'Failed to create tag' });
+      }
+    }
+  });
+
+  // Add tag to question
+  app.post("/questions/:id/tags", requireAdminSession, async (req, res) => {
+    const { id } = req.params;
+    const addTagSchema = z.object({
+      tagId: z.string().uuid()
+    });
+
+    const parse = addTagSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+
+    try {
+      // Check if question exists
+      const question = await prisma.question.findUnique({ where: { id } });
+      if (!question) return res.status(404).json({ error: 'Question not found' });
+
+      // Check if tag exists
+      const tag = await prisma.tag.findUnique({ where: { id: parse.data.tagId } });
+      if (!tag) return res.status(404).json({ error: 'Tag not found' });
+
+      // Add tag to question (upsert to handle duplicates)
+      await prisma.questionTag.upsert({
+        where: {
+          questionId_tagId: {
+            questionId: id,
+            tagId: parse.data.tagId
+          }
+        },
+        update: {},
+        create: {
+          questionId: id,
+          tagId: parse.data.tagId
+        }
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error adding tag to question:', error);
+      res.status(500).json({ error: 'Failed to add tag to question' });
+    }
+  });
+
+  // Remove tag from question
+  app.delete("/questions/:id/tags/:tagId", requireAdminSession, async (req, res) => {
+    const { id, tagId } = req.params;
+
+    try {
+      await prisma.questionTag.delete({
+        where: {
+          questionId_tagId: {
+            questionId: id,
+            tagId: tagId
+          }
+        }
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing tag from question:', error);
+      if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
+        res.status(404).json({ error: 'Tag not found on question' });
+      } else {
+        res.status(500).json({ error: 'Failed to remove tag from question' });
+      }
     }
   });
 

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
+import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminLoginPage() {
   const [adminKey, setAdminKey] = useState('');
@@ -8,6 +9,11 @@ export function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAdmin();
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(undefined, 'login');
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

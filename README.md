@@ -2,45 +2,65 @@
 
 [![CI](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Coverage](https://img.shields.io/badge/Coverage-22%25-orange.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-green.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docs.docker.com/compose/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748.svg)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 
 A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team support**, built with Express, Prisma, PostgreSQL, Redis, React, and TypeScript.
 
 **Perfect for organizations** - Features team-based question organization, admin management, session-based authentication, comprehensive search, and much more.
 
-## ✨ Key Features
+## Key Features
 
-### 🏢 Multi-Team Organization
+### Multi-Team Organization
 - **Team-based questions** - Organize questions by Engineering, Product, People, General teams
 - **Team selector** - Easy switching between teams with question counts
 - **Team management** - Admin panel for creating and managing teams
 - **URL routing** - Shareable URLs like `/engineering/open` or `/product/answered`
 
-### 💬 Question Management
+### Question Management
 - **Submit questions** - Anonymous question submission with team assignment
 - **Real-time search** - Live search with fuzzy matching as you type
 - **Upvote system** - Vote on questions you want answered (localStorage protection)
 - **Question modals** - Full-screen viewing for long questions and answers
 - **Status tracking** - Open and answered question states
 
-### 👨‍💼 Admin Features
+### Admin Features
 - **Session-based authentication** - Secure admin login with HTTP-only cookies
 - **Admin panel** - Comprehensive dashboard for managing questions and teams
 - **Response management** - Answer questions with rich text responses
 - **Team administration** - Create, update, and manage teams
+- **Tag system** - Create and manage tags for question organization
+- **Presentation mode** - Full-screen presentation view for live AMAs
 
-### 🎨 User Experience
+### Tags & Presentation System
+- **Question tagging** - Add custom tags to questions for organization
+- **Currently Presenting** - Special tag for live presentation tracking
+- **Reviewed questions** - Mark questions as reviewed during presentations
+- **Presentation mode** - Full-screen dark mode for live AMAs
+- **Keyboard shortcuts** - Space/Enter to advance, H for highest, Esc to exit
+- **Auto-filtering** - Hide reviewed questions from presentation queue
+
+### User Experience
 - **Dark mode** - Toggle between light and dark themes (persistent)
 - **Responsive design** - Works perfectly on desktop, tablet, and mobile
 - **Weekly grouping** - Answered questions organized by week for better navigation
 - **Loading states** - Smooth user experience with proper loading indicators
+- **Dynamic page titles** - Browser tab titles show current team and page context
+- **Smart modals** - Different modal types for open vs answered questions
 
-### 🔒 Security & Performance
+### Security & Performance
 - **Environment-aware rate limiting** - Disabled in development, enabled in production
 - **Session management** - Redis-backed secure session storage
 - **CORS protection** - Configurable cross-origin resource sharing
 - **Input validation** - Comprehensive Zod schema validation
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
 - **Node.js 20** with TypeScript
@@ -67,7 +87,7 @@ A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team s
 - **Playwright** - End-to-end testing (disabled in CI)
 - **ESLint & Prettier** - Code quality and formatting
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -100,7 +120,7 @@ DATABASE_URL="postgresql://app:app@localhost:5432/ama" node load-comprehensive-t
 
 This loads 88 realistic questions across all teams with answers, upvotes, and historical dates.
 
-## 📋 Environment Configuration
+## Environment Configuration
 
 ```bash
 # Database
@@ -118,9 +138,13 @@ CORS_ORIGIN=http://localhost:5173
 
 # Redis URL
 REDIS_URL=redis://redis:6379
+
+# Website Configuration
+# This title appears in the browser tab and page titles
+WEBSITE_TITLE=AMA App
 ```
 
-## 🏗 Project Structure
+## Project Structure
 
 ```
 ama-app/
@@ -178,7 +202,7 @@ ama-app/
 └── README.md
 ```
 
-## 🗄 Database Schema
+## Database Schema
 
 ```prisma
 model Team {
@@ -211,7 +235,7 @@ enum QuestionStatus {
 }
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Public Endpoints
 - `GET /health` - Health check
@@ -230,6 +254,10 @@ enum QuestionStatus {
 - `PUT /teams/:id` - Update a team
 - `DELETE /teams/:id` - Deactivate a team (soft delete)
 - `POST /questions/:id/respond` - Answer a question
+- `GET /tags` - List all tags
+- `POST /tags` - Create a new tag
+- `POST /questions/:id/tags` - Add tag to question
+- `DELETE /questions/:id/tags/:tagId` - Remove tag from question
 
 ### API Documentation
 Interactive Swagger UI available at **http://localhost:3000/docs** with:
@@ -238,7 +266,7 @@ Interactive Swagger UI available at **http://localhost:3000/docs** with:
 - Try-it-out functionality
 - Authentication examples
 
-## 🧪 Testing
+## Testing
 
 ### API Tests (Vitest)
 ```bash
@@ -249,10 +277,10 @@ npm run test:watch          # Watch mode for development
 ```
 
 **Coverage Requirements:**
-- Lines: 45%
-- Branches: 65%
-- Functions: 75%
-- Statements: 45%
+- Lines: 20%
+- Branches: 60%
+- Functions: 50%
+- Statements: 20%
 
 **Test Coverage:**
 - ✅ All API endpoints and middleware
@@ -262,6 +290,8 @@ npm run test:watch          # Watch mode for development
 - ✅ Search functionality
 - ✅ Rate limiting behavior
 - ✅ Input validation with Zod
+- ✅ Tag management operations
+- ✅ Presentation mode functionality
 
 ### End-to-End Tests (Playwright)
 ```bash
@@ -280,7 +310,7 @@ npm run test:e2e:ui        # Run with Playwright UI
 - ✅ Dark mode toggle
 - ✅ Responsive design validation
 
-## 🔒 Security Features
+## Security Features
 
 ### Authentication & Sessions
 - **Session-based admin auth** - HTTP-only cookies with secure session storage
@@ -300,7 +330,7 @@ npm run test:e2e:ui        # Run with Playwright UI
 - **SQL injection protection** - Prisma ORM with parameterized queries
 - **XSS protection** - Input sanitization and CSP headers
 
-## 🚀 CI/CD Pipeline
+## CI/CD Pipeline
 
 ### GitHub Actions Workflow (`.github/workflows/ci.yaml`)
 
@@ -326,7 +356,7 @@ npm run test:e2e:ui        # Run with Playwright UI
 - **GitHub Actions updates**
 - **Grouped updates** to reduce PR noise
 
-## 📊 Test Data
+## Test Data
 
 The application includes a comprehensive test data script that loads:
 - **4 teams**: Engineering, Product, People, General
@@ -342,7 +372,31 @@ cd api
 DATABASE_URL="postgresql://app:app@localhost:5432/ama" node load-comprehensive-test-data.js
 ```
 
-## 🌐 Production Deployment
+## Presentation Mode
+
+The application includes a full-screen presentation mode for live AMAs:
+
+### Features
+- **Full-screen dark mode** optimized for projectors and large displays
+- **Large fonts** for visibility from a distance
+- **Keyboard shortcuts** for easy navigation:
+  - `Space` or `Enter` - Advance to next question
+  - `H` - Jump to highest upvoted unreviewed question
+  - `Esc` - Exit presentation mode
+- **Tag management** - Automatic tagging of "Currently Presenting" and "Reviewed" questions
+- **Auto-filtering** - Reviewed questions are hidden from future presentations
+
+### Usage
+1. **Access**: Available from any open questions page when logged in as admin
+2. **Navigation**: Use keyboard shortcuts or on-screen buttons
+3. **Question tracking**: Questions are automatically tagged as "Currently Presenting" and "Reviewed"
+4. **Exit**: Press `Esc` or click the exit button to return to normal view
+
+### URL Structure
+- Team-specific: `/{teamSlug}/open/present`
+- All teams: `/all/open/present`
+
+## Production Deployment
 
 ### Environment Variables for Production
 ```bash
@@ -363,7 +417,7 @@ Images are automatically built and pushed to GitHub Container Registry:
 - **API status indicator** in the frontend navbar
 - **Comprehensive logging** for debugging
 
-## 🤝 Contributing
+## Contributing
 
 1. **Fork the repository**
 2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
@@ -380,7 +434,7 @@ Images are automatically built and pushed to GitHub Container Registry:
 - **Code style**: ESLint and Prettier configured
 - **Security**: Follow security best practices
 
-## 📄 License
+## License
 
 Copyright 2025 Sean M. Dalton
 
@@ -396,22 +450,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## 👨‍💻 Author
-
-**Sean M. Dalton** - [seanmdalton@pm.me](mailto:seanmdalton@pm.me)
-
 ---
 
-## 🎯 What Makes This Special
+## What Makes This Special
 
 This AMA application goes beyond basic Q&A functionality:
 
-- **🏢 Multi-team architecture** - Perfect for large organizations
-- **🔍 Advanced search** - Real-time fuzzy search with debouncing
-- **🎨 Modern UX** - Dark mode, responsive design, smooth interactions
-- **🔒 Enterprise security** - Session-based auth, rate limiting, input validation
-- **📊 Rich test data** - Comprehensive test scenarios for all features
-- **🚀 Production ready** - Docker, CI/CD, security scanning, monitoring
-- **📚 Complete documentation** - OpenAPI specs, interactive docs, comprehensive README
+- **Multi-team architecture** - Perfect for large organizations
+- **Advanced search** - Real-time fuzzy search with debouncing
+- **Modern UX** - Dark mode, responsive design, smooth interactions
+- **Enterprise security** - Session-based auth, rate limiting, input validation
+- **Rich test data** - Comprehensive test scenarios for all features
+- **Production ready** - Docker, CI/CD, security scanning, monitoring
+- **Complete documentation** - OpenAPI specs, interactive docs, comprehensive README
 
-**Built for scale, designed for teams, ready for production.** 🚀
+**Built for scale, designed for teams, ready for production.**

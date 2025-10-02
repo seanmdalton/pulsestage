@@ -5,6 +5,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { SearchResults } from '../components/SearchResults';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
+import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function SubmitPage() {
   const [question, setQuestion] = useState('');
@@ -16,6 +17,11 @@ export function SubmitPage() {
 
   const { currentTeam } = useTeamFromUrl();
   const debouncedQuestion = useDebounce(question, 300); // 300ms delay
+
+  // Set page title
+  useEffect(() => {
+    setFormattedPageTitle(currentTeam?.slug, 'submit');
+  }, [currentTeam?.slug]);
 
   // Load upvoted questions from localStorage
   useEffect(() => {
