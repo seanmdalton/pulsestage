@@ -102,6 +102,54 @@ class ApiClient {
     const encodedQuery = encodeURIComponent(query.trim());
     return this.request(`/questions/search?q=${encodedQuery}`, {}, z.array(QuestionSchema));
   }
+
+  // Admin authentication methods
+  async adminLogin(adminKey: string): Promise<{ success: boolean; message: string; expiresIn: number }> {
+    const AdminLoginResponseSchema = z.object({
+      success: z.boolean(),
+      message: z.string(),
+      expiresIn: z.number()
+    });
+
+    return this.request('/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ adminKey }),
+      credentials: 'include' // Important for session cookies
+    }, AdminLoginResponseSchema);
+  }
+
+  async adminLogout(): Promise<{ success: boolean; message: string }> {
+    const AdminLogoutResponseSchema = z.object({
+      success: z.boolean(),
+      message: z.string()
+    });
+
+    return this.request('/admin/logout', {
+      method: 'POST',
+      credentials: 'include'
+    }, AdminLogoutResponseSchema);
+  }
+
+  async getAdminStatus(): Promise<{ isAuthenticated: boolean; loginTime: number | null; sessionAge: number | null }> {
+    const AdminStatusSchema = z.object({
+      isAuthenticated: z.boolean(),
+      loginTime: z.number().nullable(),
+      sessionAge: z.number().nullable()
+    });
+
+    return this.request('/admin/status', {
+      credentials: 'include'
+    }, AdminStatusSchema);
+  }
+
+  // Updated respond method that uses session auth instead of admin key
+  async respondToQuestionWithSession(id: string, data: RespondRequest): Promise<Question> {
+    return this.request(`/questions/${id}/respond`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      credentials: 'include' // Use session instead of admin key header
+    }, QuestionSchema);
+  }
 }
 
 export const apiClient = new ApiClient();

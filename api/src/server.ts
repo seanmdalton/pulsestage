@@ -1,17 +1,25 @@
 import { PrismaClient } from "@prisma/client";
 import { env } from "./env.js";
 import { initRedis } from "./middleware/rateLimit.js";
+import { initSessionStore } from "./middleware/session.js";
 import { createApp } from "./app.js";
 
 const prisma = new PrismaClient();
 
 // Initialize Redis and start server
 async function start() {
-  // Initialize Redis (non-blocking)
+  // Initialize Redis for rate limiting (non-blocking)
   try {
     await initRedis();
   } catch (error) {
     console.warn('Redis initialization failed, continuing without rate limiting:', error);
+  }
+
+  // Initialize Redis for sessions (non-blocking)
+  try {
+    await initSessionStore();
+  } catch (error) {
+    console.warn('Session store initialization failed, using memory store:', error);
   }
   
   const app = createApp(prisma);

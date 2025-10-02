@@ -5,6 +5,7 @@ const envSchema = z.object({
   PORT: z.string().default('3000').transform(Number),
   ADMIN_KEY: z.string().optional(),
   CORS_ORIGIN: z.string().default('*'),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
 });
 
 export const env = envSchema.parse(process.env);

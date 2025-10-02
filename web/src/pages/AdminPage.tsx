@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
+import { useAdmin } from '../contexts/AdminContext';
 
 export function AdminPage() {
+  const { isAuthenticated, isLoading: authLoading, logout } = useAdmin();
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -10,32 +14,40 @@ export function AdminPage() {
   const [response, setResponse] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [adminKey, setAdminKey] = useState('');
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/admin/login');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   useEffect(() => {
-    const loadQuestions = async () => {
-      try {
-        const data = await apiClient.getQuestions('OPEN');
-        setQuestions(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load questions');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (isAuthenticated) {
+      const loadQuestions = async () => {
+        try {
+          const data = await apiClient.getQuestions('OPEN');
+          setQuestions(data);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to load questions');
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    loadQuestions();
-  }, []);
+      loadQuestions();
+    }
+  }, [isAuthenticated]);
 
   const handleRespond = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedQuestionId || !response.trim() || !adminKey.trim()) return;
+    if (!selectedQuestionId || !response.trim()) return;
 
     setIsSubmitting(true);
     setMessage(null);
 
     try {
-      await apiClient.respondToQuestion(selectedQuestionId, { response: response.trim() }, adminKey);
+      await apiClient.respondToQuestionWithSession(selectedQuestionId, { response: response.trim() });
       setResponse('');
       setSelectedQuestionId('');
       setMessage({ type: 'success', text: 'Response submitted successfully!' });
@@ -44,6 +56,11 @@ export function AdminPage() {
       const data = await apiClient.getQuestions('OPEN');
       setQuestions(data);
     } catch (error) {
+      if (error instanceof Error && error.message.includes('authentication required')) {
+        // Session expired, redirect to login
+        navigate('/admin/login');
+        return;
+      }
       setMessage({ 
         type: 'error', 
         text: error instanceof Error ? error.message : 'Failed to submit response' 
@@ -51,6 +68,11 @@ export function AdminPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/admin/login');
   };
 
   if (loading) {
@@ -77,7 +99,15 @@ export function AdminPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+        >
+          Logout
+        </button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Open Questions List */}
@@ -113,21 +143,6 @@ export function AdminPage() {
           
           <form onSubmit={handleRespond} className="space-y-4">
             <div>
-              <label htmlFor="adminKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Admin Key
-              </label>
-              <input
-                id="adminKey"
-                type="password"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter admin key"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
               <label htmlFor="response" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Response
               </label>
@@ -160,7 +175,7 @@ export function AdminPage() {
 
             <button
               type="submit"
-              disabled={!selectedQuestionId || !response.trim() || !adminKey.trim() || isSubmitting}
+              disabled={!selectedQuestionId || !response.trim() || isSubmitting}
               className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Response'}
