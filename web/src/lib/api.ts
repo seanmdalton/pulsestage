@@ -52,6 +52,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         ...options.headers,
       },
+      credentials: 'include', // Always include credentials for session cookies
       ...options,
     });
 

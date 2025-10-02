@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { useAdmin } from '../contexts/AdminContext';
+import { ResponseModal } from '../components/ResponseModal';
 
 export function AdminPage() {
   const { isAuthenticated, isLoading: authLoading, logout } = useAdmin();
@@ -10,10 +11,8 @@ export function AdminPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string>('');
-  const [response, setResponse] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -39,35 +38,21 @@ export function AdminPage() {
     }
   }, [isAuthenticated]);
 
-  const handleRespond = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedQuestionId || !response.trim()) return;
+  const handleQuestionClick = (question: Question) => {
+    setSelectedQuestion(question);
+    setIsModalOpen(true);
+  };
 
-    setIsSubmitting(true);
-    setMessage(null);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedQuestion(null);
+  };
 
-    try {
-      await apiClient.respondToQuestionWithSession(selectedQuestionId, { response: response.trim() });
-      setResponse('');
-      setSelectedQuestionId('');
-      setMessage({ type: 'success', text: 'Response submitted successfully!' });
-      
-      // Reload questions to show updated status
-      const data = await apiClient.getQuestions('OPEN');
-      setQuestions(data);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('authentication required')) {
-        // Session expired, redirect to login
-        navigate('/admin/login');
-        return;
-      }
-      setMessage({ 
-        type: 'error', 
-        text: error instanceof Error ? error.message : 'Failed to submit response' 
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleResponseSuccess = (updatedQuestion: Question) => {
+    // Update the questions list to remove the answered question
+    setQuestions(prevQuestions => 
+      prevQuestions.filter(q => q.id !== updatedQuestion.id)
+    );
   };
 
   const handleLogout = async () => {
@@ -98,91 +83,84 @@ export function AdminPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
-        >
-          Logout
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Open Questions List */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Open Questions</h2>
+    <>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {questions.length} open question{questions.length !== 1 ? 's' : ''} awaiting response
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors self-start sm:self-auto"
+          >
+            Logout
+          </button>
+        </div>
+        
+        {/* Single Column Layout - Questions List */}
+        <div className="space-y-4">
           {questions.length === 0 ? (
-            <div className="text-gray-500 dark:text-gray-400">No open questions.</div>
-          ) : (
-            <div className="space-y-3">
-              {questions.map((question) => (
-                <div
-                  key={question.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedQuestionId === question.id
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
-                  }`}
-                  onClick={() => setSelectedQuestionId(question.id)}
-                >
-                  <p className="text-gray-900 dark:text-gray-100 mb-2">{question.body}</p>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {question.upvotes} upvotes • {new Date(question.createdAt).toLocaleString()}
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <div className="text-gray-500 dark:text-gray-400 mb-2">🎉 All caught up!</div>
+              <div className="text-sm text-gray-400 dark:text-gray-500">No open questions awaiting response.</div>
             </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Open Questions
+                </h2>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Click a question to respond
+                </div>
+              </div>
+              
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {questions.map((question) => (
+                  <div
+                    key={question.id}
+                    className="group p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10"
+                    onClick={() => handleQuestionClick(question)}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                          {question.upvotes} upvote{question.upvotes !== 1 ? 's' : ''}
+                        </span>
+                        <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    
+                    <p className="text-gray-900 dark:text-gray-100 leading-relaxed line-clamp-3">
+                      {question.body}
+                    </p>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <button className="text-sm text-blue-600 dark:text-blue-400 font-medium group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                        Click to respond →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
-
-        {/* Response Form */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Respond to Question</h2>
-          
-          <form onSubmit={handleRespond} className="space-y-4">
-            <div>
-              <label htmlFor="response" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Response
-              </label>
-              <textarea
-                id="response"
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-                placeholder="Enter your response..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                rows={8}
-                maxLength={10000}
-                disabled={isSubmitting || !selectedQuestionId}
-              />
-              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {response.length}/10000 characters
-              </div>
-            </div>
-
-            {message && (
-              <div
-                className={`p-4 rounded-md ${
-                  message.type === 'success'
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800'
-                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={!selectedQuestionId || !response.trim() || isSubmitting}
-              className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Response'}
-            </button>
-          </form>
-        </div>
       </div>
-    </div>
+
+      {/* Response Modal */}
+      <ResponseModal
+        question={selectedQuestion}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleResponseSuccess}
+      />
+    </>
   );
 }
