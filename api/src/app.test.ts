@@ -133,17 +133,23 @@ describe("API Tests", () => {
 
   describe("POST /questions/:id/respond", () => {
     let question: any;
+    let adminAgent: any;
 
     beforeEach(async () => {
       question = await testPrisma.question.create({
         data: { body: "Test question" }
       });
+
+      // Create an authenticated admin session
+      adminAgent = request.agent(app);
+      await adminAgent
+        .post("/admin/login")
+        .send({ adminKey: "test-admin-key" });
     });
 
-    it("should respond to question with valid admin key", async () => {
-      const response = await request(app)
+    it("should respond to question with valid admin session", async () => {
+      const response = await adminAgent
         .post(`/questions/${question.id}/respond`)
-        .set("x-admin-key", process.env.ADMIN_KEY || "dev-admin-key-change-me")
         .send({ response: "This is my answer" });
 
       expect(response.status).toBe(200);
@@ -152,35 +158,18 @@ describe("API Tests", () => {
       expect(response.body.respondedAt).toBeTruthy();
     });
 
-    it("should reject without admin key when ADMIN_KEY is set", async () => {
-      // Only test if admin key is configured
-      if (process.env.ADMIN_KEY) {
-        const response = await request(app)
-          .post(`/questions/${question.id}/respond`)
-          .send({ response: "This is my answer" });
+    it("should reject without admin session", async () => {
+      const response = await request(app)
+        .post(`/questions/${question.id}/respond`)
+        .send({ response: "This is my answer" });
 
-        expect(response.status).toBe(401);
-        expect(response.body).toHaveProperty("error");
-      }
-    });
-
-    it("should reject with invalid admin key", async () => {
-      // Only test if admin key is configured
-      if (process.env.ADMIN_KEY) {
-        const response = await request(app)
-          .post(`/questions/${question.id}/respond`)
-          .set("x-admin-key", "wrong-key")
-          .send({ response: "This is my answer" });
-
-        expect(response.status).toBe(401);
-        expect(response.body).toHaveProperty("error");
-      }
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("error");
     });
 
     it("should reject with missing response", async () => {
-      const response = await request(app)
+      const response = await adminAgent
         .post(`/questions/${question.id}/respond`)
-        .set("x-admin-key", process.env.ADMIN_KEY || "dev-admin-key-change-me")
         .send({});
 
       expect(response.status).toBe(400);
@@ -188,9 +177,8 @@ describe("API Tests", () => {
     });
 
     it("should reject with response too short", async () => {
-      const response = await request(app)
+      const response = await adminAgent
         .post(`/questions/${question.id}/respond`)
-        .set("x-admin-key", process.env.ADMIN_KEY || "dev-admin-key-change-me")
         .send({ response: "" });
 
       expect(response.status).toBe(400);
@@ -198,9 +186,8 @@ describe("API Tests", () => {
     });
 
     it("should return 404 for non-existent question", async () => {
-      const response = await request(app)
+      const response = await adminAgent
         .post("/questions/non-existent-id/respond")
-        .set("x-admin-key", process.env.ADMIN_KEY || "dev-admin-key-change-me")
         .send({ response: "This is my answer" });
 
       expect(response.status).toBe(404);
