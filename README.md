@@ -238,10 +238,10 @@ npm run test:watch          # Watch mode for development
 ```
 
 **Coverage Requirements:**
-- Lines: 80%
-- Branches: 80%
+- Lines: 75%
+- Branches: 70%
 - Functions: 80%
-- Statements: 80%
+- Statements: 75%
 
 **What's Tested:**
 - ✅ All API endpoints (GET, POST)
@@ -304,7 +304,7 @@ The project includes comprehensive CI/CD automation:
 **Jobs:**
 1. **API Tests**
    - Runs Vitest tests with PostgreSQL service
-   - Generates coverage report (80% threshold)
+   - Generates coverage report (75% lines/statements, 70% branches, 80% functions)
    - Uploads coverage artifacts
 
 2. **E2E Tests**
