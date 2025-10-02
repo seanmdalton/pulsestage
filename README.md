@@ -140,21 +140,32 @@ npm run dev
 
 ```
 ama-app/
-├── api/                    # Backend API
+├── api/                      # Backend API
 │   ├── src/
-│   │   ├── index.ts       # Main application entry
-│   │   ├── env.ts         # Environment validation
-│   │   └── middleware/    # Express middleware
+│   │   ├── app.ts           # Express app (testable)
+│   │   ├── server.ts        # Server startup
+│   │   ├── env.ts           # Environment validation
+│   │   ├── middleware/      # Express middleware
+│   │   │   ├── adminAuth.ts # Admin key authentication
+│   │   │   └── rateLimit.ts # Redis rate limiting
+│   │   ├── test/
+│   │   │   └── setup.ts     # Test configuration
+│   │   └── app.test.ts      # API integration tests
 │   ├── prisma/
-│   │   └── schema.prisma  # Database schema
+│   │   └── schema.prisma    # Database schema
+│   ├── vitest.config.ts     # Test configuration
 │   └── Dockerfile
-├── web/                    # Frontend application
+├── web/                      # Frontend application
 │   ├── src/
-│   │   ├── pages/         # React pages
-│   │   ├── components/    # React components
-│   │   └── lib/           # API client and utilities
+│   │   ├── pages/           # React pages
+│   │   ├── components/      # React components
+│   │   └── lib/             # API client and utilities
+│   ├── e2e/
+│   │   └── happy-path.spec.ts # E2E tests
+│   ├── playwright.config.ts # Playwright configuration
 │   └── Dockerfile
 ├── docker-compose.yaml
+├── env.example
 └── README.md
 ```
 
@@ -178,12 +189,80 @@ enum QuestionStatus {
 }
 ```
 
+## Testing
+
+### API Tests (Vitest)
+
+The API has comprehensive unit and integration tests using Vitest and Supertest.
+
+**Run tests:**
+```bash
+cd api
+npm test                    # Run all tests
+npm run test:coverage       # Run with coverage report
+npm run test:watch          # Watch mode for development
+```
+
+**Coverage Requirements:**
+- Lines: 80%
+- Branches: 80%
+- Functions: 80%
+- Statements: 80%
+
+**What's Tested:**
+- ✅ All API endpoints (GET, POST)
+- ✅ Request validation (Zod schemas)
+- ✅ Admin authentication
+- ✅ Error handling (404, 401, 400)
+- ✅ Rate limiting behavior
+- ✅ Question status filtering
+- ✅ Upvote functionality
+
+**Test Database:**
+Tests use an ephemeral PostgreSQL database (`ama_test`) that is automatically set up and cleaned between tests.
+
+### E2E Tests (Playwright)
+
+End-to-end tests verify the complete user journey using Playwright.
+
+**Run E2E tests:**
+```bash
+cd web
+npm run test:e2e           # Run tests headless
+npm run test:e2e:headed    # Run with visible browser
+npm run test:e2e:ui        # Run with Playwright UI
+```
+
+**Test Scenarios:**
+- ✅ Complete happy path: submit → open → upvote → admin respond → answered
+- ✅ Upvote button localStorage guard (prevents duplicate votes)
+- ✅ Admin key authentication
+- ✅ Health check indicator
+
+**Prerequisites:**
+- Docker services must be running (`docker compose up`)
+- API must be accessible at `http://localhost:3000`
+- Frontend must be accessible at `http://localhost:5173`
+
+### Running All Tests
+
+```bash
+# Start services
+docker compose up -d
+
+# Run API tests
+cd api && npm test
+
+# Run E2E tests
+cd web && npm run test:e2e
+```
+
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. **Run tests and ensure coverage meets thresholds**
 5. Submit a pull request
 
 ## License

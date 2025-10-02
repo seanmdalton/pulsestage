@@ -87,6 +87,7 @@ export function OpenQuestionsPage() {
           {questions.map((question) => (
             <div
               key={question.id}
+              data-testid="question-item"
               className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
             >
               <div className="flex justify-between items-start">

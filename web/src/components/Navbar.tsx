@@ -47,6 +47,7 @@ export function Navbar() {
           <div className="flex items-center space-x-2">
             <div className="text-sm text-gray-500">API Status:</div>
             <div
+              data-testid="health-status"
               className={`w-3 h-3 rounded-full ${
                 healthStatus === 'healthy'
                   ? 'bg-green-500'
