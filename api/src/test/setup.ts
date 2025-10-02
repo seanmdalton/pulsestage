@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { execSync } from "child_process";
 
 // Use a test database - set this BEFORE any imports that might use env
-const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || "postgresql://app:app@localhost:5432/ama_test";
+const TEST_DATABASE_URL = process.env.DATABASE_URL || "postgresql://app:app@localhost:5432/ama_test";
 process.env.DATABASE_URL = TEST_DATABASE_URL;
 
 export const testPrisma = new PrismaClient({
