@@ -7,3 +7,6 @@ Dockerfile
 Dockerfile.* 
 .vscode
 .DS_Store
+**/test-results
+**/coverage
+**/playwright-report
