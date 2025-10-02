@@ -302,33 +302,31 @@ The project includes comprehensive CI/CD automation:
 **Runs on**: Every push to `main` and all pull requests
 
 **Jobs:**
-1. **API Tests**
-   - Runs Vitest tests with PostgreSQL service
-   - Generates coverage report (75% lines/statements, 70% branches, 80% functions)
-   - Uploads coverage artifacts
+1. **API Tests** - *Currently disabled due to CI environment issues*
+   - Tests work locally but fail in GitHub Actions
+   - TODO: Fix database connection and Prisma setup in CI
 
-2. **E2E Tests**
-   - Starts full stack with Docker Compose
-   - Runs Playwright tests
-   - Uploads test reports
+2. **E2E Tests** - *Currently disabled due to Docker Compose startup issues*
+   - Tests work locally but Docker services fail to start in CI
+   - TODO: Fix service dependencies and startup timing
 
-3. **Semgrep SAST**
+3. **Semgrep SAST** ✅
    - Security scanning with `p/ci`, `p/typescript`, `p/nodejs` rulesets
    - Uploads results as artifacts
    - Non-blocking (reports only)
 
-4. **Trivy Filesystem Scan**
+4. **Trivy Filesystem Scan** ✅
    - Scans dependencies for vulnerabilities
    - Reports CRITICAL and HIGH severity issues
    - Uploads to GitHub Security tab
 
-5. **Build & Scan Images**
+5. **Build & Scan Images** ✅
    - Builds Docker images for `api` and `web`
    - Scans images with Trivy
    - Pushes to GHCR on main branch
    - Uploads scan results
 
-6. **CI Summary**
+6. **CI Summary** ✅
    - Aggregates all job statuses
    - Generates markdown summary in PR
 
