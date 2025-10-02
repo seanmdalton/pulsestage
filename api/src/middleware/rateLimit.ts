@@ -5,6 +5,12 @@ let redisClient: RedisClientType | null = null;
 
 // Initialize Redis client
 export async function initRedis() {
+  // Skip Redis initialization in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🚫 Rate limiting disabled in development environment');
+    return;
+  }
+
   try {
     redisClient = createClient({
       url: process.env.REDIS_URL || 'redis://redis:6379'
@@ -13,7 +19,7 @@ export async function initRedis() {
     redisClient.on('error', (err) => console.error('Redis Client Error', err));
     
     await redisClient.connect();
-    console.log('Redis connected for rate limiting');
+    console.log('🔒 Redis connected for rate limiting (production mode)');
   } catch (error) {
     console.error('Failed to connect to Redis:', error);
     // Continue without rate limiting if Redis is unavailable
@@ -22,6 +28,11 @@ export async function initRedis() {
 
 export function rateLimit(route: string, maxRequests: number = 10, windowMs: number = 60000) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    // Skip rate limiting in development environment
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+
     // Skip rate limiting if Redis is not available
     if (!redisClient) {
       return next();
