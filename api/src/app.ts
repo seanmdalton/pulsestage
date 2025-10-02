@@ -107,6 +107,50 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // Search questions endpoint
+  app.get("/questions/search", async (req, res) => {
+    const { q: query } = req.query;
+    
+    if (!query || typeof query !== 'string' || query.trim().length < 2) {
+      return res.json([]);
+    }
+
+    const searchTerm = query.trim();
+    
+    try {
+      // Search in both question body and response text
+      const questions = await prisma.question.findMany({
+        where: {
+          OR: [
+            {
+              body: {
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            },
+            {
+              responseText: {
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            }
+          ]
+        },
+        orderBy: [
+          { status: 'asc' }, // OPEN questions first
+          { upvotes: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: 10 // Limit to 10 results
+      });
+
+      res.json(questions);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: 'Search failed' });
+    }
+  });
+
   return app;
 }
 

@@ -1,10 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
+import type { Question } from '../lib/api';
+import { useDebounce } from '../hooks/useDebounce';
+import { SearchResults } from '../components/SearchResults';
 
 export function SubmitPage() {
   const [question, setQuestion] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [searchResults, setSearchResults] = useState<Question[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [upvotedQuestions, setUpvotedQuestions] = useState<Set<string>>(new Set());
+
+  const debouncedQuestion = useDebounce(question, 300); // 300ms delay
+
+  // Load upvoted questions from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('upvotedQuestions');
+    if (stored) {
+      try {
+        setUpvotedQuestions(new Set(JSON.parse(stored)));
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+  }, []);
+
+  // Search for similar questions when user types
+  useEffect(() => {
+    const searchQuestions = async () => {
+      if (!debouncedQuestion || debouncedQuestion.trim().length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
+      setSearchLoading(true);
+      try {
+        const results = await apiClient.searchQuestions(debouncedQuestion);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search failed:', error);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+
+    searchQuestions();
+  }, [debouncedQuestion]);
+
+  const handleUpvote = async (questionId: string) => {
+    if (upvotedQuestions.has(questionId)) return;
+
+    try {
+      const updatedQuestion = await apiClient.upvoteQuestion(questionId);
+      
+      // Update the search results
+      setSearchResults(prev => 
+        prev.map(q => q.id === questionId ? updatedQuestion : q)
+      );
+      
+      // Mark as upvoted
+      const newUpvoted = new Set(upvotedQuestions);
+      newUpvoted.add(questionId);
+      setUpvotedQuestions(newUpvoted);
+      localStorage.setItem('upvotedQuestions', JSON.stringify([...newUpvoted]));
+    } catch (err) {
+      console.error('Failed to upvote:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +135,15 @@ export function SubmitPage() {
           {isSubmitting ? 'Submitting...' : 'Submit Question'}
         </button>
       </form>
+
+      {/* Search Results */}
+      <SearchResults
+        results={searchResults}
+        loading={searchLoading}
+        query={debouncedQuestion}
+        onUpvote={handleUpvote}
+        upvotedQuestions={upvotedQuestions}
+      />
     </div>
   );
 }

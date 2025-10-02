@@ -94,6 +94,14 @@ class ApiClient {
       },
     }, QuestionSchema);
   }
+
+  async searchQuestions(query: string): Promise<Question[]> {
+    if (!query || query.trim().length < 2) {
+      return [];
+    }
+    const encodedQuery = encodeURIComponent(query.trim());
+    return this.request(`/questions/search?q=${encodedQuery}`, {}, z.array(QuestionSchema));
+  }
 }
 
 export const apiClient = new ApiClient();
