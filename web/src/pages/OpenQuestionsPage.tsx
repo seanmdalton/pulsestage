@@ -55,9 +55,9 @@ export function OpenQuestionsPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Open Questions</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Open Questions</h1>
         <div className="text-center py-8">
-          <div className="text-gray-500">Loading questions...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading questions...</div>
         </div>
       </div>
     );
@@ -66,9 +66,9 @@ export function OpenQuestionsPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Open Questions</h1>
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">Error: {error}</div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Open Questions</h1>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+          <div className="text-red-800 dark:text-red-300">Error: {error}</div>
         </div>
       </div>
     );
@@ -76,11 +76,11 @@ export function OpenQuestionsPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Open Questions</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Open Questions</h1>
       
       {questions.length === 0 ? (
         <div className="text-center py-8">
-          <div className="text-gray-500">No open questions yet.</div>
+          <div className="text-gray-500 dark:text-gray-400">No open questions yet.</div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -88,24 +88,24 @@ export function OpenQuestionsPage() {
             <div
               key={question.id}
               data-testid="question-item"
-              className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm"
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <p className="text-gray-900 mb-2">{question.body}</p>
-                  <div className="text-sm text-gray-500">
+                  <p className="text-gray-900 dark:text-gray-100 mb-2">{question.body}</p>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     Submitted {new Date(question.createdAt).toLocaleString()}
                   </div>
                 </div>
                 <div className="ml-4 flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">{question.upvotes}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{question.upvotes}</span>
                   <button
                     onClick={() => handleUpvote(question.id)}
                     disabled={upvotedQuestions.has(question.id)}
                     className={`px-3 py-1 text-sm rounded-md transition-colors ${
                       upvotedQuestions.has(question.id)
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
                     }`}
                   >
                     {upvotedQuestions.has(question.id) ? 'Upvoted' : 'Upvote'}

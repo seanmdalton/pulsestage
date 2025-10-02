@@ -56,9 +56,9 @@ export function AdminPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Panel</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
         <div className="text-center py-8">
-          <div className="text-gray-500">Loading questions...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading questions...</div>
         </div>
       </div>
     );
@@ -67,9 +67,9 @@ export function AdminPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Panel</h1>
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">Error: {error}</div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+          <div className="text-red-800 dark:text-red-300">Error: {error}</div>
         </div>
       </div>
     );
@@ -77,14 +77,14 @@ export function AdminPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Panel</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Open Questions List */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Open Questions</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Open Questions</h2>
           {questions.length === 0 ? (
-            <div className="text-gray-500">No open questions.</div>
+            <div className="text-gray-500 dark:text-gray-400">No open questions.</div>
           ) : (
             <div className="space-y-3">
               {questions.map((question) => (
@@ -92,13 +92,13 @@ export function AdminPage() {
                   key={question.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                     selectedQuestionId === question.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
                   }`}
                   onClick={() => setSelectedQuestionId(question.id)}
                 >
-                  <p className="text-gray-900 mb-2">{question.body}</p>
-                  <div className="text-sm text-gray-500">
+                  <p className="text-gray-900 dark:text-gray-100 mb-2">{question.body}</p>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {question.upvotes} upvotes • {new Date(question.createdAt).toLocaleString()}
                   </div>
                 </div>
@@ -109,11 +109,11 @@ export function AdminPage() {
 
         {/* Response Form */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Respond to Question</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Respond to Question</h2>
           
           <form onSubmit={handleRespond} className="space-y-4">
             <div>
-              <label htmlFor="adminKey" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="adminKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Admin Key
               </label>
               <input
@@ -121,14 +121,14 @@ export function AdminPage() {
                 type="password"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter admin key"
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label htmlFor="response" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="response" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Response
               </label>
               <textarea
@@ -136,12 +136,12 @@ export function AdminPage() {
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
                 placeholder="Enter your response..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 rows={8}
                 maxLength={10000}
                 disabled={isSubmitting || !selectedQuestionId}
               />
-              <div className="mt-1 text-sm text-gray-500">
+              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {response.length}/10000 characters
               </div>
             </div>
@@ -150,8 +150,8 @@ export function AdminPage() {
               <div
                 className={`p-4 rounded-md ${
                   message.type === 'success'
-                    ? 'bg-green-50 text-green-800 border border-green-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'
                 }`}
               >
                 {message.text}
@@ -161,7 +161,7 @@ export function AdminPage() {
             <button
               type="submit"
               disabled={!selectedQuestionId || !response.trim() || !adminKey.trim() || isSubmitting}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Response'}
             </button>
