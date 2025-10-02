@@ -1,6 +1,13 @@
 import { z } from 'zod';
+import type { components, operations } from './api-types';
 
-// API Response schemas
+// Re-export OpenAPI-generated types
+export type Question = components['schemas']['Question'];
+export type CreateQuestionRequest = components['schemas']['CreateQuestionRequest'];
+export type RespondRequest = components['schemas']['RespondRequest'];
+export type HealthResponse = components['schemas']['HealthResponse'];
+
+// Zod schemas for runtime validation (kept for validation purposes)
 const QuestionSchema = z.object({
   id: z.string(),
   body: z.string(),
@@ -24,11 +31,6 @@ const HealthSchema = z.object({
   ok: z.boolean(),
   service: z.string(),
 });
-
-export type Question = z.infer<typeof QuestionSchema>;
-export type CreateQuestionRequest = z.infer<typeof CreateQuestionSchema>;
-export type RespondRequest = z.infer<typeof RespondSchema>;
-export type HealthResponse = z.infer<typeof HealthSchema>;
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 

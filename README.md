@@ -95,6 +95,34 @@ npm install
 npm run dev
 ```
 
+## API Documentation
+
+### Interactive Documentation (Swagger UI)
+
+The API includes a fully interactive OpenAPI documentation available at:
+
+**http://localhost:3000/docs** (when running in development mode)
+
+The Swagger UI provides:
+- ✅ Complete API endpoint documentation
+- ✅ Request/response schemas with examples
+- ✅ Try-it-out functionality for testing endpoints
+- ✅ Authentication information for protected endpoints
+
+### Generating TypeScript Types
+
+The frontend uses automatically generated TypeScript types from the OpenAPI specification:
+
+```bash
+# From the root directory
+npm run openapi:gen
+
+# Or from the web directory
+cd web && npm run openapi:gen
+```
+
+This generates `web/src/lib/api-types.ts` with fully typed API interfaces.
+
 ## API Endpoints
 
 ### Public Endpoints
@@ -140,32 +168,36 @@ npm run dev
 
 ```
 ama-app/
-├── api/                      # Backend API
+├── api/                        # Backend API
 │   ├── src/
-│   │   ├── app.ts           # Express app (testable)
-│   │   ├── server.ts        # Server startup
-│   │   ├── env.ts           # Environment validation
-│   │   ├── middleware/      # Express middleware
-│   │   │   ├── adminAuth.ts # Admin key authentication
-│   │   │   └── rateLimit.ts # Redis rate limiting
+│   │   ├── app.ts             # Express app (testable)
+│   │   ├── server.ts          # Server startup
+│   │   ├── env.ts             # Environment validation
+│   │   ├── middleware/        # Express middleware
+│   │   │   ├── adminAuth.ts   # Admin key authentication
+│   │   │   └── rateLimit.ts   # Redis rate limiting
 │   │   ├── test/
-│   │   │   └── setup.ts     # Test configuration
-│   │   └── app.test.ts      # API integration tests
+│   │   │   └── setup.ts       # Test configuration
+│   │   └── app.test.ts        # API integration tests
 │   ├── prisma/
-│   │   └── schema.prisma    # Database schema
-│   ├── vitest.config.ts     # Test configuration
+│   │   └── schema.prisma      # Database schema
+│   ├── openapi.yaml           # OpenAPI 3.0 specification
+│   ├── vitest.config.ts       # Test configuration
 │   └── Dockerfile
-├── web/                      # Frontend application
+├── web/                        # Frontend application
 │   ├── src/
-│   │   ├── pages/           # React pages
-│   │   ├── components/      # React components
-│   │   └── lib/             # API client and utilities
+│   │   ├── pages/             # React pages
+│   │   ├── components/        # React components
+│   │   └── lib/               # API client and utilities
+│   │       ├── api.ts         # API client with Zod validation
+│   │       └── api-types.ts   # Generated TypeScript types
 │   ├── e2e/
 │   │   └── happy-path.spec.ts # E2E tests
-│   ├── playwright.config.ts # Playwright configuration
+│   ├── playwright.config.ts   # Playwright configuration
 │   └── Dockerfile
 ├── docker-compose.yaml
 ├── env.example
+├── package.json               # Root scripts (openapi:gen)
 └── README.md
 ```
 

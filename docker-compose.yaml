@@ -4,6 +4,7 @@ services:
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/ama
       PORT: "3000"
+      NODE_ENV: development
       ADMIN_KEY: ${ADMIN_KEY:-dev-admin-key-change-me}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       REDIS_URL: redis://redis:6379
