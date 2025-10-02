@@ -3,6 +3,8 @@ import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { groupQuestionsByWeek } from '../utils/dateUtils';
 import { AnswerModal } from '../components/AnswerModal';
+import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
+import { getTeamDisplayName } from '../contexts/TeamContext';
 
 export function AnsweredQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -11,10 +13,12 @@ export function AnsweredQuestionsPage() {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { currentTeam } = useTeamFromUrl();
+
   useEffect(() => {
     const loadQuestions = async () => {
       try {
-        const data = await apiClient.getQuestions('ANSWERED');
+        const data = await apiClient.getQuestions('ANSWERED', currentTeam?.id);
         setQuestions(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load questions');
@@ -24,12 +28,17 @@ export function AnsweredQuestionsPage() {
     };
 
     loadQuestions();
-  }, []);
+  }, [currentTeam?.id]);
 
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Answered Questions</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Answered Questions</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Viewing: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
+          </p>
+        </div>
         <div className="text-center py-8">
           <div className="text-gray-500 dark:text-gray-400">Loading questions...</div>
         </div>
@@ -40,7 +49,12 @@ export function AnsweredQuestionsPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Answered Questions</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Answered Questions</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Viewing: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
+          </p>
+        </div>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
           <div className="text-red-800 dark:text-red-300">Error: {error}</div>
         </div>
@@ -68,6 +82,9 @@ export function AnsweredQuestionsPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Answered Questions</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {questions.length} question{questions.length !== 1 ? 's' : ''} answered
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+            Viewing: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
           </p>
         </div>
       </div>

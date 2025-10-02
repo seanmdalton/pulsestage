@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Sean M. Dalton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import express from "express";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
@@ -53,22 +69,51 @@ export function createApp(prisma: PrismaClient) {
   });
 
   const createQuestionSchema = z.object({
-    body: z.string().min(3).max(2000)
+    body: z.string().min(3).max(2000),
+    teamId: z.string().optional()
   });
 
   // Rate limited: 10 requests per minute per IP
   app.post("/questions", rateLimit("create-question", 10), async (req, res) => {
     const parse = createQuestionSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
-    const q = await prisma.question.create({ data: { body: parse.data.body } });
+    
+    // Validate teamId if provided
+    if (parse.data.teamId) {
+      const team = await prisma.team.findUnique({ where: { id: parse.data.teamId } });
+      if (!team || !team.isActive) {
+        return res.status(400).json({ error: "Invalid or inactive team" });
+      }
+    }
+    
+    const q = await prisma.question.create({ 
+      data: { 
+        body: parse.data.body,
+        teamId: parse.data.teamId || null
+      },
+      include: {
+        team: true
+      }
+    });
     res.status(201).json(q);
   });
 
   app.get("/questions", async (req, res) => {
     const status = (req.query.status as string)?.toUpperCase();
-    const where = status === "ANSWERED" ? { status: "ANSWERED" as const } : { status: "OPEN" as const };
+    const teamId = req.query.teamId as string;
+    
+    const where: any = status === "ANSWERED" ? { status: "ANSWERED" as const } : { status: "OPEN" as const };
+    
+    // Add team filter if provided
+    if (teamId) {
+      where.teamId = teamId;
+    }
+    
     const list = await prisma.question.findMany({
       where,
+      include: {
+        team: true
+      },
       orderBy: [{ upvotes: "desc" }, { createdAt: "asc" }]
     });
     res.json(list);
@@ -152,6 +197,152 @@ export function createApp(prisma: PrismaClient) {
     });
   });
 
+  // Team management endpoints
+  const createTeamSchema = z.object({
+    name: z.string().min(1).max(100),
+    slug: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+    description: z.string().max(500).optional()
+  });
+
+  const updateTeamSchema = z.object({
+    name: z.string().min(1).max(100).optional(),
+    description: z.string().max(500).optional(),
+    isActive: z.boolean().optional()
+  });
+
+  // Get all teams (public endpoint)
+  app.get("/teams", async (req, res) => {
+    try {
+      const teams = await prisma.team.findMany({
+        where: { isActive: true },
+        include: {
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        },
+        orderBy: { name: "asc" }
+      });
+      res.json(teams);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+      res.status(500).json({ error: "Failed to fetch teams" });
+    }
+  });
+
+  // Get team by slug (public endpoint)
+  app.get("/teams/:slug", async (req, res) => {
+    const { slug } = req.params;
+    try {
+      const team = await prisma.team.findUnique({
+        where: { slug },
+        include: {
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        }
+      });
+      
+      if (!team || !team.isActive) {
+        return res.status(404).json({ error: "Team not found" });
+      }
+      
+      res.json(team);
+    } catch (error) {
+      console.error('Error fetching team:', error);
+      res.status(500).json({ error: "Failed to fetch team" });
+    }
+  });
+
+  // Create team (admin only)
+  app.post("/teams", requireAdminSession, async (req, res) => {
+    const parse = createTeamSchema.safeParse(req.body);
+    if (!parse.success) {
+      return res.status(400).json({ error: parse.error.flatten() });
+    }
+
+    try {
+      // Check if slug already exists
+      const existingTeam = await prisma.team.findUnique({
+        where: { slug: parse.data.slug }
+      });
+      
+      if (existingTeam) {
+        return res.status(409).json({ error: "Team with this slug already exists" });
+      }
+
+      const team = await prisma.team.create({
+        data: parse.data,
+        include: {
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        }
+      });
+      
+      res.status(201).json(team);
+    } catch (error) {
+      console.error('Error creating team:', error);
+      res.status(500).json({ error: "Failed to create team" });
+    }
+  });
+
+  // Update team (admin only)
+  app.put("/teams/:id", requireAdminSession, async (req, res) => {
+    const { id } = req.params;
+    const parse = updateTeamSchema.safeParse(req.body);
+    if (!parse.success) {
+      return res.status(400).json({ error: parse.error.flatten() });
+    }
+
+    try {
+      const team = await prisma.team.update({
+        where: { id },
+        data: parse.data,
+        include: {
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        }
+      });
+      
+      res.json(team);
+    } catch (error: any) {
+      console.error('Error updating team:', error);
+      if (error.code === 'P2025') {
+        return res.status(404).json({ error: "Team not found" });
+      }
+      res.status(500).json({ error: "Failed to update team" });
+    }
+  });
+
+  // Deactivate team (admin only) - soft delete
+  app.delete("/teams/:id", requireAdminSession, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const team = await prisma.team.update({
+        where: { id },
+        data: { isActive: false }
+      });
+      
+      res.json({ success: true, message: "Team deactivated successfully" });
+    } catch (error: any) {
+      console.error('Error deactivating team:', error);
+      if (error.code === 'P2025') {
+        return res.status(404).json({ error: "Team not found" });
+      }
+      res.status(500).json({ error: "Failed to deactivate team" });
+    }
+  });
+
   // Protected by admin session (new approach)
   app.post("/questions/:id/respond", requireAdminSession, async (req, res) => {
     const { id } = req.params;
@@ -194,7 +385,7 @@ export function createApp(prisma: PrismaClient) {
 
   // Search questions endpoint with improved fuzzy matching
   app.get("/questions/search", async (req, res) => {
-    const { q: query } = req.query;
+    const { q: query, teamId } = req.query;
     
     if (!query || typeof query !== 'string' || query.trim().length < 2) {
       return res.json([]);
@@ -220,22 +411,32 @@ export function createApp(prisma: PrismaClient) {
       
       if (keywords.length === 0) {
         // Fallback to original search if no keywords extracted
-        const questions = await prisma.question.findMany({
-          where: {
-            OR: [
-              {
-                body: {
-                  contains: searchTerm,
-                  mode: 'insensitive'
-                }
-              },
-              {
-                responseText: {
-                  contains: searchTerm,
-                  mode: 'insensitive'
-                }
+        const whereClause: any = {
+          OR: [
+            {
+              body: {
+                contains: searchTerm,
+                mode: 'insensitive'
               }
-            ]
+            },
+            {
+              responseText: {
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            }
+          ]
+        };
+        
+        // Add team filter if provided
+        if (teamId && typeof teamId === 'string') {
+          whereClause.teamId = teamId;
+        }
+        
+        const questions = await prisma.question.findMany({
+          where: whereClause,
+          include: {
+            team: true
           },
           orderBy: [
             { status: 'asc' },
@@ -263,12 +464,22 @@ export function createApp(prisma: PrismaClient) {
       }));
 
       // Search with keyword-based matching
+      const searchWhereClause: any = {
+        OR: [
+          ...bodyConditions,
+          ...responseConditions
+        ]
+      };
+      
+      // Add team filter if provided
+      if (teamId && typeof teamId === 'string') {
+        searchWhereClause.teamId = teamId;
+      }
+      
       const questions = await prisma.question.findMany({
-        where: {
-          OR: [
-            ...bodyConditions,
-            ...responseConditions
-          ]
+        where: searchWhereClause,
+        include: {
+          team: true
         },
         orderBy: [
           { status: 'asc' }, // OPEN questions first

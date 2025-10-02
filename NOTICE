@@ -1,0 +1,28 @@
+AMA App
+Copyright 2025 Sean M. Dalton
+
+This product includes software developed by Sean M. Dalton.
+
+This software contains the following third-party components:
+
+Backend Dependencies:
+- Express.js - MIT License
+- Prisma - Apache License 2.0
+- PostgreSQL - PostgreSQL License
+- Redis - BSD 3-Clause License
+- Zod - MIT License
+- TypeScript - Apache License 2.0
+
+Frontend Dependencies:
+- React - MIT License
+- Vite - MIT License
+- Tailwind CSS - MIT License
+- React Router - MIT License
+
+Development Dependencies:
+- Vitest - MIT License
+- Playwright - Apache License 2.0
+- ESLint - MIT License
+- Prettier - MIT License
+
+For a complete list of dependencies and their licenses, see the package.json files in the api/ and web/ directories.

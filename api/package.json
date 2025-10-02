@@ -1,6 +1,9 @@
 {
   "name": "ama-api",
   "version": "0.1.0",
+  "description": "Ask Me Anything API - A team-based Q&A platform",
+  "author": "Sean M. Dalton <seanmdalton@pm.me>",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

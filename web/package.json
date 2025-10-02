@@ -1,7 +1,10 @@
 {
-  "name": "web",
+  "name": "ama-web",
+  "description": "Ask Me Anything Web App - A team-based Q&A platform frontend",
+  "author": "Sean M. Dalton <seanmdalton@pm.me>",
+  "license": "Apache-2.0",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

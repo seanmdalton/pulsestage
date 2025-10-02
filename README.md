@@ -1,8 +1,11 @@
 # AMA App
 
 [![CI](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A full-stack Ask Me Anything (AMA) application built with Express, Prisma, PostgreSQL, Redis, React, and TypeScript.
+
+**Perfect for organizations** - Features team-based question organization, admin management, and comprehensive search capabilities.
 
 ## Features
 
@@ -382,4 +385,20 @@ Images are automatically pushed to GitHub Container Registry:
 
 ## License
 
-[Your License Here]
+Copyright 2025 Sean M. Dalton
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+## Author
+
+**Sean M. Dalton** - [seanmdalton@pm.me](mailto:seanmdalton@pm.me)

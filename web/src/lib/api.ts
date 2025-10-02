@@ -7,7 +7,46 @@ export type CreateQuestionRequest = components['schemas']['CreateQuestionRequest
 export type RespondRequest = components['schemas']['RespondRequest'];
 export type HealthResponse = components['schemas']['HealthResponse'];
 
+// Team types (manual until we update OpenAPI spec)
+export interface Team {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    questions: number;
+  };
+}
+
+export interface CreateTeamRequest {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface UpdateTeamRequest {
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 // Zod schemas for runtime validation (kept for validation purposes)
+const TeamSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  _count: z.object({
+    questions: z.number()
+  }).optional()
+});
+
 const QuestionSchema = z.object({
   id: z.string(),
   body: z.string(),
@@ -17,14 +56,29 @@ const QuestionSchema = z.object({
   respondedAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  teamId: z.string().nullable(),
+  team: TeamSchema.nullable().optional()
 });
 
 const CreateQuestionSchema = z.object({
   body: z.string().min(3).max(2000),
+  teamId: z.string().optional()
 });
 
 const RespondSchema = z.object({
   response: z.string().min(1).max(10000),
+});
+
+const CreateTeamSchema = z.object({
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(50),
+  description: z.string().max(500).optional()
+});
+
+const UpdateTeamSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().max(500).optional(),
+  isActive: z.boolean().optional()
 });
 
 const HealthSchema = z.object({
@@ -75,9 +129,12 @@ class ApiClient {
     }, QuestionSchema);
   }
 
-  async getQuestions(status?: 'OPEN' | 'ANSWERED'): Promise<Question[]> {
-    const params = status ? `?status=${status.toLowerCase()}` : '';
-    return this.request(`/questions${params}`, {}, z.array(QuestionSchema));
+  async getQuestions(status?: 'OPEN' | 'ANSWERED', teamId?: string): Promise<Question[]> {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status.toLowerCase());
+    if (teamId) params.append('teamId', teamId);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return this.request(`/questions${queryString}`, {}, z.array(QuestionSchema));
   }
 
   async upvoteQuestion(id: string): Promise<Question> {
@@ -96,12 +153,14 @@ class ApiClient {
     }, QuestionSchema);
   }
 
-  async searchQuestions(query: string): Promise<Question[]> {
+  async searchQuestions(query: string, teamId?: string): Promise<Question[]> {
     if (!query || query.trim().length < 2) {
       return [];
     }
-    const encodedQuery = encodeURIComponent(query.trim());
-    return this.request(`/questions/search?q=${encodedQuery}`, {}, z.array(QuestionSchema));
+    const params = new URLSearchParams();
+    params.append('q', query.trim());
+    if (teamId) params.append('teamId', teamId);
+    return this.request(`/questions/search?${params.toString()}`, {}, z.array(QuestionSchema));
   }
 
   // Admin authentication methods
@@ -150,6 +209,43 @@ class ApiClient {
       body: JSON.stringify(data),
       credentials: 'include' // Use session instead of admin key header
     }, QuestionSchema);
+  }
+
+  // Team management methods
+  async getTeams(): Promise<Team[]> {
+    return this.request('/teams', {}, z.array(TeamSchema));
+  }
+
+  async getTeamBySlug(slug: string): Promise<Team> {
+    return this.request(`/teams/${slug}`, {}, TeamSchema);
+  }
+
+  async createTeam(data: CreateTeamRequest): Promise<Team> {
+    return this.request('/teams', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, TeamSchema);
+  }
+
+  async updateTeam(id: string, data: UpdateTeamRequest): Promise<Team> {
+    return this.request(`/teams/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, TeamSchema);
+  }
+
+  async deleteTeam(id: string): Promise<{ success: boolean; message: string }> {
+    const DeleteTeamResponseSchema = z.object({
+      success: z.boolean(),
+      message: z.string()
+    });
+
+    return this.request(`/teams/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    }, DeleteTeamResponseSchema);
   }
 }
 

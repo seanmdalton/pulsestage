@@ -3,6 +3,8 @@ import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { useDebounce } from '../hooks/useDebounce';
 import { SearchResults } from '../components/SearchResults';
+import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
+import { getTeamDisplayName } from '../contexts/TeamContext';
 
 export function SubmitPage() {
   const [question, setQuestion] = useState('');
@@ -12,6 +14,7 @@ export function SubmitPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [upvotedQuestions, setUpvotedQuestions] = useState<Set<string>>(new Set());
 
+  const { currentTeam } = useTeamFromUrl();
   const debouncedQuestion = useDebounce(question, 300); // 300ms delay
 
   // Load upvoted questions from localStorage
@@ -36,7 +39,7 @@ export function SubmitPage() {
 
       setSearchLoading(true);
       try {
-        const results = await apiClient.searchQuestions(debouncedQuestion);
+        const results = await apiClient.searchQuestions(debouncedQuestion, currentTeam?.id);
         setSearchResults(results);
       } catch (error) {
         console.error('Search failed:', error);
@@ -47,7 +50,7 @@ export function SubmitPage() {
     };
 
     searchQuestions();
-  }, [debouncedQuestion]);
+  }, [debouncedQuestion, currentTeam?.id]);
 
   const handleUpvote = async (questionId: string) => {
     if (upvotedQuestions.has(questionId)) return;
@@ -78,9 +81,15 @@ export function SubmitPage() {
     setMessage(null);
 
     try {
-      await apiClient.createQuestion({ body: question.trim() });
+      await apiClient.createQuestion({ 
+        body: question.trim(),
+        teamId: currentTeam?.id
+      });
       setQuestion('');
-      setMessage({ type: 'success', text: 'Question submitted successfully!' });
+      setMessage({ 
+        type: 'success', 
+        text: `Question submitted successfully${currentTeam ? ` to ${currentTeam.name}` : ''}!` 
+      });
     } catch (error) {
       setMessage({ 
         type: 'error', 
@@ -93,7 +102,12 @@ export function SubmitPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Submit a Question</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Submit a Question</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
+          Submitting to: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
+        </p>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
