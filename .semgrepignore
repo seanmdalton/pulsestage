@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+*/dist/
+build/
+*/build/
+
+# Test outputs
+coverage/
+*/coverage/
+playwright-report/
+test-results/
+
+# Generated files
+api/src/lib/api-types.ts
+web/src/lib/api-types.ts
+
+# Prisma generated
+**/node_modules/@prisma/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yaml
+

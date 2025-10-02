@@ -1,5 +1,7 @@
 # AMA App
 
+[![CI](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
+
 A full-stack Ask Me Anything (AMA) application built with Express, Prisma, PostgreSQL, Redis, React, and TypeScript.
 
 ## Features
@@ -289,6 +291,88 @@ cd api && npm test
 cd web && npm run test:e2e
 ```
 
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+The project includes comprehensive CI/CD automation:
+
+#### **CI Pipeline** (`.github/workflows/ci.yaml`)
+
+**Runs on**: Every push to `main` and all pull requests
+
+**Jobs:**
+1. **API Tests**
+   - Runs Vitest tests with PostgreSQL service
+   - Generates coverage report (80% threshold)
+   - Uploads coverage artifacts
+
+2. **E2E Tests**
+   - Starts full stack with Docker Compose
+   - Runs Playwright tests
+   - Uploads test reports
+
+3. **Semgrep SAST**
+   - Security scanning with `p/ci`, `p/typescript`, `p/nodejs` rulesets
+   - Uploads results as artifacts
+   - Non-blocking (reports only)
+
+4. **Trivy Filesystem Scan**
+   - Scans dependencies for vulnerabilities
+   - Reports CRITICAL and HIGH severity issues
+   - Uploads to GitHub Security tab
+
+5. **Build & Scan Images**
+   - Builds Docker images for `api` and `web`
+   - Scans images with Trivy
+   - Pushes to GHCR on main branch
+   - Uploads scan results
+
+6. **CI Summary**
+   - Aggregates all job statuses
+   - Generates markdown summary in PR
+
+#### **Dependabot** (`.github/dependabot.yml`)
+
+Automated dependency updates:
+- **npm packages**: Weekly updates for `api/` and `web/`
+- **Docker images**: Weekly base image updates
+- **GitHub Actions**: Weekly action version updates
+- Grouped minor/patch updates to reduce PR noise
+
+### Security Features
+
+**SAST (Static Analysis)**:
+- Semgrep scans for security issues, bugs, and anti-patterns
+- Results uploaded as artifacts
+
+**Dependency Scanning**:
+- Trivy scans for known CVEs in dependencies
+- Results uploaded to GitHub Security tab (SARIF format)
+
+**Container Scanning**:
+- Trivy scans built images before pushing
+- Blocks CRITICAL vulnerabilities (configurable)
+
+### Artifacts
+
+Each CI run generates:
+- `api-coverage` - Test coverage HTML report
+- `playwright-report` - E2E test results
+- `semgrep-results` - SAST findings (JSON)
+- `trivy-fs-results` - Filesystem vulnerability scan
+- `trivy-api-image` - API image scan results
+- `trivy-web-image` - Web image scan results
+
+Artifacts retained for 30 days.
+
+### Container Registry
+
+Images are automatically pushed to GitHub Container Registry:
+- `ghcr.io/YOUR_USERNAME/ama-app-api:latest`
+- `ghcr.io/YOUR_USERNAME/ama-app-web:latest`
+- Also tagged with branch name and commit SHA
+
 ## Contributing
 
 1. Fork the repository
@@ -296,6 +380,7 @@ cd web && npm run test:e2e
 3. Make your changes
 4. **Run tests and ensure coverage meets thresholds**
 5. Submit a pull request
+6. **CI will automatically run** - ensure all checks pass
 
 ## License
 
