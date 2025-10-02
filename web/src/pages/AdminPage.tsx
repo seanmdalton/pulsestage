@@ -5,6 +5,7 @@ import type { Question } from '../lib/api';
 import { useAdmin } from '../contexts/AdminContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
+import { ExportPage } from './ExportPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminPage() {
@@ -15,7 +16,7 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'questions' | 'teams'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'export'>('questions');
 
   // Set page title
   useEffect(() => {
@@ -129,16 +130,26 @@ export function AdminPage() {
             >
               Questions ({questions.length})
             </button>
-            <button
-              onClick={() => setActiveTab('teams')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'teams'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              Teams
-            </button>
+                <button
+                  onClick={() => setActiveTab('teams')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'teams'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  Teams
+                </button>
+                <button
+                  onClick={() => setActiveTab('export')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'export'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  Export
+                </button>
           </nav>
         </div>
         
@@ -197,7 +208,9 @@ export function AdminPage() {
           </div>
         )}
 
-        {activeTab === 'teams' && <TeamManagement />}
+            {activeTab === 'teams' && <TeamManagement />}
+
+            {activeTab === 'export' && <ExportPage />}
       </div>
 
       {/* Response Modal */}

@@ -45,6 +45,24 @@ export interface CreateTagRequest {
   color?: string;
 }
 
+export interface ExportFilters {
+  teamId?: string;
+  status?: 'open' | 'answered' | 'both';
+  startDate?: string;
+  endDate?: string;
+  minUpvotes?: number;
+  maxUpvotes?: number;
+  tagIds?: string[];
+  hasResponse?: 'true' | 'false';
+  limit?: number;
+}
+
+export interface ExportPreview {
+  count: number;
+  preview: Question[];
+  filters: ExportFilters;
+}
+
 export interface CreateTeamRequest {
   name: string;
   slug: string;
@@ -126,6 +144,12 @@ const UpdateTeamSchema = z.object({
 const HealthSchema = z.object({
   ok: z.boolean(),
   service: z.string(),
+});
+
+const ExportPreviewSchema = z.object({
+  count: z.number(),
+  preview: z.array(QuestionSchema),
+  filters: z.object({}).passthrough()
 });
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -330,6 +354,52 @@ class ApiClient {
       method: 'DELETE',
       credentials: 'include'
     }, RemoveTagResponseSchema);
+  }
+
+  // Export methods
+  async getExportPreview(filters: ExportFilters): Promise<ExportPreview> {
+    const queryParams = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach(v => queryParams.append(key, v.toString()));
+        } else {
+          queryParams.append(key, value.toString());
+        }
+      }
+    });
+
+    return this.request(`/admin/export/preview?${queryParams}`, {
+      credentials: 'include'
+    }, ExportPreviewSchema);
+  }
+
+  async downloadExport(filters: ExportFilters, format: 'csv' | 'json'): Promise<Blob> {
+    const queryParams = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach(v => queryParams.append(key, v.toString()));
+        } else {
+          queryParams.append(key, value.toString());
+        }
+      }
+    });
+    
+    queryParams.append('format', format);
+
+    const response = await fetch(`${this.baseUrl}/admin/export/download?${queryParams}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+    }
+
+    return response.blob();
   }
 }
 

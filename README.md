@@ -37,6 +37,7 @@ A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team s
 - **Team administration** - Create, update, and manage teams
 - **Tag system** - Create and manage tags for question organization
 - **Presentation mode** - Full-screen presentation view for live AMAs
+- **Data export** - Export questions with full metadata in CSV or JSON format
 
 ### Tags & Presentation System
 - **Question tagging** - Add custom tags to questions for organization
@@ -258,6 +259,8 @@ enum QuestionStatus {
 - `POST /tags` - Create a new tag
 - `POST /questions/:id/tags` - Add tag to question
 - `DELETE /questions/:id/tags/:tagId` - Remove tag from question
+- `GET /admin/export/preview` - Preview export data with filters
+- `GET /admin/export/download` - Download export data (CSV/JSON)
 
 ### API Documentation
 Interactive Swagger UI available at **http://localhost:3000/docs** with:
@@ -395,6 +398,48 @@ The application includes a full-screen presentation mode for live AMAs:
 ### URL Structure
 - Team-specific: `/{teamSlug}/open/present`
 - All teams: `/all/open/present`
+
+## Data Export
+
+The application provides comprehensive data export capabilities for admins:
+
+### Export Features
+- **Multiple formats** - CSV for spreadsheet analysis, JSON for programmatic use
+- **Advanced filtering** - Filter by team, status, date range, upvotes, tags, and response status
+- **Full metadata** - Export includes all question data, team information, tags, and timestamps
+- **Preview functionality** - Preview export data before downloading
+- **Large export handling** - Warning system for exports with 1000+ questions
+
+### Export Data Includes
+- Question ID, body, upvotes, status
+- Response text and timestamps
+- Team information (ID, name, slug)
+- All associated tags with metadata
+- Creation and update timestamps
+- All internal IDs for potential re-importing
+
+### Usage
+1. **Access**: Admin Panel → Export Tab
+2. **Filter**: Use the filter panel to select your data
+3. **Preview**: See sample data and total count
+4. **Download**: Click CSV or JSON to download
+
+### Export Formats
+
+**CSV Format:**
+```csv
+id,body,upvotes,status,responseText,respondedAt,createdAt,updatedAt,teamId,teamName,teamSlug,tags
+```
+
+**JSON Format:**
+```json
+{
+  "exportedAt": "2025-10-02T23:01:52.897Z",
+  "filters": {...},
+  "totalCount": 88,
+  "questions": [...]
+}
+```
 
 ## Production Deployment
 

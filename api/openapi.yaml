@@ -20,6 +20,8 @@ tags:
     description: Team management endpoints
   - name: Tags
     description: Tag management endpoints
+  - name: Export
+    description: Data export endpoints
 
 components:
   securitySchemes:
@@ -819,3 +821,189 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /admin/export/preview:
+    get:
+      tags:
+        - Export
+      summary: Get export preview
+      description: Preview data that will be exported with current filters (admin only)
+      security:
+        - AdminSession: []
+      parameters:
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Team ID filter (use 'all' for all teams)
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, answered, both]
+          description: Question status filter
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for filtering
+        - name: minUpvotes
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Minimum upvotes filter
+        - name: maxUpvotes
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum upvotes filter
+        - name: tagIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          description: Tag IDs to filter by
+        - name: hasResponse
+          in: query
+          schema:
+            type: string
+            enum: [true, false]
+          description: Filter by response status
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of preview items
+      responses:
+        '200':
+          description: Export preview data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of questions matching filters
+                  preview:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+                    description: Sample questions for preview
+                  filters:
+                    type: object
+                    description: Applied filters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/export/download:
+    get:
+      tags:
+        - Export
+      summary: Download export data
+      description: Download filtered questions as CSV or JSON (admin only)
+      security:
+        - AdminSession: []
+      parameters:
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Team ID filter (use 'all' for all teams)
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, answered, both]
+          description: Question status filter
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for filtering
+        - name: minUpvotes
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Minimum upvotes filter
+        - name: maxUpvotes
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum upvotes filter
+        - name: tagIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          description: Tag IDs to filter by
+        - name: hasResponse
+          in: query
+          schema:
+            type: string
+            enum: [true, false]
+          description: Filter by response status
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, json]
+          description: Export format
+      responses:
+        '200':
+          description: Export file
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: CSV file with question data
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportedAt:
+                    type: string
+                    format: date-time
+                  filters:
+                    type: object
+                  totalCount:
+                    type: integer
+                  questions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          description: Invalid format or parameters
+        '500':
+          $ref: '#/components/responses/InternalServerError'
