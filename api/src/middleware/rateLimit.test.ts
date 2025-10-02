@@ -23,7 +23,7 @@ describe('rateLimit middleware', () => {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis()
     };
-    mockNext = vi.fn();
+    mockNext = vi.fn() as unknown as NextFunction;
 
     // Reset mocks
     vi.clearAllMocks();
@@ -96,8 +96,10 @@ describe('rateLimit middleware', () => {
   });
 
   it('should use fallback IP when req.ip is not available', async () => {
-    mockReq.ip = undefined;
-    mockReq.socket = { remoteAddress: '192.168.1.1' } as any;
+    mockReq = {
+      ip: undefined,
+      socket: { remoteAddress: '192.168.1.1' } as any
+    };
 
     const middleware = rateLimit('test-route', 10);
     
@@ -107,8 +109,10 @@ describe('rateLimit middleware', () => {
   });
 
   it('should use "unknown" when no IP is available', async () => {
-    mockReq.ip = undefined;
-    mockReq.socket = {} as any;
+    mockReq = {
+      ip: undefined,
+      socket: {} as any
+    };
 
     const middleware = rateLimit('test-route', 10);
     
