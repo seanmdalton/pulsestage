@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock SSO Testing - PulseStage</title>
+    <title>Mock SSO Testing - PulseStage (Multi-Tenant)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -118,48 +118,66 @@
             margin: 10px 0;
             overflow-x: auto;
         }
+        .tenant-selector {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .tenant-selector label {
+            font-weight: 600;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .tenant-selector select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+        }
+        .current-context {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: 500;
+            color: #065f46;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Mock SSO Testing</h1>
+        <h1>🔐 Mock SSO Testing (Multi-Tenant)</h1>
         
         <div class="instructions">
-            <h3>How to Test SSO Locally</h3>
-            <p>This page simulates SSO authentication for local development. Select a user below to authenticate as them in PulseStage.</p>
+            <h3>How to Test Multi-Tenant SSO Locally</h3>
+            <p>This page simulates SSO authentication for local development with multi-tenancy support. Select a tenant, then select a user from that tenant to authenticate.</p>
             
-            <h4>Available Test Users:</h4>
+            <h4>Multi-Tenancy Notes:</h4>
             <ul>
-                <li><strong>John Doe (Admin)</strong> - Has admin access to Engineering, member of Product</li>
-                <li><strong>Jane Smith (Member)</strong> - Member of Engineering and Design</li>
-                <li><strong>Bob Wilson (Owner)</strong> - Owner of Product, admin of Design</li>
+                <li>Users are permanently bound to their tenant</li>
+                <li>You cannot switch tenants with the same user</li>
+                <li>Each tenant has its own set of users, teams, and data</li>
+                <li>The app will automatically use your tenant context</li>
             </ul>
         </div>
 
+        <div id="currentContext" class="current-context" style="display: none;"></div>
+
+        <div class="tenant-selector">
+            <label for="tenantSelect">Select Tenant:</label>
+            <select id="tenantSelect" onchange="handleTenantChange()">
+                <option value="">-- Select a Tenant --</option>
+                <option value="default">Default (default)</option>
+            </select>
+        </div>
+
         <div id="status"></div>
-
-        <h3>Select a User to Authenticate As:</h3>
-        
-        <div class="user-card" data-user="john.doe@company.com">
-            <div class="user-name">John Doe</div>
-            <div class="user-email">john.doe@company.com</div>
-            <span class="user-role role-admin">Admin</span>
-            <div class="teams">Teams: Engineering (admin), Product (member)</div>
-        </div>
-
-        <div class="user-card" data-user="jane.smith@company.com">
-            <div class="user-name">Jane Smith</div>
-            <div class="user-email">jane.smith@company.com</div>
-            <span class="user-role role-member">Member</span>
-            <div class="teams">Teams: Engineering (member), Design (member)</div>
-        </div>
-
-        <div class="user-card" data-user="bob.wilson@company.com">
-            <div class="user-name">Bob Wilson</div>
-            <div class="user-email">bob.wilson@company.com</div>
-            <span class="user-role role-owner">Owner</span>
-            <div class="teams">Teams: Product (owner), Design (admin)</div>
-        </div>
 
         <div style="margin-top: 30px;">
             <button class="button" onclick="authenticateUser()">🔐 Authenticate as Selected User</button>
@@ -185,38 +203,124 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
 
     <script>
         let selectedUser = null;
+        let selectedTenant = null;
 
-        // User selection
-        document.querySelectorAll('.user-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelectorAll('.user-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                selectedUser = card.dataset.user;
-                console.log('SSO Test: Selected user:', selectedUser);
+        // Tenant-specific user data
+        const tenantUsers = {
+            'default': [
+                {
+                    email: 'john.doe@company.com',
+                    name: 'John Doe',
+                    role: 'admin',
+                    teams: 'Engineering (admin)'
+                },
+                {
+                    email: 'jane.smith@company.com',
+                    name: 'Jane Smith',
+                    role: 'member',
+                    teams: 'Engineering (member)'
+                },
+                {
+                    email: 'bob.wilson@company.com',
+                    name: 'Bob Wilson',
+                    role: 'owner',
+                    teams: 'Product (owner)'
+                }
+            ]
+        };
+
+        // Handle tenant change
+        function handleTenantChange() {
+            const tenantSelect = document.getElementById('tenantSelect');
+            selectedTenant = tenantSelect.value;
+            
+            if (selectedTenant) {
+                renderUsers(selectedTenant);
+                showCurrentContext();
+            } else {
+                document.getElementById('usersList').innerHTML = '';
+                hideCurrentContext();
+            }
+        }
+
+        // Render users for selected tenant
+        function renderUsers(tenant) {
+            const users = tenantUsers[tenant] || [];
+            const usersList = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<p style="color: #666; font-style: italic;">No users available for this tenant.</p>';
+                return;
+            }
+
+            let html = '<h3>Select a User to Authenticate As:</h3>';
+            users.forEach(user => {
+                const roleClass = `role-${user.role}`;
+                html += `
+                    <div class="user-card" data-user="${user.email}" data-tenant="${tenant}">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-email">${user.email}</div>
+                        <span class="user-role ${roleClass}">${user.role}</span>
+                        <div class="teams">Teams: ${user.teams}</div>
+                    </div>
+                `;
             });
-        });
+            
+            usersList.innerHTML = html;
+
+            // Add click handlers to user cards
+            document.querySelectorAll('.user-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.user-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedUser = card.dataset.user;
+                    console.log('SSO Test: Selected user:', selectedUser, 'in tenant:', tenant);
+                });
+            });
+        }
+
+        // Show current context
+        function showCurrentContext() {
+            const contextDiv = document.getElementById('currentContext');
+            const currentUser = localStorage.getItem('mock-sso-user');
+            const currentTenant = localStorage.getItem('mock-tenant');
+            
+            if (currentUser && currentTenant) {
+                contextDiv.innerHTML = `📌 Current Context: <strong>${currentUser}</strong> in tenant <strong>${currentTenant}</strong>`;
+                contextDiv.style.display = 'block';
+            }
+        }
+
+        // Hide current context
+        function hideCurrentContext() {
+            document.getElementById('currentContext').style.display = 'none';
+        }
 
         // Authenticate user
         function authenticateUser() {
+            if (!selectedTenant) {
+                showStatus('Please select a tenant first!', 'error');
+                return;
+            }
+
             if (!selectedUser) {
                 showStatus('Please select a user first!', 'error');
                 return;
             }
 
-            console.log('SSO Test: Authenticating user:', selectedUser);
+            console.log('SSO Test: Authenticating user:', selectedUser, 'in tenant:', selectedTenant);
             
-            // Set the mock SSO header for future requests
-            // In a real app, this would be handled by the SSO provider
+            // Set the mock SSO user and tenant in localStorage
             localStorage.setItem('mock-sso-user', selectedUser);
+            localStorage.setItem('mock-tenant', selectedTenant);
             
-            // Verify it was set
-            const storedUser = localStorage.getItem('mock-sso-user');
-            console.log('SSO Test: Stored user in localStorage:', storedUser);
+            console.log('SSO Test: Stored user and tenant in localStorage');
             
-            // Dispatch custom event to notify UserContext of the change
+            // Dispatch custom event to notify app of the change
             window.dispatchEvent(new CustomEvent('mock-sso-changed'));
             
-            showStatus(`✅ Authenticated as ${selectedUser}. You can now use PulseStage with user context!`, 'success');
+            showStatus(`✅ Authenticated as ${selectedUser} in tenant "${selectedTenant}". Redirecting...`, 'success');
+            showCurrentContext();
             
             // Auto-redirect to app after 2 seconds
             setTimeout(() => {
@@ -228,10 +332,17 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
         // Logout
         function logout() {
             localStorage.removeItem('mock-sso-user');
+            localStorage.removeItem('mock-tenant');
             
-            // Dispatch custom event to notify UserContext of the change
+            // Dispatch custom event to notify app of the change
             window.dispatchEvent(new CustomEvent('mock-sso-changed'));
             
+            selectedUser = null;
+            selectedTenant = null;
+            document.getElementById('tenantSelect').value = '';
+            document.getElementById('usersList').innerHTML = '';
+            
+            hideCurrentContext();
             showStatus('🚪 Logged out. Now in anonymous mode.', 'success');
         }
 
@@ -246,19 +357,32 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
         }
 
-        // Check if already authenticated
-        const currentUser = localStorage.getItem('mock-sso-user');
-        if (currentUser) {
-            showStatus(`🔐 Currently authenticated as: ${currentUser}`, 'success');
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUser = localStorage.getItem('mock-sso-user');
+            const currentTenant = localStorage.getItem('mock-tenant');
             
-            // Highlight the current user
-            document.querySelectorAll('.user-card').forEach(card => {
-                if (card.dataset.user === currentUser) {
-                    card.classList.add('selected');
-                    selectedUser = currentUser;
-                }
-            });
-        }
+            if (currentUser && currentTenant) {
+                // Set the tenant selector
+                document.getElementById('tenantSelect').value = currentTenant;
+                selectedTenant = currentTenant;
+                
+                // Render users for that tenant
+                renderUsers(currentTenant);
+                
+                // Highlight the current user
+                setTimeout(() => {
+                    document.querySelectorAll('.user-card').forEach(card => {
+                        if (card.dataset.user === currentUser) {
+                            card.classList.add('selected');
+                            selectedUser = currentUser;
+                        }
+                    });
+                }, 100);
+                
+                showCurrentContext();
+            }
+        });
     </script>
 </body>
 </html>
