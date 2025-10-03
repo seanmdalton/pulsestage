@@ -72,6 +72,15 @@
 - **CORS protection** - Configurable cross-origin resource sharing
 - **Input validation** - Comprehensive Zod schema validation
 
+### Multi-Tenancy (Optional)
+- **Dual-mode operation** - Single-tenant (default) or multi-tenant mode
+- **Strict data isolation** - Tenant data is completely isolated at the database level
+- **Subdomain routing** - Automatic tenant resolution from subdomains
+- **Live updates (SSE)** - Real-time question updates across open and presenter views
+- **Per-tenant administration** - Admins are scoped to their tenant
+- **Org signup** - Self-service tenant creation with first owner account
+- **User-tenant binding** - Users are permanently associated with one tenant
+
 ## Tech Stack
 
 ### Backend
@@ -174,7 +183,29 @@ WEBSITE_TITLE=PulseStage
 # Mock SSO Configuration (Development Only)
 # Set to 'development' to enable mock SSO authentication
 NODE_ENV=development
+
+# Multi-Tenancy Configuration (Optional)
+MULTI_TENANT_MODE=false  # Set to 'true' to enable multi-tenant mode
+BASE_DOMAIN=              # e.g., 'pulsestage.com' for subdomain routing
+TENANT_HEADER=x-tenant-id # Header for tenant override in dev/test
+SSE_HEARTBEAT_INTERVAL=30000  # Heartbeat interval for SSE connections (ms)
 ```
+
+### Multi-Tenancy Modes
+
+**Single-Tenant Mode (Default)**
+- `MULTI_TENANT_MODE=false`
+- All data belongs to the "default" tenant
+- Maintains backward compatibility with existing deployments
+- No subdomain routing required
+
+**Multi-Tenant Mode**
+- `MULTI_TENANT_MODE=true`
+- Requires `BASE_DOMAIN` to be set for subdomain routing
+- Example: `alpha.pulsestage.com` routes to tenant "alpha"
+- Admins are scoped to their tenant
+- Complete data isolation between tenants
+- Users are permanently bound to their tenant
 
 ## Project Structure
 
