@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 WORKDIR /app
 LABEL org.opencontainers.image.title="PulseStage Web"
 LABEL org.opencontainers.image.description="PulseStage Web App - Ask Me Anything (AMA) platform frontend for organizational engagement"
