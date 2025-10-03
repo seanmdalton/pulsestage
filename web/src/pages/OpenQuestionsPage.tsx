@@ -7,6 +7,7 @@ import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 import { useUser } from '../contexts/UserContext';
+import { useSSE, SSEEvent } from '../hooks/useSSE';
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -30,6 +31,45 @@ export function OpenQuestionsPage() {
   useEffect(() => {
     setFormattedPageTitle(currentTeam?.slug, 'open');
   }, [currentTeam?.slug]);
+
+  // Handle SSE events for real-time updates
+  const handleSSEEvent = (event: SSEEvent) => {
+    if (event.type === 'question:created' || event.type === 'question:upvoted' || event.type === 'question:tagged' || event.type === 'question:untagged') {
+      const updatedQuestion = event.data as Question;
+      
+      // Only update if question is OPEN and matches current team filter
+      if (updatedQuestion.status === 'OPEN') {
+        const matchesTeamFilter = !currentTeam || updatedQuestion.teamId === currentTeam.id;
+        
+        if (matchesTeamFilter) {
+          setQuestions(prev => {
+            // Check if question already exists
+            const existingIndex = prev.findIndex(q => q.id === updatedQuestion.id);
+            
+            if (existingIndex >= 0) {
+              // Update existing question
+              const newQuestions = [...prev];
+              newQuestions[existingIndex] = updatedQuestion;
+              // Re-sort by upvotes
+              return newQuestions.sort((a, b) => b.upvotes - a.upvotes);
+            } else {
+              // Add new question and sort
+              return [updatedQuestion, ...prev].sort((a, b) => b.upvotes - a.upvotes);
+            }
+          });
+        }
+      }
+    } else if (event.type === 'question:answered') {
+      // Remove answered questions from the open list
+      const answeredQuestion = event.data as Question;
+      setQuestions(prev => prev.filter(q => q.id !== answeredQuestion.id));
+    }
+  };
+
+  // Connect to SSE for real-time updates
+  const { isConnected: sseConnected } = useSSE({
+    onEvent: handleSSEEvent
+  });
 
   useEffect(() => {
     const loadQuestions = async () => {

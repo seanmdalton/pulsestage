@@ -87,9 +87,29 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // SSE endpoint for real-time updates
-  app.get("/events", (req, res) => {
-    const tenantId = req.tenant!.tenantId;
-    const tenantSlug = req.tenant!.tenantSlug;
+  // Note: EventSource doesn't support custom headers, so we also check query param
+  app.get("/events", async (req, res) => {
+    // If tenant not resolved from header, try query parameter
+    let tenantId = req.tenant?.tenantId;
+    let tenantSlug = req.tenant?.tenantSlug;
+    
+    if (!tenantId && req.query.tenant) {
+      // Resolve tenant from query parameter
+      const tenant = await prisma.tenant.findUnique({
+        where: { slug: req.query.tenant as string }
+      });
+      
+      if (!tenant) {
+        return res.status(404).json({ error: 'Tenant not found' });
+      }
+      
+      tenantId = tenant.id;
+      tenantSlug = tenant.slug;
+    }
+    
+    if (!tenantId) {
+      return res.status(400).json({ error: 'Tenant required for SSE connection' });
+    }
 
     // Set SSE headers
     res.writeHead(200, {

@@ -22,6 +22,7 @@ import { useUser } from '../contexts/UserContext';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { PulseStageLogo } from '../components/PulseStageLogo';
 import { setFormattedPageTitle } from '../utils/titleUtils';
+import { useSSE, SSEEvent } from '../hooks/useSSE';
 
 export function PresentationPage() {
   const { userTeams, getUserRoleInTeam, isLoading } = useUser();
@@ -52,6 +53,47 @@ export function PresentationPage() {
       navigate('/admin/login');
     }
   }, [hasAdminRole, userTeams.length, isLoading, navigate]);
+
+  // Handle SSE events for real-time updates in presentation mode
+  const handleSSEEvent = (event: SSEEvent) => {
+    if (event.type === 'question:upvoted' || event.type === 'question:tagged' || event.type === 'question:untagged') {
+      const updatedQuestion = event.data as Question;
+      
+      // Update question in list if it's still OPEN and not reviewed
+      if (updatedQuestion.status === 'OPEN') {
+        const hasReviewedTag = updatedQuestion.tags?.some(qt => qt.tag.name === 'Reviewed');
+        const matchesTeamFilter = !currentTeam || updatedQuestion.teamId === currentTeam.id;
+        
+        if (!hasReviewedTag && matchesTeamFilter) {
+          setQuestions(prev => {
+            const existingIndex = prev.findIndex(q => q.id === updatedQuestion.id);
+            
+            if (existingIndex >= 0) {
+              // Update existing question and re-sort
+              const newQuestions = [...prev];
+              newQuestions[existingIndex] = updatedQuestion;
+              return newQuestions.sort((a, b) => b.upvotes - a.upvotes);
+            }
+            
+            return prev;
+          });
+        }
+      }
+    } else if (event.type === 'question:created') {
+      // Add new question if it matches filters
+      const newQuestion = event.data as Question;
+      const matchesTeamFilter = !currentTeam || newQuestion.teamId === currentTeam.id;
+      
+      if (newQuestion.status === 'OPEN' && matchesTeamFilter) {
+        setQuestions(prev => [newQuestion, ...prev].sort((a, b) => b.upvotes - a.upvotes));
+      }
+    }
+  };
+
+  // Connect to SSE for real-time updates
+  useSSE({
+    onEvent: handleSSEEvent
+  });
 
   // Load tags (create them if they don't exist)
   useEffect(() => {
