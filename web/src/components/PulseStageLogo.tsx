@@ -8,7 +8,8 @@ interface PulseStageLogoProps {
 }
 
 export function PulseStageLogo({ className = '', showWordmark = true, size = 'md' }: PulseStageLogoProps) {
-  const { isDarkMode } = useTheme();
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
   
   // Size classes for the logo
   const sizeClasses = {
@@ -23,11 +24,11 @@ export function PulseStageLogo({ className = '', showWordmark = true, size = 'md
   // Note: Light logo is used with dark mode, dark logo with light mode
   const logoSrc = showWordmark 
     ? isDarkMode 
-      ? '/src/assets/pulsestage-wordmark-tight-light.svg'  // Light logo on dark background
-      : '/src/assets/pulsestage-wordmark-tight-dark.svg'   // Dark logo on light background
+      ? '/pulsestage-wordmark-tight-light.svg'  // Light logo on dark background
+      : '/pulsestage-wordmark-tight-dark.svg'   // Dark logo on light background
     : isDarkMode 
-      ? '/src/assets/pulsestage-icon-light.svg'            // Light icon on dark background
-      : '/src/assets/pulsestage-icon-dark.svg';            // Dark icon on light background
+      ? '/pulsestage-icon-light.svg'            // Light icon on dark background
+      : '/pulsestage-icon-dark.svg';            // Dark icon on light background
   
   return (
     <Link to="/" className={`flex items-center ${className}`}>
