@@ -41,7 +41,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
             {/* PulseStage Logo */}
-            <PulseStageLogo size="md" showWordmark={false} className="mr-4" />
+            <PulseStageLogo size="md" showWordmark={true} className="mr-4" />
             
             {/* Team Selector */}
             <TeamSelector />

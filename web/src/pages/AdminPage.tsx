@@ -6,6 +6,7 @@ import { useAdmin } from '../contexts/AdminContext';
 import { useUser } from '../contexts/UserContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
+import { PulseStageLogo } from '../components/PulseStageLogo';
 import { ExportPage } from './ExportPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
@@ -146,11 +147,14 @@ export function AdminPage() {
     <>
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage questions and teams
-            </p>
+          <div className="flex items-center gap-4">
+            <PulseStageLogo size="lg" showWordmark={true} />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Manage questions and teams
+              </p>
+            </div>
           </div>
           <div className="flex gap-3 items-center">
             {/* API Status Indicator */}
