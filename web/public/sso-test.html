@@ -173,8 +173,12 @@
             <label for="tenantSelect">Select Tenant:</label>
             <select id="tenantSelect" onchange="handleTenantChange()">
                 <option value="">-- Select a Tenant --</option>
-                <option value="default">Default (default)</option>
+                <option value="default">Default Tenant (default)</option>
+                <option value="acme">Acme Corp (acme)</option>
             </select>
+            <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                Each tenant has completely isolated data, teams, and users.
+            </p>
         </div>
 
         <div id="status"></div>
@@ -227,6 +231,26 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
                     name: 'Bob Wilson',
                     role: 'owner',
                     teams: 'Product (owner)'
+                }
+            ],
+            'acme': [
+                {
+                    email: 'alice.admin@acme.com',
+                    name: 'Alice Anderson',
+                    role: 'admin',
+                    teams: 'Engineering (admin)'
+                },
+                {
+                    email: 'charlie.owner@acme.com',
+                    name: 'Charlie Chen',
+                    role: 'owner',
+                    teams: 'Product (owner), Marketing (admin)'
+                },
+                {
+                    email: 'emily.member@acme.com',
+                    name: 'Emily Evans',
+                    role: 'member',
+                    teams: 'Engineering (member), Product (member)'
                 }
             ]
         };
