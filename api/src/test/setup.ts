@@ -15,16 +15,27 @@ export const testPrisma = new PrismaClient({
 });
 
 beforeAll(async () => {
-  // Push schema to test database
-  execSync("npx prisma db push --skip-generate --accept-data-loss", { 
+  // Push schema to test database with force reset for schema changes
+  execSync("npx prisma db push --skip-generate --force-reset --accept-data-loss", { 
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
   });
   await testPrisma.$connect();
+  
+  // Create default tenant for backward compatibility tests
+  await testPrisma.tenant.upsert({
+    where: { slug: 'default' },
+    update: {},
+    create: {
+      id: 'default-tenant-id',
+      slug: 'default',
+      name: 'Default Tenant'
+    }
+  });
 });
 
 beforeEach(async () => {
-  // Clean up database before each test
+  // Clean up database before each test (preserve default tenant)
   await testPrisma.questionTag.deleteMany();
   await testPrisma.upvote.deleteMany();
   await testPrisma.question.deleteMany();
@@ -33,6 +44,11 @@ beforeEach(async () => {
   await testPrisma.team.deleteMany();
   await testPrisma.user.deleteMany();
   await testPrisma.tag.deleteMany();
+  await testPrisma.tenant.deleteMany({
+    where: {
+      slug: { not: 'default' }
+    }
+  });
 });
 
 afterAll(async () => {

@@ -4,6 +4,12 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    pool: "forks", // Use forks instead of threads for better isolation
+    poolOptions: {
+      forks: {
+        singleFork: true // Run tests in a single fork to avoid database conflicts
+      }
+    },
     env: {
       DATABASE_URL: "postgresql://app:app@localhost:5432/ama_test",
       ADMIN_KEY: "test-admin-key"
