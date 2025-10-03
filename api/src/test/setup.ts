@@ -16,7 +16,7 @@ export const testPrisma = new PrismaClient({
 
 beforeAll(async () => {
   // Push schema to test database
-  execSync("npx prisma db push --skip-generate", { 
+  execSync("npx prisma db push --skip-generate --accept-data-loss", { 
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
   });
@@ -26,8 +26,12 @@ beforeAll(async () => {
 beforeEach(async () => {
   // Clean up database before each test
   await testPrisma.questionTag.deleteMany();
+  await testPrisma.upvote.deleteMany();
   await testPrisma.question.deleteMany();
+  await testPrisma.teamMembership.deleteMany();
+  await testPrisma.userPreferences.deleteMany();
   await testPrisma.team.deleteMany();
+  await testPrisma.user.deleteMany();
   await testPrisma.tag.deleteMany();
 });
 

@@ -7,12 +7,14 @@ import { useUser } from '../contexts/UserContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
 import { PulseStageLogo } from '../components/PulseStageLogo';
+import { useTheme } from '../contexts/ThemeContext';
 import { ExportPage } from './ExportPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminPage() {
   const { isAuthenticated, isLoading: authLoading } = useAdmin();
   const { userTeams, getUserRoleInTeam } = useUser();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +150,12 @@ export function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <PulseStageLogo size="lg" showWordmark={true} />
+            {/* Icon only */}
+            <img 
+              src={theme === 'dark' ? '/pulsestage-icon-light.svg' : '/pulsestage-icon-dark.svg'}
+              alt="PulseStage Icon"
+              className="h-12 w-12"
+            />
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">

@@ -59,10 +59,12 @@
 ### User Experience
 - **Dark mode** - Toggle between light and dark themes (persistent)
 - **Responsive design** - Works perfectly on desktop, tablet, and mobile
+- **Smart redirect** - Automatically redirects users to their default team on homepage
 - **Weekly grouping** - Answered questions organized by week for better navigation
 - **Loading states** - Smooth user experience with proper loading indicators
 - **Dynamic page titles** - Browser tab titles show current team and page context
 - **Smart modals** - Different modal types for open vs answered questions
+- **Profile team management** - Set favorites and default team directly from profile page
 
 ### Security & Performance
 - **Environment-aware rate limiting** - Disabled in development, enabled in production
