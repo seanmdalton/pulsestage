@@ -13,23 +13,45 @@ enum QuestionStatus {
   ANSWERED
 }
 
+// Multi-tenancy: Tenant model
+model Tenant {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  teams             Team[]
+  questions         Question[]
+  tags              Tag[]
+  users             User[]
+  userPreferences   UserPreferences[]
+}
+
 model Team {
   id          String     @id @default(uuid())
+  tenantId    String
   name        String
-  slug        String     @unique
+  slug        String
   description String?
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   
   // Relationships
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   questions   Question[]
   memberships TeamMembership[]
   userPreferences UserPreferences[] // Teams that users have set as default
+  
+  @@unique([tenantId, slug])
+  @@index([tenantId])
 }
 
 model Question {
   id           String         @id @default(uuid())
+  tenantId     String
   body         String
   upvotes      Int            @default(0) // Legacy field - will be calculated from Upvote records
   status       QuestionStatus @default(OPEN)
@@ -41,18 +63,32 @@ model Question {
   team         Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
   authorId     String?        // User who submitted the question
   author       User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  
+  // Relationships
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   tags         QuestionTag[]
   upvoteRecords Upvote[]      // Individual upvote records
+  
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, teamId])
 }
 
 model Tag {
   id          String        @id @default(uuid())
-  name        String        @unique
+  tenantId    String
+  name        String
   description String?
   color       String        @default("#3B82F6") // Default blue color
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  
+  // Relationships
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   questions   QuestionTag[]
+  
+  @@unique([tenantId, name])
+  @@index([tenantId])
 }
 
 model QuestionTag {
@@ -70,17 +106,23 @@ model QuestionTag {
 // User management for SSO integration
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
+  tenantId  String
+  email     String
   name      String?
-  ssoId     String?  @unique // For SSO provider integration
+  ssoId     String?  // For SSO provider integration
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   // Relationships
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   teamMemberships TeamMembership[]
   preferences     UserPreferences?
   questions       Question[]      // Questions submitted by this user
   upvotes         Upvote[]        // Upvotes given by this user
+  
+  @@unique([tenantId, email])
+  @@unique([tenantId, ssoId])
+  @@index([tenantId])
 }
 
 // Team membership with roles
@@ -101,6 +143,7 @@ model TeamMembership {
 // User preferences and settings
 model UserPreferences {
   id             String   @id @default(uuid())
+  tenantId       String
   userId         String   @unique
   favoriteTeams  Json     @default("[]") // Array of team slugs
   defaultTeamId  String?
@@ -108,8 +151,11 @@ model UserPreferences {
   updatedAt      DateTime @updatedAt
   
   // Relationships
-  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  defaultTeam Team? @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultTeam Team?  @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
+  
+  @@index([tenantId])
 }
 
 // Upvote tracking for questions
