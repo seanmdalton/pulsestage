@@ -14,6 +14,29 @@ export default {
           'accent': '#00B3A4',    // Accent (pulse)
           'text-light': '#F9FAFB', // Light text
           'text-dark': '#0B1221',  // Dark text
+          // Extended brand palette for better integration
+          'accent-light': '#26C5B8', // Lighter accent variant
+          'accent-dark': '#008B7D',  // Darker accent variant
+          'surface': '#1A2332',     // Surface color for cards/panels
+        }
+      },
+      backgroundColor: {
+        'pulse': {
+          'dark': '#0B1221',
+          'surface': '#1A2332',
+        }
+      },
+      textColor: {
+        'pulse': {
+          'accent': '#00B3A4',
+          'text-light': '#F9FAFB',
+          'text-dark': '#0B1221',
+        }
+      },
+      borderColor: {
+        'pulse': {
+          'accent': '#00B3A4',
+          'surface': '#1A2332',
         }
       }
     },

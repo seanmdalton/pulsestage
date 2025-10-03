@@ -36,7 +36,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <nav className="bg-white dark:bg-pulse-dark shadow-sm border-b border-gray-200 dark:border-pulse-surface">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
@@ -54,8 +54,8 @@ export function Navbar() {
                   to={item.path}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActiveNavItem(item.path)
-                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? 'bg-pulse-accent/10 dark:bg-pulse-accent/20 text-pulse-accent dark:text-pulse-accent'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-pulse-surface'
                   }`}
                 >
                   {item.label}

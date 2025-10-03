@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="720" height="128" viewBox="0 0 720 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 64 L60 64 L76 28 L96 100 L108 64 L156 64"
+        stroke="#00B3A4" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <g font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-weight="700" font-size="64">
+    <text x="180" y="86" fill="#0B1221">PulseStage</text>
+  </g>
+  <line x1="180" y1="94" x2="370" y2="94" stroke="#00B3A4" stroke-width="6" stroke-linecap="round"/>
+</svg>
