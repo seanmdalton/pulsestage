@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock SSO Testing - AMA App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .user-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .user-card:hover {
+            border-color: #3b82f6;
+            background: #f8faff;
+        }
+        .user-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .user-email {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .user-role {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .role-admin { background: #fef3c7; color: #92400e; }
+        .role-member { background: #d1fae5; color: #065f46; }
+        .role-owner { background: #e0e7ff; color: #3730a3; }
+        .teams {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .button.secondary {
+            background: #6b7280;
+        }
+        .button.secondary:hover {
+            background: #4b5563;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .instructions {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .code {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Mock SSO Testing</h1>
+        
+        <div class="instructions">
+            <h3>How to Test SSO Locally</h3>
+            <p>This page simulates SSO authentication for local development. Select a user below to authenticate as them in the AMA app.</p>
+            
+            <h4>Available Test Users:</h4>
+            <ul>
+                <li><strong>John Doe (Admin)</strong> - Has admin access to Engineering, member of Product</li>
+                <li><strong>Jane Smith (Member)</strong> - Member of Engineering and Design</li>
+                <li><strong>Bob Wilson (Owner)</strong> - Owner of Product, admin of Design</li>
+            </ul>
+        </div>
+
+        <div id="status"></div>
+
+        <h3>Select a User to Authenticate As:</h3>
+        
+        <div class="user-card" data-user="john.doe@company.com">
+            <div class="user-name">John Doe</div>
+            <div class="user-email">john.doe@company.com</div>
+            <span class="user-role role-admin">Admin</span>
+            <div class="teams">Teams: Engineering (admin), Product (member)</div>
+        </div>
+
+        <div class="user-card" data-user="jane.smith@company.com">
+            <div class="user-name">Jane Smith</div>
+            <div class="user-email">jane.smith@company.com</div>
+            <span class="user-role role-member">Member</span>
+            <div class="teams">Teams: Engineering (member), Design (member)</div>
+        </div>
+
+        <div class="user-card" data-user="bob.wilson@company.com">
+            <div class="user-name">Bob Wilson</div>
+            <div class="user-email">bob.wilson@company.com</div>
+            <span class="user-role role-owner">Owner</span>
+            <div class="teams">Teams: Product (owner), Design (admin)</div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button class="button" onclick="authenticateUser()">🔐 Authenticate as Selected User</button>
+            <button class="button secondary" onclick="logout()">🚪 Logout (Anonymous Mode)</button>
+            <button class="button secondary" onclick="goToApp()">🏠 Go to AMA App</button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h4>Manual Testing (Browser Console):</h4>
+            <p>You can also test manually by adding this header to API requests:</p>
+            <div class="code">
+# Test as John Doe (Admin)
+curl -H "x-mock-sso-user: john.doe@company.com" http://localhost:3000/users/me
+
+# Test as Jane Smith (Member)  
+curl -H "x-mock-sso-user: jane.smith@company.com" http://localhost:3000/users/me
+
+# Test as Bob Wilson (Owner)
+curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedUser = null;
+
+        // User selection
+        document.querySelectorAll('.user-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.user-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedUser = card.dataset.user;
+                console.log('SSO Test: Selected user:', selectedUser);
+            });
+        });
+
+        // Authenticate user
+        function authenticateUser() {
+            if (!selectedUser) {
+                showStatus('Please select a user first!', 'error');
+                return;
+            }
+
+            console.log('SSO Test: Authenticating user:', selectedUser);
+            
+            // Set the mock SSO header for future requests
+            // In a real app, this would be handled by the SSO provider
+            localStorage.setItem('mock-sso-user', selectedUser);
+            
+            // Verify it was set
+            const storedUser = localStorage.getItem('mock-sso-user');
+            console.log('SSO Test: Stored user in localStorage:', storedUser);
+            
+            // Dispatch custom event to notify UserContext of the change
+            window.dispatchEvent(new CustomEvent('mock-sso-changed'));
+            
+            showStatus(`✅ Authenticated as ${selectedUser}. You can now use the AMA app with user context!`, 'success');
+            
+            // Auto-redirect to app after 2 seconds
+            setTimeout(() => {
+                console.log('SSO Test: Redirecting to main app...');
+                window.location.href = '/';
+            }, 2000);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('mock-sso-user');
+            
+            // Dispatch custom event to notify UserContext of the change
+            window.dispatchEvent(new CustomEvent('mock-sso-changed'));
+            
+            showStatus('🚪 Logged out. Now in anonymous mode.', 'success');
+        }
+
+        // Go to app
+        function goToApp() {
+            window.location.href = '/';
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Check if already authenticated
+        const currentUser = localStorage.getItem('mock-sso-user');
+        if (currentUser) {
+            showStatus(`🔐 Currently authenticated as: ${currentUser}`, 'success');
+            
+            // Highlight the current user
+            document.querySelectorAll('.user-card').forEach(card => {
+                if (card.dataset.user === currentUser) {
+                    card.classList.add('selected');
+                    selectedUser = currentUser;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

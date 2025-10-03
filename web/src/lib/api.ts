@@ -45,6 +45,78 @@ export interface CreateTagRequest {
   color?: string;
 }
 
+// User types
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  ssoId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMembership {
+  id: string;
+  userId: string;
+  teamId: string;
+  role: 'member' | 'admin' | 'owner';
+  createdAt: string;
+  user?: User;
+  team?: Team;
+}
+
+export interface UserPreferences {
+  id: string;
+  userId: string;
+  favoriteTeams: string[]; // Array of team slugs
+  defaultTeamId?: string;
+  createdAt: string;
+  updatedAt: string;
+  defaultTeam?: Team;
+}
+
+// Enhanced team type with user context
+export interface TeamWithMembership extends Team {
+  userRole?: 'member' | 'admin' | 'owner';
+  isFavorite?: boolean;
+  memberCount?: number;
+  members?: TeamMembership[];
+}
+
+// User management request types
+export interface CreateUserRequest {
+  email: string;
+  name?: string;
+  ssoId?: string;
+}
+
+export interface UpdateUserPreferencesRequest {
+  favoriteTeams?: string[];
+  defaultTeamId?: string;
+}
+
+export interface AddTeamMemberRequest {
+  userId: string;
+  role?: 'member' | 'admin' | 'owner';
+}
+
+export interface UpdateTeamMemberRequest {
+  role: 'member' | 'admin' | 'owner';
+}
+
+// User context response types
+export interface UserContext {
+  user: User;
+  teams: TeamWithMembership[];
+  preferences: UserPreferences;
+}
+
+export interface UserTeamsResponse {
+  teams: TeamWithMembership[];
+  favorites: string[];
+  defaultTeam?: Team;
+}
+
 export interface ExportFilters {
   teamId?: string;
   status?: 'open' | 'answered' | 'both';
@@ -167,11 +239,20 @@ class ApiClient {
     schema: z.ZodSchema<T>
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const response = await fetch(url, {
-      headers: {
+    
+      // Add mock SSO header for local development
+      const mockSSOUser = localStorage.getItem('mock-sso-user');
+      const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         ...options.headers,
-      },
+      };
+      
+      if (mockSSOUser) {
+        headers['x-mock-sso-user'] = mockSSOUser;
+      }
+    
+    const response = await fetch(url, {
+      headers,
       credentials: 'include', // Always include credentials for session cookies
       ...options,
     });
@@ -400,6 +481,218 @@ class ApiClient {
     }
 
     return response.blob();
+  }
+
+  // User management methods
+  async getCurrentUser(): Promise<User> {
+    const UserSchema = z.object({
+      id: z.string(),
+      email: z.string().email(),
+      name: z.string().optional(),
+      ssoId: z.string().optional(),
+      createdAt: z.string(),
+      updatedAt: z.string()
+    });
+
+    return this.request('/users/me', {
+      credentials: 'include'
+    }, UserSchema);
+  }
+
+  async updateUserPreferences(data: UpdateUserPreferencesRequest): Promise<UserPreferences> {
+    const UpdateUserPreferencesSchema = z.object({
+      favoriteTeams: z.array(z.string()).optional(),
+      defaultTeamId: z.string().optional()
+    });
+
+    const UserPreferencesSchema = z.object({
+      id: z.string(),
+      userId: z.string(),
+      favoriteTeams: z.array(z.string()),
+      defaultTeamId: z.string().optional(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      defaultTeam: TeamSchema.optional()
+    });
+
+    return this.request('/users/me/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, UserPreferencesSchema);
+  }
+
+  async getUserTeams(): Promise<UserTeamsResponse> {
+    const TeamWithMembershipSchema = TeamSchema.extend({
+      userRole: z.enum(['member', 'admin', 'owner']).optional(),
+      isFavorite: z.boolean().optional(),
+      memberCount: z.number().optional(),
+      members: z.array(z.object({
+        id: z.string(),
+        userId: z.string(),
+        teamId: z.string(),
+        role: z.enum(['member', 'admin', 'owner']),
+        createdAt: z.string(),
+        user: z.object({
+          id: z.string(),
+          email: z.string().email(),
+          name: z.string().optional()
+        }).optional()
+      })).optional()
+    });
+
+    const UserTeamsResponseSchema = z.object({
+      teams: z.array(TeamWithMembershipSchema),
+      favorites: z.array(z.string()),
+      defaultTeam: TeamSchema.nullable()
+    });
+
+    return this.request('/users/me/teams', {
+      credentials: 'include'
+    }, UserTeamsResponseSchema);
+  }
+
+  async toggleTeamFavorite(teamId: string): Promise<{ isFavorite: boolean }> {
+    const ToggleFavoriteResponseSchema = z.object({
+      isFavorite: z.boolean()
+    });
+
+    return this.request(`/users/me/teams/${teamId}/favorite`, {
+      method: 'POST',
+      credentials: 'include'
+    }, ToggleFavoriteResponseSchema);
+  }
+
+  async getUserQuestions(): Promise<Question[]> {
+    const QuestionSchema = z.object({
+      id: z.string(),
+      body: z.string(),
+      upvotes: z.number(),
+      status: z.enum(['OPEN', 'ANSWERED']),
+      responseText: z.string().nullable().optional(),
+      respondedAt: z.string().nullable().optional(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      teamId: z.string().optional(),
+      authorId: z.string().optional(),
+      team: z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().optional(),
+        isActive: z.boolean(),
+        createdAt: z.string(),
+        updatedAt: z.string()
+      }).optional(),
+      author: z.object({
+        id: z.string(),
+        email: z.string().email(),
+        name: z.string().optional(),
+        ssoId: z.string().optional(),
+        createdAt: z.string(),
+        updatedAt: z.string()
+      }).optional(),
+      tags: z.array(z.object({
+        id: z.string(),
+        questionId: z.string(),
+        tagId: z.string(),
+        createdAt: z.string(),
+        tag: z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string().optional(),
+          color: z.string(),
+          createdAt: z.string(),
+          updatedAt: z.string()
+        })
+      })).optional()
+    });
+
+    return this.request('/users/me/questions', {
+      credentials: 'include'
+    }, z.array(QuestionSchema));
+  }
+
+  // Team membership management (admin only)
+  async getTeamMembers(teamId: string): Promise<TeamMembership[]> {
+    const TeamMembershipSchema = z.object({
+      id: z.string(),
+      userId: z.string(),
+      teamId: z.string(),
+      role: z.enum(['member', 'admin', 'owner']),
+      createdAt: z.string(),
+      user: z.object({
+        id: z.string(),
+        email: z.string().email(),
+        name: z.string().optional()
+      }).optional()
+    });
+
+    return this.request(`/teams/${teamId}/members`, {
+      credentials: 'include'
+    }, z.array(TeamMembershipSchema));
+  }
+
+  async addTeamMember(teamId: string, data: AddTeamMemberRequest): Promise<TeamMembership> {
+    const AddTeamMemberSchema = z.object({
+      userId: z.string(),
+      role: z.enum(['member', 'admin', 'owner']).optional()
+    });
+
+    const TeamMembershipSchema = z.object({
+      id: z.string(),
+      userId: z.string(),
+      teamId: z.string(),
+      role: z.enum(['member', 'admin', 'owner']),
+      createdAt: z.string(),
+      user: z.object({
+        id: z.string(),
+        email: z.string().email(),
+        name: z.string().optional()
+      }).optional()
+    });
+
+    return this.request(`/teams/${teamId}/members`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, TeamMembershipSchema);
+  }
+
+  async updateTeamMember(teamId: string, userId: string, data: UpdateTeamMemberRequest): Promise<TeamMembership> {
+    const UpdateTeamMemberSchema = z.object({
+      role: z.enum(['member', 'admin', 'owner'])
+    });
+
+    const TeamMembershipSchema = z.object({
+      id: z.string(),
+      userId: z.string(),
+      teamId: z.string(),
+      role: z.enum(['member', 'admin', 'owner']),
+      createdAt: z.string(),
+      user: z.object({
+        id: z.string(),
+        email: z.string().email(),
+        name: z.string().optional()
+      }).optional()
+    });
+
+    return this.request(`/teams/${teamId}/members/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      credentials: 'include'
+    }, TeamMembershipSchema);
+  }
+
+  async removeTeamMember(teamId: string, userId: string): Promise<{ success: boolean }> {
+    const RemoveMemberResponseSchema = z.object({
+      success: z.boolean()
+    });
+
+    return this.request(`/teams/${teamId}/members/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    }, RemoveMemberResponseSchema);
   }
 }
 

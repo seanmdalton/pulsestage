@@ -1,26 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/api';
 import { ThemeToggle } from './ThemeToggle';
 import { TeamSelector } from './TeamSelector';
+import { UserProfile } from './UserProfile';
 import { useTeam, getTeamSlug } from '../contexts/TeamContext';
+import { useUser } from '../contexts/UserContext';
 
 export function Navbar() {
   const location = useLocation();
-  const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
   const { currentTeam } = useTeam();
+  const { userTeams, getUserRoleInTeam } = useUser();
 
-  useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        await apiClient.getHealth();
-        setHealthStatus('healthy');
-      } catch {
-        setHealthStatus('unhealthy');
-      }
-    };
-    checkHealth();
-  }, []);
+  // Check if user has admin privileges in any team
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
 
   // Generate team-aware navigation items
   const teamSlug = getTeamSlug(currentTeam);
@@ -28,7 +22,8 @@ export function Navbar() {
     { path: `/${teamSlug}`, label: 'Submit Question' },
     { path: `/${teamSlug}/open`, label: 'Open Questions' },
     { path: `/${teamSlug}/answered`, label: 'Answered Questions' },
-    { path: '/admin', label: 'Admin' },
+    // Only show Admin link if user has admin role in any team
+    ...(hasAdminRole ? [{ path: '/admin', label: 'Admin' }] : []),
   ];
 
   // Helper function to check if a nav item is active
@@ -43,7 +38,11 @@ export function Navbar() {
     <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-6">
+            {/* Team Selector - Far Left */}
+            <TeamSelector />
+            
+            {/* Navigation Items */}
             <div className="flex space-x-6">
               {navItems.map((item) => (
                 <Link
@@ -62,28 +61,8 @@ export function Navbar() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <TeamSelector />
-            <div className="flex items-center space-x-2">
-              <div className="text-sm text-gray-500 dark:text-gray-400">API Status:</div>
-              <div
-                data-testid="health-status"
-                className={`w-3 h-3 rounded-full ${
-                  healthStatus === 'healthy'
-                    ? 'bg-green-500'
-                    : healthStatus === 'unhealthy'
-                    ? 'bg-red-500'
-                    : 'bg-yellow-500'
-                }`}
-                title={
-                  healthStatus === 'healthy'
-                    ? 'API is healthy'
-                    : healthStatus === 'unhealthy'
-                    ? 'API is unhealthy'
-                    : 'Checking API status...'
-                }
-              />
-            </div>
             <ThemeToggle />
+            <UserProfile />
           </div>
         </div>
       </div>

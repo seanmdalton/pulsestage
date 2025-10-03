@@ -47,6 +47,15 @@ A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team s
 - **Keyboard shortcuts** - Space/Enter to advance, H for highest, Esc to exit
 - **Auto-filtering** - Hide reviewed questions from presentation queue
 
+### SSO-Ready User Management
+- **User profiles** - Complete user profile system with preferences and question history
+- **Team memberships** - Role-based access control (member, admin, owner)
+- **User preferences** - Favorite teams and default team selection
+- **Mock SSO testing** - Local development SSO simulation for testing
+- **Role-based admin access** - Admin privileges based on user roles, not separate login
+- **My Questions** - Track and view all questions submitted by the user
+- **User context** - Global user state management across the application
+
 ### User Experience
 - **Dark mode** - Toggle between light and dark themes (persistent)
 - **Responsive design** - Works perfectly on desktop, tablet, and mobile
@@ -121,6 +130,22 @@ DATABASE_URL="postgresql://app:app@localhost:5432/ama" node load-comprehensive-t
 
 This loads 88 realistic questions across all teams with answers, upvotes, and historical dates.
 
+### 5. Test SSO Features (Optional)
+For testing user management and role-based features locally:
+
+1. **Access Mock SSO Page**: Navigate to http://localhost:5173/sso-test.html
+2. **Select Test User**: Choose from John Doe (admin), Jane Smith (member), or Bob Wilson (owner)
+3. **Test User Features**: 
+   - User profile with question history
+   - Team favorites and default team selection
+   - Role-based admin access (no separate admin login needed)
+   - Team membership and preferences
+
+**Mock Users Available:**
+- **John Doe** (john.doe@company.com) - Admin role in Test Team
+- **Jane Smith** (jane.smith@company.com) - Member role in Test Team  
+- **Bob Wilson** (bob.wilson@company.com) - Owner role in Test Team
+
 ## Environment Configuration
 
 ```bash
@@ -132,7 +157,7 @@ ADMIN_KEY=your-secure-random-string-here
 
 # API Configuration
 PORT=3000
-NODE_ENV=development  # Disables rate limiting in development
+NODE_ENV=development  # Disables rate limiting in development, exposes swagger UI
 
 # CORS Configuration
 CORS_ORIGIN=http://localhost:5173
@@ -143,6 +168,10 @@ REDIS_URL=redis://redis:6379
 # Website Configuration
 # This title appears in the browser tab and page titles
 WEBSITE_TITLE=AMA App
+
+# Mock SSO Configuration (Development Only)
+# Set to 'development' to enable mock SSO authentication
+NODE_ENV=development
 ```
 
 ## Project Structure
@@ -261,6 +290,11 @@ enum QuestionStatus {
 - `DELETE /questions/:id/tags/:tagId` - Remove tag from question
 - `GET /admin/export/preview` - Preview export data with filters
 - `GET /admin/export/download` - Download export data (CSV/JSON)
+- `GET /users/me` - Get current user profile
+- `GET /users/me/questions` - Get user's submitted questions
+- `GET /users/me/teams` - Get user's team memberships
+- `PUT /users/me/preferences` - Update user preferences
+- `POST /users/me/teams/:teamId/favorite` - Toggle team favorite status
 
 ### API Documentation
 Interactive Swagger UI available at **http://localhost:3000/docs** with:
@@ -268,6 +302,8 @@ Interactive Swagger UI available at **http://localhost:3000/docs** with:
 - Request/response schemas
 - Try-it-out functionality
 - Authentication examples
+- **New User Management endpoints** - `/users/me/*` for profile, questions, teams, and preferences
+- **Mock SSO authentication** - Development-only SSO simulation for testing
 
 ## Testing
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../contexts/AdminContext';
+import { useUser } from '../contexts/UserContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminLoginPage() {
@@ -9,11 +10,30 @@ export function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAdmin();
+  const { userTeams, getUserRoleInTeam } = useUser();
 
   // Set page title
   useEffect(() => {
     setFormattedPageTitle(undefined, 'login');
   }, []);
+
+  // Check if user has admin privileges and redirect accordingly
+  useEffect(() => {
+    const hasAdminRole = userTeams.some(team => {
+      const role = getUserRoleInTeam(team.id);
+      return role === 'admin' || role === 'owner';
+    });
+
+    if (userTeams.length > 0) {
+      if (hasAdminRole) {
+        // User has admin role, redirect directly to admin panel
+        navigate('/admin', { replace: true });
+      } else {
+        // User is authenticated but doesn't have admin role
+        navigate('/all', { replace: true });
+      }
+    }
+  }, [userTeams, getUserRoleInTeam, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +52,35 @@ export function AdminLoginPage() {
       setIsLoggingIn(false);
     }
   };
+
+  // Check if user has admin role
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
+
+  // Show access denied message for non-admin users
+  if (userTeams.length > 0 && !hasAdminRole) {
+    return (
+      <div className="min-h-screen flex justify-center bg-gray-50 dark:bg-gray-900 pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-6">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">
+              Access Denied
+            </h3>
+            <p className="text-sm text-red-700 dark:text-red-400">
+              You don't have admin privileges to access this page. Admin access is restricted to team administrators and owners.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-50 dark:bg-gray-900 pt-16 pb-12 px-4 sm:px-6 lg:px-8">

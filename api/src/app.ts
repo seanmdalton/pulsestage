@@ -28,6 +28,7 @@ import { requireAdminKey } from "./middleware/adminAuth.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
+import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam } from "./middleware/mockAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,6 +47,9 @@ export function createApp(prisma: PrismaClient) {
   // Session middleware
   app.use(createSessionMiddleware());
 
+  // Mock authentication middleware (for local development)
+  app.use(mockAuthMiddleware);
+
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
     try {
@@ -58,7 +62,9 @@ export function createApp(prisma: PrismaClient) {
         customCss: '.swagger-ui .topbar { display: none }',
       }));
       
-      console.log('📚 API documentation available at /docs');
+      if (process.env.NODE_ENV === 'development') {
+    console.log('📚 API documentation available at /docs');
+  }
     } catch (error) {
       console.warn('⚠️  Failed to load OpenAPI spec:', error);
     }
@@ -74,7 +80,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions", rateLimit("create-question", 10), async (req, res) => {
+  app.post("/questions", rateLimit("create-question", 10), mockAuthMiddleware, async (req, res) => {
     const parse = createQuestionSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
     
@@ -89,10 +95,12 @@ export function createApp(prisma: PrismaClient) {
     const q = await prisma.question.create({ 
       data: { 
         body: parse.data.body,
-        teamId: parse.data.teamId || null
+        teamId: parse.data.teamId || null,
+        authorId: req.user?.id || null // Set author if user is authenticated
       },
       include: {
-        team: true
+        team: true,
+        author: true
       }
     });
     res.status(201).json(q);
@@ -148,20 +156,26 @@ export function createApp(prisma: PrismaClient) {
   });
 
   app.post("/admin/login", async (req, res) => {
-    console.log('🔐 Admin login attempt:', { 
-      hasSession: !!req.session, 
-      sessionId: req.sessionID,
-      userAgent: req.get('User-Agent')?.substring(0, 50) 
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 Admin login attempt:', { 
+        hasSession: !!req.session, 
+        sessionId: req.sessionID,
+        userAgent: req.get('User-Agent')?.substring(0, 50) 
+      });
+    }
     
     const parse = adminLoginSchema.safeParse(req.body);
     if (!parse.success) {
-      console.log('❌ Login failed: Invalid request body');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ Login failed: Invalid request body');
+      }
       return res.status(400).json({ error: "Admin key is required" });
     }
 
     if (parse.data.adminKey !== env.ADMIN_KEY) {
-      console.log('❌ Login failed: Invalid admin key');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ Login failed: Invalid admin key');
+      }
       return res.status(401).json({ error: "Invalid admin key" });
     }
 
@@ -169,10 +183,12 @@ export function createApp(prisma: PrismaClient) {
     req.session.isAdmin = true;
     req.session.loginTime = Date.now();
     
-    console.log('✅ Admin login successful:', { 
-      sessionId: req.sessionID,
-      loginTime: req.session.loginTime 
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Admin login successful:', { 
+        sessionId: req.sessionID,
+        loginTime: req.session.loginTime 
+      });
+    }
 
     res.json({ 
       success: true, 
@@ -891,6 +907,125 @@ export function createApp(prisma: PrismaClient) {
         res.status(500).json({ error: 'Failed to remove tag from question' });
       }
     }
+  });
+
+  // User management endpoints with mock SSO
+  // Note: In production, replace mockAuthMiddleware with real SSO integration
+  
+  // Get current user
+  app.get("/users/me", requireMockAuth, (req, res) => {
+    res.json({
+      id: req.user!.id,
+      email: req.user!.email,
+      name: req.user!.name,
+      ssoId: req.user!.ssoId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  });
+
+  // Get user's questions
+  app.get("/users/me/questions", requireMockAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      const questions = await prisma.question.findMany({
+        where: {
+          authorId: userId // Query for questions authored by this user
+        },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      res.json(questions);
+    } catch (error) {
+      console.error('Error fetching user questions:', error);
+      res.status(500).json({ error: 'Failed to fetch user questions' });
+    }
+  });
+
+  // Get user teams with membership info
+  app.get("/users/me/teams", requireMockAuth, async (req, res) => {
+    try {
+      const userTeams = await getUserTeamsWithMembership(req.user!.id, prisma);
+      const preferences = getUserPreferences(req.user!.id);
+      
+      res.json({
+        teams: userTeams,
+        favorites: preferences.favoriteTeams,
+        defaultTeam: userTeams.find((t: any) => t.id === preferences.defaultTeamId) || null
+      });
+    } catch (error) {
+      console.error('Error fetching user teams:', error);
+      res.status(500).json({ error: 'Failed to fetch user teams' });
+    }
+  });
+
+  // Update user preferences
+  app.put("/users/me/preferences", requireMockAuth, (req, res) => {
+    const { favoriteTeams, defaultTeamId } = req.body;
+    const userId = req.user!.id;
+    
+    // In a real implementation, this would update the database
+    // For now, we'll just return the updated preferences
+    const updatedPreferences = {
+      userId,
+      favoriteTeams: favoriteTeams || [],
+      defaultTeamId: defaultTeamId || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    res.json(updatedPreferences);
+  });
+
+  // Toggle team favorite
+  app.post("/users/me/teams/:teamId/favorite", requireMockAuth, (req, res) => {
+    const { teamId } = req.params;
+    const userId = req.user!.id;
+    
+    const isFavorite = toggleTeamFavorite(userId, teamId);
+    
+    res.json({ isFavorite });
+  });
+
+  // Team membership management endpoints (admin only - placeholder)
+  app.get("/teams/:teamId/members", requireAdminSession, (req, res) => {
+    res.status(501).json({ 
+      error: "Not implemented",
+      message: "Team membership management not implemented yet" 
+    });
+  });
+
+  app.post("/teams/:teamId/members", requireAdminSession, (req, res) => {
+    res.status(501).json({ 
+      error: "Not implemented",
+      message: "Team membership management not implemented yet" 
+    });
+  });
+
+  app.put("/teams/:teamId/members/:userId", requireAdminSession, (req, res) => {
+    res.status(501).json({ 
+      error: "Not implemented",
+      message: "Team membership management not implemented yet" 
+    });
+  });
+
+  app.delete("/teams/:teamId/members/:userId", requireAdminSession, (req, res) => {
+    res.status(501).json({ 
+      error: "Not implemented",
+      message: "Team membership management not implemented yet" 
+    });
   });
 
   return app;

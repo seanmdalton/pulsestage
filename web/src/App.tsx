@@ -21,9 +21,11 @@ import { AnsweredQuestionsPage } from './pages/AnsweredQuestionsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { PresentationPage } from './pages/PresentationPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { Navbar } from './components/Navbar';
 import { AdminProvider } from './contexts/AdminContext';
 import { TeamProvider } from './contexts/TeamContext';
+import { UserProvider } from './contexts/UserContext';
 import { useEffect } from 'react';
 import { getBaseTitle } from './utils/titleUtils';
 
@@ -35,8 +37,9 @@ function App() {
 
   return (
     <Router>
-      <AdminProvider>
-        <TeamProvider>
+      <UserProvider>
+        <AdminProvider>
+          <TeamProvider>
           <Routes>
             {/* Presentation routes (no navbar) */}
             <Route path="/:teamSlug/open/present" element={<PresentationPage />} />
@@ -61,13 +64,19 @@ function App() {
                     {/* Admin routes (not team-scoped) */}
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/login" element={<AdminLoginPage />} />
+                    
+                    {/* Profile routes (not team-scoped) */}
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/favorites" element={<ProfilePage />} />
+                    <Route path="/profile/questions" element={<ProfilePage />} />
                   </Routes>
                 </main>
               </div>
             } />
           </Routes>
-        </TeamProvider>
-      </AdminProvider>
+          </TeamProvider>
+        </AdminProvider>
+      </UserProvider>
     </Router>
   );
 }

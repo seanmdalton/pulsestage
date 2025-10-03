@@ -22,6 +22,8 @@ tags:
     description: Tag management endpoints
   - name: Export
     description: Data export endpoints
+  - name: Users
+    description: User management and profile endpoints
 
 components:
   securitySchemes:
@@ -35,6 +37,11 @@ components:
       in: cookie
       name: connect.sid
       description: Admin session cookie
+    MockSSO:
+      type: apiKey
+      in: header
+      name: x-mock-sso-user
+      description: Mock SSO authentication header (development only)
 
   schemas:
     Question:
@@ -229,6 +236,131 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          nullable: true
+          description: User display name
+        ssoId:
+          type: string
+          nullable: true
+          description: SSO provider identifier
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    TeamMembership:
+      type: object
+      required:
+        - userId
+        - teamId
+        - role
+        - createdAt
+        - updatedAt
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User identifier
+        teamId:
+          type: string
+          format: uuid
+          description: Team identifier
+        role:
+          type: string
+          enum: [member, admin, owner]
+          description: User role in the team
+        createdAt:
+          type: string
+          format: date-time
+          description: Membership creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    TeamWithMembership:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            membership:
+              $ref: '#/components/schemas/TeamMembership'
+
+    UserPreferences:
+      type: object
+      required:
+        - userId
+        - favoriteTeams
+        - defaultTeamId
+        - createdAt
+        - updatedAt
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User identifier
+        favoriteTeams:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of favorite team IDs
+        defaultTeamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Default team ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Preferences creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    UserTeamsResponse:
+      type: object
+      required:
+        - teams
+        - favorites
+        - defaultTeam
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamWithMembership'
+        favorites:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of favorite team IDs
+        defaultTeam:
+          $ref: '#/components/schemas/Team'
+          nullable: true
 
     CreateQuestionRequest:
       type: object
@@ -1005,5 +1137,143 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '400':
           description: Invalid format or parameters
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieve the current authenticated user's profile information
+      security:
+        - MockSSO: []
+      responses:
+        '200':
+          description: User profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/questions:
+    get:
+      tags:
+        - Users
+      summary: Get user's submitted questions
+      description: Retrieve all questions submitted by the current user
+      security:
+        - MockSSO: []
+      responses:
+        '200':
+          description: User's submitted questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/teams:
+    get:
+      tags:
+        - Users
+      summary: Get user's team memberships
+      description: Retrieve all teams the current user is a member of with their roles
+      security:
+        - MockSSO: []
+      responses:
+        '200':
+          description: User's team memberships and preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/preferences:
+    put:
+      tags:
+        - Users
+      summary: Update user preferences
+      description: Update user preferences including favorite teams and default team
+      security:
+        - MockSSO: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                favoriteTeams:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Array of favorite team IDs
+                defaultTeamId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Default team ID
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '400':
+          description: Invalid request body
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/teams/{teamId}/favorite:
+    post:
+      tags:
+        - Users
+      summary: Toggle team favorite status
+      description: Add or remove a team from user's favorites
+      security:
+        - MockSSO: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID to toggle favorite status
+      responses:
+        '200':
+          description: Favorite status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isFavorite:
+                    type: boolean
+                    description: New favorite status
+        '400':
+          description: Invalid team ID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Team not found
         '500':
           $ref: '#/components/responses/InternalServerError'

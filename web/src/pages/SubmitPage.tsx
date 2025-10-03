@@ -81,7 +81,7 @@ export function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim()) return;
+    if (!question.trim() || !currentTeam) return; // Don't allow submission without a team
 
     setIsSubmitting(true);
     setMessage(null);
@@ -89,12 +89,12 @@ export function SubmitPage() {
     try {
       await apiClient.createQuestion({ 
         body: question.trim(),
-        teamId: currentTeam?.id
+        teamId: currentTeam.id
       });
       setQuestion('');
       setMessage({ 
         type: 'success', 
-        text: `Question submitted successfully${currentTeam ? ` to ${currentTeam.name}` : ''}!` 
+        text: `Question submitted successfully to ${currentTeam.name}!` 
       });
     } catch (error) {
       setMessage({ 
@@ -114,6 +114,24 @@ export function SubmitPage() {
           Submitting to: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
         </p>
       </div>
+
+      {!currentTeam && (
+        <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                Select a Team to Submit Questions
+              </h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                Please select a specific team from the team selector to submit questions. Questions must be associated with a team.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -124,11 +142,13 @@ export function SubmitPage() {
             id="question"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask your question here..."
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder={currentTeam ? "Ask your question here..." : "Please select a team first to submit questions"}
+            className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+              !currentTeam ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             rows={6}
             maxLength={2000}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !currentTeam}
           />
           <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {question.length}/2000 characters
@@ -149,10 +169,10 @@ export function SubmitPage() {
 
         <button
           type="submit"
-          disabled={!question.trim() || isSubmitting}
+          disabled={!question.trim() || isSubmitting || !currentTeam}
           className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isSubmitting ? 'Submitting...' : 'Submit Question'}
+          {isSubmitting ? 'Submitting...' : !currentTeam ? 'Select a Team First' : 'Submit Question'}
         </button>
       </form>
 

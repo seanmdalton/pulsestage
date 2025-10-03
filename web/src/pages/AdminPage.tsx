@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { useAdmin } from '../contexts/AdminContext';
+import { useUser } from '../contexts/UserContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
 import { ExportPage } from './ExportPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading, logout } = useAdmin();
+  const { isAuthenticated, isLoading: authLoading } = useAdmin();
+  const { userTeams, getUserRoleInTeam } = useUser();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,21 +19,46 @@ export function AdminPage() {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'export'>('questions');
+  const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
 
   // Set page title
   useEffect(() => {
     setFormattedPageTitle(undefined, 'admin');
   }, []);
 
-  // Redirect to login if not authenticated
+  // Check admin access and handle authentication
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate('/admin/login');
+    if (authLoading) return; // Wait for auth to load
+
+    // Check if user has admin role in any team
+    const hasAdminRole = userTeams.some(team => {
+      const role = getUserRoleInTeam(team.id);
+      return role === 'admin' || role === 'owner';
+    });
+
+    if (userTeams.length === 0) {
+      // No user context yet, wait for it to load
+      return;
     }
-  }, [isAuthenticated, authLoading, navigate]);
+
+    if (!hasAdminRole) {
+      // User doesn't have admin role, redirect to home
+      navigate('/all');
+      return;
+    }
+
+    // If user has admin role, we'll bypass the AdminContext authentication
+    // and allow direct access to admin features
+  }, [authLoading, userTeams, getUserRoleInTeam, navigate]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Check if user has admin role
+    const hasAdminRole = userTeams.some(team => {
+      const role = getUserRoleInTeam(team.id);
+      return role === 'admin' || role === 'owner';
+    });
+
+    if (hasAdminRole) {
       const loadQuestions = async () => {
         try {
           const data = await apiClient.getQuestions('OPEN');
@@ -45,7 +72,20 @@ export function AdminPage() {
 
       loadQuestions();
     }
-  }, [isAuthenticated]);
+  }, [userTeams, getUserRoleInTeam]);
+
+  // Check API health status
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        await apiClient.getHealth();
+        setHealthStatus('healthy');
+      } catch {
+        setHealthStatus('unhealthy');
+      }
+    };
+    checkHealth();
+  }, []);
 
   const handleQuestionClick = (question: Question) => {
     setSelectedQuestion(question);
@@ -64,20 +104,28 @@ export function AdminPage() {
     );
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/admin/login');
-  };
 
-  if (loading) {
+  // Check if user has admin role
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
+
+  // Show loading while checking user roles or loading data
+  if (userTeams.length === 0 || loading) {
     return (
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
         <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400">Loading questions...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading...</div>
         </div>
       </div>
     );
+  }
+
+  // Redirect if user doesn't have admin role
+  if (!hasAdminRole) {
+    return null; // The useEffect will handle the redirect
   }
 
   if (error) {
@@ -101,18 +149,34 @@ export function AdminPage() {
               Manage questions and teams
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            {/* API Status Indicator */}
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-md">
+              <div className="text-sm text-gray-500 dark:text-gray-400">API Status:</div>
+              <div
+                data-testid="health-status"
+                className={`w-3 h-3 rounded-full ${
+                  healthStatus === 'healthy'
+                    ? 'bg-green-500'
+                    : healthStatus === 'unhealthy'
+                    ? 'bg-red-500'
+                    : 'bg-yellow-500'
+                }`}
+                title={
+                  healthStatus === 'healthy'
+                    ? 'API is healthy'
+                    : healthStatus === 'unhealthy'
+                    ? 'API is unhealthy'
+                    : 'Checking API status...'
+                }
+              />
+            </div>
+            
             <button
               onClick={() => navigate('/all/open/present')}
               className="px-4 py-2 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors self-start sm:self-auto"
             >
               Presentation Mode
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm bg-gray-600 dark:bg-gray-700 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors self-start sm:self-auto"
-            >
-              Logout
             </button>
           </div>
         </div>

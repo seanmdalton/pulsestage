@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -20,7 +21,11 @@ model Team {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  
+  // Relationships
   questions   Question[]
+  memberships TeamMembership[]
+  userPreferences UserPreferences[] // Teams that users have set as default
 }
 
 model Question {
@@ -34,6 +39,8 @@ model Question {
   updatedAt    DateTime       @updatedAt
   teamId       String?
   team         Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  authorId     String?        // User who submitted the question
+  author       User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
   tags         QuestionTag[]
 }
 
@@ -57,4 +64,48 @@ model QuestionTag {
   tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
   
   @@unique([questionId, tagId])
+}
+
+// User management for SSO integration
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  ssoId     String?  @unique // For SSO provider integration
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  teamMemberships TeamMembership[]
+  preferences     UserPreferences?
+  questions       Question[]      // Questions submitted by this user
+}
+
+// Team membership with roles
+model TeamMembership {
+  id        String   @id @default(uuid())
+  userId    String
+  teamId    String
+  role      String   @default("member") // member, admin, owner
+  createdAt DateTime @default(now())
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, teamId])
+}
+
+// User preferences and settings
+model UserPreferences {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  favoriteTeams  Json     @default("[]") // Array of team slugs
+  defaultTeamId  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relationships
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultTeam Team? @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
 }
