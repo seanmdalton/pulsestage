@@ -342,7 +342,7 @@ export function PresentationPage() {
       {/* Header with minimal controls */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <div className="flex items-center gap-4">
-          <PulseStageLogo size="sm" showWordmark={true} className="text-white" />
+          <PulseStageLogo size="sm" showWordmark={true} forceTheme="dark" className="text-white" />
           <div className="text-sm text-gray-400">
             {currentTeam ? currentTeam.name : 'All Teams'} • Question {currentQuestionIndex + 1} of {questions.length}
           </div>
