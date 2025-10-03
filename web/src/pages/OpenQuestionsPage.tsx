@@ -6,19 +6,25 @@ import { QuestionModal } from '../components/QuestionModal';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
-import { useAdmin } from '../contexts/AdminContext';
+import { useUser } from '../contexts/UserContext';
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [upvotedQuestions, setUpvotedQuestions] = useState<Set<string>>(new Set());
+  const [upvoteStatus, setUpvoteStatus] = useState<Map<string, { hasUpvoted: boolean; canUpvote: boolean }>>(new Map());
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { currentTeam } = useTeamFromUrl();
-  const { isAuthenticated } = useAdmin();
+  const { userTeams, getUserRoleInTeam } = useUser();
   const navigate = useNavigate();
+
+  // Check if user has admin role in any team
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
 
   // Set page title
   useEffect(() => {
@@ -30,6 +36,20 @@ export function OpenQuestionsPage() {
       try {
         const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
         setQuestions(data);
+        
+        // Load upvote status for each question
+        const statusMap = new Map<string, { hasUpvoted: boolean; canUpvote: boolean }>();
+        for (const question of data) {
+          try {
+            const status = await apiClient.getUpvoteStatus(question.id);
+            statusMap.set(question.id, status);
+          } catch (err) {
+            console.error(`Failed to load upvote status for question ${question.id}:`, err);
+            statusMap.set(question.id, { hasUpvoted: false, canUpvote: true });
+          }
+        }
+        setUpvoteStatus(statusMap);
+        
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load questions');
       } finally {
@@ -38,20 +58,11 @@ export function OpenQuestionsPage() {
     };
 
     loadQuestions();
-
-    // Load upvoted questions from localStorage
-    const stored = localStorage.getItem('upvotedQuestions');
-    if (stored) {
-      try {
-        setUpvotedQuestions(new Set(JSON.parse(stored)));
-      } catch {
-        // Invalid JSON, ignore
-      }
-    }
   }, [currentTeam?.id]);
 
   const handleUpvote = async (questionId: string) => {
-    if (upvotedQuestions.has(questionId)) return;
+    const status = upvoteStatus.get(questionId);
+    if (!status || status.hasUpvoted || !status.canUpvote) return;
 
     try {
       const updatedQuestion = await apiClient.upvoteQuestion(questionId);
@@ -59,13 +70,20 @@ export function OpenQuestionsPage() {
         prev.map(q => q.id === questionId ? updatedQuestion : q)
       );
       
-      // Mark as upvoted
-      const newUpvoted = new Set(upvotedQuestions);
-      newUpvoted.add(questionId);
-      setUpvotedQuestions(newUpvoted);
-      localStorage.setItem('upvotedQuestions', JSON.stringify([...newUpvoted]));
+      // Update upvote status
+      setUpvoteStatus(prev => {
+        const newMap = new Map(prev);
+        newMap.set(questionId, { hasUpvoted: true, canUpvote: false });
+        return newMap;
+      });
     } catch (err) {
       console.error('Failed to upvote:', err);
+      // Handle specific error cases
+      if (err instanceof Error && err.message.includes('Cannot upvote your own question')) {
+        alert('You cannot upvote your own question');
+      } else if (err instanceof Error && err.message.includes('Already upvoted')) {
+        alert('You have already upvoted this question');
+      }
     }
   };
 
@@ -124,7 +142,7 @@ export function OpenQuestionsPage() {
             Viewing: <span className="font-medium">{getTeamDisplayName(currentTeam)}</span>
           </p>
         </div>
-        {isAuthenticated && questions.length > 0 && (
+        {hasAdminRole && questions.length > 0 && (
           <button
             onClick={() => {
               const teamSlug = currentTeam?.slug || 'all';
@@ -190,20 +208,29 @@ export function OpenQuestionsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleUpvote(question.id);
-                  }}
-                  disabled={upvotedQuestions.has(question.id)}
-                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    upvotedQuestions.has(question.id)
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
-                  }`}
-                >
-                  {upvotedQuestions.has(question.id) ? 'Upvoted' : 'Upvote'}
-                </button>
+                {(() => {
+                  const status = upvoteStatus.get(question.id);
+                  const hasUpvoted = status?.hasUpvoted || false;
+                  const canUpvote = status?.canUpvote ?? true;
+                  
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpvote(question.id);
+                      }}
+                      disabled={hasUpvoted || !canUpvote}
+                      className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                        hasUpvoted || !canUpvote
+                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
+                      }`}
+                      title={!canUpvote ? 'Cannot upvote your own question' : hasUpvoted ? 'Already upvoted' : 'Upvote this question'}
+                    >
+                      {hasUpvoted ? 'Upvoted' : 'Upvote'}
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           ))}
@@ -217,7 +244,8 @@ export function OpenQuestionsPage() {
       isOpen={isModalOpen}
       onClose={handleModalClose}
       onUpvote={handleUpvote}
-      upvotedQuestions={upvotedQuestions}
+      upvotedQuestions={new Set()}
+      upvoteStatus={upvoteStatus}
     />
     </>
   );

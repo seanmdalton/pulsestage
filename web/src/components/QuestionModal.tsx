@@ -8,9 +8,10 @@ interface QuestionModalProps {
   onClose: () => void;
   onUpvote: (questionId: string) => void;
   upvotedQuestions: Set<string>;
+  upvoteStatus?: Map<string, { hasUpvoted: boolean; canUpvote: boolean }>;
 }
 
-export function QuestionModal({ question, isOpen, onClose, onUpvote, upvotedQuestions }: QuestionModalProps) {
+export function QuestionModal({ question, isOpen, onClose, onUpvote, upvotedQuestions, upvoteStatus = new Map() }: QuestionModalProps) {
   if (!question) return null;
 
   const handleUpvote = (e: React.MouseEvent) => {
@@ -81,20 +82,29 @@ export function QuestionModal({ question, isOpen, onClose, onUpvote, upvotedQues
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleUpvote}
-            disabled={upvotedQuestions.has(question.id)}
-            className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
-              upvotedQuestions.has(question.id)
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                : 'bg-orange-100 dark:bg-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-600'
-            }`}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-            </svg>
-            {upvotedQuestions.has(question.id) ? 'Upvoted' : 'Upvote Question'}
-          </button>
+          {(() => {
+            const status = upvoteStatus.get(question.id);
+            const hasUpvoted = status?.hasUpvoted || false;
+            const canUpvote = status?.canUpvote ?? true;
+            
+            return (
+              <button
+                onClick={handleUpvote}
+                disabled={hasUpvoted || !canUpvote}
+                className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
+                  hasUpvoted || !canUpvote
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    : 'bg-orange-100 dark:bg-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-600'
+                }`}
+                title={!canUpvote ? 'Cannot upvote your own question' : hasUpvoted ? 'Already upvoted' : 'Upvote this question'}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+                {hasUpvoted ? 'Upvoted' : 'Upvote Question'}
+              </button>
+            );
+          })()}
           
           <button
             onClick={onClose}

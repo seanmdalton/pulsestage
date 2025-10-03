@@ -111,6 +111,9 @@ export function AdminPage() {
     return role === 'admin' || role === 'owner';
   });
 
+  // Check if there are open questions for presentation mode
+  const hasOpenQuestions = questions.some(q => q.status === 'OPEN');
+
   // Show loading while checking user roles or loading data
   if (userTeams.length === 0 || loading) {
     return (
@@ -174,7 +177,13 @@ export function AdminPage() {
             
             <button
               onClick={() => navigate('/all/open/present')}
-              className="px-4 py-2 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors self-start sm:self-auto"
+              disabled={!hasOpenQuestions}
+              className={`px-4 py-2 text-sm rounded-md transition-colors self-start sm:self-auto ${
+                hasOpenQuestions
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600'
+                  : 'bg-gray-400 dark:bg-gray-600 text-gray-200 cursor-not-allowed'
+              }`}
+              title={hasOpenQuestions ? 'Enter presentation mode' : 'No open questions available for presentation'}
             >
               Presentation Mode
             </button>

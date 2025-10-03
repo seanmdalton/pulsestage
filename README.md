@@ -1,8 +1,8 @@
-# AMA App
+# PulseStage
 
-[![CI](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
+[![CI](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Coverage](https://img.shields.io/badge/Coverage-22%25-orange.svg)](https://github.com/seanmdalton/ama-app/actions/workflows/ci.yaml)
+[![Coverage](https://img.shields.io/badge/Coverage-22%25-orange.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20-green.svg)](https://nodejs.org/)
@@ -11,9 +11,9 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 
-A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team support**, built with Express, Prisma, PostgreSQL, Redis, React, and TypeScript.
+**PulseStage** is an open-source platform designed to engage across your organization, providing all the functionality you need to capture, respond, and present questions. Built as a comprehensive full-stack Ask Me Anything (AMA) application with **multi-team support**, it promotes engagement, transparency, and trust among your teams.
 
-**Perfect for organizations** - Features team-based question organization, admin management, session-based authentication, comprehensive search, and much more.
+**Perfect for organizations** - Features team-based question organization, admin management, role-based authentication, comprehensive search, and much more. PulseStage empowers teams to have meaningful conversations and build stronger connections through structured Q&A sessions.
 
 ## Key Features
 
@@ -105,8 +105,8 @@ A comprehensive full-stack Ask Me Anything (AMA) application with **multi-team s
 
 ### 1. Clone and Setup
 ```bash
-git clone https://github.com/seanmdalton/ama-app.git
-cd ama-app
+git clone https://github.com/seanmdalton/pulsestage.git
+cd pulsestage
 cp env.example .env
 # Edit .env to set your ADMIN_KEY
 ```
@@ -167,7 +167,7 @@ REDIS_URL=redis://redis:6379
 
 # Website Configuration
 # This title appears in the browser tab and page titles
-WEBSITE_TITLE=AMA App
+WEBSITE_TITLE=PulseStage
 
 # Mock SSO Configuration (Development Only)
 # Set to 'development' to enable mock SSO authentication
@@ -177,7 +177,7 @@ NODE_ENV=development
 ## Project Structure
 
 ```
-ama-app/
+pulsestage/
 ├── api/                          # Backend API
 │   ├── src/
 │   │   ├── app.ts               # Express app with all routes
@@ -413,7 +413,7 @@ DATABASE_URL="postgresql://app:app@localhost:5432/ama" node load-comprehensive-t
 
 ## Presentation Mode
 
-The application includes a full-screen presentation mode for live AMAs:
+The application includes a full-screen presentation mode for live Q&A sessions:
 
 ### Features
 - **Full-screen dark mode** optimized for projectors and large displays
@@ -490,8 +490,8 @@ REDIS_URL=redis://redis-host:6379
 
 ### Docker Images
 Images are automatically built and pushed to GitHub Container Registry:
-- `ghcr.io/seanmdalton/ama-app-api:latest`
-- `ghcr.io/seanmdalton/ama-app-web:latest`
+- `ghcr.io/seanmdalton/pulsestage-api:latest`
+- `ghcr.io/seanmdalton/pulsestage-web:latest`
 
 ### Health Monitoring
 - **Health endpoint**: `/health` for load balancer checks
@@ -535,7 +535,7 @@ limitations under the License.
 
 ## What Makes This Special
 
-This AMA application goes beyond basic Q&A functionality:
+PulseStage goes beyond basic Q&A functionality:
 
 - **Multi-team architecture** - Perfect for large organizations
 - **Advanced search** - Real-time fuzzy search with debouncing

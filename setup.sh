@@ -48,7 +48,7 @@ EOF
 # Devcontainer (optional but nice in Cursor)
 cat > .devcontainer/devcontainer.json <<'EOF'
 {
-  "name": "ama-app",
+  "name": "pulsestage",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock SSO Testing - AMA App</title>
+    <title>Mock SSO Testing - PulseStage</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -126,7 +126,7 @@
         
         <div class="instructions">
             <h3>How to Test SSO Locally</h3>
-            <p>This page simulates SSO authentication for local development. Select a user below to authenticate as them in the AMA app.</p>
+            <p>This page simulates SSO authentication for local development. Select a user below to authenticate as them in PulseStage.</p>
             
             <h4>Available Test Users:</h4>
             <ul>
@@ -164,7 +164,7 @@
         <div style="margin-top: 30px;">
             <button class="button" onclick="authenticateUser()">🔐 Authenticate as Selected User</button>
             <button class="button secondary" onclick="logout()">🚪 Logout (Anonymous Mode)</button>
-            <button class="button secondary" onclick="goToApp()">🏠 Go to AMA App</button>
+            <button class="button secondary" onclick="goToApp()">🏠 Go to PulseStage</button>
         </div>
 
         <div style="margin-top: 30px;">
@@ -216,7 +216,7 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
             // Dispatch custom event to notify UserContext of the change
             window.dispatchEvent(new CustomEvent('mock-sso-changed'));
             
-            showStatus(`✅ Authenticated as ${selectedUser}. You can now use the AMA app with user context!`, 'success');
+            showStatus(`✅ Authenticated as ${selectedUser}. You can now use PulseStage with user context!`, 'success');
             
             // Auto-redirect to app after 2 seconds
             setTimeout(() => {

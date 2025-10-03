@@ -18,7 +18,7 @@ services:
     build: ./web
     environment:
       VITE_API_URL: http://localhost:3000
-      VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-AMA App}
+      VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-PulseStage}
     ports:
       - "5173:5173"
     depends_on:

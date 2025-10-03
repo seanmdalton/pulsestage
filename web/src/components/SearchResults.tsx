@@ -9,9 +9,10 @@ interface SearchResultsProps {
   query: string;
   onUpvote?: (questionId: string) => void;
   upvotedQuestions?: Set<string>;
+  upvoteStatus?: Map<string, { hasUpvoted: boolean; canUpvote: boolean }>;
 }
 
-export function SearchResults({ results, loading, query, onUpvote, upvotedQuestions = new Set() }: SearchResultsProps) {
+export function SearchResults({ results, loading, query, onUpvote, upvotedQuestions = new Set(), upvoteStatus = new Map() }: SearchResultsProps) {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -83,19 +84,26 @@ export function SearchResults({ results, loading, query, onUpvote, upvotedQuesti
                       {question.upvotes} upvotes • {new Date(question.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  {onUpvote && (
-                    <button
-                      onClick={() => onUpvote(question.id)}
-                      disabled={upvotedQuestions.has(question.id)}
-                      className={`ml-3 px-2 py-1 text-xs rounded transition-colors ${
-                        upvotedQuestions.has(question.id)
-                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                          : 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800'
-                      }`}
-                    >
-                      {upvotedQuestions.has(question.id) ? 'Upvoted' : 'Upvote'}
-                    </button>
-                  )}
+                  {onUpvote && (() => {
+                    const status = upvoteStatus.get(question.id);
+                    const hasUpvoted = status?.hasUpvoted || false;
+                    const canUpvote = status?.canUpvote ?? true;
+                    
+                    return (
+                      <button
+                        onClick={() => onUpvote(question.id)}
+                        disabled={hasUpvoted || !canUpvote}
+                        className={`ml-3 px-2 py-1 text-xs rounded transition-colors ${
+                          hasUpvoted || !canUpvote
+                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800'
+                        }`}
+                        title={!canUpvote ? 'Cannot upvote your own question' : hasUpvoted ? 'Already upvoted' : 'Upvote this question'}
+                      >
+                        {hasUpvoted ? 'Upvoted' : 'Upvote'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             ))}

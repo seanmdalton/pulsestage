@@ -290,6 +290,15 @@ class ApiClient {
     }, QuestionSchema);
   }
 
+  async getUpvoteStatus(id: string): Promise<{ hasUpvoted: boolean; canUpvote: boolean }> {
+    return this.request(`/questions/${id}/upvote-status`, {
+      method: 'GET',
+    }, z.object({
+      hasUpvoted: z.boolean(),
+      canUpvote: z.boolean()
+    }));
+  }
+
   async respondToQuestion(id: string, data: RespondRequest, adminKey: string): Promise<Question> {
     return this.request(`/questions/${id}/respond`, {
       method: 'POST',
@@ -471,9 +480,15 @@ class ApiClient {
     
     queryParams.append('format', format);
 
+    // Get the mock SSO user header from localStorage
+    const mockSSOUser = localStorage.getItem('mock-sso-user');
+    
     const response = await fetch(`${this.baseUrl}/admin/export/download?${queryParams}`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        ...(mockSSOUser && { 'x-mock-sso-user': mockSSOUser })
+      }
     });
 
     if (!response.ok) {

@@ -18,14 +18,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question, Tag } from '../lib/api';
-import { useAdmin } from '../contexts/AdminContext';
+import { useUser } from '../contexts/UserContext';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function PresentationPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAdmin();
+  const { userTeams, getUserRoleInTeam, isLoading } = useUser();
   const { currentTeam } = useTeamFromUrl();
   const navigate = useNavigate();
+
+  // Check if user has admin role in any team
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -39,31 +45,50 @@ export function PresentationPage() {
     setFormattedPageTitle(currentTeam?.slug, 'present');
   }, [currentTeam?.slug]);
 
-  // Redirect to login if not authenticated
+  // Redirect if not authenticated or doesn't have admin role
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isLoading && (!hasAdminRole || userTeams.length === 0)) {
       navigate('/admin/login');
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [hasAdminRole, userTeams.length, isLoading, navigate]);
 
-  // Load tags
+  // Load tags (create them if they don't exist)
   useEffect(() => {
-    const loadTags = async () => {
+    const loadOrCreateTags = async () => {
       try {
         const tags = await apiClient.getTags();
-        const currentlyPresentingTag = tags.find(t => t.name === 'Currently Presenting');
-        const reviewedTag = tags.find(t => t.name === 'Reviewed');
-        setCurrentlyPresentingTag(currentlyPresentingTag || null);
-        setReviewedTag(reviewedTag || null);
+        let currentlyPresentingTag = tags.find(t => t.name === 'Currently Presenting');
+        let reviewedTag = tags.find(t => t.name === 'Reviewed');
+
+        // Create "Currently Presenting" tag if it doesn't exist
+        if (!currentlyPresentingTag) {
+          currentlyPresentingTag = await apiClient.createTag({
+            name: 'Currently Presenting',
+            description: 'Question currently being presented',
+            color: '#10B981' // Green
+          });
+        }
+
+        // Create "Reviewed" tag if it doesn't exist
+        if (!reviewedTag) {
+          reviewedTag = await apiClient.createTag({
+            name: 'Reviewed',
+            description: 'Question has been reviewed',
+            color: '#6B7280' // Gray
+          });
+        }
+
+        setCurrentlyPresentingTag(currentlyPresentingTag);
+        setReviewedTag(reviewedTag);
       } catch (err) {
-        console.error('Failed to load tags:', err);
+        console.error('Failed to load/create tags:', err);
       }
     };
 
-    if (isAuthenticated) {
-      loadTags();
+    if (hasAdminRole) {
+      loadOrCreateTags();
     }
-  }, [isAuthenticated]);
+  }, [hasAdminRole]);
 
   // Load questions (filter out reviewed questions)
   useEffect(() => {
@@ -112,14 +137,14 @@ export function PresentationPage() {
       }
     };
 
-    if (isAuthenticated && currentlyPresentingTag && reviewedTag) {
+    if (hasAdminRole && currentlyPresentingTag && reviewedTag) {
       loadQuestions();
     }
-  }, [isAuthenticated, currentTeam?.id, currentlyPresentingTag, reviewedTag]);
+  }, [hasAdminRole, currentTeam?.id, currentlyPresentingTag, reviewedTag]);
 
   // Refresh questions periodically to get updated upvotes (but don't auto-move)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!hasAdminRole) return;
 
     const interval = setInterval(async () => {
       try {
@@ -155,7 +180,7 @@ export function PresentationPage() {
     }, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, currentTeam?.id, questions, currentQuestionIndex]);
+  }, [hasAdminRole, currentTeam?.id, questions, currentQuestionIndex]);
 
   const advanceToNext = useCallback(async () => {
     if (questions.length === 0 || !currentlyPresentingTag) return;
@@ -276,7 +301,7 @@ export function PresentationPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [advanceToNext, goToHighestUpvoted, cleanupCurrentTag, navigate]);
 
-  if (authLoading || loading) {
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white text-2xl">Loading presentation mode...</div>
@@ -323,12 +348,6 @@ export function PresentationPage() {
             Space/Enter: Next • H: Highest Unreviewed • Esc: Exit
           </div>
           <button
-            onClick={goToHighestUpvoted}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Go to Highest
-          </button>
-          <button
             onClick={() => {
               cleanupCurrentTag().then(() => {
                 navigate(-1);
@@ -342,8 +361,8 @@ export function PresentationPage() {
       </div>
 
       {/* Main question display */}
-      <div className="flex items-center justify-center min-h-screen px-8">
-        <div className="max-w-4xl w-full text-center">
+      <div className="flex items-center justify-center min-h-screen px-8 pt-16 pb-8">
+        <div className="max-w-5xl w-full text-center">
           {/* Upvote count */}
           <div className="mb-8">
             <div className="text-6xl font-bold text-blue-400">
@@ -354,13 +373,22 @@ export function PresentationPage() {
             </div>
           </div>
 
-          {/* Question text */}
-          <div className="text-4xl md:text-5xl lg:text-6xl font-medium leading-relaxed text-white">
-            {currentQuestion.body}
+          {/* Question text with scrollable container */}
+          <div className="relative max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+            {/* Fade overlay at top */}
+            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-gray-900 to-transparent z-10 pointer-events-none"></div>
+            
+            {/* Fade overlay at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-900 to-transparent z-10 pointer-events-none"></div>
+            
+            {/* Question text */}
+            <div className="text-3xl md:text-4xl lg:text-5xl font-medium leading-relaxed text-white px-4 py-8">
+              {currentQuestion.body}
+            </div>
           </div>
 
           {/* Currently presenting indicator */}
-          <div className="mt-12">
+          <div className="mt-8">
             <div 
               className="inline-block px-6 py-3 text-white rounded-full text-lg font-medium"
               style={{ backgroundColor: currentlyPresentingTag?.color || '#10B981' }}
@@ -371,12 +399,6 @@ export function PresentationPage() {
         </div>
       </div>
 
-      {/* Bottom navigation hint */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <div className="text-gray-500 text-sm">
-          Press <span className="font-bold">Space/Enter</span> to advance • Press <span className="font-bold">H</span> for highest unreviewed • Press <span className="font-bold">Esc</span> to exit
-        </div>
-      </div>
     </div>
   );
 }

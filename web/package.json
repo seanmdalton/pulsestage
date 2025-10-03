@@ -1,6 +1,6 @@
 {
   "name": "ama-web",
-  "description": "Ask Me Anything Web App - A team-based Q&A platform frontend",
+  "description": "PulseStage Web App - Ask Me Anything (AMA) platform frontend for organizational engagement",
   "author": "Sean M. Dalton <seanmdalton@pm.me>",
   "license": "Apache-2.0",
   "private": true,

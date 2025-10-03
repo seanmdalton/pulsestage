@@ -59,7 +59,7 @@ export function createApp(prisma: PrismaClient) {
       const openapiSpec = parseYaml(openapiContent);
       
       app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec, {
-        customSiteTitle: 'AMA API Documentation',
+        customSiteTitle: 'PulseStage API Documentation',
         customCss: '.swagger-ui .topbar { display: none }',
       }));
       
@@ -93,17 +93,36 @@ export function createApp(prisma: PrismaClient) {
       }
     }
     
+    const questionData = {
+      body: parse.data.body,
+      teamId: parse.data.teamId || null,
+      authorId: req.user?.id || null, // Set author if user is authenticated
+      upvotes: req.user?.id ? 1 : 0 // Start with 1 upvote if user is authenticated
+    };
+    
     const q = await prisma.question.create({ 
-      data: { 
-        body: parse.data.body,
-        teamId: parse.data.teamId || null,
-        authorId: req.user?.id || null // Set author if user is authenticated
-      },
+      data: questionData,
       include: {
         team: true,
-        author: true
+        author: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
       }
     });
+    
+    // If user is authenticated, create an automatic upvote record
+    if (req.user?.id) {
+      await prisma.upvote.create({
+        data: {
+          questionId: q.id,
+          userId: req.user.id
+        }
+      });
+    }
+    
     res.status(201).json(q);
   });
 
@@ -134,16 +153,109 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions/:id/upvote", rateLimit("upvote", 10), async (req, res) => {
+  app.post("/questions/:id/upvote", rateLimit("upvote", 10), mockAuthMiddleware, async (req, res) => {
     const { id } = req.params;
+    const userId = req.user?.id;
+    
     try {
-      const q = await prisma.question.update({
+      // Check if question exists and get author info
+      const question = await prisma.question.findUnique({
         where: { id },
-        data: { upvotes: { increment: 1 } }
+        include: { author: true }
       });
-      res.json(q);
-    } catch {
-      res.status(404).json({ error: "Not found" });
+      
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+      
+      // Prevent self-upvoting
+      if (userId && question.authorId === userId) {
+        return res.status(400).json({ error: "Cannot upvote your own question" });
+      }
+      
+      // Check if user has already upvoted this question
+      if (userId) {
+        const existingUpvote = await prisma.upvote.findUnique({
+          where: {
+            questionId_userId: {
+              questionId: id,
+              userId: userId
+            }
+          }
+        });
+        
+        if (existingUpvote) {
+          return res.status(400).json({ error: "Already upvoted this question" });
+        }
+      }
+      
+      // Create upvote record
+      await prisma.upvote.create({
+        data: {
+          questionId: id,
+          userId: userId || null
+        }
+      });
+      
+      // Update the legacy upvotes counter (for backward compatibility)
+      const updatedQuestion = await prisma.question.update({
+        where: { id },
+        data: { upvotes: { increment: 1 } },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      });
+      
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error('Upvote error:', error);
+      res.status(500).json({ error: "Failed to upvote question" });
+    }
+  });
+
+  // Check if user has upvoted a question
+  app.get("/questions/:id/upvote-status", mockAuthMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    
+    try {
+      if (!userId) {
+        return res.json({ hasUpvoted: false, canUpvote: false });
+      }
+      
+      // Check if question exists and get author info
+      const question = await prisma.question.findUnique({
+        where: { id },
+        select: { authorId: true }
+      });
+      
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+      
+      // Check if user has upvoted
+      const existingUpvote = await prisma.upvote.findUnique({
+        where: {
+          questionId_userId: {
+            questionId: id,
+            userId: userId
+          }
+        }
+      });
+      
+      const hasUpvoted = !!existingUpvote;
+      const canUpvote = !hasUpvoted && question.authorId !== userId;
+      
+      res.json({ hasUpvoted, canUpvote });
+    } catch (error) {
+      console.error('Upvote status error:', error);
+      res.status(500).json({ error: "Failed to check upvote status" });
     }
   });
 

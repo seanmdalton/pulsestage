@@ -1,7 +1,7 @@
 {
   "name": "ama-api",
   "version": "0.1.0",
-  "description": "Ask Me Anything API - A team-based Q&A platform",
+  "description": "PulseStage API - Ask Me Anything (AMA) platform for organizational engagement",
   "author": "Sean M. Dalton <seanmdalton@pm.me>",
   "license": "Apache-2.0",
   "type": "module",

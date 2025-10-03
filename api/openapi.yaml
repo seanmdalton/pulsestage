@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: AMA API
-  description: Ask Me Anything API - Submit questions, upvote, and respond to questions
+  title: PulseStage API
+  description: PulseStage API - Ask Me Anything (AMA) platform for organizational engagement
   version: 0.1.0
   contact:
-    name: AMA App
+    name: PulseStage
 servers:
   - url: http://localhost:3000
     description: Local development server

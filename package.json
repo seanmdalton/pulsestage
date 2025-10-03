@@ -1,13 +1,13 @@
 {
-  "name": "ama-app",
+  "name": "pulsestage",
   "version": "0.1.0",
-  "description": "Ask Me Anything - A team-based Q&A platform for organizations",
+  "description": "PulseStage - Ask Me Anything (AMA) platform for organizational engagement",
   "author": "Sean M. Dalton <seanmdalton@pm.me>",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/seanmdalton/ama-app.git"
+    "url": "https://github.com/seanmdalton/pulsestage.git"
   },
   "keywords": [
     "q-and-a",

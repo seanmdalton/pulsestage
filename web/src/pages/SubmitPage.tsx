@@ -13,7 +13,7 @@ export function SubmitPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchResults, setSearchResults] = useState<Question[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [upvotedQuestions, setUpvotedQuestions] = useState<Set<string>>(new Set());
+  const [upvoteStatus, setUpvoteStatus] = useState<Map<string, { hasUpvoted: boolean; canUpvote: boolean }>>(new Map());
 
   const { currentTeam } = useTeamFromUrl();
   const debouncedQuestion = useDebounce(question, 300); // 300ms delay
@@ -23,17 +23,6 @@ export function SubmitPage() {
     setFormattedPageTitle(currentTeam?.slug, 'submit');
   }, [currentTeam?.slug]);
 
-  // Load upvoted questions from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('upvotedQuestions');
-    if (stored) {
-      try {
-        setUpvotedQuestions(new Set(JSON.parse(stored)));
-      } catch {
-        // Invalid JSON, ignore
-      }
-    }
-  }, []);
 
   // Search for similar questions when user types
   useEffect(() => {
@@ -47,6 +36,20 @@ export function SubmitPage() {
       try {
         const results = await apiClient.searchQuestions(debouncedQuestion, currentTeam?.id);
         setSearchResults(results);
+        
+        // Load upvote status for search results
+        const statusMap = new Map<string, { hasUpvoted: boolean; canUpvote: boolean }>();
+        for (const question of results) {
+          try {
+            const status = await apiClient.getUpvoteStatus(question.id);
+            statusMap.set(question.id, status);
+          } catch (err) {
+            console.error(`Failed to load upvote status for question ${question.id}:`, err);
+            statusMap.set(question.id, { hasUpvoted: false, canUpvote: true });
+          }
+        }
+        setUpvoteStatus(statusMap);
+        
       } catch (error) {
         console.error('Search failed:', error);
         setSearchResults([]);
@@ -59,7 +62,8 @@ export function SubmitPage() {
   }, [debouncedQuestion, currentTeam?.id]);
 
   const handleUpvote = async (questionId: string) => {
-    if (upvotedQuestions.has(questionId)) return;
+    const status = upvoteStatus.get(questionId);
+    if (!status || status.hasUpvoted || !status.canUpvote) return;
 
     try {
       const updatedQuestion = await apiClient.upvoteQuestion(questionId);
@@ -69,13 +73,20 @@ export function SubmitPage() {
         prev.map(q => q.id === questionId ? updatedQuestion : q)
       );
       
-      // Mark as upvoted
-      const newUpvoted = new Set(upvotedQuestions);
-      newUpvoted.add(questionId);
-      setUpvotedQuestions(newUpvoted);
-      localStorage.setItem('upvotedQuestions', JSON.stringify([...newUpvoted]));
+      // Update upvote status
+      setUpvoteStatus(prev => {
+        const newMap = new Map(prev);
+        newMap.set(questionId, { hasUpvoted: true, canUpvote: false });
+        return newMap;
+      });
     } catch (err) {
       console.error('Failed to upvote:', err);
+      // Handle specific error cases
+      if (err instanceof Error && err.message.includes('Cannot upvote your own question')) {
+        alert('You cannot upvote your own question');
+      } else if (err instanceof Error && err.message.includes('Already upvoted')) {
+        alert('You have already upvoted this question');
+      }
     }
   };
 
@@ -182,7 +193,8 @@ export function SubmitPage() {
         loading={searchLoading}
         query={debouncedQuestion}
         onUpvote={handleUpvote}
-        upvotedQuestions={upvotedQuestions}
+        upvotedQuestions={new Set()}
+        upvoteStatus={upvoteStatus}
       />
     </div>
   );

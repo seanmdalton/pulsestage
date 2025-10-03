@@ -18,7 +18,7 @@
  * Get the base website title from environment variables
  */
 export function getBaseTitle(): string {
-  return import.meta.env.VITE_WEBSITE_TITLE || 'AMA App';
+  return import.meta.env.VITE_WEBSITE_TITLE || 'PulseStage';
 }
 
 /**
@@ -29,16 +29,16 @@ export function setPageTitle(team?: string, page?: string): void {
   let title = baseTitle;
   
   if (team && page) {
-    // Format: "Engineering - Open Questions | AMA App"
+    // Format: "Engineering - Open Questions | PulseStage"
     const teamName = capitalizeFirst(team);
     const pageName = capitalizeFirst(page);
     title = `${teamName} - ${pageName} | ${baseTitle}`;
   } else if (team) {
-    // Format: "Engineering | AMA App"
+    // Format: "Engineering | PulseStage"
     const teamName = capitalizeFirst(team);
     title = `${teamName} | ${baseTitle}`;
   } else if (page) {
-    // Format: "Open Questions | AMA App"
+    // Format: "Open Questions | PulseStage"
     const pageName = capitalizeFirst(page);
     title = `${pageName} | ${baseTitle}`;
   }

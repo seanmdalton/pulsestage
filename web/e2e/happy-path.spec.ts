@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 const API_URL = 'http://localhost:3000';
 const ADMIN_KEY = 'dev-admin-key-change-me';
 
-test.describe('AMA Happy Path', () => {
+test.describe('PulseStage Happy Path', () => {
   let questionId: string;
 
   test.beforeEach(async ({ request }) => {
