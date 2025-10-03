@@ -32,6 +32,7 @@ import { requireAdminRole } from "./middleware/requireAdminRole.js";
 import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam, setUserPreferences } from "./middleware/mockAuth.js";
 import { createTenantResolverMiddleware } from "./middleware/tenantResolver.js";
 import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
+import { eventBus } from "./lib/eventBus.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -85,6 +86,36 @@ export function createApp(prisma: PrismaClient) {
     res.json({ ok: true, service: "ama-api" });
   });
 
+  // SSE endpoint for real-time updates
+  app.get("/events", (req, res) => {
+    const tenantId = req.tenant!.tenantId;
+    const tenantSlug = req.tenant!.tenantSlug;
+
+    // Set SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no' // Disable nginx buffering
+    });
+
+    // Send initial connection event
+    res.write(`data: ${JSON.stringify({ 
+      type: 'connected', 
+      tenantId, 
+      tenantSlug,
+      timestamp: Date.now() 
+    })}\n\n`);
+
+    // Register client with event bus
+    const clientId = eventBus.addClient(tenantId, res);
+
+    // Handle client disconnect
+    req.on('close', () => {
+      eventBus.removeClient(tenantId, clientId);
+    });
+  });
+
   const createQuestionSchema = z.object({
     body: z.string().min(3).max(2000),
     teamId: z.string().optional()
@@ -133,6 +164,14 @@ export function createApp(prisma: PrismaClient) {
         }
       });
     }
+    
+    // Publish SSE event for question creation
+    eventBus.publish({
+      type: 'question:created',
+      tenantId: req.tenant!.tenantId,
+      data: q,
+      timestamp: Date.now()
+    });
     
     res.status(201).json(q);
   });
@@ -221,6 +260,14 @@ export function createApp(prisma: PrismaClient) {
             }
           }
         }
+      });
+      
+      // Publish SSE event for upvote
+      eventBus.publish({
+        type: 'question:upvoted',
+        tenantId: req.tenant!.tenantId,
+        data: updatedQuestion,
+        timestamp: Date.now()
       });
       
       res.json(updatedQuestion);
@@ -513,8 +560,26 @@ export function createApp(prisma: PrismaClient) {
           status: "ANSWERED",
           responseText: parse.data.response,
           respondedAt: new Date()
+        },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
         }
       });
+      
+      // Publish SSE event for answer
+      eventBus.publish({
+        type: 'question:answered',
+        tenantId: req.tenant!.tenantId,
+        data: q,
+        timestamp: Date.now()
+      });
+      
       res.json(q);
     } catch {
       res.status(404).json({ error: "Not found" });
@@ -1015,6 +1080,30 @@ export function createApp(prisma: PrismaClient) {
         }
       });
 
+      // Get updated question with tags for SSE event
+      const updatedQuestion = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      });
+
+      // Publish SSE event for tag addition
+      if (updatedQuestion) {
+        eventBus.publish({
+          type: 'question:tagged',
+          tenantId: req.tenant!.tenantId,
+          data: updatedQuestion,
+          timestamp: Date.now()
+        });
+      }
+
       res.json({ success: true });
     } catch (error) {
       console.error('Error adding tag to question:', error);
@@ -1035,6 +1124,30 @@ export function createApp(prisma: PrismaClient) {
           }
         }
       });
+
+      // Get updated question for SSE event
+      const updatedQuestion = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      });
+
+      // Publish SSE event for tag removal
+      if (updatedQuestion) {
+        eventBus.publish({
+          type: 'question:untagged',
+          tenantId: req.tenant!.tenantId,
+          data: updatedQuestion,
+          timestamp: Date.now()
+        });
+      }
 
       res.json({ success: true });
     } catch (error) {
