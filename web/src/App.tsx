@@ -23,6 +23,7 @@ import { AdminLoginPage } from './pages/AdminLoginPage';
 import { PresentationPage } from './pages/PresentationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { Navbar } from './components/Navbar';
+import { SmartRedirect } from './components/SmartRedirect';
 import { AdminProvider } from './contexts/AdminContext';
 import { TeamProvider } from './contexts/TeamContext';
 import { UserProvider } from './contexts/UserContext';
@@ -51,10 +52,10 @@ function App() {
                 <Navbar />
                 <main className="container mx-auto px-4 py-8">
                   <Routes>
-                    {/* Default routes - redirect to /all */}
-                    <Route path="/" element={<Navigate to="/all" replace />} />
-                    <Route path="/open" element={<Navigate to="/all/open" replace />} />
-                    <Route path="/answered" element={<Navigate to="/all/answered" replace />} />
+                    {/* Default routes - smart redirect to user's default team or /all */}
+                    <Route path="/" element={<SmartRedirect fallbackTo="/all" />} />
+                    <Route path="/open" element={<SmartRedirect fallbackTo="/all/open" />} />
+                    <Route path="/answered" element={<SmartRedirect fallbackTo="/all/answered" />} />
                     
                     {/* Team-based routes */}
                     <Route path="/:teamSlug" element={<SubmitPage />} />
