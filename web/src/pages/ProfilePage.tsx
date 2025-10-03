@@ -6,7 +6,7 @@ import { setFormattedPageTitle } from '../utils/titleUtils';
 export function ProfilePage() {
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
-  const { userTeams, favorites, defaultTeam, userQuestions, getUserRoleInTeam } = useUser();
+  const { userTeams, favorites, defaultTeam, userQuestions, getUserRoleInTeam, toggleTeamFavorite, setDefaultTeam } = useUser();
   const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'questions'>('overview');
 
   // Set active tab based on current route
@@ -109,22 +109,42 @@ export function ProfilePage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Profile Overview</h2>
               
               {/* Default Team */}
-              {defaultTeam && (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Default Team</h3>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Default Team</h3>
+                {defaultTeam ? (
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                        {defaultTeam.name.charAt(0).toUpperCase()}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                          {defaultTeam.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-medium text-blue-900 dark:text-blue-300">{defaultTeam.name}</p>
+                          <p className="text-sm text-blue-700 dark:text-blue-400">{defaultTeam.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-blue-900 dark:text-blue-300">{defaultTeam.name}</p>
-                        <p className="text-sm text-blue-700 dark:text-blue-400">{defaultTeam.description}</p>
-                      </div>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await setDefaultTeam(null);
+                          } catch (error) {
+                            console.error('Failed to remove default team:', error);
+                          }
+                        }}
+                        className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium transition-colors"
+                      >
+                        Remove Default
+                      </button>
                     </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      No default team set. You can set a default team from the team cards below.
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Team Memberships */}
               <div>
@@ -155,7 +175,7 @@ export function ProfilePage() {
                         {team.description && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{team.description}</p>
                         )}
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-3">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             role === 'owner' 
                               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
@@ -168,6 +188,44 @@ export function ProfilePage() {
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {team._count?.questions || 0} questions
                           </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await toggleTeamFavorite(team.id);
+                              } catch (error) {
+                                console.error('Failed to toggle favorite:', error);
+                              }
+                            }}
+                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                              isFavorite
+                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            {isFavorite ? '★ Favorited' : '☆ Favorite'}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                if (isDefault) {
+                                  await setDefaultTeam(null);
+                                } else {
+                                  await setDefaultTeam(team.id);
+                                }
+                              } catch (error) {
+                                console.error('Failed to set default team:', error);
+                              }
+                            }}
+                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                              isDefault
+                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            {isDefault ? '✓ Default' : 'Set Default'}
+                          </button>
                         </div>
                       </div>
                     );

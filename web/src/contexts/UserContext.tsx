@@ -226,13 +226,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   // Set default team
-  const setDefaultTeamAction = async (teamId: string) => {
+  const setDefaultTeamAction = async (teamId: string | null) => {
     if (!user) return;
     
     try {
-      await updatePreferences({ defaultTeamId: teamId });
+      await updatePreferences({ defaultTeamId: teamId || undefined });
       
-      const newDefaultTeam = userTeams.find(team => team.id === teamId);
+      const newDefaultTeam = teamId ? userTeams.find(team => team.id === teamId) : null;
       setDefaultTeam(newDefaultTeam || null);
       
     } catch (err) {

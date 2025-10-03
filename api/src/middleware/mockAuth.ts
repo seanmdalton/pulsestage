@@ -251,3 +251,27 @@ export async function setDefaultTeam(userId: string, teamId: string) {
   prefs.defaultTeamId = teamId;
   return prefs;
 }
+
+// Set user preferences (for updating the mock data cache)
+export async function setUserPreferences(userId: string, preferences: { favoriteTeams?: string[]; defaultTeamId?: string | null }) {
+  await loadMockData();
+  
+  let existingPrefs = mockUserPreferences.find(p => p.userId === userId);
+  
+  if (existingPrefs) {
+    // Update existing preferences
+    if (preferences.favoriteTeams !== undefined) {
+      existingPrefs.favoriteTeams = preferences.favoriteTeams;
+    }
+    if (preferences.defaultTeamId !== undefined) {
+      existingPrefs.defaultTeamId = preferences.defaultTeamId;
+    }
+  } else {
+    // Create new preferences
+    mockUserPreferences.push({
+      userId,
+      favoriteTeams: preferences.favoriteTeams || [],
+      defaultTeamId: preferences.defaultTeamId || null
+    });
+  }
+}

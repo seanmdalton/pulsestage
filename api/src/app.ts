@@ -29,7 +29,7 @@ import { rateLimit } from "./middleware/rateLimit.js";
 import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
 import { requireAdminRole } from "./middleware/requireAdminRole.js";
-import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam } from "./middleware/mockAuth.js";
+import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam, setUserPreferences } from "./middleware/mockAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1085,21 +1085,39 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Update user preferences
-  app.put("/users/me/preferences", requireMockAuth, (req, res) => {
+  app.put("/users/me/preferences", requireMockAuth, async (req, res) => {
     const { favoriteTeams, defaultTeamId } = req.body;
     const userId = req.user!.id;
     
-    // In a real implementation, this would update the database
-    // For now, we'll just return the updated preferences
-    const updatedPreferences = {
-      userId,
-      favoriteTeams: favoriteTeams || [],
-      defaultTeamId: defaultTeamId || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    res.json(updatedPreferences);
+    try {
+      // Update database
+      const updatedPreferences = await prisma.userPreferences.upsert({
+        where: { userId },
+        update: {
+          favoriteTeams: favoriteTeams !== undefined ? favoriteTeams : undefined,
+          defaultTeamId: defaultTeamId !== undefined ? defaultTeamId : undefined,
+        },
+        create: {
+          userId,
+          favoriteTeams: favoriteTeams || [],
+          defaultTeamId: defaultTeamId || null,
+        },
+        include: {
+          defaultTeam: true
+        }
+      });
+      
+      // Update mock data cache
+      await setUserPreferences(userId, {
+        favoriteTeams: updatedPreferences.favoriteTeams as string[],
+        defaultTeamId: updatedPreferences.defaultTeamId || null
+      });
+      
+      res.json(updatedPreferences);
+    } catch (error) {
+      console.error('Error updating user preferences:', error);
+      res.status(500).json({ error: 'Failed to update preferences' });
+    }
   });
 
   // Toggle team favorite
