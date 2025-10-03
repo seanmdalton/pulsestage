@@ -22,11 +22,28 @@ export async function seedTags() {
   console.log('🏷️  Seeding default tags...');
   
   try {
-    // Create "Currently Presenting" tag
-    await prisma.tag.upsert({
-      where: { name: 'Currently Presenting' },
+    // Ensure default tenant exists
+    const tenant = await prisma.tenant.upsert({
+      where: { slug: 'default' },
       update: {},
       create: {
+        id: 'default-tenant-id',
+        slug: 'default',
+        name: 'Default Tenant'
+      }
+    });
+    
+    // Create "Currently Presenting" tag
+    await prisma.tag.upsert({
+      where: { 
+        tenantId_name: { 
+          tenantId: tenant.id, 
+          name: 'Currently Presenting' 
+        }
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
         name: 'Currently Presenting',
         description: 'Question is currently being presented in presentation mode',
         color: '#10B981' // Green color

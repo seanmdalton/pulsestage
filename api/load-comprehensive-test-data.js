@@ -534,18 +534,45 @@ async function clearDatabase() {
   // Delete teams
   await prisma.team.deleteMany();
   
+  // Clean up non-default tenants
+  await prisma.tenant.deleteMany({
+    where: { slug: { not: 'default' } }
+  });
+  
   console.log('✅ Database cleared');
 }
 
-async function createTeams() {
+async function ensureDefaultTenant() {
+  console.log('🏢 Ensuring default tenant exists...');
+  
+  const tenant = await prisma.tenant.upsert({
+    where: { slug: 'default' },
+    update: {},
+    create: {
+      id: 'default-tenant-id',
+      slug: 'default',
+      name: 'Default Tenant'
+    }
+  });
+  
+  console.log(`  ✅ Default tenant: ${tenant.name}`);
+  return tenant;
+}
+
+async function createTeams(tenantId) {
   console.log('🏢 Creating teams...');
   
   for (const [key, teamData] of Object.entries(testData)) {
     const { questions, ...teamInfo } = teamData; // Remove questions from team data
     const team = await prisma.team.upsert({
-      where: { slug: teamData.slug },
+      where: { 
+        tenantId_slug: { tenantId: tenantId, slug: teamData.slug }
+      },
       update: teamInfo,
-      create: teamInfo
+      create: {
+        ...teamInfo,
+        tenantId: tenantId
+      }
     });
     console.log(`  ✅ Created team: ${team.name}`);
   }
@@ -574,7 +601,8 @@ async function createQuestion(questionData, teamId, cookies) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Cookie': cookies
+      'Cookie': cookies,
+      'x-tenant-id': 'default'
     },
     body: JSON.stringify({
       body: questionData.body,
@@ -595,7 +623,8 @@ async function addUpvotes(questionId, upvoteCount, cookies) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': cookies
+        'Cookie': cookies,
+        'x-tenant-id': 'default'
       }
     });
     
@@ -610,7 +639,8 @@ async function answerQuestion(questionId, answer, cookies) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Cookie': cookies
+      'Cookie': cookies,
+      'x-tenant-id': 'default'
     },
     body: JSON.stringify({ response: answer })
   });
@@ -643,8 +673,11 @@ async function loadTestData() {
     // Clear existing data
     await clearDatabase();
     
+    // Ensure default tenant exists
+    const tenant = await ensureDefaultTenant();
+    
     // Create teams
-    await createTeams();
+    await createTeams(tenant.id);
     
     // Login as admin
     const cookies = await loginAsAdmin();

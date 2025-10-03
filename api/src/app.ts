@@ -30,12 +30,17 @@ import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
 import { requireAdminRole } from "./middleware/requireAdminRole.js";
 import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam, setUserPreferences } from "./middleware/mockAuth.js";
+import { createTenantResolverMiddleware } from "./middleware/tenantResolver.js";
+import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export function createApp(prisma: PrismaClient) {
   const app = express();
+
+  // Apply Prisma middleware for automatic tenant scoping
+  applyTenantMiddleware(prisma);
 
   // CORS configuration
   app.use(cors({
@@ -50,6 +55,9 @@ export function createApp(prisma: PrismaClient) {
 
   // Mock authentication middleware (for local development)
   app.use(mockAuthMiddleware);
+
+  // Tenant resolution middleware - resolves tenant from header/subdomain/default
+  app.use(createTenantResolverMiddleware(prisma));
 
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
@@ -97,7 +105,8 @@ export function createApp(prisma: PrismaClient) {
       body: parse.data.body,
       teamId: parse.data.teamId || null,
       authorId: req.user?.id || null, // Set author if user is authenticated
-      upvotes: req.user?.id ? 1 : 0 // Start with 1 upvote if user is authenticated
+      upvotes: req.user?.id ? 1 : 0, // Start with 1 upvote if user is authenticated
+      tenantId: req.tenant!.tenantId // Add tenant context
     };
     
     const q = await prisma.question.create({ 
@@ -370,7 +379,12 @@ export function createApp(prisma: PrismaClient) {
     const { slug } = req.params;
     try {
       const team = await prisma.team.findUnique({
-        where: { slug },
+        where: { 
+          tenantId_slug: {
+            tenantId: req.tenant!.tenantId,
+            slug
+          }
+        },
         include: {
           _count: {
             select: {
@@ -399,9 +413,14 @@ export function createApp(prisma: PrismaClient) {
     }
 
     try {
-      // Check if slug already exists
+      // Check if slug already exists in this tenant
       const existingTeam = await prisma.team.findUnique({
-        where: { slug: parse.data.slug }
+        where: { 
+          tenantId_slug: {
+            tenantId: req.tenant!.tenantId,
+            slug: parse.data.slug
+          }
+        }
       });
       
       if (existingTeam) {
@@ -409,7 +428,10 @@ export function createApp(prisma: PrismaClient) {
       }
 
       const team = await prisma.team.create({
-        data: parse.data,
+        data: {
+          ...parse.data,
+          tenantId: req.tenant!.tenantId
+        },
         include: {
           _count: {
             select: {
@@ -942,7 +964,8 @@ export function createApp(prisma: PrismaClient) {
         data: {
           name: parse.data.name,
           description: parse.data.description,
-          color: parse.data.color || '#3B82F6'
+          color: parse.data.color || '#3B82F6',
+          tenantId: req.tenant!.tenantId
         }
       });
       res.status(201).json(tag);
@@ -1099,6 +1122,7 @@ export function createApp(prisma: PrismaClient) {
         },
         create: {
           userId,
+          tenantId: req.tenant!.tenantId,
           favoriteTeams: favoriteTeams || [],
           defaultTeamId: defaultTeamId || null,
         },

@@ -59,17 +59,18 @@ describe("API Tests", () => {
     beforeEach(async () => {
       // Create test questions
       await testPrisma.question.create({
-        data: { body: "Open question 1", upvotes: 5, status: "OPEN" }
+        data: { body: "Open question 1", upvotes: 5, status: "OPEN", tenantId: "default-tenant-id" }
       });
       await testPrisma.question.create({
-        data: { body: "Open question 2", upvotes: 10, status: "OPEN" }
+        data: { body: "Open question 2", upvotes: 10, status: "OPEN", tenantId: "default-tenant-id" }
       });
       await testPrisma.question.create({
         data: {
           body: "Answered question",
           status: "ANSWERED",
           responseText: "The answer",
-          respondedAt: new Date()
+          respondedAt: new Date(),
+          tenantId: "default-tenant-id"
         }
       });
     });
@@ -112,7 +113,7 @@ describe("API Tests", () => {
   describe("POST /questions/:id/upvote", () => {
     it("should increment upvotes for existing question", async () => {
       const question = await testPrisma.question.create({
-        data: { body: "Test question", upvotes: 0 }
+        data: { body: "Test question", upvotes: 0, tenantId: "default-tenant-id" }
       });
 
       const response = await request(app)
@@ -137,7 +138,7 @@ describe("API Tests", () => {
 
     beforeEach(async () => {
       question = await testPrisma.question.create({
-        data: { body: "Test question" }
+        data: { body: "Test question", tenantId: "default-tenant-id" }
       });
 
       // Create an authenticated admin session

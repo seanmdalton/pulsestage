@@ -36,7 +36,7 @@ describe('tenantResolver', () => {
     mockReq = {
       headers: {},
       hostname: 'localhost',
-      get: vi.fn()
+      get: vi.fn() as any
     };
 
     mockRes = {
@@ -44,7 +44,7 @@ describe('tenantResolver', () => {
       json: vi.fn().mockReturnThis()
     };
 
-    mockNext = vi.fn();
+    mockNext = vi.fn() as any;
   });
 
   describe('tenant resolution from header', () => {
