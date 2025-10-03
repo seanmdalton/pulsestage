@@ -361,7 +361,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         },
@@ -388,7 +388,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
@@ -435,7 +435,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
@@ -463,7 +463,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
