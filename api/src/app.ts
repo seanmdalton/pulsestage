@@ -53,11 +53,13 @@ export function createApp(prisma: PrismaClient) {
   // Session middleware
   app.use(createSessionMiddleware());
 
-  // Mock authentication middleware (for local development)
-  app.use(mockAuthMiddleware);
-
   // Tenant resolution middleware - resolves tenant from header/subdomain/default
+  // MUST come before mockAuthMiddleware to validate user's tenant
   app.use(createTenantResolverMiddleware(prisma));
+
+  // Mock authentication middleware (for local development)
+  // Validates user belongs to current tenant
+  app.use(mockAuthMiddleware);
 
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
