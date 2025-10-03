@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient, RedisClientType } from 'redis';
+import { tryGetTenantContext } from './tenantContext.js';
 
 let redisClient: RedisClientType | null = null;
 
@@ -39,7 +40,11 @@ export function rateLimit(route: string, maxRequests: number = 10, windowMs: num
     }
 
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    const key = `rate:${route}:${ip}`;
+    
+    // Include tenantId in rate limit key for per-tenant rate limiting
+    const tenantContext = tryGetTenantContext();
+    const tenantPart = tenantContext ? tenantContext.tenantId : 'no-tenant';
+    const key = `rate:${route}:${tenantPart}:${ip}`;
     
     try {
       const current = await redisClient.get(key);
