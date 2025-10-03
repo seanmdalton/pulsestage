@@ -22,18 +22,8 @@ async function loadMockData() {
       console.log('🔐 Loading mock SSO data from database...');
     }
     
-    // Load users
-    const users = await prisma.user.findMany({
-      where: {
-        email: {
-          in: [
-            'john.doe@company.com',
-            'jane.smith@company.com', 
-            'bob.wilson@company.com'
-          ]
-        }
-      }
-    });
+    // Load all users from all tenants for mock SSO
+    const users = await prisma.user.findMany();
     
     // Load team memberships
     const memberships = await prisma.teamMembership.findMany({
@@ -63,6 +53,7 @@ async function loadMockData() {
       const userMembership = memberships.find(m => m.userId === user.id);
       mockUsers.push({
         id: user.id,
+        tenantId: user.tenantId,
         email: user.email,
         name: user.name || user.email,
         ssoId: user.ssoId || user.email,
@@ -102,6 +93,7 @@ async function loadMockData() {
 // Mock user database - will be populated with real IDs from database
 const mockUsers: Array<{
   id: string;
+  tenantId: string;
   email: string;
   name: string;
   ssoId: string;
@@ -147,9 +139,20 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
       );
       
       if (user) {
-        req.user = user;
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`🔐 Mock SSO: Authenticated user ${user.name} (${user.email})`);
+        // Validate that user belongs to the current tenant
+        const currentTenant = (req as any).tenant;
+        
+        if (currentTenant && user.tenantId !== currentTenant.tenantId) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`❌ Mock SSO: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`);
+          }
+          // User belongs to different tenant - don't authenticate
+          req.user = undefined;
+        } else {
+          req.user = user;
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`🔐 Mock SSO: Authenticated user ${user.name} (${user.email}) in tenant ${user.tenantId}`);
+          }
         }
       }
     }
@@ -168,10 +171,16 @@ export async function requireMockAuth(req: Request, res: Response, next: NextFun
     await loadMockData();
     
     if (!req.user) {
+      const currentTenant = (req as any).tenant;
+      const availableUsers = currentTenant 
+        ? mockUsers.filter(u => u.tenantId === currentTenant.tenantId)
+        : mockUsers;
+      
       return res.status(401).json({
         error: 'Authentication required',
         message: 'Please provide x-mock-sso-user header for local testing',
-        availableUsers: mockUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId }))
+        currentTenant: currentTenant?.tenantSlug || 'unknown',
+        availableUsers: availableUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId }))
       });
     }
     
