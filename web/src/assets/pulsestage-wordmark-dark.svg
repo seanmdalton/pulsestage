@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="240" fill="#0B1221"/>
+  <!-- Pulse icon before the word -->
+  <g transform="translate(32,52)">
+    <rect x="0" y="0" width="136" height="136" rx="24" fill="#FFFFFF"/>
+    <path d="M16 68 L48 68 L64 30 L84 110 L96 68 L120 68" 
+          stroke="#00B3A4" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <!-- Wordmark -->
+  <g font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+    <text x="200" y="110" font-size="64" font-weight="700" fill="#F9FAFB">Pulse</text>
+    <text x="200" y="170" font-size="64" font-weight="700" fill="#F9FAFB">Stage</text>
+    <!-- underline under Pulse -->
+    <line x1="200" y1="120" x2="415" y2="120" stroke="#00B3A4" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

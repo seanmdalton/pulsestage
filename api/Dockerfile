@@ -17,6 +17,9 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 ENV PORT=3000
+LABEL org.opencontainers.image.title="PulseStage API"
+LABEL org.opencontainers.image.description="PulseStage API - Ask Me Anything (AMA) platform for organizational engagement"
+LABEL org.opencontainers.image.vendor="Sean M. Dalton"
 COPY --from=builder /app/node_modules node_modules
 COPY --from=builder /app/dist dist
 COPY --from=builder /app/prisma prisma

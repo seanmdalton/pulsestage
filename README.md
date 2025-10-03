@@ -533,6 +533,28 @@ limitations under the License.
 
 ---
 
+## Branding & Design
+
+PulseStage features a modern, professional brand identity designed for enterprise use:
+
+### Brand Colors
+- **Dark Background**: `#0B1221` - Deep blue-black for professional appearance
+- **Accent (Pulse)**: `#00B3A4` - Teal/cyan for highlights and interactive elements
+- **Light Text**: `#F9FAFB` - Near white for readability on dark backgrounds
+- **Dark Text**: `#0B1221` - Matching dark background for light mode
+
+### Brand Assets
+- **Logo**: Available in light/dark variants (SVG format)
+- **Icons**: Multiple sizes (16px to 512px) for various use cases
+- **Favicon**: Custom PulseStage favicon for browser tabs
+- **Wordmark**: Full PulseStage wordmark for headers and branding
+
+### Usage Guidelines
+- Use **dark icon** on light backgrounds and vice versa
+- Prefer **SVG format** for web and print applications
+- Use **PNG format** for favicons and app icons
+- Maintain **consistent spacing** around brand elements
+
 ## What Makes This Special
 
 PulseStage goes beyond basic Q&A functionality:

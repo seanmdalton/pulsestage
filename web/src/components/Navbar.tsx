@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 import { TeamSelector } from './TeamSelector';
 import { UserProfile } from './UserProfile';
+import { PulseStageLogo } from './PulseStageLogo';
 import { useTeam, getTeamSlug } from '../contexts/TeamContext';
 import { useUser } from '../contexts/UserContext';
 
@@ -39,7 +40,10 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
-            {/* Team Selector - Far Left */}
+            {/* PulseStage Logo */}
+            <PulseStageLogo size="md" showWordmark={false} className="mr-4" />
+            
+            {/* Team Selector */}
             <TeamSelector />
             
             {/* Navigation Items */}
