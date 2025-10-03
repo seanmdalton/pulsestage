@@ -6,49 +6,121 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-// Mock user database - using real user IDs from database
-const mockUsers = [
-  {
-    id: 'b454a85b-5a76-4b06-90db-71a483ff8409', // Real ID from database
-    email: 'john.doe@company.com',
-    name: 'John Doe',
-    ssoId: 'sso-john-doe-123',
-    role: 'admin'
-  },
-  {
-    id: '0b9ab53c-e821-4731-834c-1b017dd56a24', // Real ID from database
-    email: 'jane.smith@company.com',
-    name: 'Jane Smith',
-    ssoId: 'sso-jane-smith-456',
-    role: 'member'
-  },
-  {
-    id: 'baee1e15-2209-481f-adb1-f57278c60457', // Real ID from database
-    email: 'bob.wilson@company.com', 
-    name: 'Bob Wilson',
-    ssoId: 'sso-bob-wilson-789',
-    role: 'owner'
+const prisma = new PrismaClient();
+
+// Flag to track if mock data has been loaded
+let mockDataLoaded = false;
+
+// Function to load mock data from database
+async function loadMockData() {
+  if (mockDataLoaded) return;
+  
+  try {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 Loading mock SSO data from database...');
+    }
+    
+    // Load users
+    const users = await prisma.user.findMany({
+      where: {
+        email: {
+          in: [
+            'john.doe@company.com',
+            'jane.smith@company.com', 
+            'bob.wilson@company.com'
+          ]
+        }
+      }
+    });
+    
+    // Load team memberships
+    const memberships = await prisma.teamMembership.findMany({
+      where: {
+        userId: {
+          in: users.map(u => u.id)
+        }
+      }
+    });
+    
+    // Load user preferences
+    const preferences = await prisma.userPreferences.findMany({
+      where: {
+        userId: {
+          in: users.map(u => u.id)
+        }
+      }
+    });
+    
+    // Populate mock data arrays
+    mockUsers.length = 0;
+    mockTeamMemberships.length = 0;
+    mockUserPreferences.length = 0;
+    
+    // Add users with their roles from memberships
+    for (const user of users) {
+      const userMembership = memberships.find(m => m.userId === user.id);
+      mockUsers.push({
+        id: user.id,
+        email: user.email,
+        name: user.name || user.email,
+        ssoId: user.ssoId || user.email,
+        role: userMembership?.role || 'member'
+      });
+    }
+    
+    // Add memberships
+    for (const membership of memberships) {
+      mockTeamMemberships.push({
+        userId: membership.userId,
+        teamId: membership.teamId,
+        role: membership.role
+      });
+    }
+    
+    // Add preferences
+    for (const preference of preferences) {
+      mockUserPreferences.push({
+        userId: preference.userId,
+        favoriteTeams: Array.isArray(preference.favoriteTeams) ? preference.favoriteTeams as string[] : [],
+        defaultTeamId: preference.defaultTeamId
+      });
+    }
+    
+    mockDataLoaded = true;
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Loaded ${mockUsers.length} mock users, ${mockTeamMemberships.length} memberships, ${mockUserPreferences.length} preferences`);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error loading mock SSO data:', error);
   }
-];
+}
 
-// Mock team memberships (using real team ID and real user IDs from database)
-const mockTeamMemberships = [
-  { userId: 'b454a85b-5a76-4b06-90db-71a483ff8409', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'admin' },
-  { userId: '0b9ab53c-e821-4731-834c-1b017dd56a24', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'member' },
-  { userId: 'baee1e15-2209-481f-adb1-f57278c60457', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'owner' }
-];
+// Mock user database - will be populated with real IDs from database
+const mockUsers: Array<{
+  id: string;
+  email: string;
+  name: string;
+  ssoId: string;
+  role: string;
+}> = [];
 
-// Mock user preferences (using real team ID and real user IDs from database)
+// Mock team memberships - will be populated with real IDs from database
+const mockTeamMemberships: Array<{
+  userId: string;
+  teamId: string;
+  role: string;
+}> = [];
+
+// Mock user preferences - will be populated with real IDs from database
 const mockUserPreferences: Array<{
   userId: string;
   favoriteTeams: string[];
   defaultTeamId: string | null;
-}> = [
-  { userId: 'b454a85b-5a76-4b06-90db-71a483ff8409', favoriteTeams: ['f4be47d7-9c97-4087-94cf-c914f01a0ab4'], defaultTeamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4' },
-  { userId: '0b9ab53c-e821-4731-834c-1b017dd56a24', favoriteTeams: ['f4be47d7-9c97-4087-94cf-c914f01a0ab4'], defaultTeamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4' },
-  { userId: 'baee1e15-2209-481f-adb1-f57278c60457', favoriteTeams: [], defaultTeamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4' }
-];
+}> = [];
 
 // Extend Request type to include user
 declare global {
@@ -60,42 +132,60 @@ declare global {
 }
 
 // Mock authentication middleware
-export function mockAuthMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Check for mock SSO header (simulating SSO provider)
-  const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
-  
-  if (mockSSOHeader) {
-    // Find user by email or SSO ID
-    const user = mockUsers.find(u => 
-      u.email === mockSSOHeader || u.ssoId === mockSSOHeader
-    );
+export async function mockAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+  try {
+    // Load mock data if not already loaded
+    await loadMockData();
     
-    if (user) {
-      req.user = user;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔐 Mock SSO: Authenticated user ${user.name} (${user.email})`);
+    // Check for mock SSO header (simulating SSO provider)
+    const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
+    
+    if (mockSSOHeader) {
+      // Find user by email or SSO ID
+      const user = mockUsers.find(u => 
+        u.email === mockSSOHeader || u.ssoId === mockSSOHeader
+      );
+      
+      if (user) {
+        req.user = user;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔐 Mock SSO: Authenticated user ${user.name} (${user.email})`);
+        }
       }
     }
+    
+    next();
+  } catch (error) {
+    console.error('Error in mock auth middleware:', error);
+    next();
   }
-  
-  next();
 }
 
 // Require authentication middleware
-export function requireMockAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.user) {
-    return res.status(401).json({
-      error: 'Authentication required',
-      message: 'Please provide x-mock-sso-user header for local testing',
-      availableUsers: mockUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId }))
-    });
+export async function requireMockAuth(req: Request, res: Response, next: NextFunction) {
+  try {
+    // Load mock data if not already loaded
+    await loadMockData();
+    
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please provide x-mock-sso-user header for local testing',
+        availableUsers: mockUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId }))
+      });
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Error in require mock auth middleware:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  
-  next();
 }
 
 // Get user's teams with membership info
 export async function getUserTeamsWithMembership(userId: string, prisma: any) {
+  await loadMockData();
+  
   const userMemberships = mockTeamMemberships.filter(m => m.userId === userId);
   const userPreferences = mockUserPreferences.find(p => p.userId === userId);
   
@@ -127,11 +217,13 @@ export async function getUserTeamsWithMembership(userId: string, prisma: any) {
 }
 
 // Get user preferences
-export function getUserPreferences(userId: string): {
+export async function getUserPreferences(userId: string): Promise<{
   userId: string;
   favoriteTeams: string[];
   defaultTeamId: string | null;
-} {
+}> {
+  await loadMockData();
+  
   return mockUserPreferences.find(p => p.userId === userId) || {
     userId,
     favoriteTeams: [],
@@ -140,8 +232,8 @@ export function getUserPreferences(userId: string): {
 }
 
 // Toggle team favorite
-export function toggleTeamFavorite(userId: string, teamId: string) {
-  const prefs = getUserPreferences(userId);
+export async function toggleTeamFavorite(userId: string, teamId: string) {
+  const prefs = await getUserPreferences(userId);
   const isFavorite = prefs.favoriteTeams.includes(teamId);
   
   if (isFavorite) {
@@ -154,8 +246,8 @@ export function toggleTeamFavorite(userId: string, teamId: string) {
 }
 
 // Set default team
-export function setDefaultTeam(userId: string, teamId: string) {
-  const prefs = getUserPreferences(userId);
+export async function setDefaultTeam(userId: string, teamId: string) {
+  const prefs = await getUserPreferences(userId);
   prefs.defaultTeamId = teamId;
   return prefs;
 }

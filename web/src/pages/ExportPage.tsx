@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { ExportFilters, ExportPreview, Question, Team, Tag } from '../lib/api';
-import { useAdmin } from '../contexts/AdminContext';
+import { useUser } from '../contexts/UserContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 
 export function ExportPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAdmin();
+  const { userTeams, getUserRoleInTeam, isLoading } = useUser();
   const navigate = useNavigate();
   
   const [teams, setTeams] = useState<Team[]>([]);
@@ -33,17 +33,23 @@ export function ExportPage() {
     setFormattedPageTitle(undefined, 'admin');
   }, []);
 
-  // Redirect to login if not authenticated
+  // Check if user has admin role
+  const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
+
+  // Redirect if not authenticated or doesn't have admin role
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isLoading && (!hasAdminRole || userTeams.length === 0)) {
       navigate('/admin/login');
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [hasAdminRole, userTeams.length, isLoading, navigate]);
 
   // Load teams and tags
   useEffect(() => {
     const loadData = async () => {
-      if (!isAuthenticated) return;
+      if (!hasAdminRole) return;
       
       try {
         const [teamsData, tagsData] = await Promise.all([
@@ -58,12 +64,12 @@ export function ExportPage() {
     };
 
     loadData();
-  }, [isAuthenticated]);
+  }, [hasAdminRole]);
 
   // Load preview when filters change
   useEffect(() => {
     const loadPreview = async () => {
-      if (!isAuthenticated) return;
+      if (!hasAdminRole) return;
       
       setLoading(true);
       try {
@@ -78,7 +84,7 @@ export function ExportPage() {
     };
 
     loadPreview();
-  }, [filters, isAuthenticated]);
+  }, [filters, hasAdminRole]);
 
   const handleFilterChange = (key: keyof ExportFilters, value: any) => {
     setFilters(prev => ({
@@ -115,7 +121,7 @@ export function ExportPage() {
     return new Date(date).toLocaleDateString();
   };
 
-  if (authLoading) {
+  if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto text-center py-8">
         <div className="text-gray-500 dark:text-gray-400">Loading export page...</div>

@@ -28,6 +28,7 @@ import { requireAdminKey } from "./middleware/adminAuth.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
+import { requireAdminRole } from "./middleware/requireAdminRole.js";
 import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam } from "./middleware/mockAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -279,7 +280,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create team (admin only)
-  app.post("/teams", requireAdminSession, async (req, res) => {
+  app.post("/teams", requireAdminRole, async (req, res) => {
     const parse = createTeamSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.flatten() });
@@ -314,7 +315,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Update team (admin only)
-  app.put("/teams/:id", requireAdminSession, async (req, res) => {
+  app.put("/teams/:id", requireAdminRole, async (req, res) => {
     const { id } = req.params;
     const parse = updateTeamSchema.safeParse(req.body);
     if (!parse.success) {
@@ -345,7 +346,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Deactivate team (admin only) - soft delete
-  app.delete("/teams/:id", requireAdminSession, async (req, res) => {
+  app.delete("/teams/:id", requireAdminRole, async (req, res) => {
     const { id } = req.params;
     
     try {
@@ -364,8 +365,8 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
-  // Protected by admin session (new approach)
-  app.post("/questions/:id/respond", requireAdminSession, async (req, res) => {
+  // Protected by admin role (new approach)
+  app.post("/questions/:id/respond", requireAdminRole, async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
@@ -565,7 +566,7 @@ export function createApp(prisma: PrismaClient) {
 // Export endpoints (admin only)
     
     // Get export preview
-    app.get("/admin/export/preview", requireAdminSession, async (req, res) => {
+    app.get("/admin/export/preview", requireAdminRole, async (req, res) => {
       try {
         const filters = req.query;
         
@@ -654,7 +655,7 @@ export function createApp(prisma: PrismaClient) {
     });
     
     // Download export
-    app.get("/admin/export/download", requireAdminSession, async (req, res) => {
+    app.get("/admin/export/download", requireAdminRole, async (req, res) => {
       try {
         const filters = req.query;
         const format = (filters.format as string) || 'csv';
@@ -801,7 +802,7 @@ export function createApp(prisma: PrismaClient) {
 // Tag endpoints (admin only)
     
     // Get all tags
-    app.get("/tags", requireAdminSession, async (_req, res) => {
+    app.get("/tags", requireAdminRole, async (_req, res) => {
     try {
       const tags = await prisma.tag.findMany({
         orderBy: { name: 'asc' }
@@ -814,7 +815,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create a new tag
-  app.post("/tags", requireAdminSession, async (req, res) => {
+  app.post("/tags", requireAdminRole, async (req, res) => {
     const createTagSchema = z.object({
       name: z.string().min(1).max(100),
       description: z.string().max(500).optional(),
@@ -844,7 +845,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Add tag to question
-  app.post("/questions/:id/tags", requireAdminSession, async (req, res) => {
+  app.post("/questions/:id/tags", requireAdminRole, async (req, res) => {
     const { id } = req.params;
     const addTagSchema = z.object({
       tagId: z.string().uuid()
@@ -885,7 +886,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Remove tag from question
-  app.delete("/questions/:id/tags/:tagId", requireAdminSession, async (req, res) => {
+  app.delete("/questions/:id/tags/:tagId", requireAdminRole, async (req, res) => {
     const { id, tagId } = req.params;
 
     try {
@@ -958,7 +959,7 @@ export function createApp(prisma: PrismaClient) {
   app.get("/users/me/teams", requireMockAuth, async (req, res) => {
     try {
       const userTeams = await getUserTeamsWithMembership(req.user!.id, prisma);
-      const preferences = getUserPreferences(req.user!.id);
+      const preferences = await getUserPreferences(req.user!.id);
       
       res.json({
         teams: userTeams,
@@ -990,11 +991,11 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Toggle team favorite
-  app.post("/users/me/teams/:teamId/favorite", requireMockAuth, (req, res) => {
+  app.post("/users/me/teams/:teamId/favorite", requireMockAuth, async (req, res) => {
     const { teamId } = req.params;
     const userId = req.user!.id;
     
-    const isFavorite = toggleTeamFavorite(userId, teamId);
+    const isFavorite = await toggleTeamFavorite(userId, teamId);
     
     res.json({ isFavorite });
   });
