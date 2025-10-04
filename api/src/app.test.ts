@@ -15,21 +15,43 @@ describe("API Tests", () => {
   });
 
   describe("POST /questions", () => {
+    let testUser: any;
+    
+    beforeEach(async () => {
+      // Create a test user for authenticated requests
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' }
+      });
+      
+      testUser = await testPrisma.user.create({
+        data: {
+          tenantId: tenant!.id,
+          email: 'test@example.com',
+          name: 'Test User',
+          ssoId: 'test-123'
+        }
+      });
+    });
+
     it("should create a question with valid data", async () => {
       const response = await request(app)
         .post("/questions")
+        .set('x-mock-sso-user', testUser.email)
+        .set('x-tenant-id', 'default')
         .send({ body: "What is your favorite color?" });
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("id");
       expect(response.body.body).toBe("What is your favorite color?");
-      expect(response.body.upvotes).toBe(0);
+      expect(response.body.upvotes).toBe(1); // Author automatically upvotes their own question
       expect(response.body.status).toBe("OPEN");
     });
 
     it("should reject question with body too short", async () => {
       const response = await request(app)
         .post("/questions")
+        .set('x-mock-sso-user', testUser.email)
+        .set('x-tenant-id', 'default')
         .send({ body: "Hi" });
 
       expect(response.status).toBe(400);
@@ -39,6 +61,8 @@ describe("API Tests", () => {
     it("should reject question with body too long", async () => {
       const response = await request(app)
         .post("/questions")
+        .set('x-mock-sso-user', testUser.email)
+        .set('x-tenant-id', 'default')
         .send({ body: "a".repeat(2001) });
 
       expect(response.status).toBe(400);
@@ -48,9 +72,20 @@ describe("API Tests", () => {
     it("should reject question with missing body", async () => {
       const response = await request(app)
         .post("/questions")
+        .set('x-mock-sso-user', testUser.email)
+        .set('x-tenant-id', 'default')
         .send({});
 
       expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("error");
+    });
+    
+    it("should reject unauthenticated requests", async () => {
+      const response = await request(app)
+        .post("/questions")
+        .send({ body: "What is your favorite color?" });
+
+      expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("error");
     });
   });
