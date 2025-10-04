@@ -225,7 +225,8 @@ describe("API Tests", () => {
         .set('x-tenant-id', 'default')
         .send({ response: "This is my answer" });
 
-      expect(response.status).toBe(401);
+      // CSRF check happens before auth, so expect 403 (CSRF failure) or 401 (auth failure)
+      expect([401, 403]).toContain(response.status);
       expect(response.body).toHaveProperty("error");
     });
 

@@ -34,15 +34,15 @@ export function createSessionMiddleware() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Allow HTTP cookies in development
-      httpOnly: true, // Prevent XSS
+      secure: isProduction, // HTTPS-only in production, HTTP allowed in dev
+      httpOnly: true, // Prevent XSS by blocking JavaScript access
       maxAge: 30 * 60 * 1000, // 30 minutes
-      sameSite: 'lax', // CSRF protection but allow cross-site in dev
+      sameSite: 'lax', // CSRF protection - allow cross-site GET but not POST
       domain: undefined // Let browser decide
     }
   };
 
-  console.log(`🍪 Session config: secure=${sessionConfig.cookie?.secure}, sameSite=${sessionConfig.cookie?.sameSite}`);
+  console.log(`🍪 Session config: secure=${sessionConfig.cookie?.secure}, sameSite=${sessionConfig.cookie?.sameSite}, httpOnly=${sessionConfig.cookie?.httpOnly}`);
 
   // Use Redis store if available, otherwise fall back to memory store
   if (redisClient) {

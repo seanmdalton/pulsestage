@@ -37,6 +37,9 @@ import { initAuditService, auditService } from "./lib/auditService.js";
 import { initPermissionMiddleware, requirePermission, requireRole } from "./middleware/requirePermission.js";
 import { initTeamScopingMiddleware, extractQuestionTeam, getUserTeamsByRole } from "./middleware/teamScoping.js";
 import { securityHeadersMiddleware, apiSecurityHeaders, developmentSecurityHeaders } from "./middleware/securityHeaders.js";
+import { provideCsrfToken, validateCsrfToken, csrfTokenEndpoint } from "./middleware/csrf.js";
+// @ts-ignore - Package doesn't have TypeScript types
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,6 +75,9 @@ export function createApp(prisma: PrismaClient) {
   
   // Additional API security headers (both environments)
   app.use(apiSecurityHeaders());
+
+  // Cookie parser (required for CSRF)
+  app.use(cookieParser());
 
   app.use(express.json());
 
@@ -118,6 +124,9 @@ export function createApp(prisma: PrismaClient) {
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "ama-api" });
   });
+
+  // CSRF token endpoint - frontend can call this to get a token
+  app.get("/csrf-token", provideCsrfToken(), csrfTokenEndpoint());
 
   // SSE endpoint for real-time updates
   // Note: EventSource doesn't support custom headers, so we also check query param
@@ -409,7 +418,7 @@ export function createApp(prisma: PrismaClient) {
     adminKey: z.string().min(1)
   });
 
-  app.post("/admin/login", async (req, res) => {
+  app.post("/admin/login", validateCsrfToken(), async (req, res) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔐 Admin login attempt:', { 
         hasSession: !!req.session, 
@@ -538,7 +547,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create team (admin only)
-  app.post("/teams", requirePermission('team.create'), async (req, res) => {
+  app.post("/teams", validateCsrfToken(), requirePermission('team.create'), async (req, res) => {
     const parse = createTeamSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.flatten() });
@@ -590,7 +599,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Update team (admin only)
-  app.put("/teams/:id", requirePermission('team.edit', { teamIdParam: 'id' }), async (req, res) => {
+  app.put("/teams/:id", validateCsrfToken(), requirePermission('team.edit', { teamIdParam: 'id' }), async (req, res) => {
     const { id } = req.params;
     const parse = updateTeamSchema.safeParse(req.body);
     if (!parse.success) {
@@ -637,7 +646,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Deactivate team (admin only) - soft delete
-  app.delete("/teams/:id", requirePermission('team.delete', { teamIdParam: 'id' }), async (req, res) => {
+  app.delete("/teams/:id", validateCsrfToken(), requirePermission('team.delete', { teamIdParam: 'id' }), async (req, res) => {
     const { id } = req.params;
     
     try {
@@ -674,7 +683,7 @@ export function createApp(prisma: PrismaClient) {
 
   // Protected by moderator or higher (question.answer permission)
   // Team-scoped: moderators can only answer questions from their teams
-  app.post("/questions/:id/respond", extractQuestionTeam(), requirePermission('question.answer', { teamIdParam: 'teamId' }), async (req, res) => {
+  app.post("/questions/:id/respond", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.answer', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
@@ -1161,7 +1170,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create a new tag
-  app.post("/tags", requirePermission('tag.create'), async (req, res) => {
+  app.post("/tags", validateCsrfToken(), requirePermission('tag.create'), async (req, res) => {
     const createTagSchema = z.object({
       name: z.string().min(1).max(100),
       description: z.string().max(500).optional(),
@@ -1203,7 +1212,7 @@ export function createApp(prisma: PrismaClient) {
 
   // Add tag to question
   // Team-scoped: moderators can only tag questions from their teams
-  app.post("/questions/:id/tags", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
+  app.post("/questions/:id/tags", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const addTagSchema = z.object({
       tagId: z.string().uuid()
@@ -1281,7 +1290,7 @@ export function createApp(prisma: PrismaClient) {
 
   // Remove tag from question
   // Team-scoped: moderators can only untag questions from their teams
-  app.delete("/questions/:id/tags/:tagId", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
+  app.delete("/questions/:id/tags/:tagId", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id, tagId } = req.params;
 
     try {
