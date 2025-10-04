@@ -7,7 +7,8 @@ import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 import { useUser } from '../contexts/UserContext';
-import { useSSE, SSEEvent } from '../hooks/useSSE';
+import { useSSE } from '../hooks/useSSE';
+import type { SSEEvent } from '../hooks/useSSE';
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);

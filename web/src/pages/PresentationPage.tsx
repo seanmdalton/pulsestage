@@ -22,7 +22,8 @@ import { useUser } from '../contexts/UserContext';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { PulseStageLogo } from '../components/PulseStageLogo';
 import { setFormattedPageTitle } from '../utils/titleUtils';
-import { useSSE, SSEEvent } from '../hooks/useSSE';
+import { useSSE } from '../hooks/useSSE';
+import type { SSEEvent } from '../hooks/useSSE';
 
 export function PresentationPage() {
   const { userTeams, getUserRoleInTeam, isLoading } = useUser();
