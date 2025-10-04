@@ -37,6 +37,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   // Clean up database before each test (preserve default tenant)
+  await testPrisma.auditLog.deleteMany(); // Delete audit logs first
   await testPrisma.questionTag.deleteMany();
   await testPrisma.upvote.deleteMany();
   await testPrisma.question.deleteMany();

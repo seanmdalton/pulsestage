@@ -27,6 +27,7 @@ model Tenant {
   tags              Tag[]
   users             User[]
   userPreferences   UserPreferences[]
+  auditLogs         AuditLog[]
 }
 
 model Team {
@@ -119,6 +120,7 @@ model User {
   preferences     UserPreferences?
   questions       Question[]      // Questions submitted by this user
   upvotes         Upvote[]        // Upvotes given by this user
+  auditLogs       AuditLog[]      // Audit logs for actions performed by this user
   
   @@unique([tenantId, email])
   @@unique([tenantId, ssoId])
@@ -171,4 +173,30 @@ model Upvote {
   
   @@unique([questionId, userId]) // Prevent duplicate upvotes per user per question
   @@index([questionId]) // Index for faster queries
+}
+
+// Audit Log (append-only, immutable record of all admin actions)
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String
+  userId      String?  // User who performed the action (null for system actions)
+  action      String   // e.g., "question.answer", "team.create", "tag.add"
+  entityType  String   // e.g., "Question", "Team", "Tag"
+  entityId    String?  // ID of the affected entity
+  before      Json?    // State before the action (for updates/deletes)
+  after       Json?    // State after the action (for creates/updates)
+  ipAddress   String?  // IP address of the requester
+  userAgent   String?  // User agent string
+  metadata    Json?    // Additional context (e.g., team name, question body preview)
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Indexes for efficient querying
+  @@index([tenantId, createdAt(sort: Desc)]) // Most common query: tenant's recent logs
+  @@index([tenantId, userId])
+  @@index([tenantId, action])
+  @@index([tenantId, entityType, entityId])
 }
