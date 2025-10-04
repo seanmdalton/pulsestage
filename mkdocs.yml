@@ -111,7 +111,9 @@ nav:
       - Overview: security/overview.md
       - RBAC & Permissions: security/rbac.md
       - Audit Logging: security/audit-logging.md
+      - Security Headers: security/security-headers.md
       - Session Management: security/sessions.md
+      - CI Security Scanning: security/ci-scanning.md
       - Rate Limiting: security/rate-limiting.md
   - API Reference:
       - Overview: api/overview.md

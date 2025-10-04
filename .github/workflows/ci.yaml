@@ -172,9 +172,26 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Semgrep
-        run: semgrep ci --config=p/ci --config=p/typescript --config=p/nodejs --json --output=semgrep-results.json
+        run: semgrep ci --config=p/ci --config=p/typescript --config=p/nodejs --json --output=semgrep-results.json || true
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: Check for High/Critical findings
+        run: |
+          if [ -f semgrep-results.json ]; then
+            HIGH_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "ERROR")] | length')
+            
+            echo "🔍 Semgrep SAST Results:"
+            echo "   High/Critical findings: $HIGH_COUNT"
+            
+            if [ "$HIGH_COUNT" -gt 0 ]; then
+              echo "❌ Found $HIGH_COUNT high/critical security issues"
+              cat semgrep-results.json | jq -r '.results[] | select(.extra.severity == "ERROR") | "  - \(.extra.message) (\(.path):\(.start.line))"' | head -20
+              exit 1
+            fi
+            
+            echo "✅ No high/critical security issues found"
+          fi
 
       - name: Upload Semgrep results
         if: always()
@@ -228,6 +245,23 @@ jobs:
           format: 'json'
           output: 'trivy-fs-results.json'
           severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Check for Critical/High vulnerabilities in dependencies
+        run: |
+          if [ -f trivy-fs-results.json ]; then
+            VULN_COUNT=$(cat trivy-fs-results.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length')
+            
+            echo "🔍 Trivy Filesystem Scan Results:"
+            echo "   High/Critical vulnerabilities: $VULN_COUNT"
+            
+            if [ "$VULN_COUNT" -gt 0 ]; then
+              echo "❌ Found $VULN_COUNT high/critical vulnerabilities in dependencies"
+              cat trivy-fs-results.json | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -20
+              exit 1
+            fi
+            
+            echo "✅ No high/critical vulnerabilities found in dependencies"
+          fi
 
       - name: Upload Trivy results
         uses: actions/upload-artifact@v4
@@ -314,6 +348,23 @@ jobs:
           output: 'trivy-${{ matrix.service }}-image.json'
           severity: 'CRITICAL,HIGH,MEDIUM'
 
+      - name: Check for Critical/High vulnerabilities
+        run: |
+          if [ -f trivy-${{ matrix.service }}-image.json ]; then
+            VULN_COUNT=$(cat trivy-${{ matrix.service }}-image.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length')
+            
+            echo "🔍 Trivy ${{ matrix.service }} Image Scan:"
+            echo "   High/Critical vulnerabilities: $VULN_COUNT"
+            
+            if [ "$VULN_COUNT" -gt 0 ]; then
+              echo "❌ Found $VULN_COUNT high/critical vulnerabilities"
+              cat trivy-${{ matrix.service }}-image.json | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -20
+              exit 1
+            fi
+            
+            echo "✅ No high/critical vulnerabilities found"
+          fi
+
       - name: Upload Trivy image scan results
         uses: actions/upload-artifact@v4
         if: always()
@@ -321,6 +372,33 @@ jobs:
           name: trivy-${{ matrix.service }}-image
           path: trivy-${{ matrix.service }}-image.json
           retention-days: 30
+
+      - name: Install Syft for SBOM generation
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM
+        run: |
+          syft ${{ fromJSON(steps.meta.outputs.json).tags[0] }} \
+            -o spdx-json=sbom-${{ matrix.service }}.spdx.json \
+            -o cyclonedx-json=sbom-${{ matrix.service }}.cyclonedx.json
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.service }}
+          path: |
+            sbom-${{ matrix.service }}.spdx.json
+            sbom-${{ matrix.service }}.cyclonedx.json
+          retention-days: 90
+
+      - name: Display SBOM summary
+        run: |
+          PACKAGE_COUNT=$(cat sbom-${{ matrix.service }}.spdx.json | jq '.packages | length')
+          echo "📦 SBOM Generated for ${{ matrix.service }}"
+          echo "   Format: SPDX + CycloneDX JSON"
+          echo "   Total packages: $PACKAGE_COUNT"
+          echo "   Retention: 90 days"
 
       - name: Push Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -341,19 +419,36 @@ jobs:
     if: always()
     
     steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+
       - name: Generate CI Summary
         run: |
           echo "# 🎯 CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## Security Scanning" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| API Tests | DISABLED (TODO: Fix CI environment) |" >> $GITHUB_STEP_SUMMARY
-          echo "| E2E Tests | DISABLED (TODO: Fix Docker startup) |" >> $GITHUB_STEP_SUMMARY
           echo "| Semgrep SAST | ${{ needs.semgrep.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trivy FS Scan | ${{ needs.trivy-fs.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Scan | ${{ needs.build-and-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy Filesystem | ${{ needs.trivy-fs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & Scan Images | ${{ needs.build-and-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note**: Tests work locally but have CI environment issues" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          
+          # SBOM Info
+          echo "## 📦 SBOM Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- API component (SPDX + CycloneDX)" >> $GITHUB_STEP_SUMMARY
+          echo "- Web component (SPDX + CycloneDX)" >> $GITHUB_STEP_SUMMARY
+          echo "- Retention: 90 days" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## Build Info" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: API/E2E tests work locally but have CI environment issues (TODO: Fix)" >> $GITHUB_STEP_SUMMARY
 

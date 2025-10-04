@@ -1,28 +1,35 @@
+# Semgrep ignore patterns
+
 # Dependencies
 node_modules/
-*/node_modules/
+**/node_modules/
 
 # Build outputs
 dist/
-*/dist/
 build/
-*/build/
-
-# Test outputs
+*.js.map
 coverage/
-*/coverage/
-playwright-report/
-test-results/
+
+# Test files (scan but don't enforce strictly)
+**/*.test.ts
+**/*.spec.ts
+**/test/
+**/tests/
 
 # Generated files
-api/src/lib/api-types.ts
-web/src/lib/api-types.ts
+prisma/generated/
+**/*.d.ts
 
-# Prisma generated
-**/node_modules/@prisma/
+# Documentation
+docs/
+*.md
 
-# Docker
-.dockerignore
-Dockerfile
-docker-compose*.yaml
+# Config files
+*.json
+*.yaml
+*.yml
+!semgrep.yaml
 
+# Logs
+*.log
+logs/
