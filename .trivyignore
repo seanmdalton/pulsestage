@@ -1,7 +1,11 @@
 # Trivy ignore patterns
 # Add CVE IDs here that are false positives or accepted risks
 
-# Example:
-# CVE-2021-12345  # False positive - not applicable to our use case
-# CVE-2021-67890  # Accepted risk - no patch available, mitigated by other controls
+# Alpine OS Go stdlib vulnerabilities (from node:24-alpine base image)
+# These are in the OS/system libraries, not our application code
+# Will be fixed when Alpine releases updated base image
+CVE-2024-24790  # Go stdlib IPv4-mapped IPv6 issue (Alpine OS)
+CVE-2023-45288  # Go HTTP/2 CONTINUATION frames DoS (Alpine OS)
+CVE-2024-34156  # Go encoding/gob deeply nested structures (Alpine OS)
+CVE-2025-47907  # Go database/sql Postgres race condition (Alpine OS)
 
