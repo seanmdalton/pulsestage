@@ -69,7 +69,9 @@ describe('CSRF Protection', () => {
 
       // Should set a cookie
       expect(response.headers['set-cookie']).toBeDefined();
-      const cookies = response.headers['set-cookie'];
+      const cookies = Array.isArray(response.headers['set-cookie']) 
+        ? response.headers['set-cookie'] 
+        : [response.headers['set-cookie']];
       expect(cookies.some((cookie: string) => cookie.startsWith('x-csrf-token='))).toBe(true);
     });
 
@@ -78,7 +80,9 @@ describe('CSRF Protection', () => {
         .get('/csrf-token')
         .set('x-tenant-id', 'default');
 
-      const cookies = response.headers['set-cookie'] as string[];
+      const cookies = Array.isArray(response.headers['set-cookie']) 
+        ? response.headers['set-cookie'] 
+        : [response.headers['set-cookie']];
       const csrfCookie = cookies.find((cookie: string) => cookie.startsWith('x-csrf-token='));
       
       expect(csrfCookie).toBeDefined();
@@ -97,7 +101,9 @@ describe('CSRF Protection', () => {
       csrfToken = tokenResponse.body.csrfToken;
       
       // Extract cookie from response
-      const cookies = tokenResponse.headers['set-cookie'] as string[];
+      const cookies = Array.isArray(tokenResponse.headers['set-cookie']) 
+        ? tokenResponse.headers['set-cookie'] 
+        : [tokenResponse.headers['set-cookie']];
       csrfCookie = cookies.find((cookie: string) => cookie.startsWith('x-csrf-token=')) || '';
     });
 
