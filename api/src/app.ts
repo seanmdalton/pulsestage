@@ -33,6 +33,7 @@ import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUse
 import { createTenantResolverMiddleware } from "./middleware/tenantResolver.js";
 import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
 import { eventBus } from "./lib/eventBus.js";
+import { initAuditService, auditService } from "./lib/auditService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,6 +43,9 @@ export function createApp(prisma: PrismaClient) {
 
   // Apply Prisma middleware for automatic tenant scoping
   applyTenantMiddleware(prisma);
+
+  // Initialize audit service
+  initAuditService(prisma);
 
   // CORS configuration
   app.use(cors({
@@ -512,6 +516,15 @@ export function createApp(prisma: PrismaClient) {
         }
       });
       
+      // Audit log: team created
+      await auditService.log(req, {
+        action: 'team.create',
+        entityType: 'Team',
+        entityId: team.id,
+        after: { id: team.id, name: team.name, slug: team.slug },
+        metadata: { description: team.description }
+      });
+      
       res.status(201).json(team);
     } catch (error) {
       console.error('Error creating team:', error);
@@ -528,6 +541,12 @@ export function createApp(prisma: PrismaClient) {
     }
 
     try {
+      // Get team before update for audit log
+      const beforeTeam = await prisma.team.findUnique({
+        where: { id },
+        select: { id: true, name: true, slug: true, description: true, isActive: true }
+      });
+
       const team = await prisma.team.update({
         where: { id },
         data: parse.data,
@@ -538,6 +557,16 @@ export function createApp(prisma: PrismaClient) {
             }
           }
         }
+      });
+      
+      // Audit log: team updated
+      await auditService.log(req, {
+        action: 'team.update',
+        entityType: 'Team',
+        entityId: team.id,
+        before: beforeTeam,
+        after: { id: team.id, name: team.name, slug: team.slug, description: team.description, isActive: team.isActive },
+        metadata: { teamName: team.name }
       });
       
       res.json(team);
@@ -555,9 +584,25 @@ export function createApp(prisma: PrismaClient) {
     const { id } = req.params;
     
     try {
+      // Get team before deactivation for audit log
+      const beforeTeam = await prisma.team.findUnique({
+        where: { id },
+        select: { id: true, name: true, slug: true, isActive: true }
+      });
+
       const team = await prisma.team.update({
         where: { id },
         data: { isActive: false }
+      });
+      
+      // Audit log: team deactivated
+      await auditService.log(req, {
+        action: 'team.deactivate',
+        entityType: 'Team',
+        entityId: team.id,
+        before: beforeTeam,
+        after: { id: team.id, isActive: false },
+        metadata: { teamName: beforeTeam?.name }
       });
       
       res.json({ success: true, message: "Team deactivated successfully" });
@@ -576,6 +621,12 @@ export function createApp(prisma: PrismaClient) {
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
     try {
+      // Get question before update for audit log
+      const beforeQuestion = await prisma.question.findUnique({
+        where: { id },
+        select: { id: true, body: true, status: true, responseText: true }
+      });
+
       const q = await prisma.question.update({
         where: { id },
         data: {
@@ -591,6 +642,20 @@ export function createApp(prisma: PrismaClient) {
               tag: true
             }
           }
+        }
+      });
+      
+      // Audit log: question answered
+      await auditService.log(req, {
+        action: 'question.answer',
+        entityType: 'Question',
+        entityId: q.id,
+        before: beforeQuestion,
+        after: { id: q.id, status: q.status, responseText: q.responseText },
+        metadata: { 
+          questionBody: q.body.substring(0, 100),
+          teamId: q.teamId,
+          teamName: q.team?.name
         }
       });
       
@@ -1057,6 +1122,16 @@ export function createApp(prisma: PrismaClient) {
           tenantId: req.tenant!.tenantId
         }
       });
+      
+      // Audit log: tag created
+      await auditService.log(req, {
+        action: 'tag.create',
+        entityType: 'Tag',
+        entityId: tag.id,
+        after: { id: tag.id, name: tag.name, color: tag.color },
+        metadata: { description: tag.description }
+      });
+      
       res.status(201).json(tag);
     } catch (error) {
       console.error('Error creating tag:', error);
@@ -1116,8 +1191,20 @@ export function createApp(prisma: PrismaClient) {
         }
       });
 
-      // Publish SSE event for tag addition
+      // Audit log: tag added to question
       if (updatedQuestion) {
+        await auditService.log(req, {
+          action: 'question.tag.add',
+          entityType: 'Question',
+          entityId: updatedQuestion.id,
+          metadata: { 
+            questionBody: updatedQuestion.body.substring(0, 100),
+            tagId: parse.data.tagId,
+            tagName: tag.name
+          }
+        });
+        
+        // Publish SSE event for tag addition
         eventBus.publish({
           type: 'question:tagged',
           tenantId: req.tenant!.tenantId,
@@ -1138,6 +1225,12 @@ export function createApp(prisma: PrismaClient) {
     const { id, tagId } = req.params;
 
     try {
+      // Get tag name before deletion for audit log
+      const tag = await prisma.tag.findUnique({
+        where: { id: tagId },
+        select: { name: true }
+      });
+
       await prisma.questionTag.delete({
         where: {
           questionId_tagId: {
@@ -1147,7 +1240,7 @@ export function createApp(prisma: PrismaClient) {
         }
       });
 
-      // Get updated question for SSE event
+      // Get updated question for SSE event and audit
       const updatedQuestion = await prisma.question.findUnique({
         where: { id },
         include: {
@@ -1161,8 +1254,20 @@ export function createApp(prisma: PrismaClient) {
         }
       });
 
-      // Publish SSE event for tag removal
+      // Audit log: tag removed from question
       if (updatedQuestion) {
+        await auditService.log(req, {
+          action: 'question.tag.remove',
+          entityType: 'Question',
+          entityId: updatedQuestion.id,
+          metadata: { 
+            questionBody: updatedQuestion.body.substring(0, 100),
+            tagId,
+            tagName: tag?.name
+          }
+        });
+
+        // Publish SSE event for tag removal
         eventBus.publish({
           type: 'question:untagged',
           tenantId: req.tenant!.tenantId,
