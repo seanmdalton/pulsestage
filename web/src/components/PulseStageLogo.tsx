@@ -36,7 +36,7 @@ export function PulseStageLogo({ className = '', showWordmark = true, size = 'md
       <img 
         src={logoSrc}
         alt="PulseStage"
-        className={`${iconSize} ${showWordmark ? 'h-8' : iconSize}`}
+        className={`${showWordmark ? 'h-12' : iconSize}`}
       />
     </Link>
   );
