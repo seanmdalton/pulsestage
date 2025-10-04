@@ -1,0 +1,139 @@
+site_name: PulseStage Documentation
+site_url: https://seanmdalton.github.io/pulsestage/
+site_description: Open-source Q&A platform for town halls and all-hands meetings
+site_author: Sean Dalton
+repo_url: https://github.com/seanmdalton/pulsestage
+repo_name: seanmdalton/pulsestage
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+  logo: web/public/pulsestage-icon-light.svg
+  favicon: web/public/favicon.ico
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/seanmdalton/pulsestage
+  version:
+    provider: mike
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quick-start.md
+      - Installation: getting-started/installation.md
+      - Configuration: getting-started/configuration.md
+      - First Steps: getting-started/first-steps.md
+  - User Guide:
+      - Overview: user-guide/overview.md
+      - Submitting Questions: user-guide/submitting-questions.md
+      - Upvoting: user-guide/upvoting.md
+      - Search & Browse: user-guide/search-browse.md
+      - Teams: user-guide/teams.md
+      - Profile & Preferences: user-guide/profile.md
+  - Moderator Guide:
+      - Overview: moderator-guide/overview.md
+      - Answering Questions: moderator-guide/answering-questions.md
+      - Tagging Questions: moderator-guide/tagging.md
+      - Presentation Mode: moderator-guide/presentation-mode.md
+  - Admin Guide:
+      - Overview: admin-guide/overview.md
+      - Team Management: admin-guide/team-management.md
+      - Tag Management: admin-guide/tag-management.md
+      - User Roles & Permissions: admin-guide/roles-permissions.md
+      - Audit Logging: admin-guide/audit-logging.md
+      - Export Data: admin-guide/export.md
+  - Architecture:
+      - System Design: architecture/system-design.md
+      - Database Schema: architecture/database-schema.md
+      - Authentication: architecture/authentication.md
+      - Multi-Tenancy: architecture/multi-tenancy.md
+      - Real-Time Updates: architecture/real-time.md
+  - Security:
+      - Overview: security/overview.md
+      - RBAC & Permissions: security/rbac.md
+      - Audit Logging: security/audit-logging.md
+      - Session Management: security/sessions.md
+      - Rate Limiting: security/rate-limiting.md
+  - API Reference:
+      - Overview: api/overview.md
+      - Authentication: api/authentication.md
+      - Questions: api/questions.md
+      - Teams: api/teams.md
+      - Tags: api/tags.md
+      - Users: api/users.md
+      - Admin: api/admin.md
+  - Development:
+      - Setup: development/setup.md
+      - Running Locally: development/running-locally.md
+      - Testing: development/testing.md
+      - Database Migrations: development/migrations.md
+      - Code Style: development/code-style.md
+      - Contributing: development/contributing.md
+  - Deployment:
+      - Docker Compose: deployment/docker-compose.md
+      - Production Setup: deployment/production.md
+      - Environment Variables: deployment/environment.md
+      - Monitoring: deployment/monitoring.md
+  - About:
+      - License: about/license.md
+      - Changelog: about/changelog.md
+      - Branding: about/branding.md
+

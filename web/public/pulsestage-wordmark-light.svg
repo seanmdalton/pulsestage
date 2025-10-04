@@ -20,11 +20,11 @@
        inkscape:collect="always">
       <stop
          style="stop-color:#00b3a4;stop-opacity:1;"
-         offset="0.35121259"
+         offset="0.34272167"
          id="stop1" />
       <stop
          style="stop-color:#00b3a4;stop-opacity:0;"
-         offset="1"
+         offset="0.84872031"
          id="stop2" />
     </linearGradient>
     <linearGradient
@@ -47,9 +47,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.8829269"
-     inkscape:cx="238.45854"
+     inkscape:cx="237.92745"
      inkscape:cy="15.401554"
-     inkscape:window-width="1078"
+     inkscape:window-width="1216"
      inkscape:window-height="991"
      inkscape:window-x="26"
      inkscape:window-y="23"
@@ -85,7 +85,7 @@
      style="display:inline;stroke:#454545;stroke-width:2.6622;stroke-dasharray:none;stroke-opacity:1"
      sodipodi:nodetypes="sssssscccsss" />
   <path
-     d="M 4.5855699,67.172127 H 44.327187 L 67.04766,25.137725 82.540287,120.67047 103.79697,76.60736 413.40925,77.138448"
+     d="M 4.5855699,67.172127 H 44.327187 L 67.04766,25.137725 82.540287,120.67047 103.79697,76.60736 l 154.31388,0.2647 155.2984,0.266388"
      stroke="#00b3a4"
      stroke-width="9.17114"
      stroke-linecap="round"
@@ -94,5 +94,5 @@
      id="path3"
      style="display:inline;stroke:url(#linearGradient2)"
      inkscape:label="path3"
-     sodipodi:nodetypes="cccccc" />
+     sodipodi:nodetypes="ccccccc" />
 </svg>
