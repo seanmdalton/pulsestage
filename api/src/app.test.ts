@@ -134,23 +134,48 @@ describe("API Tests", () => {
 
   describe("POST /questions/:id/respond", () => {
     let question: any;
-    let adminAgent: any;
+    let adminUser: any;
+    let testTeam: any;
 
     beforeEach(async () => {
+      // Create a test team
+      testTeam = await testPrisma.team.create({
+        data: {
+          name: "Test Team",
+          slug: "test-team",
+          tenantId: "default-tenant-id"
+        }
+      });
+
+      // Create an admin user
+      adminUser = await testPrisma.user.create({
+        data: {
+          email: "admin@test.com",
+          name: "Admin User",
+          ssoId: "admin@test.com",
+          tenantId: "default-tenant-id"
+        }
+      });
+
+      // Create team membership with admin role
+      await testPrisma.teamMembership.create({
+        data: {
+          userId: adminUser.id,
+          teamId: testTeam.id,
+          role: "admin"
+        }
+      });
+
       question = await testPrisma.question.create({
         data: { body: "Test question", tenantId: "default-tenant-id" }
       });
-
-      // Create an authenticated admin session
-      adminAgent = request.agent(app);
-      await adminAgent
-        .post("/admin/login")
-        .send({ adminKey: "test-admin-key" });
     });
 
-    it("should respond to question with valid admin session", async () => {
-      const response = await adminAgent
+    it("should respond to question with valid admin role", async () => {
+      const response = await request(app)
         .post(`/questions/${question.id}/respond`)
+        .set('x-mock-sso-user', adminUser.email)
+        .set('x-tenant-id', 'default')
         .send({ response: "This is my answer" });
 
       expect(response.status).toBe(200);
@@ -159,9 +184,10 @@ describe("API Tests", () => {
       expect(response.body.respondedAt).toBeTruthy();
     });
 
-    it("should reject without admin session", async () => {
+    it("should reject without authentication", async () => {
       const response = await request(app)
         .post(`/questions/${question.id}/respond`)
+        .set('x-tenant-id', 'default')
         .send({ response: "This is my answer" });
 
       expect(response.status).toBe(401);
@@ -169,8 +195,10 @@ describe("API Tests", () => {
     });
 
     it("should reject with missing response", async () => {
-      const response = await adminAgent
+      const response = await request(app)
         .post(`/questions/${question.id}/respond`)
+        .set('x-mock-sso-user', adminUser.email)
+        .set('x-tenant-id', 'default')
         .send({});
 
       expect(response.status).toBe(400);
@@ -178,8 +206,10 @@ describe("API Tests", () => {
     });
 
     it("should reject with response too short", async () => {
-      const response = await adminAgent
+      const response = await request(app)
         .post(`/questions/${question.id}/respond`)
+        .set('x-mock-sso-user', adminUser.email)
+        .set('x-tenant-id', 'default')
         .send({ response: "" });
 
       expect(response.status).toBe(400);
@@ -187,8 +217,10 @@ describe("API Tests", () => {
     });
 
     it("should return 404 for non-existent question", async () => {
-      const response = await adminAgent
+      const response = await request(app)
         .post("/questions/non-existent-id/respond")
+        .set('x-mock-sso-user', adminUser.email)
+        .set('x-tenant-id', 'default')
         .send({ response: "This is my answer" });
 
       expect(response.status).toBe(404);

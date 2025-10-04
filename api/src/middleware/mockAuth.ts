@@ -13,6 +13,14 @@ const prisma = new PrismaClient();
 // Flag to track if mock data has been loaded
 let mockDataLoaded = false;
 
+// Function to reset mock data (for testing)
+export function resetMockData() {
+  mockDataLoaded = false;
+  mockUsers.length = 0;
+  mockTeamMemberships.length = 0;
+  mockUserPreferences.length = 0;
+}
+
 // Function to load mock data from database
 async function loadMockData() {
   if (mockDataLoaded) return;

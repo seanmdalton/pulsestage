@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, beforeEach } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { execSync } from "child_process";
+import { resetMockData } from "../middleware/mockAuth.js";
 
 // Use a test database - set this BEFORE any imports that might use env
 const TEST_DATABASE_URL = process.env.DATABASE_URL || "postgresql://app:app@localhost:5432/ama_test";
@@ -49,6 +50,9 @@ beforeEach(async () => {
       slug: { not: 'default' }
     }
   });
+  
+  // Reset mock SSO data cache so tests can create their own users
+  resetMockData();
 });
 
 afterAll(async () => {
