@@ -2240,6 +2240,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#automated-testing-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Testing (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#local-testing" class="md-nav__link">
     <span class="md-ellipsis">
       Local Testing
@@ -2249,9 +2258,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#mozilla-http-observatory" class="md-nav__link">
+  <a href="#mozilla-http-observatory-manual" class="md-nav__link">
     <span class="md-ellipsis">
-      Mozilla HTTP Observatory
+      Mozilla HTTP Observatory (Manual)
     </span>
   </a>
   
@@ -2286,6 +2295,39 @@
       Testing
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observatory-integration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Observatory Integration Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-all-security-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run All Security Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2396,14 +2438,34 @@
 - HSTS disabled (no HTTPS required)
 - All other security headers remain strict</p>
 <h2 id="testing-security-headers">Testing Security Headers<a class="headerlink" href="#testing-security-headers" title="Permanent link">&para;</a></h2>
+<h3 id="automated-testing-recommended">Automated Testing (Recommended)<a class="headerlink" href="#automated-testing-recommended" title="Permanent link">&para;</a></h3>
+<p>We integrate <a href="https://github.com/mdn/mdn-http-observatory/">MDN HTTP Observatory</a> directly into our test suite:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>observatory.test.ts
+</span></code></pre></div>
+<p>This runs 6 automated security tests including:
+- Overall security grade and score
+- Content-Security-Policy validation
+- X-Content-Type-Options check
+- X-Frame-Options check
+- Referrer-Policy check
+- Detailed test result logging</p>
+<p><strong>Development Mode Results:</strong>
+- Expected Grade: C (relaxed CSP for Vite HMR)
+- Expected Score: 50/100
+- Acceptable: 7/10 tests passing</p>
+<p><strong>Production Mode Expectations:</strong>
+- Target Grade: A or better
+- Target Score: 70+/100
+- All critical security tests passing</p>
 <h3 id="local-testing">Local Testing<a class="headerlink" href="#local-testing" title="Permanent link">&para;</a></h3>
 <p>Check headers locally:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://localhost:5001/health
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://localhost:5001/health
 </span></code></pre></div>
-<h3 id="mozilla-http-observatory">Mozilla HTTP Observatory<a class="headerlink" href="#mozilla-http-observatory" title="Permanent link">&para;</a></h3>
-<p>Test your deployed site:</p>
+<h3 id="mozilla-http-observatory-manual">Mozilla HTTP Observatory (Manual)<a class="headerlink" href="#mozilla-http-observatory-manual" title="Permanent link">&para;</a></h3>
+<p>Test your deployed site manually:</p>
 <ol>
-<li>Visit: https://observatory.mozilla.org/</li>
+<li>Visit: https://developer.mozilla.org/en-US/observatory/</li>
 <li>Enter your site URL</li>
 <li>Run the scan</li>
 <li>Target score: <strong>A grade or higher</strong></li>
@@ -2417,31 +2479,32 @@
 </ol>
 <h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
 <p>The security headers are implemented in <code>api/src/middleware/securityHeaders.ts</code> using Helmet:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">import</span><span class="w"> </span><span class="nx">helmet</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;helmet&#39;</span><span class="p">;</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">securityHeadersMiddleware</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">RequestHandler</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">helmet</span><span class="p">({</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nx">contentSecurityPolicy</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="nx">directives</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="nx">defaultSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="nx">scriptSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="c1">// ... more directives</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">      </span><span class="p">},</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="c1">// ... more options</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span><span class="p">});</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="p">}</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">import</span><span class="w"> </span><span class="nx">helmet</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;helmet&#39;</span><span class="p">;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">securityHeadersMiddleware</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">RequestHandler</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">helmet</span><span class="p">({</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nx">contentSecurityPolicy</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">      </span><span class="nx">directives</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="nx">defaultSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="nx">scriptSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">        </span><span class="c1">// ... more directives</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">      </span><span class="p">},</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span><span class="c1">// ... more options</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">  </span><span class="p">});</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Applied in <code>api/src/app.ts</code>:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">// Production</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">securityHeadersMiddleware</span><span class="p">());</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1">// Development</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">developmentSecurityHeaders</span><span class="p">());</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// Production</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">securityHeadersMiddleware</span><span class="p">());</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1">// Development</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">developmentSecurityHeaders</span><span class="p">());</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
 </span></code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h3>
 <p>Comprehensive test suite in <code>api/src/middleware/securityHeaders.test.ts</code>:</p>
 <ul>
 <li>17 security header tests</li>
@@ -2450,9 +2513,24 @@
 <li>Tests CSP directives</li>
 <li>Validates Mozilla Observatory requirements</li>
 </ul>
-<p>Run tests:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>securityHeaders.test.ts
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>securityHeaders.test.ts
+</span></code></pre></div>
+<h3 id="observatory-integration-tests">Observatory Integration Tests<a class="headerlink" href="#observatory-integration-tests" title="Permanent link">&para;</a></h3>
+<p>Automated MDN HTTP Observatory scanning in <code>api/src/middleware/observatory.test.ts</code>:</p>
+<ul>
+<li>6 automated Observatory tests</li>
+<li>Runs actual security scanner against local server</li>
+<li>Validates grade and score</li>
+<li>Tests specific security headers</li>
+<li>Provides detailed results</li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>observatory.test.ts
+</span></code></pre></div>
+<h3 id="run-all-security-tests">Run All Security Tests<a class="headerlink" href="#run-all-security-tests" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;security|observatory&quot;</span>
 </span></code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <ol>
@@ -2491,7 +2569,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 20:07:48 UTC">October 4, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 20:14:46 UTC">October 4, 2025</span>
   </span>
 
     
