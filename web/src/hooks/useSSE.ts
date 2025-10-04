@@ -18,21 +18,21 @@ import { useEffect, useRef, useState } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-export interface SSEEvent {
+export type SSEEvent = {
   type: string;
   tenantId?: string;
   tenantSlug?: string;
   data?: any;
   timestamp: number;
-}
+};
 
-export interface SSEOptions {
+export type SSEOptions = {
   onEvent?: (event: SSEEvent) => void;
   onConnected?: () => void;
   onDisconnected?: () => void;
   onError?: (error: Event) => void;
   reconnectInterval?: number;
-}
+};
 
 /**
  * Hook to connect to SSE endpoint for real-time updates
