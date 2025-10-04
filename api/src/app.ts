@@ -120,7 +120,9 @@ export function createApp(prisma: PrismaClient) {
     });
 
     // Send initial connection event
-    res.write(`data: ${JSON.stringify({ 
+    // Safe: SSE endpoint writing JSON-stringified data to text/event-stream
+    // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write
+    res.write(`data: ${JSON.stringify({
       type: 'connected', 
       tenantId, 
       tenantSlug,
