@@ -77,6 +77,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
             ? { ...team, _count: { questions: (team._count?.questions || 0) + 1 } }
             : team
         ));
+        
+        // Also update currentTeam if it matches
+        setCurrentTeamState(prev => 
+          prev?.id === question.teamId
+            ? { ...prev, _count: { questions: (prev._count?.questions || 0) + 1 } }
+            : prev
+        );
       }
     } else if (event.type === 'question:answered') {
       const question = event.data;
@@ -87,6 +94,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
             ? { ...team, _count: { questions: Math.max(0, (team._count?.questions || 0) - 1) } }
             : team
         ));
+        
+        // Also update currentTeam if it matches
+        setCurrentTeamState(prev => 
+          prev?.id === question.teamId
+            ? { ...prev, _count: { questions: Math.max(0, (prev._count?.questions || 0) - 1) } }
+            : prev
+        );
       }
     }
   };

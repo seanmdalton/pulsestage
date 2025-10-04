@@ -34,7 +34,7 @@ export function OpenQuestionsPage() {
   }, [currentTeam?.slug]);
 
   // Handle SSE events for real-time updates
-  const handleSSEEvent = (event: SSEEvent) => {
+  const handleSSEEvent = async (event: SSEEvent) => {
     if (event.type === 'question:created' || event.type === 'question:upvoted' || event.type === 'question:tagged' || event.type === 'question:untagged') {
       const updatedQuestion = event.data as Question;
       
@@ -58,6 +58,19 @@ export function OpenQuestionsPage() {
               return [updatedQuestion, ...prev].sort((a, b) => b.upvotes - a.upvotes);
             }
           });
+          
+          // Reload upvote status for the updated question
+          // This ensures the upvote button state is correct (e.g., can't upvote own question)
+          try {
+            const status = await apiClient.getUpvoteStatus(updatedQuestion.id);
+            setUpvoteStatus(prev => {
+              const newMap = new Map(prev);
+              newMap.set(updatedQuestion.id, status);
+              return newMap;
+            });
+          } catch (err) {
+            console.error(`Failed to reload upvote status for question ${updatedQuestion.id}:`, err);
+          }
         }
       }
     } else if (event.type === 'question:answered') {
