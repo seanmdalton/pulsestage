@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="626.01154"
+   height="140.51547"
+   viewBox="0 0 626.01153 140.51547"
+   fill="none"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="pulsestage-wordmark-dark.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#00b3a4;stop-opacity:1;"
+         offset="0.35273886"
+         id="stop1" />
+      <stop
+         style="stop-color:#00b3a4;stop-opacity:0;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="4.144897e-08"
+       y1="72.904044"
+       x2="417.99482"
+       y2="72.904044"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.6628608"
+     inkscape:cx="157.34957"
+     inkscape:cy="40.557885"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="20"
+     inkscape:window-y="20"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <rect
+     x="2.7496884"
+     y="0"
+     width="140.51547"
+     height="140.51547"
+     rx="23.711987"
+     fill="#0b1221"
+     id="rect1"
+     style="fill:#ffffff;fill-opacity:1;stroke-width:0.292741" />
+  <path
+     d="m 136.54864,57.875218 c 0,-4.521375 -2.26069,-6.782063 -6.78206,-6.782063 H 82.29216 c -4.52137,0 -6.78206,2.260688 -6.78206,6.782063 V 88.39449 c 0,4.521372 2.26069,6.782061 6.78206,6.782061 h 25.43274 l 8.47756,11.868609 V 95.176551 h 13.56412 c 4.52137,0 6.78206,-2.260689 6.78206,-6.782061 z"
+     fill="#6b7280"
+     fill-opacity="0.26"
+     stroke="#0b1221"
+     stroke-width="9.17114"
+     stroke-linejoin="round"
+     id="path1"
+     style="display:inline;stroke:#808080;stroke-width:2.6622;stroke-dasharray:none;stroke-opacity:1"
+     sodipodi:nodetypes="sssssscccsss" />
+  <path
+     d="m 10.5681,43.034393 c 0,-4.521374 2.260686,-6.782062 6.78206,-6.782062 h 47.474416 c 4.52137,0 6.78206,2.260688 6.78206,6.782062 v 30.519272 c 0,4.521375 -2.26069,6.782062 -6.78206,6.782062 H 39.391855 L 30.914278,92.204343 V 80.335727 H 17.35016 c -4.521374,0 -6.78206,-2.260687 -6.78206,-6.782062 z"
+     fill="#6b7280"
+     fill-opacity="0.26"
+     stroke="#0b1221"
+     stroke-width="9.17114"
+     stroke-linejoin="round"
+     id="path1-6"
+     style="display:inline;stroke:#808080;stroke-width:2.6622;stroke-dasharray:none;stroke-opacity:1"
+     sodipodi:nodetypes="sssssscccsss" />
+  <path
+     d="M 4.5855699,67.172127 H 44.327187 L 67.04766,25.137725 82.540287,120.67047 103.79697,76.60736 413.40925,77.138448"
+     stroke="#00b3a4"
+     stroke-width="9.17114"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     fill="none"
+     id="path3"
+     style="display:inline;stroke:url(#linearGradient2)"
+     inkscape:label="path3"
+     sodipodi:nodetypes="cccccc" />
+  <g
+     font-family="Manrope, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+     font-weight="800"
+     font-size="72px"
+     letter-spacing="-0.02em"
+     id="g4"
+     transform="translate(-62.202333,-41.059683)">
+    <text
+       x="220"
+       y="108"
+       fill="#0b1221"
+       id="text3"
+       style="letter-spacing:2.5px;display:inline;fill:#0b1221"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:77.3333px;font-family:Manrope;-inkscape-font-specification:'Manrope, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:2.5px;fill:#f9fafb;fill-opacity:1"
+         id="tspan1">PulseStage</tspan></text>
+  </g>
+</svg>

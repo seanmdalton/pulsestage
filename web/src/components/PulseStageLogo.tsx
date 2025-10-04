@@ -25,11 +25,11 @@ export function PulseStageLogo({ className = '', showWordmark = true, size = 'md
   // Note: Light logo is used with dark mode, dark logo with light mode
   const logoSrc = showWordmark 
     ? isDarkMode 
-      ? '/pulsestage-wordmark-tight-light.svg'  // Light logo on dark background
-      : '/pulsestage-wordmark-tight-dark.svg'   // Dark logo on light background
+      ? '/pulsestage-wordmark-light.svg'  // Light logo on dark background
+      : '/pulsestage-wordmark-dark.svg'   // Dark logo on light background
     : isDarkMode 
-      ? '/pulsestage-icon-light.svg'            // Light icon on dark background
-      : '/pulsestage-icon-dark.svg';            // Dark icon on light background
+      ? '/pulsestage-icon-light.svg'      // Light icon on dark background
+      : '/pulsestage-icon-dark.svg';      // Dark icon on light background
   
   return (
     <Link to="/" className={`flex items-center ${className}`}>
