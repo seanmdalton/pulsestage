@@ -117,6 +117,12 @@ export function AdminPage() {
     return role === 'moderator' || role === 'admin' || role === 'owner';
   });
 
+  // Check if user has full admin role (admin or owner) for admin-only features
+  const hasFullAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'admin' || role === 'owner';
+  });
+
   // Check if there are open questions for presentation mode
   const hasOpenQuestions = questions.some(q => q.status === 'OPEN');
 
@@ -227,26 +233,31 @@ export function AdminPage() {
                 >
                   Teams
                 </button>
-                <button
-                  onClick={() => setActiveTab('export')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'export'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  Export
-                </button>
-                <button
-                  onClick={() => setActiveTab('audit')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'audit'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  Audit Log
-                </button>
+                {/* Export and Audit tabs - admin/owner only */}
+                {hasFullAdminRole && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('export')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                        activeTab === 'export'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      Export
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('audit')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                        activeTab === 'audit'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      Audit Log
+                    </button>
+                  </>
+                )}
           </nav>
         </div>
         
@@ -307,9 +318,10 @@ export function AdminPage() {
 
             {activeTab === 'teams' && <TeamManagement />}
 
-            {activeTab === 'export' && <ExportPage />}
+            {/* Export and Audit content - admin/owner only */}
+            {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
             
-            {activeTab === 'audit' && (
+            {hasFullAdminRole && activeTab === 'audit' && (
               <div className="mt-[-2rem]">
                 <AuditPage embedded={true} />
               </div>
