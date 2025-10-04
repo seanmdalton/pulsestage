@@ -5,7 +5,7 @@
 [![Coverage](https://img.shields.io/badge/Coverage-22%25-orange.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-24-green.svg)](https://nodejs.org/)
 
 <div align="left" style="margin:10px 0 10px 0">
   <img src="web/public/pulsestage-wordmark-light.svg" alt="PulseStage">
@@ -67,7 +67,7 @@ Comprehensive audit logging, tenant isolation, session-based auth, and rate limi
 ## Technology Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
-- **Backend**: Node.js 20, Express, TypeScript
+- **Backend**: Node.js 24 LTS, Express, TypeScript
 - **Database**: PostgreSQL 16 with Prisma ORM
 - **Cache**: Redis 7 for rate limiting
 - **Testing**: Vitest (91 tests), Playwright E2E

@@ -76,7 +76,7 @@ For detailed setup instructions, see the [Installation Guide](getting-started/in
 ## Technology Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
-- **Backend**: Node.js 20, Express, TypeScript
+- **Backend**: Node.js 24 LTS, Express, TypeScript
 - **Database**: PostgreSQL 16 with Prisma ORM
 - **Cache**: Redis 7 for rate limiting
 - **Testing**: Vitest, Playwright E2E
