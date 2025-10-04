@@ -1,4 +1,8 @@
-# PulseStage
+<div align="center">
+  <img src="web/public/pulsestage-wordmark-light.svg" alt="PulseStage" width="400">
+</div>
+
+<br/>
 
 [![CI](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
