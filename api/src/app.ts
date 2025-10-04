@@ -1287,6 +1287,122 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // Audit log endpoints (admin only)
+  
+  // Get audit logs
+  app.get("/admin/audit", requireAdminRole, async (req, res) => {
+    try {
+      const filters = {
+        userId: req.query.userId as string | undefined,
+        action: req.query.action as string | undefined,
+        entityType: req.query.entityType as string | undefined,
+        entityId: req.query.entityId as string | undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+      };
+
+      const logs = await auditService.getLogs(req.tenant!.tenantId, filters);
+      const total = await auditService.getCount(req.tenant!.tenantId, {
+        userId: filters.userId,
+        action: filters.action,
+        entityType: filters.entityType,
+        startDate: filters.startDate,
+        endDate: filters.endDate
+      });
+
+      res.json({
+        logs,
+        total,
+        limit: filters.limit,
+        offset: filters.offset
+      });
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      res.status(500).json({ error: 'Failed to fetch audit logs' });
+    }
+  });
+
+  // Export audit logs
+  app.get("/admin/audit/export", requireAdminRole, async (req, res) => {
+    try {
+      const filters = {
+        userId: req.query.userId as string | undefined,
+        action: req.query.action as string | undefined,
+        entityType: req.query.entityType as string | undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: 10000 // Large limit for exports
+      };
+
+      const format = (req.query.format as string) || 'csv';
+      const logs = await auditService.getLogs(req.tenant!.tenantId, filters);
+
+      if (format === 'csv') {
+        // Generate CSV
+        const csvHeaders = [
+          'timestamp', 'user_email', 'user_name', 'action', 'entity_type', 
+          'entity_id', 'ip_address', 'user_agent', 'metadata'
+        ];
+        
+        const csvRows = logs.map(log => {
+          return [
+            log.createdAt.toISOString(),
+            log.user?.email || 'system',
+            log.user?.name || 'System',
+            log.action,
+            log.entityType,
+            log.entityId || '',
+            log.ipAddress || '',
+            `"${(log.userAgent || '').replace(/"/g, '""')}"`,
+            `"${JSON.stringify(log.metadata || {}).replace(/"/g, '""')}"`
+          ].join(',');
+        });
+        
+        const csvContent = [csvHeaders.join(','), ...csvRows].join('\n');
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-log-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+        
+      } else if (format === 'json') {
+        // Generate JSON
+        const exportData = {
+          exportedAt: new Date().toISOString(),
+          tenant: req.tenant!.tenantSlug,
+          filters,
+          totalRecords: logs.length,
+          logs: logs.map(log => ({
+            timestamp: log.createdAt.toISOString(),
+            userId: log.userId,
+            userEmail: log.user?.email,
+            userName: log.user?.name,
+            action: log.action,
+            entityType: log.entityType,
+            entityId: log.entityId,
+            before: log.before,
+            after: log.after,
+            ipAddress: log.ipAddress,
+            userAgent: log.userAgent,
+            metadata: log.metadata
+          }))
+        };
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-log-${new Date().toISOString().split('T')[0]}.json"`);
+        res.json(exportData);
+        
+      } else {
+        res.status(400).json({ error: 'Invalid format. Use csv or json.' });
+      }
+      
+    } catch (error) {
+      console.error('Error exporting audit logs:', error);
+      res.status(500).json({ error: 'Failed to export audit logs' });
+    }
+  });
+
   // User management endpoints with mock SSO
   // Note: In production, replace mockAuthMiddleware with real SSO integration
   
