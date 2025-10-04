@@ -1,8 +1,4 @@
-<div align="center">
-  <img src="web/public/pulsestage-wordmark-light.svg" alt="PulseStage" width="400">
-</div>
-
-<br/>
+# PulseStage
 
 [![CI](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -15,9 +11,21 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 
-**PulseStage** is an open-source platform designed to engage across your organization, providing all the functionality you need to capture, respond, and present questions. Built as a comprehensive full-stack Ask Me Anything (AMA) application with **multi-team support**, it promotes engagement, transparency, and trust among your teams.
+<div align="left" style="margin:10px 0 10px 0">
+  <img src="web/public/pulsestage-wordmark-light.svg" alt="PulseStage">
+</div>
 
-**Perfect for organizations** - Features team-based question organization, admin management, role-based authentication, comprehensive search, and much more. PulseStage empowers teams to have meaningful conversations and build stronger connections through structured Q&A sessions.
+
+**Open-source Q&A Platform for town halls and all-hands.** PulseStage helps teams capture questions, surface what matters with up-votes, and publish clear answers—then present it all live. Built as a full-stack AMA-style app with **multi-team spaces** and **role-based controls**, it’s designed to increase employee engagement and organizational transparency.
+
+**Why PulseStage**
+- Up-vote–only questions to reduce noise and highlight priorities  
+- Team-based organization and sessions for different departments or forums  
+- Role-based admin & moderation (submit, review, respond, publish)  
+- Presenter mode for leadership meetings and all-hands  
+- Search & tags for quick discovery of related topics  
+- Exports for follow-ups and accountability  
+- Self-hostable with Docker (Postgres + Redis), open source (Apache-2.0)
 
 ## Key Features
 
