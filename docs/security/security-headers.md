@@ -112,6 +112,33 @@ Relaxed headers for local development with Vite:
 
 ## Testing Security Headers
 
+### Automated Testing (Recommended)
+
+We integrate [MDN HTTP Observatory](https://github.com/mdn/mdn-http-observatory/) directly into our test suite:
+
+```bash
+cd api
+npm test observatory.test.ts
+```
+
+This runs 6 automated security tests including:
+- Overall security grade and score
+- Content-Security-Policy validation
+- X-Content-Type-Options check
+- X-Frame-Options check
+- Referrer-Policy check
+- Detailed test result logging
+
+**Development Mode Results:**
+- Expected Grade: C (relaxed CSP for Vite HMR)
+- Expected Score: 50/100
+- Acceptable: 7/10 tests passing
+
+**Production Mode Expectations:**
+- Target Grade: A or better
+- Target Score: 70+/100
+- All critical security tests passing
+
 ### Local Testing
 
 Check headers locally:
@@ -120,11 +147,11 @@ Check headers locally:
 curl -I http://localhost:5001/health
 ```
 
-### Mozilla HTTP Observatory
+### Mozilla HTTP Observatory (Manual)
 
-Test your deployed site:
+Test your deployed site manually:
 
-1. Visit: https://observatory.mozilla.org/
+1. Visit: https://developer.mozilla.org/en-US/observatory/
 2. Enter your site URL
 3. Run the scan
 4. Target score: **A grade or higher**
@@ -172,6 +199,8 @@ app.use(apiSecurityHeaders());
 
 ## Testing
 
+### Unit Tests
+
 Comprehensive test suite in `api/src/middleware/securityHeaders.test.ts`:
 
 - 17 security header tests
@@ -180,11 +209,31 @@ Comprehensive test suite in `api/src/middleware/securityHeaders.test.ts`:
 - Tests CSP directives
 - Validates Mozilla Observatory requirements
 
-Run tests:
-
 ```bash
 cd api
 npm test securityHeaders.test.ts
+```
+
+### Observatory Integration Tests
+
+Automated MDN HTTP Observatory scanning in `api/src/middleware/observatory.test.ts`:
+
+- 6 automated Observatory tests
+- Runs actual security scanner against local server
+- Validates grade and score
+- Tests specific security headers
+- Provides detailed results
+
+```bash
+cd api
+npm test observatory.test.ts
+```
+
+### Run All Security Tests
+
+```bash
+cd api
+npm test -- --grep "security|observatory"
 ```
 
 ## Best Practices
