@@ -36,10 +36,10 @@ export function AdminPage() {
   useEffect(() => {
     if (authLoading) return; // Wait for auth to load
 
-    // Check if user has admin role in any team
+    // Check if user has moderator role or higher in any team
     const hasAdminRole = userTeams.some(team => {
       const role = getUserRoleInTeam(team.id);
-      return role === 'admin' || role === 'owner';
+      return role === 'moderator' || role === 'admin' || role === 'owner';
     });
 
     if (userTeams.length === 0) {
@@ -58,10 +58,10 @@ export function AdminPage() {
   }, [authLoading, userTeams, getUserRoleInTeam, navigate]);
 
   useEffect(() => {
-    // Check if user has admin role
+    // Check if user has moderator role or higher
     const hasAdminRole = userTeams.some(team => {
       const role = getUserRoleInTeam(team.id);
-      return role === 'admin' || role === 'owner';
+      return role === 'moderator' || role === 'admin' || role === 'owner';
     });
 
     if (hasAdminRole) {
@@ -111,10 +111,10 @@ export function AdminPage() {
   };
 
 
-  // Check if user has admin role
+  // Check if user has moderator role or higher
   const hasAdminRole = userTeams.some(team => {
     const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
+    return role === 'moderator' || role === 'admin' || role === 'owner';
   });
 
   // Check if there are open questions for presentation mode

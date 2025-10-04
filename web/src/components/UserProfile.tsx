@@ -9,10 +9,10 @@ export function UserProfile() {
   const { isAuthenticated, user } = useAuth();
   const { userTeams, getUserRoleInTeam } = useUser();
 
-  // Check if user has admin role
+  // Check if user has moderator role or higher
   const hasAdminRole = userTeams.some(team => {
     const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
+    return role === 'moderator' || role === 'admin' || role === 'owner';
   });
 
   // Close dropdown when clicking outside

@@ -181,6 +181,8 @@ export function ProfilePage() {
                               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                               : role === 'admin'
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : role === 'moderator'
+                              ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300'
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                           }`}>
                             {role}
@@ -269,6 +271,8 @@ export function ProfilePage() {
                               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                               : role === 'admin'
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : role === 'moderator'
+                              ? 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300'
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                           }`}>
                             {role}
