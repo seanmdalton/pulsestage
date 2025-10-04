@@ -1,27 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-// Mock data for role checking (simplified version)
-const mockTeamMemberships = [
-  { userId: 'john.doe@company.com', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'admin' },
-  { userId: 'jane.smith@company.com', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'member' },
-  { userId: 'bob.wilson@company.com', teamId: 'f4be47d7-9c97-4087-94cf-c914f01a0ab4', role: 'owner' },
-];
+const prisma = new PrismaClient();
 
+/**
+ * Middleware to require admin or owner role
+ * Depends on mockAuthMiddleware being applied first to populate req.user
+ */
 export async function requireAdminRole(req: Request, res: Response, next: NextFunction) {
   try {
-    // First check if we have a mock SSO user
-    const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
-    
-    if (!mockSSOHeader) {
+    // Check if user is authenticated (set by mockAuthMiddleware)
+    if (!req.user) {
       return res.status(401).json({ 
         error: 'Unauthorized', 
-        message: 'Mock SSO authentication required' 
+        message: 'Authentication required' 
       });
     }
 
+    // Get user's team memberships from database
+    const memberships = await prisma.teamMembership.findMany({
+      where: { userId: req.user.id }
+    });
+
     // Check if user has admin or owner role in any team
-    const userMemberships = mockTeamMemberships.filter(m => m.userId === mockSSOHeader);
-    const hasAdminRole = userMemberships.some(membership => 
+    const hasAdminRole = memberships.some(membership => 
       membership.role === 'admin' || membership.role === 'owner'
     );
 
@@ -31,15 +33,6 @@ export async function requireAdminRole(req: Request, res: Response, next: NextFu
         message: 'Admin or owner role required' 
       });
     }
-
-    // Add user info to request for use in endpoints
-    req.user = {
-      id: mockSSOHeader,
-      email: mockSSOHeader,
-      name: mockSSOHeader,
-      ssoId: mockSSOHeader,
-      role: 'admin' // We know they have admin role at this point
-    };
 
     next();
   } catch (error) {

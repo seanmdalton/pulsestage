@@ -5,11 +5,12 @@ interface PulseStageLogoProps {
   className?: string;
   showWordmark?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  forceTheme?: 'light' | 'dark'; // Force a specific theme regardless of context
 }
 
-export function PulseStageLogo({ className = '', showWordmark = true, size = 'md' }: PulseStageLogoProps) {
+export function PulseStageLogo({ className = '', showWordmark = true, size = 'md', forceTheme }: PulseStageLogoProps) {
   const { theme } = useTheme();
-  const isDarkMode = theme === 'dark';
+  const isDarkMode = forceTheme ? forceTheme === 'dark' : theme === 'dark';
   
   // Size classes for the logo
   const sizeClasses = {

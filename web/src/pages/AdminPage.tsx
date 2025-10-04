@@ -10,11 +10,13 @@ import { PulseStageLogo } from '../components/PulseStageLogo';
 import { useTheme } from '../contexts/ThemeContext';
 import { ExportPage } from './ExportPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
+import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 
 export function AdminPage() {
   const { isAuthenticated, isLoading: authLoading } = useAdmin();
   const { userTeams, getUserRoleInTeam } = useUser();
   const { theme } = useTheme();
+  const { currentTeam } = useTeamFromUrl();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export function AdminPage() {
     if (hasAdminRole) {
       const loadQuestions = async () => {
         try {
-          const data = await apiClient.getQuestions('OPEN');
+          const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
           setQuestions(data);
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Failed to load questions');
@@ -75,7 +77,7 @@ export function AdminPage() {
 
       loadQuestions();
     }
-  }, [userTeams, getUserRoleInTeam]);
+  }, [userTeams, getUserRoleInTeam, currentTeam?.id]);
 
   // Check API health status
   useEffect(() => {

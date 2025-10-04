@@ -4,34 +4,21 @@ import { TeamSelector } from './TeamSelector';
 import { UserProfile } from './UserProfile';
 import { PulseStageLogo } from './PulseStageLogo';
 import { useTeam, getTeamSlug } from '../contexts/TeamContext';
-import { useUser } from '../contexts/UserContext';
 
 export function Navbar() {
   const location = useLocation();
   const { currentTeam } = useTeam();
-  const { userTeams, getUserRoleInTeam } = useUser();
 
-  // Check if user has admin privileges in any team
-  const hasAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
-  });
-
-  // Generate team-aware navigation items
+  // Generate team-aware navigation items (Admin moved to user dropdown)
   const teamSlug = getTeamSlug(currentTeam);
   const navItems = [
     { path: `/${teamSlug}`, label: 'Submit Question' },
     { path: `/${teamSlug}/open`, label: 'Open Questions' },
     { path: `/${teamSlug}/answered`, label: 'Answered Questions' },
-    // Only show Admin link if user has admin role in any team
-    ...(hasAdminRole ? [{ path: '/admin', label: 'Admin' }] : []),
   ];
 
   // Helper function to check if a nav item is active
   const isActiveNavItem = (itemPath: string) => {
-    if (itemPath === '/admin') {
-      return location.pathname.startsWith('/admin');
-    }
     return location.pathname === itemPath;
   };
 

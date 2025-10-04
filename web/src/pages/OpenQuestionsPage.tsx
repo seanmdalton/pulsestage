@@ -7,6 +7,8 @@ import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 import { useUser } from '../contexts/UserContext';
+import { useSSE } from '../hooks/useSSE';
+import type { SSEEvent } from '../hooks/useSSE';
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -30,6 +32,58 @@ export function OpenQuestionsPage() {
   useEffect(() => {
     setFormattedPageTitle(currentTeam?.slug, 'open');
   }, [currentTeam?.slug]);
+
+  // Handle SSE events for real-time updates
+  const handleSSEEvent = async (event: SSEEvent) => {
+    if (event.type === 'question:created' || event.type === 'question:upvoted' || event.type === 'question:tagged' || event.type === 'question:untagged') {
+      const updatedQuestion = event.data as Question;
+      
+      // Only update if question is OPEN and matches current team filter
+      if (updatedQuestion.status === 'OPEN') {
+        const matchesTeamFilter = !currentTeam || updatedQuestion.teamId === currentTeam.id;
+        
+        if (matchesTeamFilter) {
+          setQuestions(prev => {
+            // Check if question already exists
+            const existingIndex = prev.findIndex(q => q.id === updatedQuestion.id);
+            
+            if (existingIndex >= 0) {
+              // Update existing question
+              const newQuestions = [...prev];
+              newQuestions[existingIndex] = updatedQuestion;
+              // Re-sort by upvotes
+              return newQuestions.sort((a, b) => b.upvotes - a.upvotes);
+            } else {
+              // Add new question and sort
+              return [updatedQuestion, ...prev].sort((a, b) => b.upvotes - a.upvotes);
+            }
+          });
+          
+          // Reload upvote status for the updated question
+          // This ensures the upvote button state is correct (e.g., can't upvote own question)
+          try {
+            const status = await apiClient.getUpvoteStatus(updatedQuestion.id);
+            setUpvoteStatus(prev => {
+              const newMap = new Map(prev);
+              newMap.set(updatedQuestion.id, status);
+              return newMap;
+            });
+          } catch (err) {
+            console.error(`Failed to reload upvote status for question ${updatedQuestion.id}:`, err);
+          }
+        }
+      }
+    } else if (event.type === 'question:answered') {
+      // Remove answered questions from the open list
+      const answeredQuestion = event.data as Question;
+      setQuestions(prev => prev.filter(q => q.id !== answeredQuestion.id));
+    }
+  };
+
+  // Connect to SSE for real-time updates
+  const { isConnected: sseConnected } = useSSE({
+    onEvent: handleSSEEvent
+  });
 
   useEffect(() => {
     const loadQuestions = async () => {

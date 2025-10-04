@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { apiClient, type Team } from '../lib/api';
+import { useSSE } from '../hooks/useSSE';
+import type { SSEEvent } from '../hooks/useSSE';
 
 interface TeamContextType {
   currentTeam: Team | null; // null = "All Teams" view
@@ -63,6 +65,50 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     loadTeams();
   }, []);
+
+  // Handle SSE events to update team counts in real-time
+  const handleSSEEvent = (event: SSEEvent) => {
+    if (event.type === 'question:created') {
+      const question = event.data;
+      if (question.teamId && question.status === 'OPEN') {
+        // Increment count for the team
+        setTeams(prev => prev.map(team => 
+          team.id === question.teamId
+            ? { ...team, _count: { questions: (team._count?.questions || 0) + 1 } }
+            : team
+        ));
+        
+        // Also update currentTeam if it matches
+        setCurrentTeamState(prev => 
+          prev?.id === question.teamId
+            ? { ...prev, _count: { questions: (prev._count?.questions || 0) + 1 } }
+            : prev
+        );
+      }
+    } else if (event.type === 'question:answered') {
+      const question = event.data;
+      if (question.teamId) {
+        // Decrement count for the team (moved from open to answered)
+        setTeams(prev => prev.map(team => 
+          team.id === question.teamId
+            ? { ...team, _count: { questions: Math.max(0, (team._count?.questions || 0) - 1) } }
+            : team
+        ));
+        
+        // Also update currentTeam if it matches
+        setCurrentTeamState(prev => 
+          prev?.id === question.teamId
+            ? { ...prev, _count: { questions: Math.max(0, (prev._count?.questions || 0) - 1) } }
+            : prev
+        );
+      }
+    }
+  };
+
+  // Connect to SSE for real-time team count updates
+  useSSE({
+    onEvent: handleSSEEvent
+  });
 
   const value: TeamContextType = {
     currentTeam,

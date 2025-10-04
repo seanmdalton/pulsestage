@@ -30,12 +30,18 @@ import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
 import { requireAdminRole } from "./middleware/requireAdminRole.js";
 import { mockAuthMiddleware, requireMockAuth, getUserTeamsWithMembership, getUserPreferences, toggleTeamFavorite, setDefaultTeam, setUserPreferences } from "./middleware/mockAuth.js";
+import { createTenantResolverMiddleware } from "./middleware/tenantResolver.js";
+import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
+import { eventBus } from "./lib/eventBus.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export function createApp(prisma: PrismaClient) {
   const app = express();
+
+  // Apply Prisma middleware for automatic tenant scoping
+  applyTenantMiddleware(prisma);
 
   // CORS configuration
   app.use(cors({
@@ -48,7 +54,12 @@ export function createApp(prisma: PrismaClient) {
   // Session middleware
   app.use(createSessionMiddleware());
 
+  // Tenant resolution middleware - resolves tenant from header/subdomain/default
+  // MUST come before mockAuthMiddleware to validate user's tenant
+  app.use(createTenantResolverMiddleware(prisma));
+
   // Mock authentication middleware (for local development)
+  // Validates user belongs to current tenant
   app.use(mockAuthMiddleware);
 
   // Swagger UI - only in development
@@ -75,6 +86,56 @@ export function createApp(prisma: PrismaClient) {
     res.json({ ok: true, service: "ama-api" });
   });
 
+  // SSE endpoint for real-time updates
+  // Note: EventSource doesn't support custom headers, so we also check query param
+  app.get("/events", async (req, res) => {
+    // If tenant not resolved from header, try query parameter
+    let tenantId = req.tenant?.tenantId;
+    let tenantSlug = req.tenant?.tenantSlug;
+    
+    if (!tenantId && req.query.tenant) {
+      // Resolve tenant from query parameter
+      const tenant = await prisma.tenant.findUnique({
+        where: { slug: req.query.tenant as string }
+      });
+      
+      if (!tenant) {
+        return res.status(404).json({ error: 'Tenant not found' });
+      }
+      
+      tenantId = tenant.id;
+      tenantSlug = tenant.slug;
+    }
+    
+    if (!tenantId) {
+      return res.status(400).json({ error: 'Tenant required for SSE connection' });
+    }
+
+    // Set SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no' // Disable nginx buffering
+    });
+
+    // Send initial connection event
+    res.write(`data: ${JSON.stringify({ 
+      type: 'connected', 
+      tenantId, 
+      tenantSlug,
+      timestamp: Date.now() 
+    })}\n\n`);
+
+    // Register client with event bus
+    const clientId = eventBus.addClient(tenantId, res);
+
+    // Handle client disconnect
+    req.on('close', () => {
+      eventBus.removeClient(tenantId, clientId);
+    });
+  });
+
   const createQuestionSchema = z.object({
     body: z.string().min(3).max(2000),
     teamId: z.string().optional()
@@ -97,7 +158,8 @@ export function createApp(prisma: PrismaClient) {
       body: parse.data.body,
       teamId: parse.data.teamId || null,
       authorId: req.user?.id || null, // Set author if user is authenticated
-      upvotes: req.user?.id ? 1 : 0 // Start with 1 upvote if user is authenticated
+      upvotes: req.user?.id ? 1 : 0, // Start with 1 upvote if user is authenticated
+      tenantId: req.tenant!.tenantId // Add tenant context
     };
     
     const q = await prisma.question.create({ 
@@ -122,6 +184,14 @@ export function createApp(prisma: PrismaClient) {
         }
       });
     }
+    
+    // Publish SSE event for question creation
+    eventBus.publish({
+      type: 'question:created',
+      tenantId: req.tenant!.tenantId,
+      data: q,
+      timestamp: Date.now()
+    });
     
     res.status(201).json(q);
   });
@@ -210,6 +280,14 @@ export function createApp(prisma: PrismaClient) {
             }
           }
         }
+      });
+      
+      // Publish SSE event for upvote
+      eventBus.publish({
+        type: 'question:upvoted',
+        tenantId: req.tenant!.tenantId,
+        data: updatedQuestion,
+        timestamp: Date.now()
       });
       
       res.json(updatedQuestion);
@@ -352,7 +430,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         },
@@ -370,11 +448,16 @@ export function createApp(prisma: PrismaClient) {
     const { slug } = req.params;
     try {
       const team = await prisma.team.findUnique({
-        where: { slug },
+        where: { 
+          tenantId_slug: {
+            tenantId: req.tenant!.tenantId,
+            slug
+          }
+        },
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
@@ -399,9 +482,14 @@ export function createApp(prisma: PrismaClient) {
     }
 
     try {
-      // Check if slug already exists
+      // Check if slug already exists in this tenant
       const existingTeam = await prisma.team.findUnique({
-        where: { slug: parse.data.slug }
+        where: { 
+          tenantId_slug: {
+            tenantId: req.tenant!.tenantId,
+            slug: parse.data.slug
+          }
+        }
       });
       
       if (existingTeam) {
@@ -409,11 +497,14 @@ export function createApp(prisma: PrismaClient) {
       }
 
       const team = await prisma.team.create({
-        data: parse.data,
+        data: {
+          ...parse.data,
+          tenantId: req.tenant!.tenantId
+        },
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
@@ -441,7 +532,7 @@ export function createApp(prisma: PrismaClient) {
         include: {
           _count: {
             select: {
-              questions: true
+              questions: { where: { status: "OPEN" } } // Only count open questions
             }
           }
         }
@@ -489,8 +580,26 @@ export function createApp(prisma: PrismaClient) {
           status: "ANSWERED",
           responseText: parse.data.response,
           respondedAt: new Date()
+        },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
         }
       });
+      
+      // Publish SSE event for answer
+      eventBus.publish({
+        type: 'question:answered',
+        tenantId: req.tenant!.tenantId,
+        data: q,
+        timestamp: Date.now()
+      });
+      
       res.json(q);
     } catch {
       res.status(404).json({ error: "Not found" });
@@ -942,7 +1051,8 @@ export function createApp(prisma: PrismaClient) {
         data: {
           name: parse.data.name,
           description: parse.data.description,
-          color: parse.data.color || '#3B82F6'
+          color: parse.data.color || '#3B82F6',
+          tenantId: req.tenant!.tenantId
         }
       });
       res.status(201).json(tag);
@@ -990,6 +1100,30 @@ export function createApp(prisma: PrismaClient) {
         }
       });
 
+      // Get updated question with tags for SSE event
+      const updatedQuestion = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      });
+
+      // Publish SSE event for tag addition
+      if (updatedQuestion) {
+        eventBus.publish({
+          type: 'question:tagged',
+          tenantId: req.tenant!.tenantId,
+          data: updatedQuestion,
+          timestamp: Date.now()
+        });
+      }
+
       res.json({ success: true });
     } catch (error) {
       console.error('Error adding tag to question:', error);
@@ -1010,6 +1144,30 @@ export function createApp(prisma: PrismaClient) {
           }
         }
       });
+
+      // Get updated question for SSE event
+      const updatedQuestion = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      });
+
+      // Publish SSE event for tag removal
+      if (updatedQuestion) {
+        eventBus.publish({
+          type: 'question:untagged',
+          tenantId: req.tenant!.tenantId,
+          data: updatedQuestion,
+          timestamp: Date.now()
+        });
+      }
 
       res.json({ success: true });
     } catch (error) {
@@ -1099,6 +1257,7 @@ export function createApp(prisma: PrismaClient) {
         },
         create: {
           userId,
+          tenantId: req.tenant!.tenantId,
           favoriteTeams: favoriteTeams || [],
           defaultTeamId: defaultTeamId || null,
         },

@@ -72,6 +72,15 @@
 - **CORS protection** - Configurable cross-origin resource sharing
 - **Input validation** - Comprehensive Zod schema validation
 
+### Multi-Tenancy (Optional)
+- **Dual-mode operation** - Single-tenant (default) or multi-tenant mode
+- **Strict data isolation** - Tenant data is completely isolated at the database level
+- **Subdomain routing** - Automatic tenant resolution from subdomains
+- **Live updates (SSE)** - Real-time question updates across open and presenter views
+- **Per-tenant administration** - Admins are scoped to their tenant
+- **Org signup** - Self-service tenant creation with first owner account
+- **User-tenant binding** - Users are permanently associated with one tenant
+
 ## Tech Stack
 
 ### Backend
@@ -132,21 +141,45 @@ DATABASE_URL="postgresql://app:app@localhost:5432/ama" node load-comprehensive-t
 
 This loads 88 realistic questions across all teams with answers, upvotes, and historical dates.
 
-### 5. Test SSO Features (Optional)
-For testing user management and role-based features locally:
+### 5. Test SSO and Multi-Tenancy Features (Optional)
+For testing user management, role-based features, and multi-tenancy locally:
 
 1. **Access Mock SSO Page**: Navigate to http://localhost:5173/sso-test.html
-2. **Select Test User**: Choose from John Doe (admin), Jane Smith (member), or Bob Wilson (owner)
-3. **Test User Features**: 
-   - User profile with question history
+2. **Select a Tenant**: Choose "Default Tenant" or "Acme Corp"
+3. **Select Test User**: Choose from the users available for that tenant
+4. **Test Multi-Tenant Features**: 
+   - Switch between tenants to see complete data isolation
+   - User profile with question history per tenant
    - Team favorites and default team selection
    - Role-based admin access (no separate admin login needed)
-   - Team membership and preferences
+   - Real-time updates via SSE
 
-**Mock Users Available:**
-- **John Doe** (john.doe@company.com) - Admin role in Test Team
-- **Jane Smith** (jane.smith@company.com) - Member role in Test Team  
-- **Bob Wilson** (bob.wilson@company.com) - Owner role in Test Team
+**Default Tenant Users:**
+- **John Doe** (john.doe@company.com) - Admin in Engineering
+- **Jane Smith** (jane.smith@company.com) - Member in Engineering  
+- **Bob Wilson** (bob.wilson@company.com) - Owner in Product
+
+**Acme Corp Tenant Users:**
+- **Alice Anderson** (alice.admin@acme.com) - Admin in Engineering
+- **Charlie Chen** (charlie.owner@acme.com) - Owner in Product, Admin in Marketing
+- **Emily Evans** (emily.member@acme.com) - Member in Engineering & Product
+
+### 6. Test Real-Time Updates (SSE)
+PulseStage includes Server-Sent Events for live updates:
+
+1. **Open two browser windows** side-by-side
+2. **Window A**: http://localhost:5173/engineering/open
+3. **Window B**: http://localhost:5173/engineering (submit page)
+4. **Submit a question in Window B**
+5. **Watch Window A**: Question appears instantly without refresh!
+
+**SSE Features:**
+- Real-time question creation
+- Live upvote count updates
+- Instant answer notifications  
+- Team count updates in dropdown
+- Presentation mode live updates
+- Automatic reconnection
 
 ## Environment Configuration
 
@@ -174,7 +207,57 @@ WEBSITE_TITLE=PulseStage
 # Mock SSO Configuration (Development Only)
 # Set to 'development' to enable mock SSO authentication
 NODE_ENV=development
+
+# Multi-Tenancy Configuration (Optional)
+MULTI_TENANT_MODE=false  # Set to 'true' to enable multi-tenant mode
+BASE_DOMAIN=              # e.g., 'pulsestage.com' for subdomain routing
+TENANT_HEADER=x-tenant-id # Header for tenant override in dev/test
+SSE_HEARTBEAT_INTERVAL=30000  # Heartbeat interval for SSE connections (ms)
 ```
+
+### Multi-Tenancy Modes
+
+**Single-Tenant Mode (Default)**
+- `MULTI_TENANT_MODE=false`
+- All data belongs to the "default" tenant
+- Maintains backward compatibility with existing deployments
+- No subdomain routing required
+
+**Multi-Tenant Mode**
+- `MULTI_TENANT_MODE=true`
+- Requires `BASE_DOMAIN` to be set for subdomain routing
+- Example: `alpha.pulsestage.com` routes to tenant "alpha"
+- Admins are scoped to their tenant
+- Complete data isolation between tenants
+- Users are permanently bound to their tenant
+
+### Multi-Tenancy Architecture
+
+**Data Isolation**
+- All tenant-scoped models include `tenantId` foreign key
+- Prisma middleware auto-injects `tenantId` on all queries
+- Prevents cross-tenant data access at the ORM level
+- Users cannot move between tenants
+
+**Tenant Resolution**
+- Priority: `x-tenant-id` header → subdomain → "default"
+- Header useful for development and testing
+- Subdomain used in production multi-tenant deployments
+- Returns 404 for non-existent tenants
+
+**Real-Time Updates (SSE)**
+- Server-Sent Events for live question updates
+- Per-tenant event streams (complete isolation)
+- Events: question create, upvote, answer, tag changes
+- Automatic reconnection on disconnect
+- Heartbeat every 30 seconds
+- Updates UI without page refresh
+
+**User-Tenant Binding**
+- Users are permanently associated with one tenant
+- Cannot authenticate in different tenant
+- Each tenant has own user accounts and roles
+- Cross-tenant access prevented at middleware level
 
 ## Project Structure
 
@@ -271,12 +354,14 @@ enum QuestionStatus {
 
 ### Public Endpoints
 - `GET /health` - Health check
+- `GET /events?tenant=slug` - SSE endpoint for real-time updates (requires tenant)
 - `GET /teams` - List all active teams
 - `GET /teams/:slug` - Get team by slug
 - `GET /questions?status=open|answered&teamId=uuid` - List questions (optionally filtered by team)
 - `GET /questions/search?q=query&teamId=uuid` - Search questions
 - `POST /questions` - Submit a question
 - `POST /questions/:id/upvote` - Upvote a question
+- `GET /questions/:id/upvote-status` - Check if user has upvoted
 
 ### Admin Endpoints (Session Authentication Required)
 - `POST /admin/login` - Admin login
@@ -333,6 +418,10 @@ npm run test:watch          # Watch mode for development
 - ✅ Input validation with Zod
 - ✅ Tag management operations
 - ✅ Presentation mode functionality
+- ✅ Multi-tenancy data isolation
+- ✅ Tenant context and resolution
+- ✅ Prisma middleware auto-scoping
+- ✅ Cross-tenant access prevention
 
 ### End-to-End Tests (Playwright)
 ```bash

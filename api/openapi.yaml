@@ -12,6 +12,8 @@ servers:
 tags:
   - name: Health
     description: Health check endpoints
+  - name: SSE
+    description: Server-Sent Events for real-time updates
   - name: Questions
     description: Question management endpoints
   - name: Admin
@@ -42,6 +44,11 @@ components:
       in: header
       name: x-mock-sso-user
       description: Mock SSO authentication header (development only)
+    TenantHeader:
+      type: apiKey
+      in: header
+      name: x-tenant-id
+      description: Tenant context header (defaults to 'default')
 
   schemas:
     Question:
@@ -526,6 +533,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /events:
+    get:
+      tags:
+        - SSE
+      summary: Server-Sent Events stream
+      description: |
+        Subscribe to real-time updates for a specific tenant.
+        Streams events for question creation, upvotes, answers, and tag changes.
+        Includes periodic heartbeat to keep connection alive.
+      operationId: getSSEStream
+      parameters:
+        - name: tenant
+          in: query
+          description: Tenant slug to subscribe to
+          required: true
+          schema:
+            type: string
+            example: default
+      responses:
+        '200':
+          description: SSE stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Stream of SSE events in format: data: {JSON}\n\n
+                  Event types: connected, heartbeat, question:created, 
+                  question:upvoted, question:answered, question:tagged, question:untagged
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
   /questions:
     get:
