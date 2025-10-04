@@ -106,6 +106,15 @@ export function createApp(prisma: PrismaClient) {
     }
   }
 
+  // Root endpoint for service info and security scans
+  app.get("/", (_req, res) => {
+    res.json({ 
+      service: "PulseStage API",
+      version: "1.0.0",
+      status: "healthy"
+    });
+  });
+
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "ama-api" });
   });
