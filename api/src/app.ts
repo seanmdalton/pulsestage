@@ -36,6 +36,7 @@ import { eventBus } from "./lib/eventBus.js";
 import { initAuditService, auditService } from "./lib/auditService.js";
 import { initPermissionMiddleware, requirePermission, requireRole } from "./middleware/requirePermission.js";
 import { initTeamScopingMiddleware, extractQuestionTeam, getUserTeamsByRole } from "./middleware/teamScoping.js";
+import { securityHeadersMiddleware, apiSecurityHeaders, developmentSecurityHeaders } from "./middleware/securityHeaders.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,6 +61,17 @@ export function createApp(prisma: PrismaClient) {
     origin: env.CORS_ORIGIN,
     credentials: true
   }));
+
+  // Security headers (Helmet)
+  // Use relaxed CSP in development for Vite HMR, strict in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(securityHeadersMiddleware());
+  } else {
+    app.use(developmentSecurityHeaders());
+  }
+  
+  // Additional API security headers (both environments)
+  app.use(apiSecurityHeaders());
 
   app.use(express.json());
 

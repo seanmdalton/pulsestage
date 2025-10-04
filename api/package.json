@@ -23,6 +23,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
     "redis": "^5.8.2",
     "swagger-ui-express": "^5.0.1",
     "yaml": "^2.8.1",
