@@ -30,11 +30,17 @@ export function PresentationPage() {
   const { currentTeam } = useTeamFromUrl();
   const navigate = useNavigate();
 
-  // Check if user has admin role in any team
-  const hasAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
-  });
+  // Check if user has moderator role or higher in the CURRENT team context
+  // If viewing all teams, check if they have the role in ANY team
+  const hasAdminRole = currentTeam
+    ? (() => {
+        const role = getUserRoleInTeam(currentTeam.id);
+        return role === 'moderator' || role === 'admin' || role === 'owner';
+      })()
+    : userTeams.some(team => {
+        const role = getUserRoleInTeam(team.id);
+        return role === 'moderator' || role === 'admin' || role === 'owner';
+      });
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

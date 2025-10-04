@@ -6,6 +6,7 @@ import { useAdmin } from '../contexts/AdminContext';
 import { useUser } from '../contexts/UserContext';
 import { ResponseModal } from '../components/ResponseModal';
 import { TeamManagement } from '../components/TeamManagement';
+import { TagManagement } from '../components/TagManagement';
 import { PulseStageLogo } from '../components/PulseStageLogo';
 import { useTheme } from '../contexts/ThemeContext';
 import { ExportPage } from './ExportPage';
@@ -24,7 +25,7 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'export' | 'audit'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'tags' | 'export' | 'audit'>('questions');
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
 
   // Set page title
@@ -36,10 +37,10 @@ export function AdminPage() {
   useEffect(() => {
     if (authLoading) return; // Wait for auth to load
 
-    // Check if user has admin role in any team
+    // Check if user has moderator role or higher in any team
     const hasAdminRole = userTeams.some(team => {
       const role = getUserRoleInTeam(team.id);
-      return role === 'admin' || role === 'owner';
+      return role === 'moderator' || role === 'admin' || role === 'owner';
     });
 
     if (userTeams.length === 0) {
@@ -58,10 +59,10 @@ export function AdminPage() {
   }, [authLoading, userTeams, getUserRoleInTeam, navigate]);
 
   useEffect(() => {
-    // Check if user has admin role
+    // Check if user has moderator role or higher
     const hasAdminRole = userTeams.some(team => {
       const role = getUserRoleInTeam(team.id);
-      return role === 'admin' || role === 'owner';
+      return role === 'moderator' || role === 'admin' || role === 'owner';
     });
 
     if (hasAdminRole) {
@@ -111,8 +112,14 @@ export function AdminPage() {
   };
 
 
-  // Check if user has admin role
+  // Check if user has moderator role or higher
   const hasAdminRole = userTeams.some(team => {
+    const role = getUserRoleInTeam(team.id);
+    return role === 'moderator' || role === 'admin' || role === 'owner';
+  });
+
+  // Check if user has full admin role (admin or owner) for admin-only features
+  const hasFullAdminRole = userTeams.some(team => {
     const role = getUserRoleInTeam(team.id);
     return role === 'admin' || role === 'owner';
   });
@@ -228,25 +235,40 @@ export function AdminPage() {
                   Teams
                 </button>
                 <button
-                  onClick={() => setActiveTab('export')}
+                  onClick={() => setActiveTab('tags')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'export'
+                    activeTab === 'tags'
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  Export
+                  Tags
                 </button>
-                <button
-                  onClick={() => setActiveTab('audit')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'audit'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  Audit Log
-                </button>
+                {/* Export and Audit tabs - admin/owner only */}
+                {hasFullAdminRole && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('export')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                        activeTab === 'export'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      Export
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('audit')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                        activeTab === 'audit'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      Audit Log
+                    </button>
+                  </>
+                )}
           </nav>
         </div>
         
@@ -288,6 +310,21 @@ export function AdminPage() {
                         </svg>
                       </div>
                       
+                      {/* Tags */}
+                      {question.tags && question.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {question.tags.map((questionTag) => (
+                            <span
+                              key={questionTag.id}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+                              style={{ backgroundColor: questionTag.tag.color }}
+                            >
+                              {questionTag.tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
                       <p className="text-gray-900 dark:text-gray-100 leading-relaxed line-clamp-3">
                         {question.body}
                       </p>
@@ -307,9 +344,12 @@ export function AdminPage() {
 
             {activeTab === 'teams' && <TeamManagement />}
 
-            {activeTab === 'export' && <ExportPage />}
+            {activeTab === 'tags' && <TagManagement />}
+
+            {/* Export and Audit content - admin/owner only */}
+            {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
             
-            {activeTab === 'audit' && (
+            {hasFullAdminRole && activeTab === 'audit' && (
               <div className="mt-[-2rem]">
                 <AuditPage embedded={true} />
               </div>

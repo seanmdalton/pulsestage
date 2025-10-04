@@ -59,7 +59,7 @@ export interface TeamMembership {
   id: string;
   userId: string;
   teamId: string;
-  role: 'member' | 'admin' | 'owner';
+  role: 'member' | 'moderator' | 'admin' | 'owner';
   createdAt: string;
   user?: User;
   team?: Team;
@@ -77,7 +77,7 @@ export interface UserPreferences {
 
 // Enhanced team type with user context
 export interface TeamWithMembership extends Team {
-  userRole?: 'member' | 'admin' | 'owner';
+  userRole?: 'member' | 'moderator' | 'admin' | 'owner';
   isFavorite?: boolean;
   memberCount?: number;
   members?: TeamMembership[];
@@ -97,11 +97,11 @@ export interface UpdateUserPreferencesRequest {
 
 export interface AddTeamMemberRequest {
   userId: string;
-  role?: 'member' | 'admin' | 'owner';
+  role?: 'member' | 'moderator' | 'admin' | 'owner';
 }
 
 export interface UpdateTeamMemberRequest {
-  role: 'member' | 'admin' | 'owner';
+  role: 'member' | 'moderator' | 'admin' | 'owner';
 }
 
 // User context response types
@@ -545,14 +545,14 @@ class ApiClient {
 
   async getUserTeams(): Promise<UserTeamsResponse> {
     const TeamWithMembershipSchema = TeamSchema.extend({
-      userRole: z.enum(['member', 'admin', 'owner']).optional(),
+      userRole: z.enum(['member', 'moderator', 'admin', 'owner']).optional(),
       isFavorite: z.boolean().optional(),
       memberCount: z.number().optional(),
       members: z.array(z.object({
         id: z.string(),
         userId: z.string(),
         teamId: z.string(),
-        role: z.enum(['member', 'admin', 'owner']),
+        role: z.enum(['member', 'moderator', 'admin', 'owner']),
         createdAt: z.string(),
         user: z.object({
           id: z.string(),
@@ -640,7 +640,7 @@ class ApiClient {
       id: z.string(),
       userId: z.string(),
       teamId: z.string(),
-      role: z.enum(['member', 'admin', 'owner']),
+      role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
       user: z.object({
         id: z.string(),
@@ -657,14 +657,14 @@ class ApiClient {
   async addTeamMember(teamId: string, data: AddTeamMemberRequest): Promise<TeamMembership> {
     const AddTeamMemberSchema = z.object({
       userId: z.string(),
-      role: z.enum(['member', 'admin', 'owner']).optional()
+      role: z.enum(['member', 'moderator', 'admin', 'owner']).optional()
     });
 
     const TeamMembershipSchema = z.object({
       id: z.string(),
       userId: z.string(),
       teamId: z.string(),
-      role: z.enum(['member', 'admin', 'owner']),
+      role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
       user: z.object({
         id: z.string(),
@@ -682,14 +682,14 @@ class ApiClient {
 
   async updateTeamMember(teamId: string, userId: string, data: UpdateTeamMemberRequest): Promise<TeamMembership> {
     const UpdateTeamMemberSchema = z.object({
-      role: z.enum(['member', 'admin', 'owner'])
+      role: z.enum(['member', 'moderator', 'admin', 'owner'])
     });
 
     const TeamMembershipSchema = z.object({
       id: z.string(),
       userId: z.string(),
       teamId: z.string(),
-      role: z.enum(['member', 'admin', 'owner']),
+      role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
       user: z.object({
         id: z.string(),

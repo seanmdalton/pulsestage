@@ -3,6 +3,12 @@ import { Modal } from './Modal';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface ResponseModalProps {
   question: Question | null;
   isOpen: boolean;
@@ -14,14 +20,51 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
   const [response, setResponse] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [loadingTags, setLoadingTags] = useState(false);
+
+  // Load tags when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadTags();
+    }
+  }, [isOpen]);
 
   // Reset form when modal opens/closes or question changes
   useEffect(() => {
     if (isOpen && question) {
       setResponse('');
       setError(null);
+      // Pre-select existing tags
+      const existingTagIds = new Set(question.tags?.map(qt => qt.tag.id) || []);
+      setSelectedTags(existingTagIds);
     }
   }, [isOpen, question]);
+
+  const loadTags = async () => {
+    try {
+      setLoadingTags(true);
+      const tagsData = await apiClient.getTags();
+      setTags(tagsData);
+    } catch (err) {
+      console.error('Failed to load tags:', err);
+    } finally {
+      setLoadingTags(false);
+    }
+  };
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tagId)) {
+        newSet.delete(tagId);
+      } else {
+        newSet.add(tagId);
+      }
+      return newSet;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +74,32 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
     setError(null);
 
     try {
-      const updatedQuestion = await apiClient.respondToQuestionWithSession(
+      // Submit the response
+      let updatedQuestion = await apiClient.respondToQuestionWithSession(
         question.id, 
         { response: response.trim() }
       );
+      
+      // Manage tags (add/remove)
+      const existingTagIds = new Set(question.tags?.map(qt => qt.tag.id) || []);
+      const tagsToAdd = Array.from(selectedTags).filter(id => !existingTagIds.has(id));
+      const tagsToRemove = Array.from(existingTagIds).filter(id => !selectedTags.has(id));
+
+      // Add new tags
+      for (const tagId of tagsToAdd) {
+        await apiClient.addTagToQuestion(question.id, tagId);
+      }
+
+      // Remove unselected tags
+      for (const tagId of tagsToRemove) {
+        await apiClient.removeTagFromQuestion(question.id, tagId);
+      }
+
+      // Reload question to get updated tags
+      if (tagsToAdd.length > 0 || tagsToRemove.length > 0) {
+        const questions = await apiClient.getQuestions('ANSWERED');
+        updatedQuestion = questions.find(q => q.id === question.id) || updatedQuestion;
+      }
       
       onSuccess(updatedQuestion);
       onClose();
@@ -76,6 +141,46 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
 
         {/* Response Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Tags Section */}
+          {tags.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tags (Optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleTag(tag.id)}
+                    disabled={isSubmitting}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                      selectedTags.has(tag.id)
+                        ? 'text-white ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
+                        : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={{ 
+                      backgroundColor: tag.color,
+                      opacity: selectedTags.has(tag.id) ? 1 : 0.6
+                    }}
+                  >
+                    {selectedTags.has(tag.id) && (
+                      <svg className="w-3 h-3 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+              {loadingTags && (
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Loading tags...
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label htmlFor="response" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Your Response

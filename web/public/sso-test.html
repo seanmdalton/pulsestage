@@ -57,6 +57,7 @@
         }
         .role-admin { background: #fef3c7; color: #92400e; }
         .role-member { background: #d1fae5; color: #065f46; }
+        .role-moderator { background: #d9f99d; color: #3f6212; }
         .role-owner { background: #e0e7ff; color: #3730a3; }
         .teams {
             margin-top: 10px;
@@ -227,6 +228,18 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
                     teams: 'Engineering (member)'
                 },
                 {
+                    email: 'sarah@example.com',
+                    name: 'Sarah Wilson',
+                    role: 'moderator',
+                    teams: 'Engineering, Product (moderator)'
+                },
+                {
+                    email: 'mike@example.com',
+                    name: 'Mike Chen',
+                    role: 'moderator',
+                    teams: 'Design, Marketing (moderator)'
+                },
+                {
                     email: 'bob.wilson@company.com',
                     name: 'Bob Wilson',
                     role: 'owner',
@@ -245,6 +258,12 @@ curl -H "x-mock-sso-user: bob.wilson@company.com" http://localhost:3000/users/me
                     name: 'Charlie Chen',
                     role: 'owner',
                     teams: 'Product (owner), Marketing (admin)'
+                },
+                {
+                    email: 'david@acme.com',
+                    name: 'David Martinez',
+                    role: 'moderator',
+                    teams: 'Engineering (moderator)'
                 },
                 {
                     email: 'emily.member@acme.com',

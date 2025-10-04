@@ -134,6 +134,21 @@ export function AnsweredQuestionsPage() {
                       </svg>
                     </div>
                     
+                    {/* Tags */}
+                    {question.tags && question.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {question.tags.map((questionTag) => (
+                          <span
+                            key={questionTag.id}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: questionTag.tag.color }}
+                          >
+                            {questionTag.tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
                     <div className="mb-3">
                       <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Question</h3>
                       <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-2 leading-relaxed">

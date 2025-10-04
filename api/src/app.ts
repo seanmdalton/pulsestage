@@ -34,6 +34,8 @@ import { createTenantResolverMiddleware } from "./middleware/tenantResolver.js";
 import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
 import { eventBus } from "./lib/eventBus.js";
 import { initAuditService, auditService } from "./lib/auditService.js";
+import { initPermissionMiddleware, requirePermission, requireRole } from "./middleware/requirePermission.js";
+import { initTeamScopingMiddleware, extractQuestionTeam, getUserTeamsByRole } from "./middleware/teamScoping.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,6 +48,12 @@ export function createApp(prisma: PrismaClient) {
 
   // Initialize audit service
   initAuditService(prisma);
+
+  // Initialize permission middleware
+  initPermissionMiddleware(prisma);
+
+  // Initialize team scoping middleware
+  initTeamScopingMiddleware(prisma);
 
   // CORS configuration
   app.use(cors({
@@ -148,7 +156,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions", rateLimit("create-question", 10), mockAuthMiddleware, async (req, res) => {
+  app.post("/questions", rateLimit("create-question", 10), requirePermission('question.submit'), async (req, res) => {
     const parse = createQuestionSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
     
@@ -213,6 +221,34 @@ export function createApp(prisma: PrismaClient) {
       where.teamId = teamId;
     }
     
+    // Team scoping for moderators: only show questions from teams they moderate
+    // Admins and owners can see all questions
+    if (req.user) {
+      try {
+        const memberships = await prisma.teamMembership.findMany({
+          where: { userId: req.user.id },
+          select: { role: true, teamId: true }
+        });
+
+        const hasAdminRole = memberships.some(m => m.role === 'admin' || m.role === 'owner');
+        
+        if (!hasAdminRole && !teamId) {
+          // User is a moderator/member - filter to only their teams
+          const userTeamIds = memberships.map(m => m.teamId);
+          
+          if (userTeamIds.length === 0) {
+            // User has no teams, return empty list
+            return res.json([]);
+          }
+          
+          where.teamId = { in: userTeamIds };
+        }
+      } catch (error) {
+        console.error('Error checking team memberships:', error);
+        // On error, continue without filtering (fail open)
+      }
+    }
+    
     const list = await prisma.question.findMany({
       where,
       include: {
@@ -229,7 +265,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions/:id/upvote", rateLimit("upvote", 10), mockAuthMiddleware, async (req, res) => {
+  app.post("/questions/:id/upvote", rateLimit("upvote", 10), requirePermission('question.upvote', { allowUnauthenticated: true }), async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
     
@@ -481,7 +517,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create team (admin only)
-  app.post("/teams", requireAdminRole, async (req, res) => {
+  app.post("/teams", requirePermission('team.create'), async (req, res) => {
     const parse = createTeamSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.flatten() });
@@ -533,7 +569,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Update team (admin only)
-  app.put("/teams/:id", requireAdminRole, async (req, res) => {
+  app.put("/teams/:id", requirePermission('team.edit', { teamIdParam: 'id' }), async (req, res) => {
     const { id } = req.params;
     const parse = updateTeamSchema.safeParse(req.body);
     if (!parse.success) {
@@ -580,7 +616,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Deactivate team (admin only) - soft delete
-  app.delete("/teams/:id", requireAdminRole, async (req, res) => {
+  app.delete("/teams/:id", requirePermission('team.delete', { teamIdParam: 'id' }), async (req, res) => {
     const { id } = req.params;
     
     try {
@@ -615,8 +651,9 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
-  // Protected by admin role (new approach)
-  app.post("/questions/:id/respond", requireAdminRole, async (req, res) => {
+  // Protected by moderator or higher (question.answer permission)
+  // Team-scoped: moderators can only answer questions from their teams
+  app.post("/questions/:id/respond", extractQuestionTeam(), requirePermission('question.answer', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
@@ -854,7 +891,7 @@ export function createApp(prisma: PrismaClient) {
 // Export endpoints (admin only)
     
     // Get export preview
-    app.get("/admin/export/preview", requireAdminRole, async (req, res) => {
+    app.get("/admin/export/preview", requirePermission('data.export'), async (req, res) => {
       try {
         const filters = req.query;
         
@@ -943,7 +980,7 @@ export function createApp(prisma: PrismaClient) {
     });
     
     // Download export
-    app.get("/admin/export/download", requireAdminRole, async (req, res) => {
+    app.get("/admin/export/download", requirePermission('data.export'), async (req, res) => {
       try {
         const filters = req.query;
         const format = (filters.format as string) || 'csv';
@@ -1090,7 +1127,7 @@ export function createApp(prisma: PrismaClient) {
 // Tag endpoints (admin only)
     
     // Get all tags
-    app.get("/tags", requireAdminRole, async (_req, res) => {
+    app.get("/tags", requirePermission('tag.view'), async (_req, res) => {
     try {
       const tags = await prisma.tag.findMany({
         orderBy: { name: 'asc' }
@@ -1103,7 +1140,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Create a new tag
-  app.post("/tags", requireAdminRole, async (req, res) => {
+  app.post("/tags", requirePermission('tag.create'), async (req, res) => {
     const createTagSchema = z.object({
       name: z.string().min(1).max(100),
       description: z.string().max(500).optional(),
@@ -1144,7 +1181,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Add tag to question
-  app.post("/questions/:id/tags", requireAdminRole, async (req, res) => {
+  // Team-scoped: moderators can only tag questions from their teams
+  app.post("/questions/:id/tags", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const addTagSchema = z.object({
       tagId: z.string().uuid()
@@ -1221,7 +1259,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Remove tag from question
-  app.delete("/questions/:id/tags/:tagId", requireAdminRole, async (req, res) => {
+  // Team-scoped: moderators can only untag questions from their teams
+  app.delete("/questions/:id/tags/:tagId", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id, tagId } = req.params;
 
     try {
@@ -1290,7 +1329,7 @@ export function createApp(prisma: PrismaClient) {
   // Audit log endpoints (admin only)
   
   // Get audit logs
-  app.get("/admin/audit", requireAdminRole, async (req, res) => {
+  app.get("/admin/audit", requirePermission('audit.view'), async (req, res) => {
     try {
       const filters = {
         userId: req.query.userId as string | undefined,
@@ -1325,7 +1364,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Export audit logs
-  app.get("/admin/audit/export", requireAdminRole, async (req, res) => {
+  app.get("/admin/audit/export", requirePermission('audit.view'), async (req, res) => {
     try {
       const filters = {
         userId: req.query.userId as string | undefined,
