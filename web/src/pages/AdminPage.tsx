@@ -9,6 +9,7 @@ import { TeamManagement } from '../components/TeamManagement';
 import { PulseStageLogo } from '../components/PulseStageLogo';
 import { useTheme } from '../contexts/ThemeContext';
 import { ExportPage } from './ExportPage';
+import { AuditPage } from './AuditPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 
@@ -23,7 +24,7 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'export'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'export' | 'audit'>('questions');
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
 
   // Set page title
@@ -236,6 +237,16 @@ export function AdminPage() {
                 >
                   Export
                 </button>
+                <button
+                  onClick={() => setActiveTab('audit')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'audit'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  Audit Log
+                </button>
           </nav>
         </div>
         
@@ -297,6 +308,12 @@ export function AdminPage() {
             {activeTab === 'teams' && <TeamManagement />}
 
             {activeTab === 'export' && <ExportPage />}
+            
+            {activeTab === 'audit' && (
+              <div className="mt-[-2rem]">
+                <AuditPage embedded={true} />
+              </div>
+            )}
       </div>
 
       {/* Response Modal */}

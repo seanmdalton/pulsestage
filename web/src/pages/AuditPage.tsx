@@ -17,6 +17,10 @@
 import { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 
+interface AuditPageProps {
+  embedded?: boolean; // When true, skip navbar and header
+}
+
 interface AuditLog {
   id: string;
   action: string;
@@ -40,7 +44,7 @@ interface AuditResponse {
   offset: number;
 }
 
-export function AuditPage() {
+export function AuditPage({ embedded = false }: AuditPageProps = {}) {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -160,11 +164,9 @@ export function AuditPage() {
   const currentPage = Math.floor(offset / limit) + 1;
   const totalPages = Math.ceil(total / limit);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Navbar />
-      
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+  const content = (
+    <>
+      {!embedded && (
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Audit Log
@@ -173,6 +175,7 @@ export function AuditPage() {
             View and export all administrative actions
           </p>
         </div>
+      )}
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -380,6 +383,19 @@ export function AuditPage() {
             </>
           )}
         </div>
+    </>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {content}
       </main>
     </div>
   );
