@@ -7,6 +7,12 @@ export default {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        // You can add additional font families if needed:
+        // display: ['Manrope', 'sans-serif'], // For headings
+        // body: ['Manrope', 'sans-serif'],    // For body text
+      },
       colors: {
         // PulseStage Brand Colors
         'pulse': {
