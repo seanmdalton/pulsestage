@@ -1,7 +1,7 @@
 # PulseStage
 
 <div align="center">
-  <img src="../web/public/pulsestage-wordmark-tight-light.svg" alt="PulseStage" width="400">
+  <img src="assets/pulsestage-wordmark-light.svg" alt="PulseStage" width="400">
   <p><strong>Open-source Q&A Platform for Town Halls and All-Hands</strong></p>
 </div>
 

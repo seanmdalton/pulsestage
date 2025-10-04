@@ -38,8 +38,8 @@ theme:
     - content.code.annotate
   icon:
     repo: fontawesome/brands/github
-  logo: web/public/pulsestage-icon-light.svg
-  favicon: web/public/favicon.ico
+  logo: assets/pulsestage-icon-light.svg
+  favicon: assets/favicon.ico
 
 extra:
   social:
