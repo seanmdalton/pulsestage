@@ -79,6 +79,7 @@
 - **Profile team management** - Set favorites and default team directly from profile page
 
 ### Security & Performance
+- **Audit logging** - Comprehensive append-only audit trail of all admin actions
 - **Environment-aware rate limiting** - Disabled in development, enabled in production
 - **Session management** - Redis-backed secure session storage
 - **CORS protection** - Configurable cross-origin resource sharing
@@ -458,6 +459,23 @@ npm run test:e2e:ui        # Run with Playwright UI
 - **Session-based admin auth** - HTTP-only cookies with secure session storage
 - **Session expiration** - Configurable session timeout
 - **CSRF protection** - SameSite cookie attributes
+
+### Audit Logging
+- **Comprehensive audit trail** - All admin actions are automatically logged
+- **Append-only design** - Audit logs cannot be modified or deleted
+- **Tenant isolation** - Audit logs are scoped per tenant
+- **Rich metadata** - Captures user, IP address, user-agent, before/after state
+- **Filterable UI** - Filter by action, entity type, user, date range
+- **Export functionality** - Export audit logs as CSV or JSON
+- **Automatic capture** - No manual logging required, handled by audit service
+
+**What's Logged:**
+- Question answering and responses
+- Team creation, updates, and deactivation
+- Tag creation and question tagging/untagging
+- User information and metadata changes
+
+**Access:** Admin → Audit Log (admin-only page)
 - **Environment-aware** - Different security levels for dev/prod
 
 ### Rate Limiting
