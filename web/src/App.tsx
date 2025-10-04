@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SubmitPage } from './pages/SubmitPage';
 import { OpenQuestionsPage } from './pages/OpenQuestionsPage';
 import { AnsweredQuestionsPage } from './pages/AnsweredQuestionsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AuditPage } from './pages/AuditPage';
 import { PresentationPage } from './pages/PresentationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { Navbar } from './components/Navbar';
@@ -65,6 +66,7 @@ function App() {
                     {/* Admin routes (not team-scoped) */}
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/login" element={<AdminLoginPage />} />
+                    <Route path="/admin/audit" element={<AuditPage />} />
                     
                     {/* Profile routes (not team-scoped) */}
                     <Route path="/profile" element={<ProfilePage />} />
