@@ -35,6 +35,7 @@ import { applyTenantMiddleware } from "./middleware/prismaMiddleware.js";
 import { eventBus } from "./lib/eventBus.js";
 import { initAuditService, auditService } from "./lib/auditService.js";
 import { initPermissionMiddleware, requirePermission, requireRole } from "./middleware/requirePermission.js";
+import { initTeamScopingMiddleware, extractQuestionTeam, getUserTeamsByRole } from "./middleware/teamScoping.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,6 +51,9 @@ export function createApp(prisma: PrismaClient) {
 
   // Initialize permission middleware
   initPermissionMiddleware(prisma);
+
+  // Initialize team scoping middleware
+  initTeamScopingMiddleware(prisma);
 
   // CORS configuration
   app.use(cors({
@@ -215,6 +219,34 @@ export function createApp(prisma: PrismaClient) {
     // Add team filter if provided
     if (teamId) {
       where.teamId = teamId;
+    }
+    
+    // Team scoping for moderators: only show questions from teams they moderate
+    // Admins and owners can see all questions
+    if (req.user) {
+      try {
+        const memberships = await prisma.teamMembership.findMany({
+          where: { userId: req.user.id },
+          select: { role: true, teamId: true }
+        });
+
+        const hasAdminRole = memberships.some(m => m.role === 'admin' || m.role === 'owner');
+        
+        if (!hasAdminRole && !teamId) {
+          // User is a moderator/member - filter to only their teams
+          const userTeamIds = memberships.map(m => m.teamId);
+          
+          if (userTeamIds.length === 0) {
+            // User has no teams, return empty list
+            return res.json([]);
+          }
+          
+          where.teamId = { in: userTeamIds };
+        }
+      } catch (error) {
+        console.error('Error checking team memberships:', error);
+        // On error, continue without filtering (fail open)
+      }
     }
     
     const list = await prisma.question.findMany({
@@ -620,7 +652,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Protected by moderator or higher (question.answer permission)
-  app.post("/questions/:id/respond", requirePermission('question.answer'), async (req, res) => {
+  // Team-scoped: moderators can only answer questions from their teams
+  app.post("/questions/:id/respond", extractQuestionTeam(), requirePermission('question.answer', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
@@ -1148,7 +1181,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Add tag to question
-  app.post("/questions/:id/tags", requirePermission('question.tag'), async (req, res) => {
+  // Team-scoped: moderators can only tag questions from their teams
+  app.post("/questions/:id/tags", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const addTagSchema = z.object({
       tagId: z.string().uuid()
@@ -1225,7 +1259,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Remove tag from question
-  app.delete("/questions/:id/tags/:tagId", requirePermission('question.tag'), async (req, res) => {
+  // Team-scoped: moderators can only untag questions from their teams
+  app.delete("/questions/:id/tags/:tagId", extractQuestionTeam(), requirePermission('question.tag', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id, tagId } = req.params;
 
     try {
