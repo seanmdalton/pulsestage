@@ -23,7 +23,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}-api
       - name: Build & push API
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./api
           push: true
