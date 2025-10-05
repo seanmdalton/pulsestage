@@ -13,11 +13,12 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:push": "prisma db push",
-    "db:seed": "npm run build && node dist/seed-multi-tenant-data.js",
-    "db:seed:tags": "npm run build && node dist/seed-tags.js",
-    "db:seed:full": "npm run build && node dist/seed-multi-tenant-data.js && node dist/seed-tags.js && node load-comprehensive-test-data.js",
-    "db:seed:dev": "ts-node-dev --transpile-only src/seed-multi-tenant-data.ts",
-    "db:seed:tags:dev": "ts-node-dev --transpile-only src/seed-tags.ts",
+    "db:seed": "node dist/seed-multi-tenant-data.js",
+    "db:seed:tags": "node dist/seed-tags.js",
+    "db:seed:full": "node dist/seed-multi-tenant-data.js && node dist/seed-tags.js && node load-comprehensive-test-data.js",
+    "db:seed:dev": "npm run build && node dist/seed-multi-tenant-data.js",
+    "db:seed:tags:dev": "npm run build && node dist/seed-tags.js",
+    "db:seed:full:dev": "npm run build && node dist/seed-multi-tenant-data.js && node dist/seed-tags.js && node load-comprehensive-test-data.js",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
