@@ -1953,14 +1953,16 @@ export function createApp(prisma: PrismaClient) {
         where.teamId = teamId;
       }
 
-      // Date range filter
+      // Date range filter - parse as UTC boundaries to include full days
       if (startDate || endDate) {
         where.reviewedAt = {};
         if (startDate) {
-          where.reviewedAt.gte = new Date(startDate as string);
+          // Parse as YYYY-MM-DD and set to start of day (00:00:00 UTC)
+          where.reviewedAt.gte = new Date(startDate + 'T00:00:00.000Z');
         }
         if (endDate) {
-          where.reviewedAt.lte = new Date(endDate as string);
+          // Parse as YYYY-MM-DD and set to end of day (23:59:59.999 UTC)
+          where.reviewedAt.lte = new Date(endDate + 'T23:59:59.999Z');
         }
       }
 
