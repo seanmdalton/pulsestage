@@ -28,20 +28,32 @@ cd pulsestage
 
 ### 2. Configure Environment
 
+Run the setup script to generate secure configuration:
+
 ```bash
 ./setup.sh
 ```
 
-Or manually create `.env`:
+This automatically:
+- Creates `.env` file with all required settings
+- Generates secure random secrets using OpenSSL
+- Sets up database and Redis URLs
+- Configures ports and CORS
+
+**Manual Setup (Alternative)**:
+
+If you prefer manual configuration:
 
 ```bash
 cp env.example .env
 ```
 
-Edit `.env` and set:
-- `SESSION_SECRET` - Random 32+ character string
+Then edit `.env` and set:
+- `SESSION_SECRET` - Random 32+ character string (generate with: `openssl rand -base64 32`)
 - `ADMIN_SESSION_SECRET` - Different random 32+ character string
-- `CORS_ORIGIN` - Your frontend URL (default: http://localhost:3000)
+- `CSRF_SECRET` - Another random 32+ character string
+- `ADMIN_KEY` - Admin authentication key (change from default!)
+- `CORS_ORIGIN` - Your frontend URL (default: http://localhost:5173)
 
 ### 3. Start Services
 
@@ -51,10 +63,39 @@ docker compose up -d
 
 ### 4. Initialize Database
 
-The database is automatically initialized with:
+The database is automatically initialized on first startup with:
 - Default tenant
-- Sample teams
-- Test users
+- Sample teams (Engineering, People, Product, etc.)
+- Test users with different roles
+- Basic data structures
+
+**Load Additional Test Data (Optional)**:
+
+For comprehensive testing with realistic data:
+
+```bash
+cd api
+npm run db:seed:full
+```
+
+This adds:
+- 100+ sample questions across all teams
+- Answered questions with responses
+- Tags (Currently Presenting, Urgent, Feature Request, etc.)
+- Upvotes and interactions
+
+**Individual Seed Commands**:
+
+```bash
+# Reseed teams and users only
+npm run db:seed
+
+# Add tags only
+npm run db:seed:tags
+
+# Full comprehensive data load
+npm run db:seed:full
+```
 
 ### 5. Verify Installation
 
@@ -75,9 +116,10 @@ ama-app-web-1       ama-app-web         Up
 
 ### 6. Access Application
 
-- **Web UI**: http://localhost:3000
-- **API**: http://localhost:5001
-- **API Docs**: http://localhost:5001/api-docs
+- **Web UI**: http://localhost:5173
+- **API**: http://localhost:3000
+- **API Docs (Swagger)**: http://localhost:3000/api-docs
+- **SSO Test Page**: http://localhost:5173/sso-test.html
 
 ## Local Development Installation
 
@@ -120,9 +162,11 @@ cp env.example .env
 
 ```bash
 cd api
-npx prisma migrate dev
-npx prisma db seed
+npx prisma db push
+npm run db:seed
 ```
+
+**Note**: We use `prisma db push` for development. For production, use proper migrations with `prisma migrate deploy`.
 
 ### 5. Start Development Servers
 
@@ -141,7 +185,8 @@ npm run dev
 ### 6. Access Development Environment
 
 - **Web UI**: http://localhost:5173 (Vite dev server)
-- **API**: http://localhost:5001
+- **API**: http://localhost:3000
+- **API Docs**: http://localhost:3000/api-docs
 
 ## Production Deployment
 
@@ -151,18 +196,20 @@ See [Deployment Guide](../deployment/production.md) for production setup instruc
 
 ### Port Conflicts
 
-If ports 3000 or 5001 are already in use, modify `docker-compose.yaml`:
+If ports are already in use, modify `docker-compose.yaml`:
 
 ```yaml
 services:
   web:
     ports:
-      - "8080:80"  # Change 3000 to 8080
+      - "8080:80"  # Change external port 5173 to 8080
   
   api:
     ports:
-      - "5002:5001"  # Change 5001 to 5002
+      - "3001:3000"  # Change external port 3000 to 3001
 ```
+
+Then update `CORS_ORIGIN` in `.env` to match your new web port.
 
 ### Database Connection Errors
 

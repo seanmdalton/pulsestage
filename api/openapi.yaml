@@ -160,6 +160,41 @@ components:
                   updatedAt:
                     type: string
                     format: date-time
+        isPinned:
+          type: boolean
+          default: false
+          description: Whether the question is pinned
+        pinnedBy:
+          type: string
+          nullable: true
+          description: User ID who pinned the question
+        pinnedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when question was pinned
+        isFrozen:
+          type: boolean
+          default: false
+          description: Whether the question is frozen (cannot receive upvotes/responses)
+        frozenBy:
+          type: string
+          nullable: true
+          description: User ID who froze the question
+        frozenAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when question was frozen
+        reviewedBy:
+          type: string
+          nullable: true
+          description: Last moderator who reviewed this question
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of last review
 
     Team:
       type: object
@@ -729,6 +764,380 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /questions/{id}/pin:
+    post:
+      tags:
+        - Admin
+      summary: Pin a question
+      description: Pin a question to keep it at the top of the list
+      operationId: pinQuestion
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question pinned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Question not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /questions/{id}/freeze:
+    post:
+      tags:
+        - Admin
+      summary: Freeze a question
+      description: Freeze a question to prevent further upvotes or responses
+      operationId: freezeQuestion
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question frozen successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Question not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/moderation-queue:
+    get:
+      tags:
+        - Admin
+      summary: Get moderation queue
+      description: Get paginated list of questions for moderation with filtering options
+      operationId: getModerationQueue
+      security:
+        - AdminSession: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Filter by question status
+          schema:
+            type: string
+            enum: [OPEN, ANSWERED, all]
+        - name: teamId
+          in: query
+          required: false
+          description: Filter by team ID
+          schema:
+            type: string
+            format: uuid
+        - name: isPinned
+          in: query
+          required: false
+          description: Filter by pinned status
+          schema:
+            type: boolean
+        - name: isFrozen
+          in: query
+          required: false
+          description: Filter by frozen status
+          schema:
+            type: boolean
+        - name: needsReview
+          in: query
+          required: false
+          description: Filter for questions that need review
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          required: false
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Moderation queue retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/bulk-tag:
+    post:
+      tags:
+        - Admin
+      summary: Bulk tag questions
+      description: Add a tag to multiple questions at once
+      operationId: bulkTagQuestions
+      security:
+        - AdminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - questionIds
+                - tagId
+              properties:
+                questionIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Array of question IDs to tag
+                tagId:
+                  type: string
+                  format: uuid
+                  description: Tag ID to add to questions
+      responses:
+        '200':
+          description: Questions tagged successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  tagged:
+                    type: integer
+                    description: Number of questions tagged
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/bulk-action:
+    post:
+      tags:
+        - Admin
+      summary: Bulk action on questions
+      description: Perform bulk actions (pin, freeze, delete) on multiple questions
+      operationId: bulkActionQuestions
+      security:
+        - AdminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - questionIds
+                - action
+              properties:
+                questionIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Array of question IDs to act upon
+                action:
+                  type: string
+                  enum: [pin, freeze, delete]
+                  description: Action to perform
+      responses:
+        '200':
+          description: Bulk action completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  affected:
+                    type: integer
+                    description: Number of questions affected
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/stats/moderation:
+    get:
+      tags:
+        - Admin
+      summary: Get moderation statistics
+      description: Get moderation metrics and statistics with optional filtering
+      operationId: getModerationStats
+      security:
+        - AdminSession: []
+      parameters:
+        - name: teamId
+          in: query
+          required: false
+          description: Filter by team ID
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: false
+          description: Start date for date range filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          description: End date for date range filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Moderation statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overall:
+                    type: object
+                    properties:
+                      totalQuestionsReviewed:
+                        type: integer
+                      totalQuestionsPinned:
+                        type: integer
+                      totalQuestionsFrozen:
+                        type: integer
+                      totalQuestionsAnswered:
+                        type: integer
+                  byModerator:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        moderatorId:
+                          type: string
+                        moderatorName:
+                          type: string
+                        questionsReviewed:
+                          type: integer
+                        questionsAnswered:
+                          type: integer
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /admin/login:
     post:

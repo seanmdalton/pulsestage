@@ -13,6 +13,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:push": "prisma db push",
+    "db:seed": "ts-node-dev --transpile-only src/seed-multi-tenant-data.ts",
+    "db:seed:tags": "ts-node-dev --transpile-only src/seed-tags.ts",
+    "db:seed:full": "npm run db:seed && npm run db:seed:tags && node load-comprehensive-test-data.js",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {

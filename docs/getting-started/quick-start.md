@@ -19,30 +19,49 @@ cd pulsestage
 
 ### 2. Run Setup Script
 
-The setup script creates your environment configuration:
+The setup script creates your environment configuration with secure secrets:
 
 ```bash
 ./setup.sh
 ```
 
 This will:
-- Copy `env.example` to `.env`
-- Generate secure session secrets
-- Set up default configuration
+- Create `.env` file with all required configuration
+- Generate secure random secrets for sessions and CSRF
+- Set up database and Redis connection strings
+- Configure default ports and CORS settings
+
+**Note**: The generated admin key is `dev-admin-key-change-me`. Change this in production!
 
 ### 3. Start the Services
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
-This will start:
+This will start all services in the background:
 - **PostgreSQL** database on port 5432
 - **Redis** cache on port 6379
 - **API** server on port 3000
 - **Web** frontend on port 5173
 
-### 4. Access PulseStage
+The database is automatically initialized with:
+- Default tenant and teams
+- Test users with different roles
+- Sample data for testing
+
+### 4. (Optional) Load Additional Test Data
+
+For a more comprehensive test environment:
+
+```bash
+cd api
+npm run db:seed:full
+```
+
+This loads realistic questions, answers, and tags across all teams.
+
+### 5. Access PulseStage
 
 Open your browser and navigate to:
 
@@ -68,13 +87,18 @@ http://localhost:5173/sso-test.html
 
 ### Choose a Test User
 
-You'll see several test users with different roles:
+Access the SSO test page to see all available users:
+
+```
+http://localhost:5173/sso-test.html
+```
 
 **Default Tenant:**
-- **John Doe** (john.doe@company.com) - Admin role
-- **Mike Chen** (mike.chen@company.com) - Moderator of People team
-- **Sarah Wilson** (sarah@example.com) - Moderator of Engineering team
-- **Emily Rodriguez** (emily@example.com) - Moderator of multiple teams
+- **John Doe** (john.doe@company.com) - Owner (full access)
+- **Mike Chen** (mike.chen@company.com) - Moderator (People team)
+- **Sarah Wilson** (sarah.wilson@company.com) - Moderator (Engineering team)
+- **Emily Rodriguez** (emily.rodriguez@company.com) - Moderator (multiple teams)
+- **Alex Kim** (alex.kim@company.com) - Member
 - **Anonymous** - View without logging in
 
 **Acme Corp Tenant:**
