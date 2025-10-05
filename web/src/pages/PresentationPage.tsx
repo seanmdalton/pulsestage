@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question, Tag } from '../lib/api';
@@ -43,11 +43,24 @@ export function PresentationPage() {
       });
   
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentlyPresentingTag, setCurrentlyPresentingTag] = useState<Tag | null>(null);
   const [reviewedTag, setReviewedTag] = useState<Tag | null>(null);
+
+  // Refs to capture latest values for cleanup on unmount
+  const currentQuestionIdRef = useRef<string | null>(null);
+  const currentlyPresentingTagRef = useRef<Tag | null>(null);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    currentQuestionIdRef.current = currentQuestionId;
+  }, [currentQuestionId]);
+  
+  useEffect(() => {
+    currentlyPresentingTagRef.current = currentlyPresentingTag;
+  }, [currentlyPresentingTag]);
 
   // Set page title
   useEffect(() => {
@@ -76,10 +89,10 @@ export function PresentationPage() {
             const existingIndex = prev.findIndex(q => q.id === updatedQuestion.id);
             
             if (existingIndex >= 0) {
-              // Update existing question and re-sort
+              // Update existing question - DON'T re-sort to maintain stable presentation order
               const newQuestions = [...prev];
               newQuestions[existingIndex] = updatedQuestion;
-              return newQuestions.sort((a, b) => b.upvotes - a.upvotes);
+              return newQuestions;
             }
             
             return prev;
@@ -87,12 +100,12 @@ export function PresentationPage() {
         }
       }
     } else if (event.type === 'question:created') {
-      // Add new question if it matches filters
+      // Add new question if it matches filters (at the end, don't disrupt presentation)
       const newQuestion = event.data as Question;
       const matchesTeamFilter = !currentTeam || newQuestion.teamId === currentTeam.id;
       
       if (newQuestion.status === 'OPEN' && matchesTeamFilter) {
-        setQuestions(prev => [newQuestion, ...prev].sort((a, b) => b.upvotes - a.upvotes));
+        setQuestions(prev => [...prev, newQuestion]);
       }
     }
   };
@@ -155,28 +168,32 @@ export function PresentationPage() {
         // Sort by upvotes descending to get highest upvoted first
         const sortedQuestions = unreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
         setQuestions(sortedQuestions);
-        setCurrentQuestionIndex(0);
         
-        // Add "Currently Presenting" tag to the first question if we have questions and the tag
-        if (sortedQuestions.length > 0 && currentlyPresentingTag) {
+        // Set current question to the first one
+        if (sortedQuestions.length > 0 && !currentQuestionId) {
           const firstQuestion = sortedQuestions[0];
-          const hasCurrentlyPresentingTag = firstQuestion.tags?.some(
-            qt => qt.tag.id === currentlyPresentingTag.id
-          );
+          setCurrentQuestionId(firstQuestion.id);
           
-          if (!hasCurrentlyPresentingTag) {
-            try {
-              await apiClient.addTagToQuestion(firstQuestion.id, currentlyPresentingTag.id);
-              // Refresh questions to get updated tags
-              const updatedData = await apiClient.getQuestions('OPEN', currentTeam?.id);
-              const updatedUnreviewedQuestions = updatedData.filter(question => {
-                const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
-                return !hasReviewedTag;
-              });
-              const updatedSortedQuestions = updatedUnreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
-              setQuestions(updatedSortedQuestions);
-            } catch (err) {
-              console.error('Failed to add Currently Presenting tag:', err);
+          // Add "Currently Presenting" tag to the first question
+          if (currentlyPresentingTag) {
+            const hasCurrentlyPresentingTag = firstQuestion.tags?.some(
+              qt => qt.tag.id === currentlyPresentingTag.id
+            );
+            
+            if (!hasCurrentlyPresentingTag) {
+              try {
+                await apiClient.addTagToQuestion(firstQuestion.id, currentlyPresentingTag.id);
+                // Update the question in state with the new tag
+                const updatedData = await apiClient.getQuestions('OPEN', currentTeam?.id);
+                const updatedUnreviewedQuestions = updatedData.filter(question => {
+                  const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
+                  return !hasReviewedTag;
+                });
+                const updatedSortedQuestions = updatedUnreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
+                setQuestions(updatedSortedQuestions);
+              } catch (err) {
+                console.error('Failed to add Currently Presenting tag:', err);
+              }
             }
           }
         }
@@ -190,114 +207,60 @@ export function PresentationPage() {
     if (hasAdminRole && currentlyPresentingTag && reviewedTag) {
       loadQuestions();
     }
-  }, [hasAdminRole, currentTeam?.id, currentlyPresentingTag, reviewedTag]);
+  }, [hasAdminRole, currentTeam?.id, currentlyPresentingTag, reviewedTag, currentQuestionId]);
 
-  // Refresh questions periodically to get updated upvotes (but don't auto-move)
-  useEffect(() => {
-    if (!hasAdminRole) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
-        
-        // Filter out reviewed questions
-        const unreviewedQuestions = data.filter(question => {
-          const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
-          return !hasReviewedTag;
-        });
-        
-        const sortedQuestions = unreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
-        
-        // Try to maintain the current question index
-        const currentQuestion = questions[currentQuestionIndex];
-        if (currentQuestion) {
-          const newIndex = sortedQuestions.findIndex(q => q.id === currentQuestion.id);
-          if (newIndex !== -1) {
-            // Current question still exists, update the list and maintain index
-            setQuestions(sortedQuestions);
-            setCurrentQuestionIndex(newIndex);
-          } else {
-            // Current question was removed (likely marked as reviewed), go to first
-            setQuestions(sortedQuestions);
-            setCurrentQuestionIndex(0);
-          }
-        } else {
-          setQuestions(sortedQuestions);
-        }
-      } catch (err) {
-        console.error('Failed to refresh questions:', err);
-      }
-    }, 5000); // Refresh every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [hasAdminRole, currentTeam?.id, questions, currentQuestionIndex]);
+  // SSE will handle real-time updates, no need for periodic refresh
 
   const advanceToNext = useCallback(async () => {
-    if (questions.length === 0 || !currentlyPresentingTag) return;
+    if (questions.length === 0 || !currentlyPresentingTag || !currentQuestionId) return;
     
     try {
-      // Remove "Currently Presenting" tag from current question and add "Reviewed" tag
-      const currentQuestion = questions[currentQuestionIndex];
-      if (currentQuestion) {
-        const hasCurrentlyPresentingTag = currentQuestion.tags?.some(
-          qt => qt.tag.id === currentlyPresentingTag.id
-        );
-        
-        if (hasCurrentlyPresentingTag) {
-          await apiClient.removeTagFromQuestion(currentQuestion.id, currentlyPresentingTag.id);
-        }
-        
-        // Add "Reviewed" tag to mark this question as covered
-        if (reviewedTag) {
-          await apiClient.addTagToQuestion(currentQuestion.id, reviewedTag.id);
-        }
+      // Find current question
+      const currentIndex = questions.findIndex(q => q.id === currentQuestionId);
+      if (currentIndex === -1) return;
+      
+      const currentQuestion = questions[currentIndex];
+      
+      // Remove "Currently Presenting" tag and add "Reviewed" tag
+      const hasCurrentlyPresentingTag = currentQuestion.tags?.some(
+        qt => qt.tag.id === currentlyPresentingTag.id
+      );
+      
+      if (hasCurrentlyPresentingTag) {
+        await apiClient.removeTagFromQuestion(currentQuestion.id, currentlyPresentingTag.id);
       }
       
-      // Move to next question (wrap around to beginning if at end)
-      const newIndex = (currentQuestionIndex + 1) % questions.length;
-      setCurrentQuestionIndex(newIndex);
+      if (reviewedTag) {
+        await apiClient.addTagToQuestion(currentQuestion.id, reviewedTag.id);
+      }
+      
+      // Move to next question (wrap around)
+      const nextIndex = (currentIndex + 1) % questions.length;
+      const nextQuestion = questions[nextIndex];
       
       // Add "Currently Presenting" tag to new question
-      const newQuestion = questions[newIndex];
-      if (newQuestion) {
-        await apiClient.addTagToQuestion(newQuestion.id, currentlyPresentingTag.id);
-        
-        // Refresh questions to get updated tags
-        const updatedData = await apiClient.getQuestions('OPEN', currentTeam?.id);
-        const updatedUnreviewedQuestions = updatedData.filter(question => {
-          const hasReviewedTag = question.tags?.some(qt => qt.tag.name === 'Reviewed');
-          return !hasReviewedTag;
-        });
-        const updatedSortedQuestions = updatedUnreviewedQuestions.sort((a, b) => b.upvotes - a.upvotes);
-        setQuestions(updatedSortedQuestions);
-        
-        // Update the index to point to the correct question in the sorted list
-        const correctIndex = updatedSortedQuestions.findIndex(q => q.id === newQuestion.id);
-        if (correctIndex !== -1) {
-          setCurrentQuestionIndex(correctIndex);
-        } else {
-          // If the new question was filtered out, go to the first question
-          setCurrentQuestionIndex(0);
-        }
-      }
+      await apiClient.addTagToQuestion(nextQuestion.id, currentlyPresentingTag.id);
+      setCurrentQuestionId(nextQuestion.id);
+      
+      // Note: SSE will update the question tags in state automatically
     } catch (err) {
       console.error('Failed to advance to next question:', err);
     }
-  }, [questions, currentQuestionIndex, currentlyPresentingTag, reviewedTag, currentTeam?.id]);
+  }, [questions, currentQuestionId, currentlyPresentingTag, reviewedTag]);
 
   const goToHighestUpvoted = useCallback(() => {
     if (questions.length === 0) return;
     
     // Since questions are already filtered and sorted, just go to the first one
-    setCurrentQuestionIndex(0);
+    setCurrentQuestionId(questions[0].id);
   }, [questions]);
 
   // Cleanup function to remove "Currently Presenting" tag when exiting
   const cleanupCurrentTag = useCallback(async () => {
-    if (!currentlyPresentingTag || questions.length === 0) return;
+    if (!currentlyPresentingTag || !currentQuestionId) return;
     
     try {
-      const currentQuestion = questions[currentQuestionIndex];
+      const currentQuestion = questions.find(q => q.id === currentQuestionId);
       if (currentQuestion) {
         const hasCurrentlyPresentingTag = currentQuestion.tags?.some(
           qt => qt.tag.id === currentlyPresentingTag.id
@@ -310,15 +273,24 @@ export function PresentationPage() {
     } catch (err) {
       console.error('Failed to cleanup current tag:', err);
     }
-  }, [questions, currentQuestionIndex, currentlyPresentingTag]);
+  }, [questions, currentQuestionId, currentlyPresentingTag]);
 
-  // Cleanup on component unmount
+  // Cleanup on component unmount ONLY (not on re-renders)
   useEffect(() => {
     return () => {
-      // Cleanup when component unmounts (user navigates away)
-      cleanupCurrentTag();
+      // This cleanup ONLY runs when the component actually unmounts
+      // Use refs to get the latest values without re-running the effect
+      const questionId = currentQuestionIdRef.current;
+      const presentingTag = currentlyPresentingTagRef.current;
+      
+      if (questionId && presentingTag) {
+        // Run cleanup asynchronously (fire and forget on unmount)
+        apiClient.removeTagFromQuestion(questionId, presentingTag.id).catch(err => {
+          console.error('Failed to cleanup tag on unmount:', err);
+        });
+      }
     };
-  }, [cleanupCurrentTag]);
+  }, []); // Empty deps = only runs on mount/unmount, uses refs for latest values
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -384,7 +356,17 @@ export function PresentationPage() {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = questions.find(q => q.id === currentQuestionId);
+  const currentQuestionIndex = currentQuestion ? questions.findIndex(q => q.id === currentQuestionId) : 0;
+
+  // Safety check
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading question...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -440,15 +422,20 @@ export function PresentationPage() {
             </div>
           </div>
 
-          {/* Currently presenting indicator */}
-          <div className="mt-8">
-            <div 
-              className="inline-block px-6 py-3 text-white rounded-full text-lg font-medium"
-              style={{ backgroundColor: currentlyPresentingTag?.color || '#10B981' }}
-            >
-              {currentlyPresentingTag?.name || 'Currently Presenting'}
+          {/* Question Tags */}
+          {currentQuestion.tags && currentQuestion.tags.length > 0 && (
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {currentQuestion.tags.map((questionTag) => (
+                <span
+                  key={questionTag.id}
+                  className="inline-block px-5 py-2 text-white rounded-full text-base font-medium shadow-lg"
+                  style={{ backgroundColor: questionTag.tag.color }}
+                >
+                  {questionTag.tag.name}
+                </span>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
 

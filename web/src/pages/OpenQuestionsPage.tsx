@@ -41,10 +41,25 @@ export function OpenQuestionsPage() {
     setFormattedPageTitle(currentTeam?.slug, 'open');
   }, [currentTeam?.slug]);
 
+  // Track SSE updates to prevent refetch from overwriting them
+  const [sseUpdatedQuestions, setSseUpdatedQuestions] = useState<Set<string>>(new Set());
+
   // Handle SSE events for real-time updates
   const handleSSEEvent = async (event: SSEEvent) => {
     if (event.type === 'question:created' || event.type === 'question:upvoted' || event.type === 'question:tagged' || event.type === 'question:untagged') {
       const updatedQuestion = event.data as Question;
+      
+      // Mark this question as recently updated by SSE
+      setSseUpdatedQuestions(prev => new Set(prev).add(updatedQuestion.id));
+      
+      // Clear the marker after 5 seconds (allowing DB to catch up)
+      setTimeout(() => {
+        setSseUpdatedQuestions(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(updatedQuestion.id);
+          return newSet;
+        });
+      }, 5000);
       
       // Only update if question is OPEN and matches current team filter
       if (updatedQuestion.status === 'OPEN') {
@@ -97,7 +112,23 @@ export function OpenQuestionsPage() {
     const loadQuestions = async () => {
       try {
         const data = await apiClient.getQuestions('OPEN', currentTeam?.id, filters);
-        setQuestions(data);
+        
+        // Merge with existing questions, preserving SSE-updated ones
+        setQuestions(prevQuestions => {
+          // Create a map of fetched questions
+          const fetchedMap = new Map(data.map(q => [q.id, q]));
+          
+          // For each SSE-updated question, preserve the local version if it's newer
+          prevQuestions.forEach(prevQ => {
+            if (sseUpdatedQuestions.has(prevQ.id) && fetchedMap.has(prevQ.id)) {
+              // Keep the SSE-updated version (it has the latest tags)
+              fetchedMap.set(prevQ.id, prevQ);
+            }
+          });
+          
+          // Return merged and sorted list
+          return Array.from(fetchedMap.values()).sort((a, b) => b.upvotes - a.upvotes);
+        });
         
         // Load upvote status for each question
         const statusMap = new Map<string, { hasUpvoted: boolean; canUpvote: boolean }>();
@@ -120,7 +151,7 @@ export function OpenQuestionsPage() {
     };
 
     loadQuestions();
-  }, [currentTeam?.id, filters]);
+  }, [currentTeam?.id, filters, sseUpdatedQuestions]);
 
   const handleUpvote = async (questionId: string) => {
     const status = upvoteStatus.get(questionId);

@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/api';
-
-interface Tag {
-  id: string;
-  name: string;
-  color: string;
-  createdAt: string;
-}
+import { apiClient, type Tag } from '../lib/api';
 
 export function TagManagement() {
   const [tags, setTags] = useState<Tag[]>([]);

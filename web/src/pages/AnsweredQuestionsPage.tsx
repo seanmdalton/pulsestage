@@ -6,6 +6,7 @@ import { AnswerModal } from '../components/AnswerModal';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
+import { QuestionFilters, type FilterState } from '../components/QuestionFilters';
 
 export function AnsweredQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -13,6 +14,7 @@ export function AnsweredQuestionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({});
 
   const { currentTeam } = useTeamFromUrl();
 
@@ -24,7 +26,7 @@ export function AnsweredQuestionsPage() {
   useEffect(() => {
     const loadQuestions = async () => {
       try {
-        const data = await apiClient.getQuestions('ANSWERED', currentTeam?.id);
+        const data = await apiClient.getQuestions('ANSWERED', currentTeam?.id, filters);
         setQuestions(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load questions');
@@ -34,7 +36,7 @@ export function AnsweredQuestionsPage() {
     };
 
     loadQuestions();
-  }, [currentTeam?.id]);
+  }, [currentTeam?.id, filters]);
 
   if (loading) {
     return (
@@ -94,6 +96,12 @@ export function AnsweredQuestionsPage() {
           </p>
         </div>
       </div>
+
+      {/* Search and Filters */}
+      <QuestionFilters 
+        onFilterChange={setFilters}
+        currentFilters={filters}
+      />
       
       {questions.length === 0 ? (
         <div className="text-center py-12">

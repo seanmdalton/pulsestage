@@ -25,7 +25,7 @@ export interface Team {
 export interface Tag {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   color: string;
   createdAt: string;
   updatedAt: string;
@@ -41,7 +41,7 @@ export interface QuestionTag {
 
 export interface CreateTagRequest {
   name: string;
-  description?: string;
+  description?: string | null;
   color?: string;
 }
 
@@ -164,7 +164,7 @@ const TeamSchema = z.object({
 const TagSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   color: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -429,7 +429,7 @@ class ApiClient {
   async createTag(data: CreateTagRequest): Promise<Tag> {
     const CreateTagSchema = z.object({
       name: z.string().min(1).max(100),
-      description: z.string().max(500).optional(),
+      description: z.string().max(500).nullable().optional(),
       color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
     });
 

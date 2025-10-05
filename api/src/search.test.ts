@@ -160,6 +160,19 @@ describe('Enhanced Search & Filtering', () => {
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(0);
     });
+
+    it('should support prefix/substring matching', async () => {
+      // Search for "polic" should match "policy"
+      const response = await request(app)
+        .get('/questions?search=polic')
+        .set('x-tenant-id', 'default');
+
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBeGreaterThanOrEqual(1);
+      // Should find question1 which contains "policy"
+      const ids = response.body.map((q: any) => q.id);
+      expect(ids).toContain(question1.id);
+    });
   });
 
   describe('Tag Filtering', () => {

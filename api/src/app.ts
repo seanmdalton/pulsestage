@@ -255,14 +255,17 @@ export function createApp(prisma: PrismaClient) {
       where.teamId = teamId;
     }
     
-    // Add full-text search filter
+    // Add full-text search filter with prefix matching
     if (search && search.trim()) {
-      // Use raw SQL for full-text search
+      // Use both full-text search (stemmed words) and prefix matching (substrings)
+      // Split search into words and add :* for prefix matching
+      const searchTerms = search.trim().split(/\s+/).map(term => `${term}:*`).join(' & ');
+      
       where.id = {
         in: await prisma.$queryRaw<Array<{ id: string }>>`
           SELECT id FROM "Question"
-          WHERE search_vector @@ plainto_tsquery('english', ${search})
-          ORDER BY ts_rank(search_vector, plainto_tsquery('english', ${search})) DESC
+          WHERE search_vector @@ to_tsquery('english', ${searchTerms})
+          ORDER BY ts_rank(search_vector, to_tsquery('english', ${searchTerms})) DESC
         `.then(results => results.map(r => r.id))
       };
     }
@@ -277,13 +280,18 @@ export function createApp(prisma: PrismaClient) {
     }
     
     // Add date range filters
+    // Parse dates as local dates (YYYY-MM-DD) and convert to UTC boundaries
     if (dateFrom || dateTo) {
       where.createdAt = {};
       if (dateFrom) {
-        where.createdAt.gte = new Date(dateFrom);
+        // Parse as YYYY-MM-DD and set to start of day (00:00:00 UTC)
+        const fromDate = new Date(dateFrom + 'T00:00:00.000Z');
+        where.createdAt.gte = fromDate;
       }
       if (dateTo) {
-        where.createdAt.lte = new Date(dateTo);
+        // Parse as YYYY-MM-DD and set to end of day (23:59:59.999 UTC)
+        const toDate = new Date(dateTo + 'T23:59:59.999Z');
+        where.createdAt.lte = toDate;
       }
     }
     
@@ -1211,7 +1219,7 @@ export function createApp(prisma: PrismaClient) {
   app.post("/tags", validateCsrfToken(), requirePermission('tag.create'), async (req, res) => {
     const createTagSchema = z.object({
       name: z.string().min(1).max(100),
-      description: z.string().max(500).optional(),
+      description: z.string().max(500).nullable().optional(),
       color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
     });
 
