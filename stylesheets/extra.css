@@ -1,0 +1,263 @@
+/**
+ * PulseStage Documentation Custom Styles
+ * Inspired by Immich's clean documentation design
+ */
+
+/* PulseStage Brand Colors - Matching web app exactly */
+:root {
+  --ps-primary: #2563eb;        /* PulseStage blue (bg-blue-600) */
+  --ps-primary-light: #3b82f6;  /* Lighter blue (bg-blue-500) */
+  --ps-primary-dark: #1d4ed8;   /* Darker blue (bg-blue-700) */
+  --ps-accent: #1e40af;         /* Deep blue accent (bg-blue-800) */
+  --ps-bg-light: #ffffff;
+  --ps-bg-dark: #1a1a1a;
+}
+
+/* Custom primary color for light mode */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--ps-primary);
+  --md-primary-fg-color--light: var(--ps-primary-light);
+  --md-primary-fg-color--dark: var(--ps-primary-dark);
+  --md-accent-fg-color: var(--ps-primary-light);
+  --md-typeset-a-color: var(--ps-primary);
+}
+
+/* Custom primary color for dark mode */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: var(--ps-primary-dark);
+  --md-primary-fg-color--light: var(--ps-primary-light);
+  --md-primary-fg-color--dark: var(--ps-primary);
+  --md-accent-fg-color: var(--ps-primary-light);
+  --md-typeset-a-color: var(--ps-primary-light);
+}
+
+/* Header styling - matches application header */
+.md-header {
+  background-color: rgb(11 18 33);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Also update tabs to match header */
+.md-tabs {
+  background-color: rgb(11 18 33);
+}
+
+/* Navigation accordion styling */
+.md-nav__item--nested > .md-nav__link {
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-nav__item--active > .md-nav__link {
+  color: var(--md-primary-fg-color);
+  font-weight: 600;
+}
+
+/* Improve accordion hover states */
+.md-nav__item .md-nav__link:hover {
+  background-color: rgba(37, 99, 235, 0.08);
+  border-radius: 4px;
+}
+
+/* Section headers in navigation */
+.md-nav__item--section > .md-nav__link {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--md-default-fg-color--light);
+  margin-top: 1rem;
+}
+
+/* Admonition styling - similar to Immich */
+.md-typeset .admonition,
+.md-typeset details {
+  border-left: 4px solid var(--md-primary-fg-color);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  font-weight: 600;
+}
+
+/* Code blocks - cleaner styling */
+.md-typeset code {
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-size: 0.9em;
+}
+
+.md-typeset pre > code {
+  border-radius: 6px;
+}
+
+/* Tables - cleaner borders */
+.md-typeset table:not([class]) {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--ps-primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* Search bar styling */
+.md-search__input {
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.md-search__input:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Footer - matches header for consistency */
+.md-footer {
+  background-color: rgb(11 18 33);
+}
+
+/* Link styling */
+.md-typeset a {
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.md-typeset a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Hero section on home page */
+.md-typeset h1:first-child {
+  font-size: 2.5em;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5em;
+}
+
+/* Button-like links */
+.md-typeset .md-button {
+  background-color: var(--ps-primary);
+  border-radius: 6px;
+  padding: 0.6em 1.2em;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.md-typeset .md-button:hover {
+  background-color: var(--ps-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Improve mobile navigation */
+@media screen and (max-width: 76.1875em) {
+  .md-nav__item--nested > .md-nav__link {
+    font-size: 0.9rem;
+  }
+}
+
+/* Scrollbar styling (webkit browsers) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.5);
+}
+
+/* Announcement bar (if needed) */
+.md-banner {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-light) 100%);
+  color: white;
+}
+
+/* Improve spacing and readability */
+.md-typeset {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.md-typeset p {
+  margin-bottom: 1.2em;
+}
+
+/* Cards/grids for feature highlights */
+.md-typeset .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.md-typeset .card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: all 0.2s ease;
+}
+
+.md-typeset .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--ps-primary);
+}
+
+/* Status badges */
+.md-typeset .badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-right: 0.5em;
+}
+
+.md-typeset .badge--success {
+  background-color: #10b981;
+  color: white;
+}
+
+.md-typeset .badge--warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.md-typeset .badge--info {
+  background-color: var(--ps-primary);
+  color: white;
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background-color: var(--ps-primary-dark);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .card:hover {
+  border-color: var(--ps-primary-light);
+  background-color: rgba(37, 99, 235, 0.05);
+}

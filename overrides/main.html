@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block htmltitle %}
+  <title>{% if page.meta and page.meta.title %}{{ page.meta.title }}{% elif page.title and not page.is_homepage %}{{ page.title }} - {{ config.site_name }}{% else %}{{ config.site_name }}{% endif %}</title>
+{% endblock %}
+
+{% block site_name %}
+  <div style="display: flex; align-items: center; gap: 0.75rem;">
+    <img src="{{ config.theme.logo | url }}" alt="PulseStage" style="height: 40px; filter: brightness(0) invert(1);">
+    <span style="font-size: 1.25rem; font-weight: 600; letter-spacing: -0.025em;">{{ config.site_name | replace(" Documentation", "") }}</span>
+  </div>
+{% endblock %}
