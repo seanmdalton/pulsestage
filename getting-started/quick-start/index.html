@@ -601,9 +601,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-access-pulsestage" class="md-nav__link">
+  <a href="#4-optional-load-additional-test-data" class="md-nav__link">
     <span class="md-ellipsis">
-      4. Access PulseStage
+      4. (Optional) Load Additional Test Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-access-pulsestage" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Access PulseStage
     </span>
   </a>
   
@@ -2233,7 +2242,7 @@
   
   
   <span class="md-ellipsis">
-    Setup
+    Development Setup
     
   </span>
   
@@ -2690,40 +2699,55 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>pulsestage
 </span></code></pre></div>
 <h3 id="2-run-setup-script">2. Run Setup Script<a class="headerlink" href="#2-run-setup-script" title="Anchor link to this section">&para;</a></h3>
-<p>The setup script creates your environment configuration:</p>
+<p>The setup script creates your environment configuration with secure secrets:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./setup.sh
 </span></code></pre></div>
 <p>This will:
-- Copy <code>env.example</code> to <code>.env</code>
-- Generate secure session secrets
-- Set up default configuration</p>
+- Create <code>.env</code> file with all required configuration
+- Generate secure random secrets for sessions and CSRF
+- Set up database and Redis connection strings
+- Configure default ports and CORS settings</p>
+<p><strong>Note</strong>: The generated admin key is <code>dev-admin-key-change-me</code>. Change this in production!</p>
 <h3 id="3-start-the-services">3. Start the Services<a class="headerlink" href="#3-start-the-services" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
-<p>This will start:
+<p>This will start all services in the background:
 - <strong>PostgreSQL</strong> database on port 5432
 - <strong>Redis</strong> cache on port 6379
 - <strong>API</strong> server on port 3000
 - <strong>Web</strong> frontend on port 5173</p>
-<h3 id="4-access-pulsestage">4. Access PulseStage<a class="headerlink" href="#4-access-pulsestage" title="Anchor link to this section">&para;</a></h3>
+<p>The database is automatically initialized with:
+- Default tenant and teams
+- Test users with different roles
+- Sample data for testing</p>
+<h3 id="4-optional-load-additional-test-data">4. (Optional) Load Additional Test Data<a class="headerlink" href="#4-optional-load-additional-test-data" title="Anchor link to this section">&para;</a></h3>
+<p>For a more comprehensive test environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>npm<span class="w"> </span>run<span class="w"> </span>db:seed:full
+</span></code></pre></div>
+<p>This loads realistic questions, answers, and tags across all teams.</p>
+<h3 id="5-access-pulsestage">5. Access PulseStage<a class="headerlink" href="#5-access-pulsestage" title="Anchor link to this section">&para;</a></h3>
 <p>Open your browser and navigate to:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://localhost:5173
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173
 </span></code></pre></div>
 <h2 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Anchor link to this section">&para;</a></h2>
 <h3 id="select-a-tenant">Select a Tenant<a class="headerlink" href="#select-a-tenant" title="Anchor link to this section">&para;</a></h3>
 <p>PulseStage supports multi-tenancy. The default tenant is available at:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173/
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>http://localhost:5173/
 </span></code></pre></div>
 <p>Or to see the SSO test page with all users:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>http://localhost:5173/sso-test.html
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>http://localhost:5173/sso-test.html
 </span></code></pre></div>
 <h3 id="choose-a-test-user">Choose a Test User<a class="headerlink" href="#choose-a-test-user" title="Anchor link to this section">&para;</a></h3>
-<p>You'll see several test users with different roles:</p>
+<p>Access the SSO test page to see all available users:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>http://localhost:5173/sso-test.html
+</span></code></pre></div>
 <p><strong>Default Tenant:</strong>
-- <strong>John Doe</strong> (john.doe@company.com) - Admin role
-- <strong>Mike Chen</strong> (mike.chen@company.com) - Moderator of People team
-- <strong>Sarah Wilson</strong> (sarah@example.com) - Moderator of Engineering team
-- <strong>Emily Rodriguez</strong> (emily@example.com) - Moderator of multiple teams
+- <strong>John Doe</strong> (john.doe@company.com) - Owner (full access)
+- <strong>Mike Chen</strong> (mike.chen@company.com) - Moderator (People team)
+- <strong>Sarah Wilson</strong> (sarah.wilson@company.com) - Moderator (Engineering team)
+- <strong>Emily Rodriguez</strong> (emily.rodriguez@company.com) - Moderator (multiple teams)
+- <strong>Alex Kim</strong> (alex.kim@company.com) - Member
 - <strong>Anonymous</strong> - View without logging in</p>
 <p><strong>Acme Corp Tenant:</strong>
 - <strong>Alice Johnson</strong> (alice@acme.corp) - Admin role
@@ -2745,18 +2769,18 @@
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
 <h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Anchor link to this section">&para;</a></h3>
 <p>Check if ports are already in use:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check port 5173 (web)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Check port 3000 (api)</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Check port 5432 (database)</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Check port 5173 (web)</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Check port 3000 (api)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Check port 5432 (database)</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
 </span></code></pre></div>
 <h3 id="database-connection-issues">Database Connection Issues<a class="headerlink" href="#database-connection-issues" title="Anchor link to this section">&para;</a></h3>
 <p>Ensure PostgreSQL is running:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
 </span></code></pre></div>
 <p>All services should show "Up" status.</p>
 <h3 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Anchor link to this section">&para;</a></h3>
@@ -2786,7 +2810,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 5, 2025 18:28:01 UTC"><span class="timeago" datetime="2025-10-05T18:28:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 5, 2025 18:28:01 UTC">2025-10-05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 5, 2025 21:00:23 UTC"><span class="timeago" datetime="2025-10-05T21:00:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 5, 2025 21:00:23 UTC">2025-10-05</span>
   </span>
 
     
