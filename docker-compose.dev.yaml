@@ -1,6 +1,7 @@
 services:
   api:
     build: ./api
+    command: sh -c "npx prisma db push --skip-generate && npm run dev"
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/ama
       PORT: "3000"
@@ -22,6 +23,7 @@ services:
 
   web:
     build: ./web
+    command: npm run dev
     environment:
       VITE_API_URL: http://localhost:3000
       VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-PulseStage}
