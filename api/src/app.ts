@@ -1671,6 +1671,35 @@ export function createApp(prisma: PrismaClient) {
         where.reviewedBy = reviewedBy;
       }
 
+      // Team scoping: Moderators can only see questions from teams they moderate
+      // Admins and owners have global access to all teams
+      if (req.user) {
+        const memberships = await prisma.teamMembership.findMany({
+          where: { userId: req.user.id },
+          select: { role: true, teamId: true }
+        });
+
+        const hasGlobalAccess = memberships.some(m => m.role === 'admin' || m.role === 'owner');
+        
+        if (!hasGlobalAccess) {
+          // User is a moderator - filter to only their teams
+          const userTeamIds = memberships.map(m => m.teamId);
+          
+          if (userTeamIds.length === 0) {
+            // Moderator has no teams, return empty
+            return res.json({ questions: [], total: 0, limit: limit ? parseInt(limit as string) : 100, offset: offset ? parseInt(offset as string) : 0 });
+          }
+          
+          // If teamId filter is specified, verify moderator has access to that team
+          if (teamId && !userTeamIds.includes(teamId)) {
+            return res.status(403).json({ error: 'Access denied to this team' });
+          }
+          
+          // Apply team filter for moderators
+          where.teamId = teamId || { in: userTeamIds };
+        }
+      }
+
       const questions = await prisma.question.findMany({
         where,
         include: {
@@ -1948,9 +1977,50 @@ export function createApp(prisma: PrismaClient) {
         reviewedBy: { not: null }
       };
 
+      // Team scoping: Moderators can only see stats from teams they moderate
+      // Admins and owners have global access to all team stats
+      let allowedTeamIds: string[] | null = null;
+      
+      if (req.user) {
+        const memberships = await prisma.teamMembership.findMany({
+          where: { userId: req.user.id },
+          select: { role: true, teamId: true }
+        });
+
+        const hasGlobalAccess = memberships.some(m => m.role === 'admin' || m.role === 'owner');
+        
+        if (!hasGlobalAccess) {
+          // User is a moderator - filter to only their teams
+          allowedTeamIds = memberships.map(m => m.teamId);
+          
+          if (allowedTeamIds.length === 0) {
+            // Moderator has no teams, return empty stats
+            return res.json({
+              overall: {
+                totalQuestionsReviewed: 0,
+                totalQuestionsAnswered: 0,
+                totalQuestionsPinned: 0,
+                totalQuestionsFrozen: 0,
+                activeModerators: 0,
+                avgResponseTime: null
+              },
+              byModerator: []
+            });
+          }
+          
+          // If teamId filter is specified, verify moderator has access
+          if (teamId && !allowedTeamIds.includes(teamId as string)) {
+            return res.status(403).json({ error: 'Access denied to this team' });
+          }
+        }
+      }
+
       // Team filter
       if (teamId) {
         where.teamId = teamId;
+      } else if (allowedTeamIds) {
+        // Apply moderator's team restriction if no specific team requested
+        where.teamId = { in: allowedTeamIds };
       }
 
       // Date range filter - parse as UTC boundaries to include full days

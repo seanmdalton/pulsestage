@@ -730,6 +730,142 @@ describe('Moderation Features', () => {
     });
   });
 
+  describe('Team Scoping for Admins vs Moderators', () => {
+    let team2: Team;
+    let question4: Question;
+
+    beforeEach(async () => {
+      const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
+      
+      // Create a second team
+      team2 = await testPrisma.team.create({
+        data: {
+          tenantId: defaultTenant!.id,
+          name: 'Product',
+          slug: 'product',
+          description: 'Product team'
+        }
+      });
+
+      // Moderator is NOT a member of team2
+      // Admin IS a member of both teams
+      await testPrisma.teamMembership.create({
+        data: {
+          userId: adminUser.id,
+          teamId: team2.id,
+          role: 'admin'
+        }
+      });
+
+      // Create a question in team2
+      question4 = await testPrisma.question.create({
+        data: {
+          tenantId: defaultTenant!.id,
+          body: 'Product team question',
+          status: 'OPEN',
+          upvotes: 3,
+          teamId: team2.id
+        }
+      });
+    });
+
+    it('moderator should only see questions from their teams in moderation queue', async () => {
+      const response = await request(app)
+        .get('/admin/moderation-queue')
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'moderator@example.com');
+
+      expect(response.status).toBe(200);
+      
+      // Should only see questions from team (Engineering), not team2 (Product)
+      const questionIds = response.body.questions.map((q: any) => q.id);
+      expect(questionIds).toContain(question1.id); // Engineering question
+      expect(questionIds).toContain(question2.id); // Engineering question
+      expect(questionIds).not.toContain(question4.id); // Product question (no access)
+    });
+
+    it('admin should see questions from all teams in moderation queue', async () => {
+      const response = await request(app)
+        .get('/admin/moderation-queue')
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'admin@example.com');
+
+      expect(response.status).toBe(200);
+      
+      // Should see questions from ALL teams
+      const questionIds = response.body.questions.map((q: any) => q.id);
+      expect(questionIds).toContain(question1.id); // Engineering question
+      expect(questionIds).toContain(question4.id); // Product question
+    });
+
+    it('moderator should get 403 when filtering to a team they do not moderate', async () => {
+      const response = await request(app)
+        .get(`/admin/moderation-queue?teamId=${team2.id}`)
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'moderator@example.com');
+
+      expect(response.status).toBe(403);
+      expect(response.body.error).toContain('Access denied');
+    });
+
+    it('moderator should only see stats from their teams', async () => {
+      // Mark question4 as reviewed by adminUser
+      await testPrisma.question.update({
+        where: { id: question4.id },
+        data: {
+          reviewedBy: adminUser.id,
+          reviewedAt: new Date(),
+          status: 'ANSWERED',
+          responseText: 'Answer for product team'
+        }
+      });
+
+      const response = await request(app)
+        .get('/admin/stats/moderation')
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'moderator@example.com');
+
+      expect(response.status).toBe(200);
+      
+      // Stats should only include question3 (Engineering team, reviewed by moderator)
+      // Should NOT include question4 (Product team, reviewed by admin)
+      expect(response.body.overall.totalQuestionsReviewed).toBe(1);
+    });
+
+    it('admin should see stats from all teams', async () => {
+      // Mark question4 as reviewed by adminUser
+      await testPrisma.question.update({
+        where: { id: question4.id },
+        data: {
+          reviewedBy: adminUser.id,
+          reviewedAt: new Date(),
+          status: 'ANSWERED',
+          responseText: 'Answer for product team'
+        }
+      });
+
+      const response = await request(app)
+        .get('/admin/stats/moderation')
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'admin@example.com');
+
+      expect(response.status).toBe(200);
+      
+      // Should include both question3 and question4
+      expect(response.body.overall.totalQuestionsReviewed).toBeGreaterThanOrEqual(2); // At least question3 and question4
+    });
+
+    it('moderator should get 403 when requesting stats for a team they do not moderate', async () => {
+      const response = await request(app)
+        .get(`/admin/stats/moderation?teamId=${team2.id}`)
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', 'moderator@example.com');
+
+      expect(response.status).toBe(403);
+      expect(response.body.error).toContain('Access denied');
+    });
+  });
+
   describe('Moderation Feature Integration', () => {
     it('should track reviewedBy when answering a question', async () => {
       const response = await request(app)
