@@ -745,7 +745,9 @@ export function createApp(prisma: PrismaClient) {
         data: {
           status: "ANSWERED",
           responseText: parse.data.response,
-          respondedAt: new Date()
+          respondedAt: new Date(),
+          reviewedBy: req.user?.id, // Track who reviewed/answered
+          reviewedAt: new Date()
         },
         include: {
           team: true,
@@ -1611,6 +1613,467 @@ export function createApp(prisma: PrismaClient) {
     } catch (error) {
       console.error('Error exporting audit logs:', error);
       res.status(500).json({ error: 'Failed to export audit logs' });
+    }
+  });
+
+  // Moderation queue - get questions that need review
+  app.get("/admin/moderation-queue", requirePermission('admin.access'), async (req, res) => {
+    try {
+      const {
+        status,
+        teamId,
+        isPinned,
+        isFrozen,
+        needsReview,
+        reviewedBy,
+        limit,
+        offset
+      } = req.query;
+
+      const where: any = {
+        tenantId: req.tenant!.tenantId
+      };
+
+      // Status filter
+      if (status === 'open') {
+        where.status = 'OPEN';
+      } else if (status === 'answered') {
+        where.status = 'ANSWERED';
+      }
+
+      // Team filter
+      if (teamId) {
+        where.teamId = teamId;
+      }
+
+      // Pinned filter
+      if (isPinned === 'true') {
+        where.isPinned = true;
+      } else if (isPinned === 'false') {
+        where.isPinned = false;
+      }
+
+      // Frozen filter
+      if (isFrozen === 'true') {
+        where.isFrozen = true;
+      } else if (isFrozen === 'false') {
+        where.isFrozen = false;
+      }
+
+      // Needs review filter (not reviewed yet)
+      if (needsReview === 'true') {
+        where.reviewedBy = null;
+        where.status = 'OPEN';
+      }
+
+      // Reviewed by specific user
+      if (reviewedBy) {
+        where.reviewedBy = reviewedBy;
+      }
+
+      const questions = await prisma.question.findMany({
+        where,
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true
+            }
+          }
+        },
+        orderBy: [
+          { isPinned: 'desc' },
+          { upvotes: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: limit ? parseInt(limit as string) : 100,
+        skip: offset ? parseInt(offset as string) : 0
+      });
+
+      const total = await prisma.question.count({ where });
+
+      res.json({
+        questions,
+        total,
+        limit: limit ? parseInt(limit as string) : 100,
+        offset: offset ? parseInt(offset as string) : 0
+      });
+    } catch (error) {
+      console.error('Error fetching moderation queue:', error);
+      res.status(500).json({ error: 'Failed to fetch moderation queue' });
+    }
+  });
+
+  // Bulk tag operation
+  app.post("/admin/bulk-tag", validateCsrfToken(), requirePermission('question.tag'), async (req, res) => {
+    const bulkTagSchema = z.object({
+      questionIds: z.array(z.string().uuid()).min(1),
+      tagId: z.string().uuid(),
+      action: z.enum(['add', 'remove'])
+    });
+
+    const parse = bulkTagSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+
+    try {
+      const { questionIds, tagId, action } = parse.data;
+
+      // Verify tag exists
+      const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+      if (!tag) return res.status(404).json({ error: 'Tag not found' });
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      if (action === 'add') {
+        // Add tag to all questions
+        for (const questionId of questionIds) {
+          try {
+            await prisma.questionTag.upsert({
+              where: {
+                questionId_tagId: {
+                  questionId,
+                  tagId
+                }
+              },
+              update: {},
+              create: {
+                questionId,
+                tagId
+              }
+            });
+            successCount++;
+          } catch (err) {
+            errorCount++;
+            console.error(`Failed to add tag to question ${questionId}:`, err);
+          }
+        }
+      } else {
+        // Remove tag from all questions
+        for (const questionId of questionIds) {
+          try {
+            await prisma.questionTag.delete({
+              where: {
+                questionId_tagId: {
+                  questionId,
+                  tagId
+                }
+              }
+            }).catch(() => {
+              // Ignore if tag wasn't on question
+            });
+            successCount++;
+          } catch (err) {
+            errorCount++;
+            console.error(`Failed to remove tag from question ${questionId}:`, err);
+          }
+        }
+      }
+
+      // Audit log
+      await auditService.log(req, {
+        action: `bulk.tag.${action}`,
+        entityType: 'Question',
+        entityId: 'multiple',
+        metadata: {
+          questionIds,
+          tagId,
+          tagName: tag.name,
+          successCount,
+          errorCount
+        }
+      });
+
+      // Publish SSE events for each affected question
+      for (const questionId of questionIds) {
+        const updatedQuestion = await prisma.question.findUnique({
+          where: { id: questionId },
+          include: {
+            team: true,
+            tags: { include: { tag: true } }
+          }
+        });
+
+        if (updatedQuestion) {
+          eventBus.publish({
+            type: action === 'add' ? 'question:tagged' : 'question:untagged',
+            tenantId: req.tenant!.tenantId,
+            data: updatedQuestion,
+            timestamp: Date.now()
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        successCount,
+        errorCount,
+        total: questionIds.length
+      });
+    } catch (error) {
+      console.error('Error in bulk tag operation:', error);
+      res.status(500).json({ error: 'Failed to perform bulk tag operation' });
+    }
+  });
+
+  // Bulk action operation (pin, freeze, delete)
+  app.post("/admin/bulk-action", validateCsrfToken(), requirePermission('admin.access'), async (req, res) => {
+    const bulkActionSchema = z.object({
+      questionIds: z.array(z.string().uuid()).min(1),
+      action: z.enum(['pin', 'unpin', 'freeze', 'unfreeze', 'delete'])
+    });
+
+    const parse = bulkActionSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+
+    try {
+      const { questionIds, action } = parse.data;
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const questionId of questionIds) {
+        try {
+          switch (action) {
+            case 'pin':
+              await prisma.question.update({
+                where: { id: questionId },
+                data: {
+                  isPinned: true,
+                  pinnedBy: req.user?.id,
+                  pinnedAt: new Date()
+                }
+              });
+              break;
+            
+            case 'unpin':
+              await prisma.question.update({
+                where: { id: questionId },
+                data: {
+                  isPinned: false,
+                  pinnedBy: null,
+                  pinnedAt: null
+                }
+              });
+              break;
+            
+            case 'freeze':
+              await prisma.question.update({
+                where: { id: questionId },
+                data: {
+                  isFrozen: true,
+                  frozenBy: req.user?.id,
+                  frozenAt: new Date()
+                }
+              });
+              break;
+            
+            case 'unfreeze':
+              await prisma.question.update({
+                where: { id: questionId },
+                data: {
+                  isFrozen: false,
+                  frozenBy: null,
+                  frozenAt: null
+                }
+              });
+              break;
+            
+            case 'delete':
+              await prisma.question.delete({
+                where: { id: questionId }
+              });
+              break;
+          }
+          successCount++;
+
+          // Publish SSE event
+          if (action !== 'delete') {
+            const updatedQuestion = await prisma.question.findUnique({
+              where: { id: questionId },
+              include: {
+                team: true,
+                tags: { include: { tag: true } }
+              }
+            });
+
+            if (updatedQuestion) {
+              const eventType = action === 'pin' || action === 'unpin' ? 'question:pinned' : 'question:frozen';
+              eventBus.publish({
+                type: eventType,
+                tenantId: req.tenant!.tenantId,
+                data: updatedQuestion,
+                timestamp: Date.now()
+              });
+            }
+          }
+        } catch (err) {
+          errorCount++;
+          console.error(`Failed to ${action} question ${questionId}:`, err);
+        }
+      }
+
+      // Audit log
+      await auditService.log(req, {
+        action: `bulk.${action}`,
+        entityType: 'Question',
+        entityId: 'multiple',
+        metadata: {
+          questionIds,
+          successCount,
+          errorCount
+        }
+      });
+
+      res.json({
+        success: true,
+        successCount,
+        errorCount,
+        total: questionIds.length
+      });
+    } catch (error) {
+      console.error('Error in bulk action operation:', error);
+      res.status(500).json({ error: 'Failed to perform bulk action' });
+    }
+  });
+
+  // Moderation stats - get stats per moderator
+  app.get("/admin/stats/moderation", requirePermission('admin.access'), async (req, res) => {
+    try {
+      const { teamId, startDate, endDate } = req.query;
+
+      const where: any = {
+        tenantId: req.tenant!.tenantId,
+        reviewedBy: { not: null }
+      };
+
+      // Team filter
+      if (teamId) {
+        where.teamId = teamId;
+      }
+
+      // Date range filter
+      if (startDate || endDate) {
+        where.reviewedAt = {};
+        if (startDate) {
+          where.reviewedAt.gte = new Date(startDate as string);
+        }
+        if (endDate) {
+          where.reviewedAt.lte = new Date(endDate as string);
+        }
+      }
+
+      // Get all reviewed questions with reviewer info
+      const reviewedQuestions = await prisma.question.findMany({
+        where,
+        include: {
+          team: true
+        }
+      });
+
+      // Group by reviewer
+      const statsByModerator: Record<string, {
+        moderatorId: string;
+        questionsReviewed: number;
+        questionsAnswered: number;
+        questionsPinned: number;
+        questionsFrozen: number;
+        avgResponseTime: number | null;
+        teams: Set<string>;
+      }> = {};
+
+      for (const question of reviewedQuestions) {
+        const modId = question.reviewedBy!;
+        
+        if (!statsByModerator[modId]) {
+          statsByModerator[modId] = {
+            moderatorId: modId,
+            questionsReviewed: 0,
+            questionsAnswered: 0,
+            questionsPinned: 0,
+            questionsFrozen: 0,
+            avgResponseTime: null,
+            teams: new Set()
+          };
+        }
+
+        const stats = statsByModerator[modId];
+        stats.questionsReviewed++;
+        
+        if (question.status === 'ANSWERED') {
+          stats.questionsAnswered++;
+        }
+        
+        if (question.isPinned) {
+          stats.questionsPinned++;
+        }
+        
+        if (question.isFrozen) {
+          stats.questionsFrozen++;
+        }
+        
+        if (question.teamId) {
+          stats.teams.add(question.teamId);
+        }
+      }
+
+      // Calculate average response times
+      for (const modId of Object.keys(statsByModerator)) {
+        const moderatorQuestions = reviewedQuestions.filter(q => q.reviewedBy === modId && q.respondedAt);
+        
+        if (moderatorQuestions.length > 0) {
+          const totalTime = moderatorQuestions.reduce((sum, q) => {
+            const created = new Date(q.createdAt).getTime();
+            const responded = new Date(q.respondedAt!).getTime();
+            return sum + (responded - created);
+          }, 0);
+          
+          statsByModerator[modId].avgResponseTime = Math.round(totalTime / moderatorQuestions.length / 1000 / 60); // Convert to minutes
+        }
+      }
+
+      // Get moderator user info
+      const moderatorIds = Object.keys(statsByModerator);
+      const moderators = await prisma.user.findMany({
+        where: {
+          id: { in: moderatorIds }
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      });
+
+      // Combine stats with user info
+      const stats = moderators.map(mod => ({
+        ...statsByModerator[mod.id],
+        moderatorName: mod.name,
+        moderatorEmail: mod.email,
+        teamsCount: statsByModerator[mod.id].teams.size,
+        teams: undefined // Remove the Set object
+      }));
+
+      // Overall stats
+      const overall = {
+        totalQuestionsReviewed: reviewedQuestions.length,
+        totalQuestionsAnswered: reviewedQuestions.filter(q => q.status === 'ANSWERED').length,
+        totalQuestionsPinned: reviewedQuestions.filter(q => q.isPinned).length,
+        totalQuestionsFrozen: reviewedQuestions.filter(q => q.isFrozen).length,
+        activeModerators: moderatorIds.length,
+        avgResponseTime: stats.length > 0 
+          ? Math.round(stats.reduce((sum, s) => sum + (s.avgResponseTime || 0), 0) / stats.length)
+          : null
+      };
+
+      res.json({
+        overall,
+        byModerator: stats.sort((a, b) => b.questionsReviewed - a.questionsReviewed)
+      });
+    } catch (error) {
+      console.error('Error fetching moderation stats:', error);
+      res.status(500).json({ error: 'Failed to fetch moderation stats' });
     }
   });
 

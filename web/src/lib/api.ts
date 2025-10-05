@@ -189,7 +189,16 @@ const QuestionSchema = z.object({
   updatedAt: z.string(),
   teamId: z.string().nullable(),
   team: TeamSchema.nullable().optional(),
-  tags: z.array(QuestionTagSchema).optional()
+  tags: z.array(QuestionTagSchema).optional(),
+  // Moderation fields
+  isPinned: z.boolean().optional(),
+  pinnedBy: z.string().nullable().optional(),
+  pinnedAt: z.string().nullable().optional(),
+  isFrozen: z.boolean().optional(),
+  frozenBy: z.string().nullable().optional(),
+  frozenAt: z.string().nullable().optional(),
+  reviewedBy: z.string().nullable().optional(),
+  reviewedAt: z.string().nullable().optional()
 });
 
 const CreateQuestionSchema = z.object({
@@ -461,6 +470,155 @@ class ApiClient {
       method: 'DELETE',
       credentials: 'include'
     }, RemoveTagResponseSchema);
+  }
+
+  // Moderation methods
+  async pinQuestion(questionId: string): Promise<Question> {
+    return this.request(`/questions/${questionId}/pin`, {
+      method: 'POST',
+      credentials: 'include'
+    }, QuestionSchema);
+  }
+
+  async freezeQuestion(questionId: string): Promise<Question> {
+    return this.request(`/questions/${questionId}/freeze`, {
+      method: 'POST',
+      credentials: 'include'
+    }, QuestionSchema);
+  }
+
+  async getModerationQueue(filters?: {
+    status?: 'open' | 'answered';
+    teamId?: string;
+    isPinned?: boolean;
+    isFrozen?: boolean;
+    needsReview?: boolean;
+    reviewedBy?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ questions: Question[]; total: number; limit: number; offset: number }> {
+    const params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
+
+    const ModerationQueueSchema = z.object({
+      questions: z.array(QuestionSchema),
+      total: z.number(),
+      limit: z.number(),
+      offset: z.number()
+    });
+
+    return this.request(`/admin/moderation-queue?${params.toString()}`, {
+      credentials: 'include'
+    }, ModerationQueueSchema);
+  }
+
+  async bulkTagQuestions(questionIds: string[], tagId: string, action: 'add' | 'remove'): Promise<{
+    success: boolean;
+    successCount: number;
+    errorCount: number;
+    total: number;
+  }> {
+    const BulkTagResponseSchema = z.object({
+      success: z.boolean(),
+      successCount: z.number(),
+      errorCount: z.number(),
+      total: z.number()
+    });
+
+    return this.request('/admin/bulk-tag', {
+      method: 'POST',
+      body: JSON.stringify({ questionIds, tagId, action }),
+      credentials: 'include'
+    }, BulkTagResponseSchema);
+  }
+
+  async bulkActionQuestions(questionIds: string[], action: 'pin' | 'unpin' | 'freeze' | 'unfreeze' | 'delete'): Promise<{
+    success: boolean;
+    successCount: number;
+    errorCount: number;
+    total: number;
+  }> {
+    const BulkActionResponseSchema = z.object({
+      success: z.boolean(),
+      successCount: z.number(),
+      errorCount: z.number(),
+      total: z.number()
+    });
+
+    return this.request('/admin/bulk-action', {
+      method: 'POST',
+      body: JSON.stringify({ questionIds, action }),
+      credentials: 'include'
+    }, BulkActionResponseSchema);
+  }
+
+  async getModerationStats(filters?: {
+    teamId?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
+    overall: {
+      totalQuestionsReviewed: number;
+      totalQuestionsAnswered: number;
+      totalQuestionsPinned: number;
+      totalQuestionsFrozen: number;
+      activeModerators: number;
+      avgResponseTime: number | null;
+    };
+    byModerator: Array<{
+      moderatorId: string;
+      moderatorName: string;
+      moderatorEmail: string;
+      questionsReviewed: number;
+      questionsAnswered: number;
+      questionsPinned: number;
+      questionsFrozen: number;
+      avgResponseTime: number | null;
+      teamsCount: number;
+    }>;
+  }> {
+    const params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
+
+    const ModerationStatsSchema = z.object({
+      overall: z.object({
+        totalQuestionsReviewed: z.number(),
+        totalQuestionsAnswered: z.number(),
+        totalQuestionsPinned: z.number(),
+        totalQuestionsFrozen: z.number(),
+        activeModerators: z.number(),
+        avgResponseTime: z.number().nullable()
+      }),
+      byModerator: z.array(z.object({
+        moderatorId: z.string(),
+        moderatorName: z.string(),
+        moderatorEmail: z.string(),
+        questionsReviewed: z.number(),
+        questionsAnswered: z.number(),
+        questionsPinned: z.number(),
+        questionsFrozen: z.number(),
+        avgResponseTime: z.number().nullable(),
+        teamsCount: z.number()
+      }))
+    });
+
+    return this.request(`/admin/stats/moderation?${params.toString()}`, {
+      credentials: 'include'
+    }, ModerationStatsSchema);
   }
 
   // Export methods
