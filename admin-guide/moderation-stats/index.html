@@ -12,13 +12,13 @@
         <meta name="author" content="Sean Dalton">
       
       
-        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/about/changelog/">
+        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/admin-guide/moderation-stats/">
       
       
-        <link rel="prev" href="../license/">
+        <link rel="prev" href="../roles-permissions/">
       
       
-        <link rel="next" href="../branding/">
+        <link rel="next" href="../audit-logging/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Changelog - PulseStage Documentation</title>
+        <title>Moderation Stats - PulseStage Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#changelog" class="md-skip">
+        <a href="#moderation-stats" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Changelog
+              Moderation Stats
             
           </span>
         </div>
@@ -820,8 +820,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -848,13 +850,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -870,7 +870,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Admin Guide
@@ -884,7 +884,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -907,7 +907,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/team-management/" class="md-nav__link">
+      <a href="../team-management/" class="md-nav__link">
         
   
   
@@ -930,7 +930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/tag-management/" class="md-nav__link">
+      <a href="../tag-management/" class="md-nav__link">
         
   
   
@@ -953,7 +953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/roles-permissions/" class="md-nav__link">
+      <a href="../roles-permissions/" class="md-nav__link">
         
   
   
@@ -973,10 +973,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../admin-guide/moderation-stats/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Moderation Stats
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -987,6 +1009,338 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overall-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overall Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overall Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#questions-reviewed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Reviewed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-answered" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Answered
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-pinned" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Pinned
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average-response-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Average Response Time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-moderator-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Per-Moderator Breakdown
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#date-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      Date Range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#team-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Team Filter
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#activity-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activity Breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Activity Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#activity-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activity Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#team-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Team Activity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monitor-moderator-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitor Moderator Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyze-team-engagement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyze Team Engagement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historical-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Historical Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-reviews" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Reviews
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gets-tracked" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Gets Tracked
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Gets Tracked">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-is-reviewedby-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      When is reviewedBy Set?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#moderation-actions-tracked" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moderation Actions Tracked
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreting-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interpreting Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-review-count-low-answer-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Review Count, Low Answer Count
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-response-times" class="md-nav__link">
+    <span class="md-ellipsis">
+      Long Response Times
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uneven-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven Distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regular Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setting Expectations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recognizing-top-performers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recognizing Top Performers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Pages
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -999,7 +1353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/audit-logging/" class="md-nav__link">
+      <a href="../audit-logging/" class="md-nav__link">
         
   
   
@@ -1022,7 +1376,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/export/" class="md-nav__link">
+      <a href="../export/" class="md-nav__link">
         
   
   
@@ -2044,10 +2398,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -2066,11 +2418,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
         
           
           <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
@@ -2086,7 +2440,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             About
@@ -2100,7 +2454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../license/" class="md-nav__link">
+      <a href="../../about/license/" class="md-nav__link">
         
   
   
@@ -2120,19 +2474,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../about/changelog/" class="md-nav__link">
         
   
   
@@ -2143,7 +2488,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -2156,7 +2500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../branding/" class="md-nav__link">
+      <a href="../../about/branding/" class="md-nav__link">
         
   
   
@@ -2199,6 +2543,326 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overall-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overall Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overall Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#questions-reviewed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Reviewed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-answered" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Answered
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-pinned" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions Pinned
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average-response-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Average Response Time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-moderator-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Per-Moderator Breakdown
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#date-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      Date Range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#team-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Team Filter
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#activity-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activity Breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Activity Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#activity-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activity Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#team-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Team Activity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monitor-moderator-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitor Moderator Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyze-team-engagement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyze Team Engagement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historical-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Historical Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-reviews" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Reviews
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gets-tracked" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Gets Tracked
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Gets Tracked">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-is-reviewedby-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      When is reviewedBy Set?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#moderation-actions-tracked" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moderation Actions Tracked
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreting-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interpreting Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-review-count-low-answer-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Review Count, Low Answer Count
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-response-times" class="md-nav__link">
+    <span class="md-ellipsis">
+      Long Response Times
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uneven-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven Distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regular Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setting Expectations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recognizing-top-performers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recognizing Top Performers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Pages
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2216,8 +2880,192 @@
   
 
 
-<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
-<p>Documentation coming soon...</p>
+<h1 id="moderation-stats">Moderation Stats<a class="headerlink" href="#moderation-stats" title="Permanent link">&para;</a></h1>
+<p>Track moderation activity and performance with detailed analytics dashboard.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Access Moderation Stats from the Admin Panel → <strong>Stats</strong> tab.</p>
+<p><strong>Who can access:</strong>
+- ✅ Moderators (see their own stats + team stats)
+- ✅ Admins (all stats)
+- ✅ Owners (all stats)</p>
+<h2 id="overall-metrics">Overall Metrics<a class="headerlink" href="#overall-metrics" title="Permanent link">&para;</a></h2>
+<p>Four key performance indicators displayed as cards:</p>
+<h3 id="questions-reviewed">Questions Reviewed<a class="headerlink" href="#questions-reviewed" title="Permanent link">&para;</a></h3>
+<p>Total number of questions reviewed/answered by all moderators in the date range.</p>
+<p><strong>Includes:</strong>
+- Questions answered
+- Questions reviewed but not answered
+- All moderator activity</p>
+<h3 id="questions-answered">Questions Answered<a class="headerlink" href="#questions-answered" title="Permanent link">&para;</a></h3>
+<p>Total questions that received a response (status changed to ANSWERED).</p>
+<p><strong>Answer Rate</strong> = Questions Answered / Questions Reviewed</p>
+<h3 id="questions-pinned">Questions Pinned<a class="headerlink" href="#questions-pinned" title="Permanent link">&para;</a></h3>
+<p>Total questions currently pinned (highlighted as important).</p>
+<h3 id="average-response-time">Average Response Time<a class="headerlink" href="#average-response-time" title="Permanent link">&para;</a></h3>
+<p>Mean time from question creation to response, calculated across all answered questions.</p>
+<p><strong>Displayed as:</strong>
+- Minutes (e.g., "45m") for &lt; 60 minutes
+- Hours and minutes (e.g., "2h 15m") for &gt;= 60 minutes
+- "N/A" if no questions have been answered</p>
+<h2 id="per-moderator-breakdown">Per-Moderator Breakdown<a class="headerlink" href="#per-moderator-breakdown" title="Permanent link">&para;</a></h2>
+<p>Detailed table showing performance for each moderator:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Moderator</strong></td>
+<td>Name and email address</td>
+</tr>
+<tr>
+<td><strong>Reviewed</strong></td>
+<td>Total questions reviewed</td>
+</tr>
+<tr>
+<td><strong>Answered</strong></td>
+<td>Questions with responses</td>
+</tr>
+<tr>
+<td><strong>Pinned</strong></td>
+<td>Questions pinned by this moderator</td>
+</tr>
+<tr>
+<td><strong>Frozen</strong></td>
+<td>Questions frozen by this moderator</td>
+</tr>
+<tr>
+<td><strong>Avg Response</strong></td>
+<td>Average time to respond</td>
+</tr>
+<tr>
+<td><strong>Teams</strong></td>
+<td>Number of teams this moderator covers</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sorted by:</strong> Questions reviewed (most active moderators first)</p>
+<h2 id="filters">Filters<a class="headerlink" href="#filters" title="Permanent link">&para;</a></h2>
+<h3 id="date-range">Date Range<a class="headerlink" href="#date-range" title="Permanent link">&para;</a></h3>
+<p><strong>Default:</strong> Last 30 days (most recent activity)</p>
+<p><strong>Custom Range:</strong>
+- <strong>Start Date</strong> - Beginning of date range
+- <strong>End Date</strong> - End of date range (inclusive, includes full day)</p>
+<p><strong>Indicator:</strong> Blue badge shows current range: "📅 Showing: MM/DD/YYYY - MM/DD/YYYY"</p>
+<p><strong>Reset Button:</strong> "Reset to Last 30 Days" returns to default view</p>
+<h3 id="team-filter">Team Filter<a class="headerlink" href="#team-filter" title="Permanent link">&para;</a></h3>
+<p>Filter stats to a specific team to see:
+- Only questions from that team
+- Only moderators active on that team
+- Team-specific metrics</p>
+<h2 id="activity-breakdown">Activity Breakdown<a class="headerlink" href="#activity-breakdown" title="Permanent link">&para;</a></h2>
+<p>Side panel showing additional metrics:</p>
+<h3 id="activity-metrics">Activity Metrics<a class="headerlink" href="#activity-metrics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Total Reviewed</strong> - Same as overall card</li>
+<li><strong>Answer Rate</strong> - Percentage of reviewed questions that were answered</li>
+<li><strong>Questions Frozen</strong> - Total frozen in this period</li>
+</ul>
+<h3 id="team-activity">Team Activity<a class="headerlink" href="#team-activity" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Active Moderators</strong> - Number of moderators with activity</li>
+<li><strong>Avg per Moderator</strong> - Questions reviewed per moderator</li>
+<li><strong>Coverage</strong> - Total team assignments across all moderators</li>
+</ul>
+<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h2>
+<h3 id="monitor-moderator-performance">Monitor Moderator Performance<a class="headerlink" href="#monitor-moderator-performance" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Check default view</strong> (last 30 days, all teams)</li>
+<li><strong>Review per-moderator stats</strong> - Who's most active?</li>
+<li><strong>Check answer rates</strong> - Are moderators responding?</li>
+<li><strong>Review response times</strong> - Are we answering quickly?</li>
+</ol>
+<h3 id="analyze-team-engagement">Analyze Team Engagement<a class="headerlink" href="#analyze-team-engagement" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Filter to specific team</strong> (e.g., "Engineering")</li>
+<li><strong>Check question volume</strong> - How many questions from this team?</li>
+<li><strong>Review moderator coverage</strong> - How many moderators active?</li>
+<li><strong>Check response quality</strong> - Are questions getting answered?</li>
+</ol>
+<h3 id="historical-analysis">Historical Analysis<a class="headerlink" href="#historical-analysis" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Set custom date range</strong> (e.g., Q1 2025)</li>
+<li><strong>Compare periods</strong> - More/less activity than last quarter?</li>
+<li><strong>Identify trends</strong> - Which teams need more moderation support?</li>
+</ol>
+<h3 id="performance-reviews">Performance Reviews<a class="headerlink" href="#performance-reviews" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Filter to specific moderator</strong> using team filter</li>
+<li><strong>Check their metrics</strong> - Questions reviewed, answered, response time</li>
+<li><strong>Compare to team average</strong></li>
+<li><strong>Identify top performers</strong> - Sorted by activity</li>
+</ol>
+<h2 id="what-gets-tracked">What Gets Tracked<a class="headerlink" href="#what-gets-tracked" title="Permanent link">&para;</a></h2>
+<h3 id="when-is-reviewedby-set">When is <code>reviewedBy</code> Set?<a class="headerlink" href="#when-is-reviewedby-set" title="Permanent link">&para;</a></h3>
+<p>The <code>reviewedBy</code> field is automatically set when:</p>
+<ol>
+<li><strong>Moderator answers a question</strong> - <code>reviewedBy</code> = user who answered</li>
+<li><strong><code>reviewedAt</code> timestamp</strong> - When the answer was submitted</li>
+</ol>
+<h3 id="moderation-actions-tracked">Moderation Actions Tracked<a class="headerlink" href="#moderation-actions-tracked" title="Permanent link">&para;</a></h3>
+<p>All moderation actions are counted:</p>
+<ul>
+<li>✅ Answering questions</li>
+<li>✅ Pinning/unpinning</li>
+<li>✅ Freezing/unfreezing</li>
+<li>✅ Tagging questions</li>
+<li>✅ Bulk operations</li>
+</ul>
+<h2 id="interpreting-metrics">Interpreting Metrics<a class="headerlink" href="#interpreting-metrics" title="Permanent link">&para;</a></h2>
+<h3 id="high-review-count-low-answer-count">High Review Count, Low Answer Count<a class="headerlink" href="#high-review-count-low-answer-count" title="Permanent link">&para;</a></h3>
+<p><strong>Indicates:</strong> Moderators are active but not answering</p>
+<p><strong>Possible reasons:</strong>
+- Questions are being triaged/tagged but not answered
+- Questions frozen or archived without answers
+- Bulk operations counting as reviews</p>
+<h3 id="long-response-times">Long Response Times<a class="headerlink" href="#long-response-times" title="Permanent link">&para;</a></h3>
+<p><strong>Indicates:</strong> Delay between question submission and answer</p>
+<p><strong>Possible reasons:</strong>
+- Questions submitted far in advance of town hall
+- Complex questions requiring research
+- Low moderator availability</p>
+<p><strong>Action:</strong> Consider more moderators or faster triage process</p>
+<h3 id="uneven-distribution">Uneven Distribution<a class="headerlink" href="#uneven-distribution" title="Permanent link">&para;</a></h3>
+<p><strong>Indicates:</strong> Some moderators much more active than others</p>
+<p><strong>Possible reasons:</strong>
+- Different team sizes
+- Uneven team assignments
+- Some moderators more engaged</p>
+<p><strong>Action:</strong> Review team assignments and workload distribution</p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="regular-monitoring">Regular Monitoring<a class="headerlink" href="#regular-monitoring" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Check weekly</strong> - Review last 7 days of activity</li>
+<li><strong>Monthly reports</strong> - Compare month-over-month trends</li>
+<li><strong>Pre-event</strong> - Ensure all moderators prepared for town halls</li>
+</ul>
+<h3 id="setting-expectations">Setting Expectations<a class="headerlink" href="#setting-expectations" title="Permanent link">&para;</a></h3>
+<p>Use stats to set team goals:</p>
+<ul>
+<li><strong>Target response time</strong> - e.g., &lt; 24 hours</li>
+<li><strong>Answer rate</strong> - e.g., &gt; 80% of reviewed questions answered</li>
+<li><strong>Coverage</strong> - Each team has &gt;= 2 active moderators</li>
+</ul>
+<h3 id="recognizing-top-performers">Recognizing Top Performers<a class="headerlink" href="#recognizing-top-performers" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sort by questions reviewed</strong> - See most active moderators</li>
+<li><strong>Share achievements</strong> - Recognize top contributors</li>
+<li><strong>Balance workload</strong> - Redistribute if one moderator doing too much</li>
+</ul>
+<h2 id="related-pages">Related Pages<a class="headerlink" href="#related-pages" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../moderator-guide/moderation-queue/">Moderation Queue</a></li>
+<li><a href="../audit-logging/">Audit Logging</a></li>
+<li><a href="../export/">Export</a></li>
+</ul>
 
 
 
@@ -2240,7 +3088,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 19:43:35 UTC">October 4, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 5, 2025 18:48:58 UTC">October 5, 2025</span>
   </span>
 
     
@@ -2250,7 +3098,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 19:43:35 UTC">October 4, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 5, 2025 18:48:58 UTC">October 5, 2025</span>
   </span>
 
     

@@ -849,6 +849,8 @@
       
         
       
+        
+      
     
     
     
@@ -963,6 +965,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../moderator-guide/moderation-queue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Moderation Queue
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../moderator-guide/presentation-mode/" class="md-nav__link">
         
   
@@ -994,6 +1019,8 @@
   
     
     
+      
+        
       
         
       
@@ -1127,6 +1154,29 @@
   
   <span class="md-ellipsis">
     User Roles & Permissions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin-guide/moderation-stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Moderation Stats
     
   </span>
   
@@ -2539,26 +2589,32 @@
 <p>This will start:
 - <strong>PostgreSQL</strong> database on port 5432
 - <strong>Redis</strong> cache on port 6379
-- <strong>API</strong> server on port 5001
-- <strong>Web</strong> frontend on port 3000</p>
+- <strong>API</strong> server on port 3000
+- <strong>Web</strong> frontend on port 5173</p>
 <h3 id="4-access-pulsestage">4. Access PulseStage<a class="headerlink" href="#4-access-pulsestage" title="Permanent link">&para;</a></h3>
 <p>Open your browser and navigate to:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://localhost:3000
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://localhost:5173
 </span></code></pre></div>
 <h2 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Permanent link">&para;</a></h2>
 <h3 id="select-a-tenant">Select a Tenant<a class="headerlink" href="#select-a-tenant" title="Permanent link">&para;</a></h3>
 <p>PulseStage supports multi-tenancy. The default tenant is available at:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:3000/sso-test.html
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173/
+</span></code></pre></div>
+<p>Or to see the SSO test page with all users:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>http://localhost:5173/sso-test.html
 </span></code></pre></div>
 <h3 id="choose-a-test-user">Choose a Test User<a class="headerlink" href="#choose-a-test-user" title="Permanent link">&para;</a></h3>
 <p>You'll see several test users with different roles:</p>
-<ul>
-<li><strong>Alice Anderson</strong> (admin@example.com) - Admin role</li>
-<li><strong>Bob Smith</strong> (bob@example.com) - Member role</li>
-<li><strong>Charlie Davis</strong> (charlie@example.com) - Member role</li>
-<li><strong>Mike Chen</strong> (mike@example.com) - Moderator of People team</li>
-<li><strong>Sarah Miller</strong> (sarah@example.com) - Moderator of Engineering team</li>
-</ul>
+<p><strong>Default Tenant:</strong>
+- <strong>John Doe</strong> (john.doe@company.com) - Admin role
+- <strong>Mike Chen</strong> (mike.chen@company.com) - Moderator of People team
+- <strong>Sarah Wilson</strong> (sarah@example.com) - Moderator of Engineering team
+- <strong>Emily Rodriguez</strong> (emily@example.com) - Moderator of multiple teams
+- <strong>Anonymous</strong> - View without logging in</p>
+<p><strong>Acme Corp Tenant:</strong>
+- <strong>Alice Johnson</strong> (alice@acme.corp) - Admin role
+- <strong>Bob Wilson</strong> (bob@acme.corp) - Moderator
+- <strong>Charlie Davis</strong> (charlie@acme.corp) - Member</p>
 <h3 id="submit-your-first-question">Submit Your First Question<a class="headerlink" href="#submit-your-first-question" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Click on a user to log in</li>
@@ -2575,15 +2631,18 @@
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Permanent link">&para;</a></h3>
 <p>Check if ports are already in use:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Check port 3000 (web)</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Check port 5001 (api)</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5001
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check port 5173 (web)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Check port 3000 (api)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Check port 5432 (database)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
 </span></code></pre></div>
 <h3 id="database-connection-issues">Database Connection Issues<a class="headerlink" href="#database-connection-issues" title="Permanent link">&para;</a></h3>
 <p>Ensure PostgreSQL is running:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
 </span></code></pre></div>
 <p>All services should show "Up" status.</p>
 <h3 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Permanent link">&para;</a></h3>
@@ -2613,7 +2672,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 19:43:35 UTC">October 4, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 5, 2025 18:28:01 UTC">October 5, 2025</span>
   </span>
 
     

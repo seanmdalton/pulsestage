@@ -367,6 +367,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#moderation-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      📌 Moderation Tools
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#modern-user-experience" class="md-nav__link">
     <span class="md-ellipsis">
       🎨 Modern User Experience
@@ -808,6 +817,8 @@
       
         
       
+        
+      
     
     
     
@@ -922,6 +933,29 @@
   
   
     <li class="md-nav__item">
+      <a href="moderator-guide/moderation-queue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Moderation Queue
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="moderator-guide/presentation-mode/" class="md-nav__link">
         
   
@@ -953,6 +987,8 @@
   
     
     
+      
+        
       
         
       
@@ -1086,6 +1122,29 @@
   
   <span class="md-ellipsis">
     User Roles & Permissions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="admin-guide/moderation-stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Moderation Stats
     
   </span>
   
@@ -2355,6 +2414,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#moderation-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      📌 Moderation Tools
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#modern-user-experience" class="md-nav__link">
     <span class="md-ellipsis">
       🎨 Modern User Experience
@@ -2447,10 +2515,14 @@
 <ul>
 <li><strong>Up-vote–only questions</strong> to reduce noise and highlight priorities  </li>
 <li><strong>Team-based organization</strong> for different departments or forums  </li>
-<li><strong>Role-based admin &amp; moderation</strong> (submit, review, respond, publish)  </li>
+<li><strong>Role-based moderation</strong> (viewer, member, moderator, admin, owner)  </li>
+<li><strong>Advanced search</strong> with full-text search, filters, and date ranges</li>
+<li><strong>Moderation tools</strong> - Pin, freeze, bulk operations, and analytics</li>
 <li><strong>Presenter mode</strong> for leadership meetings and all-hands  </li>
-<li><strong>Search &amp; tags</strong> for quick discovery of related topics  </li>
-<li><strong>Exports</strong> for follow-ups and accountability  </li>
+<li><strong>Tagging system</strong> for organizing and categorizing questions</li>
+<li><strong>Real-time updates</strong> via Server-Sent Events (SSE)</li>
+<li><strong>Audit logging</strong> for compliance and security</li>
+<li><strong>Exports</strong> (CSV/JSON) for follow-ups and accountability  </li>
 <li><strong>Self-hostable</strong> with Docker (Postgres + Redis), open source (Apache-2.0)</li>
 </ul>
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
@@ -2473,43 +2545,60 @@
 <h3 id="question-management">❓ Question Management<a class="headerlink" href="#question-management" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Anonymous question submission with team assignment</li>
-<li>Real-time search with fuzzy matching</li>
-<li>Upvote system with localStorage protection</li>
+<li>Full-text search with prefix matching (e.g., "mob" finds "mobile")</li>
+<li>Advanced filters: tags, date ranges, status, team</li>
+<li>Upvote system with protection against self-upvoting</li>
 <li>Full-screen viewing for long questions and answers</li>
 <li>Status tracking (Open and Answered)</li>
+<li>Tag-based organization</li>
 </ul>
 <h3 id="role-based-access-control">👥 Role-Based Access Control<a class="headerlink" href="#role-based-access-control" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Viewer</strong>: Browse questions anonymously</li>
+<li><strong>Viewer</strong>: Browse questions anonymously, upvote</li>
 <li><strong>Member</strong>: Submit and upvote questions</li>
-<li><strong>Moderator</strong>: Answer questions, tag, present (team-scoped)</li>
-<li><strong>Admin</strong>: Full access including exports and audit logs</li>
-<li><strong>Owner</strong>: Complete control including team management</li>
+<li><strong>Moderator</strong>: Answer questions, tag, pin, freeze, present (team-scoped)</li>
+<li><strong>Admin</strong>: Full access including exports, audit logs, and team management</li>
+<li><strong>Owner</strong>: Complete control including user management</li>
+</ul>
+<h3 id="moderation-tools">📌 Moderation Tools<a class="headerlink" href="#moderation-tools" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Pin questions</strong> to highlight important topics</li>
+<li><strong>Freeze questions</strong> to lock them from further interaction</li>
+<li><strong>Bulk operations</strong> - Tag, pin, freeze, or delete multiple questions at once</li>
+<li><strong>Moderation queue</strong> - Dedicated interface with comprehensive filters</li>
+<li><strong>Analytics dashboard</strong> - Track moderator performance and activity</li>
+<li><strong>Quick actions</strong> - Pin 📌, Freeze ❄️, Answer 💬 buttons on each question</li>
 </ul>
 <h3 id="modern-user-experience">🎨 Modern User Experience<a class="headerlink" href="#modern-user-experience" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Beautiful, responsive design with dark mode</li>
 <li>Real-time updates via Server-Sent Events (SSE)</li>
-<li>Presentation mode optimized for large displays</li>
-<li>Search results with live typing feedback</li>
+<li>Presentation mode optimized for large displays with live tag updates</li>
+<li>Debounced search with instant feedback</li>
 <li>Profile management with favorite teams</li>
+<li>Persistent state across browser windows</li>
 </ul>
 <h3 id="security-compliance">🔒 Security &amp; Compliance<a class="headerlink" href="#security-compliance" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Comprehensive audit logging</li>
-<li>Team-scoped permissions</li>
+<li>Comprehensive audit logging (all admin/mod actions tracked)</li>
+<li>Team-scoped permissions with RBAC enforcement</li>
 <li>Tenant isolation for multi-tenancy</li>
-<li>Session-based authentication</li>
+<li>Session-based authentication with HttpOnly cookies</li>
+<li>CSRF protection on all state-changing endpoints</li>
+<li>Security headers (Helmet, CSP, HSTS, X-Frame-Options)</li>
 <li>Rate limiting on all endpoints</li>
+<li>MDN HTTP Observatory integration for security validation</li>
 </ul>
 <h2 id="technology-stack">Technology Stack<a class="headerlink" href="#technology-stack" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Frontend</strong>: React 19, TypeScript, Tailwind CSS, Vite</li>
 <li><strong>Backend</strong>: Node.js 24 LTS, Express, TypeScript</li>
-<li><strong>Database</strong>: PostgreSQL 16 with Prisma ORM</li>
-<li><strong>Cache</strong>: Redis 7 for rate limiting</li>
-<li><strong>Testing</strong>: Vitest, Playwright E2E</li>
-<li><strong>Deployment</strong>: Docker Compose</li>
+<li><strong>Database</strong>: PostgreSQL 16 with Prisma ORM, full-text search (GIN indexes)</li>
+<li><strong>Cache</strong>: Redis 7 for rate limiting and session storage</li>
+<li><strong>Testing</strong>: Vitest (208 tests), Playwright E2E, MDN HTTP Observatory</li>
+<li><strong>Security</strong>: Helmet, CSRF protection (csrf-csrf), Content Security Policy</li>
+<li><strong>Deployment</strong>: Docker Compose with multi-stage builds</li>
+<li><strong>CI/CD</strong>: GitHub Actions with Semgrep (SAST), Trivy (security scanning), SBOM generation</li>
 </ul>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <ul>
@@ -2551,7 +2640,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 4, 2025 21:09:08 UTC">October 4, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 5, 2025 18:28:01 UTC">October 5, 2025</span>
   </span>
 
     
