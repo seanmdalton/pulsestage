@@ -1,8 +1,11 @@
 -- Add full-text search capabilities to Question table
 -- This migration adds tsvector column and GIN index for fast text search
 
+-- Drop existing column if it exists (handles type conversion from text to tsvector)
+ALTER TABLE "Question" DROP COLUMN IF EXISTS "search_vector";
+
 -- Add tsvector column for search
-ALTER TABLE "Question" ADD COLUMN IF NOT EXISTS "search_vector" tsvector;
+ALTER TABLE "Question" ADD COLUMN "search_vector" tsvector;
 
 -- Create function to update search vector
 CREATE OR REPLACE FUNCTION question_search_vector_update() RETURNS trigger AS $$

@@ -93,12 +93,14 @@ nav:
       - Overview: moderator-guide/overview.md
       - Answering Questions: moderator-guide/answering-questions.md
       - Tagging Questions: moderator-guide/tagging.md
+      - Moderation Queue: moderator-guide/moderation-queue.md
       - Presentation Mode: moderator-guide/presentation-mode.md
   - Admin Guide:
       - Overview: admin-guide/overview.md
       - Team Management: admin-guide/team-management.md
       - Tag Management: admin-guide/tag-management.md
       - User Roles & Permissions: admin-guide/roles-permissions.md
+      - Moderation Stats: admin-guide/moderation-stats.md
       - Audit Logging: admin-guide/audit-logging.md
       - Export Data: admin-guide/export.md
   - Architecture:
