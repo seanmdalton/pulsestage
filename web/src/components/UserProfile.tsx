@@ -12,23 +12,27 @@ export function UserProfile() {
   const { currentTeam } = useTeam();
   const { teamSlug } = useParams<{ teamSlug: string }>();
 
-  // Check if user has moderator role or higher in the CURRENT team context
-  // If no current team (on all teams view), check if they have the role in ANY team
-  const hasAdminRole = currentTeam
-    ? (() => {
-        const role = getUserRoleInTeam(currentTeam.id);
-        return role === 'moderator' || role === 'admin' || role === 'owner';
-      })()
-    : userTeams.some(team => {
-        const role = getUserRoleInTeam(team.id);
-        return role === 'moderator' || role === 'admin' || role === 'owner';
-      });
-
-  // Check if user has admin role or higher (for admin-only features like audit log)
-  const hasFullAdminRole = userTeams.some(team => {
+  // Check if user has global admin role (admin or owner in ANY team)
+  // Admins and owners have global access, always show Admin Panel link
+  const hasGlobalAdminRole = userTeams.some(team => {
     const role = getUserRoleInTeam(team.id);
     return role === 'admin' || role === 'owner';
   });
+
+  // Check if user has moderator role in the CURRENT team (team-scoped)
+  // Moderators only see Admin Panel link when on their team
+  const hasModeratorRoleInCurrentTeam = currentTeam
+    ? (() => {
+        const role = getUserRoleInTeam(currentTeam.id);
+        return role === 'moderator';
+      })()
+    : userTeams.some(team => {
+        const role = getUserRoleInTeam(team.id);
+        return role === 'moderator';
+      });
+
+  // Show Admin Panel if user is an admin/owner (global) OR a moderator in current team (team-scoped)
+  const hasAdminPanelAccess = hasGlobalAdminRole || hasModeratorRoleInCurrentTeam;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -134,9 +138,17 @@ export function UserProfile() {
                   {getInitials(user.name || user.email)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {user.name || 'User'}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {user.name || 'User'}
+                    </p>
+                    {/* Global role badge for admins/owners */}
+                    {hasGlobalAdminRole && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex-shrink-0">
+                        {userTeams.some(t => getUserRoleInTeam(t.id) === 'owner') ? 'Owner' : 'Admin'}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {user.email}
                   </p>
@@ -181,8 +193,8 @@ export function UserProfile() {
               <span>My Questions</span>
             </button>
 
-            {/* Admin Panel Link - only show if user has moderator+ role in current team context */}
-            {hasAdminRole && (
+            {/* Admin Panel Link - Admins/owners always see this, moderators only on their teams */}
+            {hasAdminPanelAccess && (
               <button
                 onClick={() => {
                   setIsOpen(false);

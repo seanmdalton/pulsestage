@@ -1691,12 +1691,12 @@ export function createApp(prisma: PrismaClient) {
           }
           
           // If teamId filter is specified, verify moderator has access to that team
-          if (teamId && !userTeamIds.includes(teamId)) {
+          if (teamId && !userTeamIds.includes(teamId as string)) {
             return res.status(403).json({ error: 'Access denied to this team' });
           }
           
           // Apply team filter for moderators
-          where.teamId = teamId || { in: userTeamIds };
+          where.teamId = teamId ? teamId as string : { in: userTeamIds };
         }
       }
 
@@ -2017,7 +2017,7 @@ export function createApp(prisma: PrismaClient) {
 
       // Team filter
       if (teamId) {
-        where.teamId = teamId;
+        where.teamId = teamId as string;
       } else if (allowedTeamIds) {
         // Apply moderator's team restriction if no specific team requested
         where.teamId = { in: allowedTeamIds };
