@@ -33,6 +33,7 @@ RUN npx prisma generate
 COPY --from=builder /app/dist dist
 COPY --from=builder /app/openapi.yaml openapi.yaml
 COPY --from=builder /app/scripts/start.sh scripts/start.sh
+COPY --from=builder /app/load-comprehensive-test-data.js load-comprehensive-test-data.js
 
 # Make startup script executable
 RUN chmod +x scripts/start.sh
