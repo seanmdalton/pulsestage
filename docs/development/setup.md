@@ -133,15 +133,29 @@ npx prisma studio
 
 ### Working with Docker Compose
 
-For testing production-like setup with published images:
+PulseStage uses `docker-compose.override.yaml` for local development builds.
 
+**Build and test locally:**
 ```bash
-docker compose up -d
+docker compose up --build -d       # Builds from local source
+./run-tests.sh                     # Run tests + security scans
+./test-security.sh                 # Test security headers
 ```
 
-This uses the latest images from GitHub Container Registry:
-- [pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api)
-- [pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)
+**Use published images (like end users):**
+```bash
+# Temporarily rename override file
+mv docker-compose.override.yaml docker-compose.override.yaml.bak
+docker compose pull
+docker compose up -d
+# Restore override file
+mv docker-compose.override.yaml.bak docker-compose.override.yaml
+```
+
+**How it works:**
+- `docker-compose.yaml` uses published images from [GitHub Container Registry](https://github.com/seanmdalton/pulsestage/packages)
+- `docker-compose.override.yaml` overrides with `build:` directives for local development
+- Docker Compose automatically merges both files
 
 **Auto-bootstrap**: The API automatically creates a default tenant on first startup if the database is empty.
 

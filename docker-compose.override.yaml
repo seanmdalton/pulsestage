@@ -1,0 +1,19 @@
+# Docker Compose Override for Local Development
+#
+# This file is automatically merged with docker-compose.yaml by Docker Compose.
+# It overrides the 'image:' directives to use local builds instead of published images.
+#
+# Usage:
+#   docker compose up --build -d    # Build and run locally
+#   docker compose up -d            # Use published images (if you comment out this file)
+#
+# For quick start users: This file is optional and can be ignored.
+# For developers: This allows building and testing locally before pushing to CI.
+
+services:
+  api:
+    build: ./api
+  
+  web:
+    build: ./web
+
