@@ -8,51 +8,73 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
-    # Light mode
+    # Light mode - PulseStage blue
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue
-      accent: indigo
+      primary: custom
+      accent: blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     # Dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue
-      accent: indigo
+      primary: custom
+      accent: blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
-    - navigation.instant
-    - navigation.tracking
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - navigation.indexes
-    - toc.follow
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-    - content.code.annotate
+    - navigation.instant         # Instant loading
+    - navigation.instant.progress # Progress indicator
+    - navigation.tracking        # URL updates with scroll
+    - navigation.tabs           # Top-level tabs
+    - navigation.tabs.sticky    # Sticky tabs
+    - navigation.sections       # Collapsible sections (accordion style)
+    - navigation.expand         # Expand all sections by default
+    - navigation.path           # Show breadcrumb path
+    - navigation.top            # Back to top button
+    - navigation.indexes        # Section index pages
+    - navigation.footer         # Previous/next footer
+    - toc.follow               # TOC follows scroll
+    - toc.integrate            # Integrate TOC into nav
+    - search.suggest           # Search suggestions
+    - search.highlight         # Highlight search terms
+    - search.share            # Share search results
+    - content.code.copy       # Copy button for code blocks
+    - content.code.annotate   # Code annotations
+    - content.tabs.link       # Link content tabs
+    - content.tooltips        # Improved tooltips
   icon:
     repo: fontawesome/brands/github
   logo: assets/pulsestage-icon-light.svg
   favicon: assets/favicon.ico
+  font:
+    text: Inter
+    code: Roboto Mono
+
+extra_css:
+  - stylesheets/extra.css
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/seanmdalton/pulsestage
+      name: PulseStage on GitHub
   version:
     provider: mike
+  generator: false  # Remove "Made with Material for MkDocs"
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -64,81 +86,93 @@ markdown_extensions:
   - tables
   - attr_list
   - md_in_html
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - toc:
       permalink: true
+      permalink_title: Anchor link to this section
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.caret
+  - pymdownx.tilde
 
 plugins:
-  - search
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
   - git-revision-date-localized:
       enable_creation_date: true
+      type: timeago
 
 nav:
   - Home: index.md
   - Getting Started:
-      - Quick Start: getting-started/quick-start.md
-      - Installation: getting-started/installation.md
-      - Configuration: getting-started/configuration.md
-      - First Steps: getting-started/first-steps.md
+      - getting-started/quick-start.md
+      - getting-started/installation.md
+      - getting-started/configuration.md
+      - getting-started/first-steps.md
   - User Guide:
-      - Overview: user-guide/overview.md
-      - Submitting Questions: user-guide/submitting-questions.md
-      - Upvoting: user-guide/upvoting.md
-      - Search & Browse: user-guide/search-browse.md
-      - Teams: user-guide/teams.md
-      - Profile & Preferences: user-guide/profile.md
-  - Moderator Guide:
-      - Overview: moderator-guide/overview.md
-      - Answering Questions: moderator-guide/answering-questions.md
-      - Tagging Questions: moderator-guide/tagging.md
-      - Moderation Queue: moderator-guide/moderation-queue.md
-      - Presentation Mode: moderator-guide/presentation-mode.md
-  - Admin Guide:
-      - Overview: admin-guide/overview.md
-      - Team Management: admin-guide/team-management.md
-      - Tag Management: admin-guide/tag-management.md
-      - User Roles & Permissions: admin-guide/roles-permissions.md
-      - Moderation Stats: admin-guide/moderation-stats.md
-      - Audit Logging: admin-guide/audit-logging.md
-      - Export Data: admin-guide/export.md
-  - Architecture:
-      - System Design: architecture/system-design.md
-      - Database Schema: architecture/database-schema.md
-      - Authentication: architecture/authentication.md
-      - Multi-Tenancy: architecture/multi-tenancy.md
-      - Real-Time Updates: architecture/real-time.md
-  - Security:
-      - Overview: security/overview.md
-      - RBAC & Permissions: security/rbac.md
-      - Audit Logging: security/audit-logging.md
-      - Security Headers: security/security-headers.md
-      - Session Management: security/sessions.md
-      - CI Security Scanning: security/ci-scanning.md
-      - Rate Limiting: security/rate-limiting.md
-  - API Reference:
-      - Overview: api/overview.md
-      - Authentication: api/authentication.md
-      - Questions: api/questions.md
-      - Teams: api/teams.md
-      - Tags: api/tags.md
-      - Users: api/users.md
-      - Admin: api/admin.md
-  - Development:
-      - Setup: development/setup.md
-      - Running Locally: development/running-locally.md
-      - Testing: development/testing.md
-      - Database Migrations: development/migrations.md
-      - Code Style: development/code-style.md
-      - Contributing: development/contributing.md
+      - user-guide/overview.md
+      - Basic Features:
+          - user-guide/submitting-questions.md
+          - user-guide/upvoting.md
+          - user-guide/search-browse.md
+          - user-guide/teams.md
+          - user-guide/profile.md
+      - Moderator Features:
+          - moderator-guide/overview.md
+          - moderator-guide/answering-questions.md
+          - moderator-guide/tagging.md
+          - moderator-guide/moderation-queue.md
+          - moderator-guide/presentation-mode.md
+      - Admin Features:
+          - admin-guide/overview.md
+          - admin-guide/team-management.md
+          - admin-guide/tag-management.md
+          - admin-guide/roles-permissions.md
+          - admin-guide/moderation-stats.md
+          - admin-guide/audit-logging.md
+          - admin-guide/export.md
+  - Developer Guide:
+      - Architecture:
+          - architecture/system-design.md
+          - architecture/database-schema.md
+          - architecture/authentication.md
+          - architecture/multi-tenancy.md
+          - architecture/real-time.md
+      - Security:
+          - security/overview.md
+          - security/rbac.md
+          - security/audit-logging.md
+          - security/security-headers.md
+          - security/sessions.md
+          - security/ci-scanning.md
+          - security/rate-limiting.md
+      - API Reference:
+          - api/overview.md
+          - api/authentication.md
+          - api/questions.md
+          - api/teams.md
+          - api/tags.md
+          - api/users.md
+          - api/admin.md
+      - Development:
+          - development/setup.md
+          - development/running-locally.md
+          - development/testing.md
+          - development/migrations.md
+          - development/code-style.md
+          - development/contributing.md
   - Deployment:
-      - Docker Compose: deployment/docker-compose.md
-      - Production Setup: deployment/production.md
-      - Environment Variables: deployment/environment.md
-      - Monitoring: deployment/monitoring.md
+      - deployment/docker-compose.md
+      - deployment/production.md
+      - deployment/environment.md
+      - deployment/monitoring.md
   - About:
-      - License: about/license.md
-      - Changelog: about/changelog.md
-      - Branding: about/branding.md
-
+      - about/license.md
+      - about/changelog.md
+      - about/branding.md
