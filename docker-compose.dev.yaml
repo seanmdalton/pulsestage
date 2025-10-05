@@ -1,6 +1,6 @@
 services:
   api:
-    image: ghcr.io/seanmdalton/pulsestage-api:latest
+    build: ./api
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/ama
       PORT: "3000"
@@ -16,9 +16,12 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - ./api:/app
+      - /app/node_modules
 
   web:
-    image: ghcr.io/seanmdalton/pulsestage-web:latest
+    build: ./web
     environment:
       VITE_API_URL: http://localhost:3000
       VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-PulseStage}
@@ -26,6 +29,9 @@ services:
       - "5173:5173"
     depends_on:
       - api
+    volumes:
+      - ./web:/app
+      - /app/node_modules
 
   db:
     image: postgres:16-alpine
@@ -43,3 +49,4 @@ services:
 
 volumes:
   pgdata:
+

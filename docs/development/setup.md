@@ -19,7 +19,15 @@ cd pulsestage
 ./setup.sh
 ```
 
-### 2. Start Services
+### 2. Start Services for Development
+
+For development with local builds and hot reload:
+
+```bash
+docker compose -f docker-compose.dev.yaml up -d
+```
+
+Or to use published images (like production):
 
 ```bash
 docker compose up -d
@@ -27,10 +35,25 @@ docker compose up -d
 
 ### 3. Load Test Data
 
+**With published images:**
+```bash
+docker compose exec api npm run db:seed:full
+```
+
+**With local builds:**
+```bash
+docker compose -f docker-compose.dev.yaml exec api npm run db:seed:dev
+docker compose -f docker-compose.dev.yaml exec api npm run db:seed:tags:dev
+docker compose -f docker-compose.dev.yaml exec api node load-comprehensive-test-data.js
+```
+
+**Or run directly on host (if you have Node.js and dependencies installed):**
 ```bash
 cd api
 npm install
-npm run db:seed:full
+npm run db:seed:dev
+npm run db:seed:tags:dev
+node load-comprehensive-test-data.js
 ```
 
 ### 4. Access Development Environment
@@ -43,11 +66,53 @@ npm run db:seed:full
 
 PulseStage includes several npm scripts for database seeding:
 
-| Script | Description |
-|--------|-------------|
-| `npm run db:seed` | Basic seed: tenants, teams, and users |
-| `npm run db:seed:tags` | Add default tags only |
-| `npm run db:seed:full` | Full seed with 100+ realistic questions |
+| Script | Description | Use Case |
+|--------|-------------|----------|
+| `npm run db:seed` | Basic seed: tenants, teams, and users | Published images (compiled JS) |
+| `npm run db:seed:tags` | Add default tags only | Published images (compiled JS) |
+| `npm run db:seed:full` | Full seed with 100+ realistic questions | Published images (compiled JS) |
+| `npm run db:seed:dev` | Basic seed from TypeScript source | Local development |
+| `npm run db:seed:tags:dev` | Add tags from TypeScript source | Local development |
+
+**With published images (from container):**
+```bash
+docker compose exec api npm run db:seed:full
+```
+
+**With local development:**
+```bash
+cd api
+npm run db:seed:dev
+npm run db:seed:tags:dev
+node load-comprehensive-test-data.js
+```
+
+## Docker Compose Files
+
+PulseStage includes two Docker Compose configurations:
+
+| File | Purpose | Usage |
+|------|---------|-------|
+| `docker-compose.yaml` | Published images | Quick start, production-like testing |
+| `docker-compose.dev.yaml` | Local builds | Active development with hot reload |
+
+### Using Published Images
+
+```bash
+docker compose up -d
+```
+
+Uses the latest images from GitHub Container Registry:
+- [pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api)
+- [pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)
+
+### Using Local Builds
+
+```bash
+docker compose -f docker-compose.dev.yaml up -d
+```
+
+Builds from local source with volume mounts for hot reload.
 
 ## Development Workflow
 
@@ -133,10 +198,16 @@ docker compose logs -f db
 ### Resetting Database
 
 ```bash
-# Complete reset
+# Complete reset (published images)
 docker compose down -v
 docker compose up -d
-cd api && npm run db:seed:full
+docker compose exec api npm run db:seed:full
+
+# Complete reset (local builds)
+docker compose -f docker-compose.dev.yaml down -v
+docker compose -f docker-compose.dev.yaml up -d
+docker compose -f docker-compose.dev.yaml exec api npm run db:seed:dev
+docker compose -f docker-compose.dev.yaml exec api npm run db:seed:tags:dev
 ```
 
 ## Common Issues

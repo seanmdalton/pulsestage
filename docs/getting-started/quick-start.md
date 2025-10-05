@@ -39,11 +39,15 @@ This will:
 docker compose up -d
 ```
 
-This will start all services in the background:
+This will:
+- Pull the latest published container images from GitHub Container Registry
+- Start all services in the background
+
+Services started:
 - **PostgreSQL** database on port 5432
 - **Redis** cache on port 6379
-- **API** server on port 3000
-- **Web** frontend on port 5173
+- **API** server on port 3000 ([ghcr.io/seanmdalton/pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api))
+- **Web** frontend on port 5173 ([ghcr.io/seanmdalton/pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web))
 
 The database is automatically initialized with:
 - Default tenant and teams
@@ -52,14 +56,15 @@ The database is automatically initialized with:
 
 ### 4. (Optional) Load Additional Test Data
 
-For a more comprehensive test environment:
+For a more comprehensive test environment, execute commands in the API container:
 
 ```bash
-cd api
-npm run db:seed:full
+docker compose exec api npm run db:seed:full
 ```
 
 This loads realistic questions, answers, and tags across all teams.
+
+**Note**: The seed scripts use compiled JS from the published image's `dist` folder.
 
 ### 5. Access PulseStage
 

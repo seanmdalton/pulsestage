@@ -61,6 +61,8 @@ Then edit `.env` and set:
 docker compose up -d
 ```
 
+This pulls and runs the latest published images from GitHub Container Registry.
+
 ### 4. Initialize Database
 
 The database is automatically initialized on first startup with:
@@ -71,11 +73,15 @@ The database is automatically initialized on first startup with:
 
 **Load Additional Test Data (Optional)**:
 
-For comprehensive testing with realistic data:
+For comprehensive testing with realistic data, execute in the API container:
 
 ```bash
-cd api
-npm run db:seed:full
+# Full comprehensive data load
+docker compose exec api npm run db:seed:full
+
+# Or individually:
+docker compose exec api npm run db:seed        # Teams and users only
+docker compose exec api npm run db:seed:tags   # Add tags only
 ```
 
 This adds:
@@ -84,18 +90,7 @@ This adds:
 - Tags (Currently Presenting, Urgent, Feature Request, etc.)
 - Upvotes and interactions
 
-**Individual Seed Commands**:
-
-```bash
-# Reseed teams and users only
-npm run db:seed
-
-# Add tags only
-npm run db:seed:tags
-
-# Full comprehensive data load
-npm run db:seed:full
-```
+**Note**: When using published images, seed scripts run from the compiled `dist` folder inside the container.
 
 ### 5. Verify Installation
 
