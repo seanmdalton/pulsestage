@@ -25,14 +25,23 @@ interface ModerationStats {
 }
 
 export function ModerationStatsPage() {
+  // Calculate default date range (last 30 days)
+  const getDefaultDateRange = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0]
+    };
+  };
+
   const [stats, setStats] = useState<ModerationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState<string>('');
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
-    startDate: '',
-    endDate: ''
-  });
+  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>(getDefaultDateRange());
 
   const { teams } = useTeam();
 
@@ -87,6 +96,15 @@ export function ModerationStatsPage() {
     );
   }
 
+  const formatDateRange = () => {
+    if (dateRange.startDate && dateRange.endDate) {
+      const start = new Date(dateRange.startDate).toLocaleDateString();
+      const end = new Date(dateRange.endDate).toLocaleDateString();
+      return `${start} - ${end}`;
+    }
+    return 'All Time';
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
@@ -94,10 +112,31 @@ export function ModerationStatsPage() {
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Track moderation activity and performance metrics
         </p>
+        {/* Date Range Indicator */}
+        <div className="mt-3 inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
+          <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+            Showing: {formatDateRange()}
+          </span>
+        </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters</h3>
+          <button
+            onClick={() => {
+              setTeamFilter('');
+              setDateRange(getDefaultDateRange());
+            }}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            Reset to Last 30 Days
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
