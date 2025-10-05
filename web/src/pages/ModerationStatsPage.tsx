@@ -49,6 +49,7 @@ export function ModerationStatsPage() {
         const data = await apiClient.getModerationStats(filters);
         setStats(data);
       } catch (err) {
+        console.error('Failed to load moderation stats:', err);
         setError(err instanceof Error ? err.message : 'Failed to load stats');
       } finally {
         setLoading(false);
@@ -56,7 +57,7 @@ export function ModerationStatsPage() {
     };
 
     loadStats();
-  }, [teamFilter, dateRange]);
+  }, [teamFilter, dateRange.startDate, dateRange.endDate]);
 
   const formatMinutes = (minutes: number | null) => {
     if (minutes === null) return 'N/A';

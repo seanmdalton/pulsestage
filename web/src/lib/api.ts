@@ -501,7 +501,7 @@ class ApiClient {
     
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && value !== '') {
           params.append(key, value.toString());
         }
       });
@@ -588,7 +588,7 @@ class ApiClient {
     
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && value !== '') {
           params.append(key, value.toString());
         }
       });
