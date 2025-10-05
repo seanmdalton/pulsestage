@@ -49,22 +49,21 @@ Services started:
 - **API** server on port 3000 ([ghcr.io/seanmdalton/pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api))
 - **Web** frontend on port 5173 ([ghcr.io/seanmdalton/pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web))
 
-The database is automatically initialized with:
-- Default tenant and teams
-- Test users with different roles
-- Sample data for testing
+The API automatically creates a default tenant on first startup (auto-bootstrap).
 
-### 4. (Optional) Load Additional Test Data
+### 4. Load Demo Data
 
-For a more comprehensive test environment, execute commands in the API container:
+Load teams, users, and sample questions:
 
 ```bash
 docker compose exec api npm run db:seed:full
 ```
 
-This loads realistic questions, answers, and tags across all teams.
-
-**Note**: The seed scripts use compiled JS from the published image's `dist` folder.
+This adds:
+- 4 teams (Engineering, People, Product, General)
+- Test users with different roles
+- 100+ realistic questions with answers
+- Tags and interactions
 
 ### 5. Access PulseStage
 

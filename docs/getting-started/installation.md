@@ -63,34 +63,27 @@ docker compose up -d
 
 This pulls and runs the latest published images from GitHub Container Registry.
 
-### 4. Initialize Database
+### 4. Load Demo Data
 
-The database is automatically initialized on first startup with:
-- Default tenant
-- Sample teams (Engineering, People, Product, etc.)
-- Test users with different roles
-- Basic data structures
-
-**Load Additional Test Data (Optional)**:
-
-For comprehensive testing with realistic data, execute in the API container:
+The API auto-creates a default tenant on first startup. Load demo data:
 
 ```bash
-# Full comprehensive data load
 docker compose exec api npm run db:seed:full
-
-# Or individually:
-docker compose exec api npm run db:seed        # Teams and users only
-docker compose exec api npm run db:seed:tags   # Add tags only
 ```
 
-This adds:
-- 100+ sample questions across all teams
-- Answered questions with responses
-- Tags (Currently Presenting, Urgent, Feature Request, etc.)
+This creates:
+- Teams (Engineering, People, Product, General)
+- Test users with different roles
+- 100+ sample questions with answers
+- Tags (Urgent, Feature Request, Currently Presenting, etc.)
 - Upvotes and interactions
 
-**Note**: When using published images, seed scripts run from the compiled `dist` folder inside the container.
+**Individual seed commands:**
+```bash
+docker compose exec api npm run db:seed        # Teams and users only
+docker compose exec api npm run db:seed:tags   # Tags only
+docker compose exec api npm run db:seed:full   # Everything
+```
 
 ### 5. Verify Installation
 

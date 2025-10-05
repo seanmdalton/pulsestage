@@ -22,6 +22,32 @@ import { createApp } from "./app.js";
 
 const prisma = new PrismaClient();
 
+// Auto-bootstrap: Create default tenant if database is empty
+async function autoBootstrap() {
+  try {
+    const tenantCount = await prisma.tenant.count();
+    
+    if (tenantCount === 0) {
+      console.log('🔧 Auto-bootstrap: No tenants found, creating default tenant...');
+      
+      await prisma.tenant.create({
+        data: {
+          name: 'Default Organization',
+          slug: 'default'
+        }
+      });
+      
+      console.log('✅ Auto-bootstrap: Default tenant created');
+      console.log('📝 Next steps:');
+      console.log('   - Create teams via API: POST /admin/teams');
+      console.log('   - Create users via Mock SSO (development)');
+      console.log('   - Or run demo setup script: ./scripts/setup-demo.sh');
+    }
+  } catch (error) {
+    console.warn('Auto-bootstrap failed:', error);
+  }
+}
+
 // Initialize Redis and start server
 async function start() {
   // Initialize Redis for rate limiting (non-blocking)
@@ -45,6 +71,9 @@ async function start() {
     try { 
       await prisma.$executeRawUnsafe('SELECT 1'); 
       console.log('Database connection verified');
+      
+      // Auto-bootstrap if needed
+      await autoBootstrap();
     } catch (error) {
       console.warn('Database connection check failed:', error);
     }

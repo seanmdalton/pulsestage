@@ -40,13 +40,14 @@ cd pulsestage
 ./setup.sh
 docker compose up -d
 
-# Optional: Load comprehensive test data
+# Load demo data (teams, users, questions)
 docker compose exec api npm run db:seed:full
 ```
 
 Visit [http://localhost:5173](http://localhost:5173) and you're ready to go!
 
-Uses published container images from GitHub Container Registry ([API](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api) | [Web](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)).
+**Auto-bootstrap**: Default tenant is automatically created on first startup.  
+**Published images**: Uses containers from GitHub Registry ([API](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api) | [Web](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)).
 
 📖 **[Full Documentation](https://seanmdalton.github.io/pulsestage/)** | 🚀 **[Quick Start Guide](https://seanmdalton.github.io/pulsestage/getting-started/quick-start/)**
 

@@ -19,67 +19,58 @@ cd pulsestage
 ./setup.sh
 ```
 
-### 2. Start Services for Development
+### 2. Start Infrastructure
 
-For development with local builds and hot reload:
+Start PostgreSQL and Redis via Docker:
 
 ```bash
-docker compose -f docker-compose.dev.yaml up -d
+docker compose up db redis -d
 ```
 
-Or to use published images (like production):
+### 3. Install Dependencies and Setup Database
 
 ```bash
-docker compose up -d
-```
-
-### 3. Load Test Data
-
-**With published images:**
-```bash
-docker compose exec api npm run db:seed:full
-```
-
-**With local builds:**
-```bash
-docker compose -f docker-compose.dev.yaml exec api npm run db:seed:dev
-docker compose -f docker-compose.dev.yaml exec api npm run db:seed:tags:dev
-docker compose -f docker-compose.dev.yaml exec api node load-comprehensive-test-data.js
-```
-
-**Or run directly on host (if you have Node.js and dependencies installed):**
-```bash
+# API dependencies
 cd api
 npm install
+npx prisma db push
 npm run db:seed:dev
-npm run db:seed:tags:dev
-node load-comprehensive-test-data.js
+
+# Web dependencies
+cd ../web
+npm install
 ```
 
-### 4. Access Development Environment
+### 4. Start Development Servers
 
-- Web: http://localhost:5173
-- API: http://localhost:3000
-- API Docs: http://localhost:3000/api-docs
+In separate terminals:
+
+```bash
+# Terminal 1: API with hot reload
+cd api
+npm run dev
+
+# Terminal 2: Web with Vite HMR
+cd web
+npm run dev
+```
+
+### 5. Access Development Environment
+
+- **Web**: http://localhost:5173 (Vite dev server with HMR)
+- **API**: http://localhost:3000 (ts-node-dev with auto-restart)
+- **API Docs**: http://localhost:3000/api-docs
 
 ## Database Seeding
 
-PulseStage includes several npm scripts for database seeding:
-
 | Script | Description | Use Case |
 |--------|-------------|----------|
-| `npm run db:seed` | Basic seed: tenants, teams, and users | Published images (compiled JS) |
-| `npm run db:seed:tags` | Add default tags only | Published images (compiled JS) |
-| `npm run db:seed:full` | Full seed with 100+ realistic questions | Published images (compiled JS) |
-| `npm run db:seed:dev` | Basic seed from TypeScript source | Local development |
-| `npm run db:seed:tags:dev` | Add tags from TypeScript source | Local development |
+| `npm run db:seed:dev` | Basic seed: tenants, teams, users | Local development |
+| `npm run db:seed:tags:dev` | Add default tags | Local development |
+| `npm run db:seed` | Compiled JS version | Docker containers |
+| `npm run db:seed:full` | Full demo data | Docker containers |
 
-**With published images (from container):**
-```bash
-docker compose exec api npm run db:seed:full
-```
-
-**With local development:**
+**For local development:**
 ```bash
 cd api
 npm run db:seed:dev
@@ -87,32 +78,11 @@ npm run db:seed:tags:dev
 node load-comprehensive-test-data.js
 ```
 
-## Docker Compose Files
-
-PulseStage includes two Docker Compose configurations:
-
-| File | Purpose | Usage |
-|------|---------|-------|
-| `docker-compose.yaml` | Published images | Quick start, production-like testing |
-| `docker-compose.dev.yaml` | Local builds | Active development with hot reload |
-
-### Using Published Images
-
+**For Docker testing:**
 ```bash
 docker compose up -d
+docker compose exec api npm run db:seed:full
 ```
-
-Uses the latest images from GitHub Container Registry:
-- [pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api)
-- [pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)
-
-### Using Local Builds
-
-```bash
-docker compose -f docker-compose.dev.yaml up -d
-```
-
-Builds from local source with volume mounts for hot reload.
 
 ## Development Workflow
 
@@ -161,19 +131,19 @@ npx prisma studio
 
 ## Development Tips
 
-### Hot Reload
+### Working with Docker Compose
 
-Both API and web support hot reload:
+For testing production-like setup with published images:
 
 ```bash
-# API with auto-restart
-cd api
-npm run dev
-
-# Web with Vite HMR
-cd web
-npm run dev
+docker compose up -d
 ```
+
+This uses the latest images from GitHub Container Registry:
+- [pulsestage-api:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api)
+- [pulsestage-web:latest](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)
+
+**Auto-bootstrap**: The API automatically creates a default tenant on first startup if the database is empty.
 
 ### Mock SSO
 
@@ -197,17 +167,18 @@ docker compose logs -f db
 
 ### Resetting Database
 
+**For local development:**
 ```bash
-# Complete reset (published images)
+cd api
+npx prisma db push --force-reset
+npm run db:seed:dev
+```
+
+**For Docker:**
+```bash
 docker compose down -v
 docker compose up -d
 docker compose exec api npm run db:seed:full
-
-# Complete reset (local builds)
-docker compose -f docker-compose.dev.yaml down -v
-docker compose -f docker-compose.dev.yaml up -d
-docker compose -f docker-compose.dev.yaml exec api npm run db:seed:dev
-docker compose -f docker-compose.dev.yaml exec api npm run db:seed:tags:dev
 ```
 
 ## Common Issues
