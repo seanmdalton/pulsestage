@@ -179,15 +179,17 @@ export function ModerationQueuePage() {
 
   const handleQuickAction = async (questionId: string, action: 'pin' | 'freeze') => {
     try {
+      let updatedQuestion: Question;
+      
       if (action === 'pin') {
-        await apiClient.pinQuestion(questionId);
+        updatedQuestion = await apiClient.pinQuestion(questionId);
       } else {
-        await apiClient.freezeQuestion(questionId);
+        updatedQuestion = await apiClient.freezeQuestion(questionId);
       }
       
-      // Update question in state (SSE will also update it)
+      // Update question in state immediately with the API response
       setQuestions(prev => 
-        prev.map(q => q.id === questionId ? { ...q, isPinned: action === 'pin' ? !q.isPinned : q.isPinned, isFrozen: action === 'freeze' ? !q.isFrozen : q.isFrozen } : q)
+        prev.map(q => q.id === questionId ? updatedQuestion : q)
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Action failed');
