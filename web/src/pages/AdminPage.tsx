@@ -11,6 +11,8 @@ import { PulseStageLogo } from '../components/PulseStageLogo';
 import { useTheme } from '../contexts/ThemeContext';
 import { ExportPage } from './ExportPage';
 import { AuditPage } from './AuditPage';
+import { ModerationQueuePage } from './ModerationQueuePage';
+import { ModerationStatsPage } from './ModerationStatsPage';
 import { setFormattedPageTitle } from '../utils/titleUtils';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 
@@ -25,7 +27,7 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'questions' | 'teams' | 'tags' | 'export' | 'audit'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'moderation' | 'stats' | 'teams' | 'tags' | 'export' | 'audit'>('questions');
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
 
   // Set page title
@@ -224,10 +226,30 @@ export function AdminPage() {
             >
               Questions ({questions.length})
             </button>
-                <button
-                  onClick={() => setActiveTab('teams')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'teams'
+            <button
+              onClick={() => setActiveTab('moderation')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'moderation'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              Moderation Queue
+            </button>
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'stats'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              Stats
+            </button>
+            <button
+              onClick={() => setActiveTab('teams')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'teams'
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
@@ -345,6 +367,10 @@ export function AdminPage() {
             {activeTab === 'teams' && <TeamManagement />}
 
             {activeTab === 'tags' && <TagManagement />}
+
+            {activeTab === 'moderation' && <ModerationQueuePage />}
+
+            {activeTab === 'stats' && <ModerationStatsPage />}
 
             {/* Export and Audit content - admin/owner only */}
             {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
