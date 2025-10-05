@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/api';
 import type { Question } from '../lib/api';
 import { QuestionModal } from '../components/QuestionModal';
+import { QuestionFilters, type FilterState } from '../components/QuestionFilters';
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl';
 import { getTeamDisplayName } from '../contexts/TeamContext';
 import { setFormattedPageTitle } from '../utils/titleUtils';
@@ -17,6 +18,7 @@ export function OpenQuestionsPage() {
   const [upvoteStatus, setUpvoteStatus] = useState<Map<string, { hasUpvoted: boolean; canUpvote: boolean }>>(new Map());
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({});
 
   const { currentTeam } = useTeamFromUrl();
   const { userTeams, getUserRoleInTeam } = useUser();
@@ -94,7 +96,7 @@ export function OpenQuestionsPage() {
   useEffect(() => {
     const loadQuestions = async () => {
       try {
-        const data = await apiClient.getQuestions('OPEN', currentTeam?.id);
+        const data = await apiClient.getQuestions('OPEN', currentTeam?.id, filters);
         setQuestions(data);
         
         // Load upvote status for each question
@@ -118,7 +120,7 @@ export function OpenQuestionsPage() {
     };
 
     loadQuestions();
-  }, [currentTeam?.id]);
+  }, [currentTeam?.id, filters]);
 
   const handleUpvote = async (questionId: string) => {
     const status = upvoteStatus.get(questionId);
@@ -214,8 +216,18 @@ export function OpenQuestionsPage() {
           </button>
         )}
       </div>
+
+      {/* Search and Filters */}
+      <QuestionFilters 
+        onFilterChange={setFilters}
+        currentFilters={filters}
+      />
       
-      {questions.length === 0 ? (
+      {loading && questions.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-500 dark:text-gray-400">Loading questions...</div>
+        </div>
+      ) : questions.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-500 dark:text-gray-400 mb-2">🤔 No open questions yet</div>
           <div className="text-sm text-gray-400 dark:text-gray-500">Be the first to ask a question!</div>

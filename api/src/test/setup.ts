@@ -23,6 +23,36 @@ beforeAll(async () => {
   });
   await testPrisma.$connect();
   
+  // Apply full-text search migration
+  try {
+    await testPrisma.$executeRawUnsafe(`ALTER TABLE "Question" ADD COLUMN IF NOT EXISTS "search_vector" tsvector`);
+    
+    await testPrisma.$executeRawUnsafe(`
+      CREATE OR REPLACE FUNCTION question_search_vector_update() RETURNS trigger AS $$
+      BEGIN
+        NEW.search_vector := 
+          setweight(to_tsvector('english', COALESCE(NEW.body, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW."responseText", '')), 'B');
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `);
+    
+    await testPrisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS question_search_vector_trigger ON "Question"`);
+    await testPrisma.$executeRawUnsafe(`
+      CREATE TRIGGER question_search_vector_trigger
+        BEFORE INSERT OR UPDATE OF body, "responseText"
+        ON "Question"
+        FOR EACH ROW
+        EXECUTE FUNCTION question_search_vector_update()
+    `);
+    
+    await testPrisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Question_search_vector_idx" ON "Question" USING GIN(search_vector)`);
+  } catch (error) {
+    // Migration might already be applied, continue
+    console.log('Full-text search migration skipped (may already exist)');
+  }
+  
   // Create default tenant for backward compatibility tests
   await testPrisma.tenant.upsert({
     where: { slug: 'default' },

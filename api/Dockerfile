@@ -14,7 +14,7 @@ RUN npm run build
 
 FROM node:24-alpine
 WORKDIR /app
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl postgresql-client
 ENV NODE_ENV=production
 ENV PORT=3000
 LABEL org.opencontainers.image.title="PulseStage API"
@@ -25,10 +25,17 @@ LABEL org.opencontainers.image.vendor="Sean M. Dalton"
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy built application and Prisma schema
-COPY --from=builder /app/dist dist
+# Copy Prisma schema and generate client
 COPY --from=builder /app/prisma prisma
+RUN npx prisma generate
+
+# Copy built application and migrations
+COPY --from=builder /app/dist dist
 COPY --from=builder /app/openapi.yaml openapi.yaml
+COPY --from=builder /app/scripts/start.sh scripts/start.sh
+
+# Make startup script executable
+RUN chmod +x scripts/start.sh
 
 EXPOSE 3000
-CMD ["sh","-c","npx prisma db push && node dist/server.js"]
+CMD ["./scripts/start.sh"]

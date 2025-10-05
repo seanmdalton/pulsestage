@@ -280,10 +280,23 @@ class ApiClient {
     }, QuestionSchema);
   }
 
-  async getQuestions(status?: 'OPEN' | 'ANSWERED', teamId?: string): Promise<Question[]> {
+  async getQuestions(
+    status?: 'OPEN' | 'ANSWERED', 
+    teamId?: string,
+    filters?: {
+      search?: string;
+      tagId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }
+  ): Promise<Question[]> {
     const params = new URLSearchParams();
     if (status) params.append('status', status.toLowerCase());
     if (teamId) params.append('teamId', teamId);
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.tagId) params.append('tagId', filters.tagId);
+    if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
+    if (filters?.dateTo) params.append('dateTo', filters.dateTo);
     const queryString = params.toString() ? `?${params.toString()}` : '';
     return this.request(`/questions${queryString}`, {}, z.array(QuestionSchema));
   }

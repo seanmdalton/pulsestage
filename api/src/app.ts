@@ -243,12 +243,48 @@ export function createApp(prisma: PrismaClient) {
   app.get("/questions", async (req, res) => {
     const status = (req.query.status as string)?.toUpperCase();
     const teamId = req.query.teamId as string;
+    const search = req.query.search as string;
+    const tagId = req.query.tagId as string;
+    const dateFrom = req.query.dateFrom as string;
+    const dateTo = req.query.dateTo as string;
     
     const where: any = status === "ANSWERED" ? { status: "ANSWERED" as const } : { status: "OPEN" as const };
     
     // Add team filter if provided
     if (teamId) {
       where.teamId = teamId;
+    }
+    
+    // Add full-text search filter
+    if (search && search.trim()) {
+      // Use raw SQL for full-text search
+      where.id = {
+        in: await prisma.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM "Question"
+          WHERE search_vector @@ plainto_tsquery('english', ${search})
+          ORDER BY ts_rank(search_vector, plainto_tsquery('english', ${search})) DESC
+        `.then(results => results.map(r => r.id))
+      };
+    }
+    
+    // Add tag filter
+    if (tagId) {
+      where.tags = {
+        some: {
+          tagId: tagId
+        }
+      };
+    }
+    
+    // Add date range filters
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) {
+        where.createdAt.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        where.createdAt.lte = new Date(dateTo);
+      }
     }
     
     // Team scoping for moderators: only show questions from teams they moderate
@@ -289,7 +325,9 @@ export function createApp(prisma: PrismaClient) {
           }
         }
       },
-      orderBy: [{ upvotes: "desc" }, { createdAt: "asc" }]
+      orderBy: search 
+        ? [{ createdAt: "desc" }] // Search results ordered by relevance (already filtered by rank)
+        : [{ upvotes: "desc" }, { createdAt: "asc" }] // Default ordering
     });
     res.json(list);
   });
