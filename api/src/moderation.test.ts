@@ -685,7 +685,7 @@ describe('Moderation Features', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       const response = await request(app)
-        .get(`/admin/stats/moderation?startDate=${yesterday.toISOString()}&endDate=${tomorrow.toISOString()}`)
+        .get(`/admin/stats/moderation?startDate=${yesterday.toISOString().split('T')[0]}&endDate=${tomorrow.toISOString().split('T')[0]}`)
         .set('x-tenant-id', 'default')
         .set('x-mock-sso-user', 'admin@example.com');
 

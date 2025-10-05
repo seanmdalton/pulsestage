@@ -39,15 +39,15 @@ docker compose up
 This will start:
 - **PostgreSQL** database on port 5432
 - **Redis** cache on port 6379
-- **API** server on port 5001
-- **Web** frontend on port 3000
+- **API** server on port 3000
+- **Web** frontend on port 5173
 
 ### 4. Access PulseStage
 
 Open your browser and navigate to:
 
 ```
-http://localhost:3000
+http://localhost:5173
 ```
 
 ## First Steps
@@ -57,18 +57,30 @@ http://localhost:3000
 PulseStage supports multi-tenancy. The default tenant is available at:
 
 ```
-http://localhost:3000/sso-test.html
+http://localhost:5173/
+```
+
+Or to see the SSO test page with all users:
+
+```
+http://localhost:5173/sso-test.html
 ```
 
 ### Choose a Test User
 
 You'll see several test users with different roles:
 
-- **Alice Anderson** (admin@example.com) - Admin role
-- **Bob Smith** (bob@example.com) - Member role
-- **Charlie Davis** (charlie@example.com) - Member role
-- **Mike Chen** (mike@example.com) - Moderator of People team
-- **Sarah Miller** (sarah@example.com) - Moderator of Engineering team
+**Default Tenant:**
+- **John Doe** (john.doe@company.com) - Admin role
+- **Mike Chen** (mike.chen@company.com) - Moderator of People team
+- **Sarah Wilson** (sarah@example.com) - Moderator of Engineering team
+- **Emily Rodriguez** (emily@example.com) - Moderator of multiple teams
+- **Anonymous** - View without logging in
+
+**Acme Corp Tenant:**
+- **Alice Johnson** (alice@acme.corp) - Admin role
+- **Bob Wilson** (bob@acme.corp) - Moderator
+- **Charlie Davis** (charlie@acme.corp) - Member
 
 ### Submit Your First Question
 
@@ -90,11 +102,14 @@ You'll see several test users with different roles:
 Check if ports are already in use:
 
 ```bash
-# Check port 3000 (web)
+# Check port 5173 (web)
+lsof -i :5173
+
+# Check port 3000 (api)
 lsof -i :3000
 
-# Check port 5001 (api)
-lsof -i :5001
+# Check port 5432 (database)
+lsof -i :5432
 ```
 
 ### Database Connection Issues

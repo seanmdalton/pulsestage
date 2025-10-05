@@ -19,9 +19,13 @@
 - 🏢 **Team-based organization** for different departments or forums  
 - 👥 **Role-based moderation** (viewer, member, moderator, admin, owner)  
 - 🎥 **Presenter mode** for leadership meetings and all-hands  
-- 🔍 **Search & tags** for quick discovery of related topics  
-- 📤 **Exports** for follow-ups and accountability  
+- 🔍 **Advanced search** with full-text search, filters, and date ranges
+- 🏷️ **Tagging system** for organizing and categorizing questions
+- 📌 **Moderation tools** - Pin, freeze, and bulk operations
+- 📊 **Analytics dashboard** for moderation metrics and performance
+- 📤 **Exports** (CSV/JSON) for follow-ups and accountability  
 - 🔒 **Audit logging** for compliance and security
+- 🔄 **Real-time updates** via Server-Sent Events (SSE)
 - 🐳 **Self-hostable** with Docker, open source (Apache-2.0)
 
 ## Quick Start
@@ -53,7 +57,13 @@ Five roles (viewer, member, moderator, admin, owner) with team-scoped permission
 Beautiful responsive design with dark mode, real-time updates via SSE, and presentation mode optimized for large displays.
 
 ### 🔒 Security & Compliance
-Comprehensive audit logging, tenant isolation, session-based auth, and rate limiting on all endpoints.
+Comprehensive audit logging, tenant isolation, session-based auth, CSRF protection, security headers (Helmet), and rate limiting on all endpoints.
+
+### 🔍 Advanced Search & Filtering
+Full-text search with PostgreSQL GIN indexes, prefix matching for substrings, filter by tags, date ranges, and team. Works on both open and answered questions.
+
+### 📌 Moderation Queue & Tools
+Dedicated moderation interface with bulk operations (pin, freeze, tag, delete), quick actions, comprehensive filters, and real-time updates. Track moderation activity with detailed analytics per moderator.
 
 ## Documentation
 
@@ -70,8 +80,9 @@ Comprehensive audit logging, tenant isolation, session-based auth, and rate limi
 - **Backend**: Node.js 24 LTS, Express, TypeScript
 - **Database**: PostgreSQL 16 with Prisma ORM
 - **Cache**: Redis 7 for rate limiting
-- **Testing**: Vitest (91 tests), Playwright E2E
+- **Testing**: Vitest (208 tests), Playwright E2E
 - **Deployment**: Docker Compose
+- **Security**: Helmet, CSRF protection, Content Security Policy, Audit logging
 
 ## Development
 

@@ -76,7 +76,8 @@ model Question {
   reviewedAt   DateTime?
   
   // Full-text search (managed by database trigger)
-  search_vector String?       @db.Text // tsvector for full-text search (managed by PostgreSQL trigger)
+  // Using Unsupported type since Prisma doesn't natively support tsvector
+  search_vector Unsupported("tsvector")? // tsvector for full-text search (managed by PostgreSQL trigger)
   
   // Relationships
   tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)

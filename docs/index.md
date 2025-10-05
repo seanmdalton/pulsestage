@@ -16,10 +16,14 @@ PulseStage helps teams capture questions, surface what matters with up-votes, an
 
 - **Up-vote–only questions** to reduce noise and highlight priorities  
 - **Team-based organization** for different departments or forums  
-- **Role-based admin & moderation** (submit, review, respond, publish)  
+- **Role-based moderation** (viewer, member, moderator, admin, owner)  
+- **Advanced search** with full-text search, filters, and date ranges
+- **Moderation tools** - Pin, freeze, bulk operations, and analytics
 - **Presenter mode** for leadership meetings and all-hands  
-- **Search & tags** for quick discovery of related topics  
-- **Exports** for follow-ups and accountability  
+- **Tagging system** for organizing and categorizing questions
+- **Real-time updates** via Server-Sent Events (SSE)
+- **Audit logging** for compliance and security
+- **Exports** (CSV/JSON) for follow-ups and accountability  
 - **Self-hostable** with Docker (Postgres + Redis), open source (Apache-2.0)
 
 ## Quick Start
@@ -47,40 +51,56 @@ For detailed setup instructions, see the [Installation Guide](getting-started/in
 
 ### ❓ Question Management
 - Anonymous question submission with team assignment
-- Real-time search with fuzzy matching
-- Upvote system with localStorage protection
+- Full-text search with prefix matching (e.g., "mob" finds "mobile")
+- Advanced filters: tags, date ranges, status, team
+- Upvote system with protection against self-upvoting
 - Full-screen viewing for long questions and answers
 - Status tracking (Open and Answered)
+- Tag-based organization
 
 ### 👥 Role-Based Access Control
-- **Viewer**: Browse questions anonymously
+- **Viewer**: Browse questions anonymously, upvote
 - **Member**: Submit and upvote questions
-- **Moderator**: Answer questions, tag, present (team-scoped)
-- **Admin**: Full access including exports and audit logs
-- **Owner**: Complete control including team management
+- **Moderator**: Answer questions, tag, pin, freeze, present (team-scoped)
+- **Admin**: Full access including exports, audit logs, and team management
+- **Owner**: Complete control including user management
+
+### 📌 Moderation Tools
+- **Pin questions** to highlight important topics
+- **Freeze questions** to lock them from further interaction
+- **Bulk operations** - Tag, pin, freeze, or delete multiple questions at once
+- **Moderation queue** - Dedicated interface with comprehensive filters
+- **Analytics dashboard** - Track moderator performance and activity
+- **Quick actions** - Pin 📌, Freeze ❄️, Answer 💬 buttons on each question
 
 ### 🎨 Modern User Experience
 - Beautiful, responsive design with dark mode
 - Real-time updates via Server-Sent Events (SSE)
-- Presentation mode optimized for large displays
-- Search results with live typing feedback
+- Presentation mode optimized for large displays with live tag updates
+- Debounced search with instant feedback
 - Profile management with favorite teams
+- Persistent state across browser windows
 
 ### 🔒 Security & Compliance
-- Comprehensive audit logging
-- Team-scoped permissions
+- Comprehensive audit logging (all admin/mod actions tracked)
+- Team-scoped permissions with RBAC enforcement
 - Tenant isolation for multi-tenancy
-- Session-based authentication
+- Session-based authentication with HttpOnly cookies
+- CSRF protection on all state-changing endpoints
+- Security headers (Helmet, CSP, HSTS, X-Frame-Options)
 - Rate limiting on all endpoints
+- MDN HTTP Observatory integration for security validation
 
 ## Technology Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
 - **Backend**: Node.js 24 LTS, Express, TypeScript
-- **Database**: PostgreSQL 16 with Prisma ORM
-- **Cache**: Redis 7 for rate limiting
-- **Testing**: Vitest, Playwright E2E
-- **Deployment**: Docker Compose
+- **Database**: PostgreSQL 16 with Prisma ORM, full-text search (GIN indexes)
+- **Cache**: Redis 7 for rate limiting and session storage
+- **Testing**: Vitest (208 tests), Playwright E2E, MDN HTTP Observatory
+- **Security**: Helmet, CSRF protection (csrf-csrf), Content Security Policy
+- **Deployment**: Docker Compose with multi-stage builds
+- **CI/CD**: GitHub Actions with Semgrep (SAST), Trivy (security scanning), SBOM generation
 
 ## Documentation
 
