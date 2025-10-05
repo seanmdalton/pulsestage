@@ -26,6 +26,8 @@ export type SSEEventType =
   | 'question:answered'
   | 'question:tagged'
   | 'question:untagged'
+  | 'question:pinned'
+  | 'question:frozen'
   | 'heartbeat';
 
 export interface SSEEvent {

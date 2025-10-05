@@ -786,6 +786,102 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // Pin/unpin question (moderators+)
+  app.post("/questions/:id/pin", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.pin', { teamIdParam: 'teamId' }), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const question = await prisma.question.findUnique({ where: { id } });
+      if (!question) return res.status(404).json({ error: 'Question not found' });
+      
+      const newPinnedState = !question.isPinned;
+      
+      const updated = await prisma.question.update({
+        where: { id },
+        data: {
+          isPinned: newPinnedState,
+          pinnedBy: newPinnedState ? req.user?.id : null,
+          pinnedAt: newPinnedState ? new Date() : null
+        },
+        include: {
+          team: true,
+          tags: { include: { tag: true } }
+        }
+      });
+      
+      // Audit log
+      await auditService.log(req, {
+        action: newPinnedState ? 'question.pin' : 'question.unpin',
+        entityType: 'Question',
+        entityId: id,
+        metadata: {
+          questionBody: question.body.substring(0, 100)
+        }
+      });
+      
+      // Publish SSE event
+      eventBus.publish({
+        type: 'question:pinned',
+        tenantId: req.tenant!.tenantId,
+        data: updated,
+        timestamp: Date.now()
+      });
+      
+      res.json(updated);
+    } catch (error) {
+      console.error('Error pinning question:', error);
+      res.status(500).json({ error: 'Failed to pin question' });
+    }
+  });
+
+  // Freeze/unfreeze question (moderators+)
+  app.post("/questions/:id/freeze", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.freeze', { teamIdParam: 'teamId' }), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const question = await prisma.question.findUnique({ where: { id } });
+      if (!question) return res.status(404).json({ error: 'Question not found' });
+      
+      const newFrozenState = !question.isFrozen;
+      
+      const updated = await prisma.question.update({
+        where: { id },
+        data: {
+          isFrozen: newFrozenState,
+          frozenBy: newFrozenState ? req.user?.id : null,
+          frozenAt: newFrozenState ? new Date() : null
+        },
+        include: {
+          team: true,
+          tags: { include: { tag: true } }
+        }
+      });
+      
+      // Audit log
+      await auditService.log(req, {
+        action: newFrozenState ? 'question.freeze' : 'question.unfreeze',
+        entityType: 'Question',
+        entityId: id,
+        metadata: {
+          questionBody: question.body.substring(0, 100)
+        }
+      });
+      
+      // Publish SSE event
+      eventBus.publish({
+        type: 'question:frozen',
+        tenantId: req.tenant!.tenantId,
+        data: updated,
+        timestamp: Date.now()
+      });
+      
+      res.json(updated);
+    } catch (error) {
+      console.error('Error freezing question:', error);
+      res.status(500).json({ error: 'Failed to freeze question' });
+    }
+  });
+
   // Legacy endpoint - still protected by admin key for backward compatibility
   app.post("/questions/:id/respond-legacy", requireAdminKey, async (req, res) => {
     const { id } = req.params;

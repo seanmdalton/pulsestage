@@ -65,6 +65,19 @@ model Question {
   authorId     String?        // User who submitted the question
   author       User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
   
+  // Moderation fields
+  isPinned     Boolean        @default(false)
+  pinnedBy     String?        // User who pinned the question
+  pinnedAt     DateTime?
+  isFrozen     Boolean        @default(false) // Frozen questions can't receive new upvotes/responses
+  frozenBy     String?        // User who froze the question
+  frozenAt     DateTime?
+  reviewedBy   String?        // Last moderator who reviewed this question
+  reviewedAt   DateTime?
+  
+  // Full-text search (managed by database trigger)
+  search_vector String?       @db.Text // tsvector for full-text search (managed by PostgreSQL trigger)
+  
   // Relationships
   tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   tags         QuestionTag[]
@@ -73,6 +86,8 @@ model Question {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, teamId])
+  @@index([isPinned])
+  @@index([reviewedBy])
 }
 
 model Tag {

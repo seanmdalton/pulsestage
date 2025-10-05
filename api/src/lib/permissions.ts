@@ -37,6 +37,7 @@ export type Permission =
   | 'question.answer'
   | 'question.tag'
   | 'question.pin'
+  | 'question.freeze'
   | 'question.delete'
   // Tags
   | 'tag.view'
@@ -89,6 +90,7 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'question.answer',
     'question.tag',
     'question.pin',
+    'question.freeze',
     'tag.view',
     'tag.create',
     'team.view.own',
@@ -104,6 +106,7 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'question.answer',
     'question.tag',
     'question.pin',
+    'question.freeze',
     'question.delete',
     'tag.view',
     'tag.create',
@@ -129,6 +132,7 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'question.answer',
     'question.tag',
     'question.pin',
+    'question.freeze',
     'question.delete',
     'tag.view',
     'tag.create',
