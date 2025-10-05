@@ -581,19 +581,40 @@ async function createTeams(tenantId) {
 async function loginAsAdmin() {
   console.log('🔐 Logging in as admin...');
   
+  // Get CSRF token first
+  const csrfResponse = await fetch(`${BASE_URL}/csrf-token`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  if (!csrfResponse.ok) {
+    throw new Error(`Failed to get CSRF token: ${csrfResponse.status}`);
+  }
+  
+  const csrfData = await csrfResponse.json();
+  const csrfCookie = csrfResponse.headers.get('set-cookie');
+  
+  // Login with CSRF token
   const response = await fetch(`${BASE_URL}/admin/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Cookie': csrfCookie,
+      'x-csrf-token': csrfData.token
+    },
     body: JSON.stringify({ adminKey: ADMIN_KEY })
   });
   
   if (!response.ok) {
-    throw new Error(`Login failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Login failed: ${response.status} ${response.statusText}\n${errorText}`);
   }
   
   const cookies = response.headers.get('set-cookie');
   console.log('✅ Admin login successful');
-  return cookies;
+  
+  // Merge cookies from both requests
+  return [csrfCookie, cookies].filter(Boolean).join('; ');
 }
 
 async function createQuestion(questionData, teamId, cookies) {
