@@ -147,6 +147,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTeam() {
   const context = useContext(TeamContext)
   if (context === undefined) {

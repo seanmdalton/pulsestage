@@ -126,7 +126,7 @@ export function OpenQuestionsPage() {
   }
 
   // Connect to SSE for real-time updates
-  const { isConnected: _isConnected } = useSSE({
+  const { isConnected } = useSSE({
     onEvent: handleSSEEvent,
   })
 
