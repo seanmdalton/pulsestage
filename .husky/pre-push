@@ -2,17 +2,35 @@
 
 echo "🔍 Running pre-push checks..."
 
-# Run linting for API only (Web linting temporarily disabled due to remaining issues)
+# Run API tests and build to ensure everything works
+echo "🧪 Running API tests..."
+(cd api && npm run test)
+API_TEST_EXIT_CODE=$?
+
+if [ $API_TEST_EXIT_CODE -ne 0 ]; then
+  echo "❌ API tests failed. Please fix the test failures before pushing."
+  exit 1
+fi
+
+echo "🔨 Building API..."
+(cd api && npm run build)
+API_BUILD_EXIT_CODE=$?
+
+if [ $API_BUILD_EXIT_CODE -ne 0 ]; then
+  echo "❌ API build failed. Please fix the build errors before pushing."
+  exit 1
+fi
+
 echo "📝 Checking API code quality..."
-npm run lint:api
-API_EXIT_CODE=$?
+(cd api && npm run lint)
+API_LINT_EXIT_CODE=$?
 
 # Only fail if there are actual errors (exit code 1), not warnings (exit code 2)
-if [ $API_EXIT_CODE -eq 1 ]; then
+if [ $API_LINT_EXIT_CODE -eq 1 ]; then
   echo "❌ API linting failed with errors. Please fix the errors before pushing."
   echo "💡 Warnings are allowed but errors must be fixed."
   exit 1
 fi
 
-echo "✅ API pre-push checks passed!"
-echo "ℹ️  Web linting temporarily disabled - will be re-enabled after CI validation"
+echo "✅ All pre-push checks passed!"
+echo "ℹ️  Web linting temporarily disabled - will be addressed in separate task"

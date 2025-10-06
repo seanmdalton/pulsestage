@@ -105,11 +105,5 @@ export function csrfTokenEndpoint() {
   };
 }
 
-// Extend Express Request to include CSRF token
-declare module 'express-serve-static-core' {
-  interface Response {
-    locals: {
-      csrfToken?: string;
-    };
-  }
-}
+// CSRF token will be available on res.locals.csrfToken
+// TypeScript will infer the type from usage

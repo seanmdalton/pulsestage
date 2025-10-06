@@ -105,7 +105,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   seedTeams()
     .catch(error => {
       console.error('❌ Error seeding teams:', error);
-      throw e;
+      throw error;
     })
     .finally(async () => {
       await prisma.$disconnect();
