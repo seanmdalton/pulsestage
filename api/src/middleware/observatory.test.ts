@@ -18,7 +18,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createApp } from '../app.js';
 import { testPrisma } from '../test/setup.js';
 import { Server } from 'http';
-// @ts-ignore - Package doesn't have TypeScript types
+// @ts-expect-error - Package doesn't have TypeScript types
 import { scan } from '@mdn/mdn-http-observatory';
 
 describe('MDN HTTP Observatory Security Scan', () => {

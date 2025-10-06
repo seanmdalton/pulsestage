@@ -69,7 +69,7 @@ import {
   developmentSecurityHeaders,
 } from './middleware/securityHeaders.js';
 import { provideCsrfToken, validateCsrfToken, csrfTokenEndpoint } from './middleware/csrf.js';
-// @ts-ignore - Package doesn't have TypeScript types
+// @ts-expect-error - Package doesn't have TypeScript types
 import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
