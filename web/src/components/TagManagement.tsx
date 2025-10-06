@@ -112,6 +112,7 @@ export function TagManagement() {
                 placeholder="e.g., Important, Urgent, Reviewed"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 maxLength={50}
+                autoComplete="off"
                 required
                 disabled={submitting}
               />
@@ -188,7 +189,7 @@ export function TagManagement() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {tags.map((tag) => (
+            {tags.filter(t => t && typeof t.name === 'string').map((tag) => (
               <div
                 key={tag.id}
                 className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
