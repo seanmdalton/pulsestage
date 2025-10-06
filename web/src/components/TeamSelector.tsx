@@ -175,11 +175,18 @@ export function TeamSelector() {
                   </svg>
                 )}
                 
-                {/* Role indicator - Only show for team-scoped roles (moderator) */}
-                {/* Admins and owners are global, so no per-team badge */}
-                {userRole === 'moderator' && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                    moderator
+                {/* Role indicator - Show for all roles */}
+                {userRole && (
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                    userRole === 'owner' 
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                      : userRole === 'admin'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : userRole === 'moderator'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {userRole}
                   </span>
                 )}
               </div>
