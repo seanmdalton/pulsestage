@@ -72,6 +72,24 @@ Full-text search with PostgreSQL GIN indexes, prefix matching for substrings, fi
 ### 📌 Moderation Queue & Tools
 Dedicated moderation interface with bulk operations (pin, freeze, tag, delete), quick actions, comprehensive filters, and real-time updates. Track moderation activity with detailed analytics per moderator.
 
+## Development
+
+For local development with live code changes:
+
+```bash
+make setup      # Initialize environment
+make install    # Install dependencies
+make dev        # Start with local builds (hot reload)
+```
+
+See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow guide.
+
+**Quick commands:**
+- `make test` - Run all tests
+- `make validate-ci` - Run all CI checks locally
+- `make lint-fix` - Fix linting issues
+- `make db-seed` - Load demo data
+
 ## Documentation
 
 - 📚 **[Full Documentation](https://seanmdalton.github.io/pulsestage/)** - Complete guides and API reference
@@ -79,7 +97,7 @@ Dedicated moderation interface with bulk operations (pin, freeze, tag, delete), 
 - 💻 **[Installation](https://seanmdalton.github.io/pulsestage/getting-started/installation/)** - Detailed setup instructions
 - 🏗️ **[Architecture](https://seanmdalton.github.io/pulsestage/architecture/system-design/)** - System design and technical decisions
 - 🔒 **[Security](https://seanmdalton.github.io/pulsestage/security/overview/)** - Security features and RBAC
-- 🛠️ **[Development](https://seanmdalton.github.io/pulsestage/development/setup/)** - Contributing guide
+- 🛠️ **[Development](DEVELOPMENT.md)** - Local development guide (new!)
 
 ## Technology Stack
 
