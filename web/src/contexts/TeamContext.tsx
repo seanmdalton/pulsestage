@@ -157,11 +157,13 @@ export function useTeam() {
 }
 
 // Helper function to get team slug for URLs
+// eslint-disable-next-line react-refresh/only-export-components
 export function getTeamSlug(team: Team | null): string {
   return team?.slug || 'all'
 }
 
 // Helper function to get team display name
+// eslint-disable-next-line react-refresh/only-export-components
 export function getTeamDisplayName(team: Team | null): string {
   return team?.name || 'All Teams'
 }

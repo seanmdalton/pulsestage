@@ -353,6 +353,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUser() {
   const context = useContext(UserContext)
   if (context === undefined) {
@@ -362,6 +363,7 @@ export function useUser() {
 }
 
 // Helper hook for checking if user is authenticated
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const { user, isLoading } = useUser()
   return {
@@ -372,6 +374,7 @@ export function useAuth() {
 }
 
 // Helper hook for team-related user operations
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUserTeams() {
   const {
     userTeams,

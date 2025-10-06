@@ -16,7 +16,7 @@ export function QuestionModal({
   isOpen,
   onClose,
   onUpvote,
-  upvotedQuestions,
+  upvotedQuestions: _upvotedQuestions,
   upvoteStatus = new Map(),
 }: QuestionModalProps) {
   if (!question) return null

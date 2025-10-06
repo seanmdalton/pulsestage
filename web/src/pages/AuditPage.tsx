@@ -29,6 +29,7 @@ interface AuditLog {
   createdAt: string
   ipAddress: string | null
   userAgent: string | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: any
   user: {
     id: string

@@ -140,7 +140,7 @@ export function AnsweredQuestionsPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {weeklyGroups.map((group, groupIndex) => (
+            {weeklyGroups.map((group, _groupIndex) => (
               <div key={group.weekStart.toISOString()}>
                 <div className="flex items-center gap-4 mb-4">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">

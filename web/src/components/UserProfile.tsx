@@ -10,7 +10,7 @@ export function UserProfile() {
   const { isAuthenticated, user } = useAuth()
   const { userTeams, getUserRoleInTeam } = useUser()
   const { currentTeam } = useTeam()
-  const { teamSlug } = useParams<{ teamSlug: string }>()
+  const { teamSlug: _teamSlug } = useParams<{ teamSlug: string }>()
 
   // Check if user has global admin role (admin or owner in ANY team)
   // Admins and owners have global access, always show Admin Panel link

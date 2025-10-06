@@ -86,6 +86,7 @@ export function ExportPage() {
     loadPreview()
   }, [filters, hasAdminRole])
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFilterChange = (key: keyof ExportFilters, value: any) => {
     setFilters((prev) => ({
       ...prev,

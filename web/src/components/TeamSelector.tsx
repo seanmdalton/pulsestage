@@ -17,8 +17,8 @@ export function TeamSelector() {
   // User context
   const { isAuthenticated } = useAuth()
   const {
-    userTeams,
-    favorites,
+    userTeams: _userTeams,
+    favorites: _favorites,
     defaultTeam,
     getUserRoleInTeam,
     isTeamFavorite,

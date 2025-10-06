@@ -248,7 +248,7 @@ describe('RBAC & Team Scoping Tests', () => {
 
   describe('DELETE /questions/:id/tags/:tagId - Team Scoping', () => {
     let tag: any;
-    let _questionTag: any;
+    let questionTag: any;
 
     beforeEach(async () => {
       tag = await testPrisma.tag.create({

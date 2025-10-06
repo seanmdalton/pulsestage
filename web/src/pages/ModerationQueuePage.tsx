@@ -36,7 +36,7 @@ export function ModerationQueuePage() {
   const [reviewedByFilter, setReviewedByFilter] = useState<string>('')
 
   const { teams } = useTeam()
-  const { getUserRoleInTeam } = useUser()
+  const { getUserRoleInTeam: _getUserRoleInTeam } = useUser()
 
   // Handle SSE events
   const handleSSEEvent = (event: SSEEvent) => {
