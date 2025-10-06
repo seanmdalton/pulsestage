@@ -49,7 +49,7 @@ export function ProfilePage() {
   }
 
   const favoriteTeams = userTeams.filter((team) => favorites.includes(team.id))
-  const teamsWithRoles = userTeams.filter(
+  const _teamsWithRoles = userTeams.filter(
     (team) => getUserRoleInTeam(team.id) !== 'member'
   )
 

@@ -242,11 +242,9 @@ export function requireRole(minimumRole: Role) {
 }
 
 // Extend Express Request type to include role information
-declare global {
-  namespace Express {
-    interface Request {
-      userRole?: Role;
-      teamId?: string;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    userRole?: Role;
+    teamId?: string;
   }
 }

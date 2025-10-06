@@ -81,7 +81,7 @@ export function groupQuestionsByWeek(
 
   // Convert to array and sort by week (newest first)
   return Array.from(groups.entries())
-    .map(([_, group]) => ({
+    .map(([, group]) => ({
       weekLabel: getWeekLabel(group.weekStart),
       weekStart: group.weekStart,
       questions: group.questions.sort((a, b) => b.upvotes - a.upvotes), // Sort by upvotes within week

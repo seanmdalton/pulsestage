@@ -125,7 +125,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             FAVORITES_STORAGE_KEY,
             JSON.stringify(teamsResponse.favorites)
           )
-        } catch (_userError) {
+        } catch {
           // User not authenticated or API not available
           // This is expected in anonymous mode
           setUser(null)

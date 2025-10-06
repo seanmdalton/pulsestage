@@ -126,11 +126,9 @@ const mockUserPreferences: Array<{
 }> = [];
 
 // Extend Request type to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: (typeof mockUsers)[0];
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: (typeof mockUsers)[0];
   }
 }
 

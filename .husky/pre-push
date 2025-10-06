@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+echo "🔍 Running pre-push checks..."
+
+# Run linting for both API and Web (allow warnings, block on errors)
+echo "📝 Checking code quality..."
+npm run lint:api
+API_EXIT_CODE=$?
+
+npm run lint:web  
+WEB_EXIT_CODE=$?
+
+# Only fail if there are actual errors (exit code 1), not warnings (exit code 2)
+if [ $API_EXIT_CODE -eq 1 ] || [ $WEB_EXIT_CODE -eq 1 ]; then
+  echo "❌ Linting failed with errors. Please fix the errors before pushing."
+  echo "💡 Warnings are allowed but errors must be fixed."
+  exit 1
+fi
+
+echo "✅ All pre-push checks passed!"

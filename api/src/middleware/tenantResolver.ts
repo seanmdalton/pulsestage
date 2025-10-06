@@ -20,11 +20,9 @@ import { env } from '../env.js';
 import { runInTenantContext, TenantContext } from './tenantContext.js';
 
 // Extend Express Request to include tenant
-declare global {
-  namespace Express {
-    interface Request {
-      tenant?: TenantContext;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    tenant?: TenantContext;
   }
 }
 

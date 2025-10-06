@@ -13,7 +13,7 @@ import { ModerationStatsPage } from './ModerationStatsPage'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 
 export function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAdmin()
+  const { isLoading: authLoading } = useAdmin()
   const { userTeams, getUserRoleInTeam } = useUser()
   const { theme } = useTheme()
   const navigate = useNavigate()

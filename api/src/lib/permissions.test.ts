@@ -24,7 +24,6 @@ import {
   isValidRole,
   getRoleName,
   getRoleDescription,
-  type Role,
   type Permission,
 } from './permissions.js';
 

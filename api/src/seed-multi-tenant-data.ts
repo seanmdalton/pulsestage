@@ -195,7 +195,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   seedMultiTenantData()
     .catch(e => {
       console.error(e);
-      process.exit(1);
+      throw e;
     })
     .finally(async () => {
       await prisma.$disconnect();

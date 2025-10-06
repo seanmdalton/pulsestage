@@ -11,7 +11,7 @@ let moderatorUser: User;
 let memberUser: User;
 let team: Team;
 let tag1: Tag;
-let tag2: Tag;
+let _tag2: Tag;
 let question1: Question;
 let question2: Question;
 let question3: Question;
@@ -89,7 +89,7 @@ describe('Moderation Features', () => {
     tag1 = await testPrisma.tag.create({
       data: { tenantId: defaultTenant.id, name: 'Important', color: '#FF0000' },
     });
-    tag2 = await testPrisma.tag.create({
+    _tag2 = await testPrisma.tag.create({
       data: { tenantId: defaultTenant.id, name: 'Urgent', color: '#FFA500' },
     });
 

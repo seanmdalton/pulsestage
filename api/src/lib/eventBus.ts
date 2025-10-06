@@ -122,7 +122,7 @@ class EventBus {
     for (const client of tenantClients) {
       try {
         client.res.write(eventData);
-      } catch (error) {
+      } catch (_error) {
         // Connection is dead, mark for removal
         deadClients.push(client.id);
       }
@@ -146,7 +146,7 @@ class EventBus {
   private sendHeartbeat() {
     const now = Date.now();
 
-    for (const [tenantId, tenantClients] of this.clients.entries()) {
+    for (const [tenantId, _tenantClients] of this.clients.entries()) {
       const heartbeatEvent: SSEEvent = {
         type: 'heartbeat',
         tenantId,

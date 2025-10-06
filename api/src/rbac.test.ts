@@ -248,7 +248,7 @@ describe('RBAC & Team Scoping Tests', () => {
 
   describe('DELETE /questions/:id/tags/:tagId - Team Scoping', () => {
     let tag: any;
-    let questionTag: any;
+    let _questionTag: any;
 
     beforeEach(async () => {
       tag = await testPrisma.tag.create({
@@ -303,11 +303,11 @@ describe('RBAC & Team Scoping Tests', () => {
   });
 
   describe('GET /questions - Team Filtering', () => {
-    let generalQuestion: any;
+    let _generalQuestion: any;
 
     beforeEach(async () => {
       // Create a question without a team
-      generalQuestion = await testPrisma.question.create({
+      _generalQuestion = await testPrisma.question.create({
         data: {
           body: 'General question',
           status: 'OPEN',
@@ -391,7 +391,7 @@ describe('RBAC & Team Scoping Tests', () => {
   });
 
   describe('Cross-Tenant Isolation', () => {
-    let otherTenantUser: any;
+    let _otherTenantUser: any;
     let otherTenantQuestion: any;
 
     beforeEach(async () => {
@@ -405,7 +405,7 @@ describe('RBAC & Team Scoping Tests', () => {
       });
 
       // Create another tenant's data
-      otherTenantUser = await testPrisma.user.create({
+      _otherTenantUser = await testPrisma.user.create({
         data: {
           email: 'other@example.com',
           name: 'Other Tenant User',

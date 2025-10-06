@@ -204,26 +204,7 @@ const QuestionSchema = z.object({
   reviewedAt: z.string().nullable().optional(),
 })
 
-const _CreateQuestionSchema = z.object({
-  body: z.string().min(3).max(2000),
-  teamId: z.string().optional(),
-})
-
-const _RespondSchema = z.object({
-  response: z.string().min(1).max(10000),
-})
-
-const _CreateTeamSchema = z.object({
-  name: z.string().min(1).max(100),
-  slug: z.string().min(1).max(50),
-  description: z.string().max(500).optional(),
-})
-
-const _UpdateTeamSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).optional(),
-  isActive: z.boolean().optional(),
-})
+// Validation schemas removed as they're not currently used
 
 const HealthSchema = z.object({
   ok: z.boolean(),
@@ -502,14 +483,7 @@ class ApiClient {
   }
 
   async createTag(data: CreateTagRequest): Promise<Tag> {
-    const _CreateTagSchema = z.object({
-      name: z.string().min(1).max(100),
-      description: z.string().max(500).nullable().optional(),
-      color: z
-        .string()
-        .regex(/^#[0-9A-F]{6}$/i)
-        .optional(),
-    })
+    // Schema validation removed as it's not currently used
 
     return this.request(
       '/tags',
@@ -835,10 +809,7 @@ class ApiClient {
   async updateUserPreferences(
     data: UpdateUserPreferencesRequest
   ): Promise<UserPreferences> {
-    const _UpdateUserPreferencesSchema = z.object({
-      favoriteTeams: z.array(z.string()).optional(),
-      defaultTeamId: z.string().optional(),
-    })
+    // Schema validation removed as it's not currently used
 
     const UserPreferencesSchema = z.object({
       id: z.string(),
@@ -1008,10 +979,7 @@ class ApiClient {
     teamId: string,
     data: AddTeamMemberRequest
   ): Promise<TeamMembership> {
-    const _AddTeamMemberSchema = z.object({
-      userId: z.string(),
-      role: z.enum(['member', 'moderator', 'admin', 'owner']).optional(),
-    })
+    // Schema validation removed as it's not currently used
 
     const TeamMembershipSchema = z.object({
       id: z.string(),
@@ -1044,9 +1012,7 @@ class ApiClient {
     userId: string,
     data: UpdateTeamMemberRequest
   ): Promise<TeamMembership> {
-    const _UpdateTeamMemberSchema = z.object({
-      role: z.enum(['member', 'moderator', 'admin', 'owner']),
-    })
+    // Schema validation removed as it's not currently used
 
     const TeamMembershipSchema = z.object({
       id: z.string(),

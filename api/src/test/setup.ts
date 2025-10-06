@@ -55,7 +55,7 @@ beforeAll(async () => {
     await testPrisma.$executeRawUnsafe(
       `CREATE INDEX IF NOT EXISTS "Question_search_vector_idx" ON "Question" USING GIN(search_vector)`
     );
-  } catch (error) {
+  } catch (_error) {
     // Migration might already be applied, continue
     console.log('Full-text search migration skipped (may already exist)');
   }

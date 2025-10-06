@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../lib/api'
-import type {
-  ExportFilters,
-  ExportPreview,
-  Question,
-  Team,
-  Tag,
-} from '../lib/api'
+import type { ExportFilters, ExportPreview, Team, Tag } from '../lib/api'
 import { useUser } from '../contexts/UserContext'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 

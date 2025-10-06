@@ -106,12 +106,10 @@ export function csrfTokenEndpoint() {
 }
 
 // Extend Express Request to include CSRF token
-declare global {
-  namespace Express {
-    interface Response {
-      locals: {
-        csrfToken?: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Response {
+    locals: {
+      csrfToken?: string;
+    };
   }
 }
