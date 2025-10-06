@@ -26,6 +26,7 @@ import { dirname, join } from "path";
 import { env } from "./env.js";
 import { requireAdminKey } from "./middleware/adminAuth.js";
 import { rateLimit } from "./middleware/rateLimit.js";
+import { RATE_LIMITS, HTTP_STATUS, DATABASE_LIMITS, TIME_CONSTANTS, AUDIT_CONSTANTS, VALIDATION_PATTERNS, SSE_CONSTANTS, MODERATION } from "./constants.js";
 import { createSessionMiddleware } from "./middleware/session.js";
 import { requireAdminSession } from "./middleware/adminSession.js";
 import { requireAdminRole } from "./middleware/requireAdminRole.js";
@@ -159,10 +160,10 @@ export function createApp(prisma: PrismaClient) {
     }
 
     // Set SSE headers
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+    res.writeHead(HTTP_STATUS.OK, {
+      'Content-Type': SSE_CONSTANTS.CONTENT_TYPE,
+      'Cache-Control': SSE_CONSTANTS.CACHE_CONTROL,
+      'Connection': SSE_CONSTANTS.CONNECTION,
       'X-Accel-Buffering': 'no' // Disable nginx buffering
     });
 
@@ -191,9 +192,9 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions", rateLimit("create-question", 10), requirePermission('question.submit'), async (req, res) => {
+  app.post("/questions", rateLimit("create-question", RATE_LIMITS.CREATE_QUESTION), requirePermission('question.submit'), async (req, res) => {
     const parse = createQuestionSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
     
     // Validate teamId if provided
     if (parse.data.teamId) {
@@ -346,7 +347,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Rate limited: 10 requests per minute per IP
-  app.post("/questions/:id/upvote", rateLimit("upvote", 10), requirePermission('question.upvote', { allowUnauthenticated: true }), async (req, res) => {
+  app.post("/questions/:id/upvote", rateLimit("upvote", RATE_LIMITS.UPVOTE), requirePermission('question.upvote', { allowUnauthenticated: true }), async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
     
@@ -416,7 +417,7 @@ export function createApp(prisma: PrismaClient) {
       res.json(updatedQuestion);
     } catch (error) {
       console.error('Upvote error:', error);
-      res.status(500).json({ error: "Failed to upvote question" });
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: "Failed to upvote question" });
     }
   });
 
@@ -456,7 +457,7 @@ export function createApp(prisma: PrismaClient) {
       res.json({ hasUpvoted, canUpvote });
     } catch (error) {
       console.error('Upvote status error:', error);
-      res.status(500).json({ error: "Failed to check upvote status" });
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: "Failed to check upvote status" });
     }
   });
 
@@ -507,7 +508,7 @@ export function createApp(prisma: PrismaClient) {
     res.json({ 
       success: true, 
       message: "Admin login successful",
-      expiresIn: 30 * 60 * 1000 // 30 minutes
+      expiresIn: TIME_CONSTANTS.SESSION_EXPIRY_MS // 30 minutes
     });
   });
 
@@ -534,14 +535,14 @@ export function createApp(prisma: PrismaClient) {
 
   // Team management endpoints
   const createTeamSchema = z.object({
-    name: z.string().min(1).max(100),
-    slug: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
-    description: z.string().max(500).optional()
+    name: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_NAME),
+    slug: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_SLUG).regex(VALIDATION_PATTERNS.TEAM_SLUG, "Slug must contain only lowercase letters, numbers, and hyphens"),
+    description: z.string().max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION).optional()
   });
 
   const updateTeamSchema = z.object({
-    name: z.string().min(1).max(100).optional(),
-    description: z.string().max(500).optional(),
+    name: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_NAME).optional(),
+    description: z.string().max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION).optional(),
     isActive: z.boolean().optional()
   });
 
@@ -562,7 +563,7 @@ export function createApp(prisma: PrismaClient) {
       res.json(teams);
     } catch (error) {
       console.error('Error fetching teams:', error);
-      res.status(500).json({ error: "Failed to fetch teams" });
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch teams" });
     }
   });
 
@@ -737,7 +738,7 @@ export function createApp(prisma: PrismaClient) {
   app.post("/questions/:id/respond", validateCsrfToken(), extractQuestionTeam(), requirePermission('question.answer', { teamIdParam: 'teamId' }), async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
     try {
       // Get question before update for audit log
       const beforeQuestion = await prisma.question.findUnique({
@@ -773,7 +774,7 @@ export function createApp(prisma: PrismaClient) {
         before: beforeQuestion,
         after: { id: q.id, status: q.status, responseText: q.responseText },
         metadata: { 
-          questionBody: q.body.substring(0, 100),
+          questionBody: q.body.substring(0, AUDIT_CONSTANTS.MAX_ENTITY_DESCRIPTION_LENGTH),
           teamId: q.teamId,
           teamName: q.team?.name
         }
@@ -893,7 +894,7 @@ export function createApp(prisma: PrismaClient) {
   app.post("/questions/:id/respond-legacy", requireAdminKey, async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
     try {
       const q = await prisma.question.update({
         where: { id },
@@ -974,7 +975,7 @@ export function createApp(prisma: PrismaClient) {
             { upvotes: 'desc' },
             { createdAt: 'desc' }
           ],
-          take: 10
+          take: DATABASE_LIMITS.DEFAULT_PAGINATION
         });
         return res.json(questions);
       }
@@ -1057,7 +1058,7 @@ export function createApp(prisma: PrismaClient) {
           if (b.upvotes !== a.upvotes) return b.upvotes - a.upvotes;
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         })
-        .slice(0, 10)
+        .slice(0, DATABASE_LIMITS.DEFAULT_SEARCH_LIMIT)
         .map(({ searchScore, ...question }) => question); // Remove score from response
 
       res.json(rankedQuestions);
@@ -1144,7 +1145,7 @@ export function createApp(prisma: PrismaClient) {
             { upvotes: 'desc' },
             { createdAt: 'desc' }
           ],
-          take: filters.limit ? parseInt(filters.limit as string) : 100 // Limit preview to 100
+          take: filters.limit ? parseInt(filters.limit as string) : DATABASE_LIMITS.EXPORT_PREVIEW // Limit preview to 100
         });
         
         res.json({
@@ -1321,13 +1322,13 @@ export function createApp(prisma: PrismaClient) {
   // Create a new tag
   app.post("/tags", validateCsrfToken(), requirePermission('tag.create'), async (req, res) => {
     const createTagSchema = z.object({
-      name: z.string().min(1).max(100),
-      description: z.string().max(500).nullable().optional(),
-      color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
+      name: z.string().min(1).max(DATABASE_LIMITS.MAX_TAG_NAME),
+      description: z.string().max(DATABASE_LIMITS.MAX_TAG_DESCRIPTION).nullable().optional(),
+      color: z.string().regex(VALIDATION_PATTERNS.HEX_COLOR).optional()
     });
 
     const parse = createTagSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
 
     try {
       const tag = await prisma.tag.create({
@@ -1368,7 +1369,7 @@ export function createApp(prisma: PrismaClient) {
     });
 
     const parse = addTagSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
 
     try {
       // Check if question exists
@@ -1525,8 +1526,8 @@ export function createApp(prisma: PrismaClient) {
         entityId: req.query.entityId as string | undefined,
         startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
         endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+        limit: req.query.limit ? parseInt(req.query.limit as string) : AUDIT_CONSTANTS.DEFAULT_EXPORT_LIMIT,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : AUDIT_CONSTANTS.DEFAULT_EXPORT_OFFSET
       };
 
       const logs = await auditService.getLogs(req.tenant!.tenantId, filters);
@@ -1700,7 +1701,7 @@ export function createApp(prisma: PrismaClient) {
           
           if (userTeamIds.length === 0) {
             // Moderator has no teams, return empty
-            return res.json({ questions: [], total: 0, limit: limit ? parseInt(limit as string) : 100, offset: offset ? parseInt(offset as string) : 0 });
+            return res.json({ questions: [], total: 0, limit: limit ? parseInt(limit as string) : MODERATION.DEFAULT_QUEUE_LIMIT, offset: offset ? parseInt(offset as string) : MODERATION.DEFAULT_QUEUE_OFFSET });
           }
           
           // If teamId filter is specified, verify moderator has access to that team
@@ -1729,8 +1730,8 @@ export function createApp(prisma: PrismaClient) {
           { upvotes: 'desc' },
           { createdAt: 'desc' }
         ],
-        take: limit ? parseInt(limit as string) : 100,
-        skip: offset ? parseInt(offset as string) : 0
+        take: limit ? parseInt(limit as string) : MODERATION.DEFAULT_QUEUE_LIMIT,
+        skip: offset ? parseInt(offset as string) : MODERATION.DEFAULT_QUEUE_OFFSET
       });
 
       const total = await prisma.question.count({ where });
@@ -1738,8 +1739,8 @@ export function createApp(prisma: PrismaClient) {
       res.json({
         questions,
         total,
-        limit: limit ? parseInt(limit as string) : 100,
-        offset: offset ? parseInt(offset as string) : 0
+        limit: limit ? parseInt(limit as string) : MODERATION.DEFAULT_QUEUE_LIMIT,
+        offset: offset ? parseInt(offset as string) : MODERATION.DEFAULT_QUEUE_OFFSET
       });
     } catch (error) {
       console.error('Error fetching moderation queue:', error);
@@ -1756,7 +1757,7 @@ export function createApp(prisma: PrismaClient) {
     });
 
     const parse = bulkTagSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
 
     try {
       const { questionIds, tagId, action } = parse.data;
@@ -1868,7 +1869,7 @@ export function createApp(prisma: PrismaClient) {
     });
 
     const parse = bulkActionSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json({ error: parse.error.flatten() });
+    if (!parse.success) return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
 
     try {
       const { questionIds, action } = parse.data;
@@ -2115,7 +2116,7 @@ export function createApp(prisma: PrismaClient) {
             return sum + (responded - created);
           }, 0);
           
-          statsByModerator[modId].avgResponseTime = Math.round(totalTime / moderatorQuestions.length / 1000 / 60); // Convert to minutes
+          statsByModerator[modId].avgResponseTime = Math.round(totalTime / moderatorQuestions.length / TIME_CONSTANTS.AUDIT_RESPONSE_TIME_CONVERSION.MS_TO_SECONDS / TIME_CONSTANTS.AUDIT_RESPONSE_TIME_CONVERSION.SECONDS_TO_MINUTES); // Convert to minutes
         }
       }
 
