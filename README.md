@@ -42,6 +42,7 @@ docker compose up -d
 
 # Load demo data (Acme Corp tenant with teams, users, questions)
 docker compose exec api npm run db:seed:full
+docker compose restart api    # Reload mock SSO users
 ```
 
 Visit [http://localhost:5173](http://localhost:5173) and you're ready to go!

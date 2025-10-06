@@ -69,6 +69,7 @@ The API auto-creates a default tenant on first startup. Load demo data:
 
 ```bash
 docker compose exec api npm run db:seed:full
+docker compose restart api                      # Reload mock SSO users
 ```
 
 This creates:
@@ -82,7 +83,10 @@ This creates:
 docker compose exec api npm run db:seed        # Teams and users only
 docker compose exec api npm run db:seed:tags   # Tags only
 docker compose exec api npm run db:seed:full   # Everything
+docker compose restart api                      # Reload users after seeding
 ```
+
+**Note**: The API restart is needed because mock SSO loads users once at startup and caches them.
 
 ### 5. Verify Installation
 

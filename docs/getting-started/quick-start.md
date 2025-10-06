@@ -57,6 +57,7 @@ Load teams, users, and sample questions:
 
 ```bash
 docker compose exec api npm run db:seed:full
+docker compose restart api    # Reload mock SSO users
 ```
 
 This adds:
@@ -64,6 +65,8 @@ This adds:
 - 3 test users (Alice - Admin, Charlie - Owner, Emily - Member)
 - 6 sample questions
 - Default tags (Urgent, Feature Request, Answered Live, Currently Presenting)
+
+**Note**: The API restart is needed to reload mock SSO users from the database.
 
 ### 5. Access PulseStage
 
