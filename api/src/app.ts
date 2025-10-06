@@ -1374,20 +1374,20 @@ export function createApp(prisma: PrismaClient) {
       const tag = await prisma.tag.findUnique({ where: { id: parse.data.tagId } });
       if (!tag) return res.status(404).json({ error: 'Tag not found' });
 
-      // Add tag to question (upsert to handle duplicates)
-      await prisma.questionTag.upsert({
-        where: {
-          questionId_tagId: {
+      // Add tag to question (handle duplicates gracefully)
+      try {
+        await prisma.questionTag.create({
+          data: {
             questionId: id,
             tagId: parse.data.tagId
           }
-        },
-        update: {},
-        create: {
-          questionId: id,
-          tagId: parse.data.tagId
+        });
+      } catch (createError: any) {
+        // If tag already exists (P2002 = unique constraint), that's fine - ignore it
+        if (createError.code !== 'P2002') {
+          throw createError;
         }
-      });
+      }
 
       // Get updated question with tags for SSE event
       const updatedQuestion = await prisma.question.findUnique({
@@ -1444,14 +1444,22 @@ export function createApp(prisma: PrismaClient) {
         select: { name: true }
       });
 
-      await prisma.questionTag.delete({
-        where: {
-          questionId_tagId: {
-            questionId: id,
-            tagId: tagId
+      // Remove tag from question (handle not found gracefully)
+      try {
+        await prisma.questionTag.delete({
+          where: {
+            questionId_tagId: {
+              questionId: id,
+              tagId: tagId
+            }
           }
+        });
+      } catch (deleteError: any) {
+        // If tag doesn't exist on question (P2025 = record not found), that's fine - ignore it
+        if (deleteError.code !== 'P2025') {
+          throw deleteError;
         }
-      });
+      }
 
       // Get updated question for SSE event and audit
       const updatedQuestion = await prisma.question.findUnique({
@@ -1759,23 +1767,21 @@ export function createApp(prisma: PrismaClient) {
         // Add tag to all questions
         for (const questionId of questionIds) {
           try {
-            await prisma.questionTag.upsert({
-              where: {
-                questionId_tagId: {
-                  questionId,
-                  tagId
-                }
-              },
-              update: {},
-              create: {
+            await prisma.questionTag.create({
+              data: {
                 questionId,
                 tagId
               }
             });
             successCount++;
-          } catch (err) {
-            errorCount++;
-            console.error(`Failed to add tag to question ${questionId}:`, err);
+          } catch (err: any) {
+            // If tag already exists (P2002), count as success
+            if (err.code === 'P2002') {
+              successCount++;
+            } else {
+              errorCount++;
+              console.error(`Failed to add tag to question ${questionId}:`, err);
+            }
           }
         }
       } else {
@@ -1789,13 +1795,16 @@ export function createApp(prisma: PrismaClient) {
                   tagId
                 }
               }
-            }).catch(() => {
-              // Ignore if tag wasn't on question
             });
             successCount++;
-          } catch (err) {
-            errorCount++;
-            console.error(`Failed to remove tag from question ${questionId}:`, err);
+          } catch (err: any) {
+            // If tag doesn't exist on question (P2025), count as success
+            if (err.code === 'P2025') {
+              successCount++;
+            } else {
+              errorCount++;
+              console.error(`Failed to remove tag from question ${questionId}:`, err);
+            }
           }
         }
       }
