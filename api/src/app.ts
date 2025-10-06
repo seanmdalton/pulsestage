@@ -131,12 +131,12 @@ export function createApp(prisma: PrismaClient) {
   // SSE endpoint for real-time updates
   // Note: EventSource doesn't support custom headers, so we also check query param
   app.get("/events", async (req, res) => {
-    // If tenant not resolved from header, try query parameter
-    let tenantId = req.tenant?.tenantId;
-    let tenantSlug = req.tenant?.tenantSlug;
+    // SSE connections can't send custom headers, so prioritize query parameter
+    let tenantId: string | undefined;
+    let tenantSlug: string | undefined;
     
-    if (!tenantId && req.query.tenant) {
-      // Resolve tenant from query parameter
+    // 1. Try query parameter first (for SSE connections)
+    if (req.query.tenant) {
       const tenant = await prisma.tenant.findUnique({
         where: { slug: req.query.tenant as string }
       });
@@ -147,6 +147,11 @@ export function createApp(prisma: PrismaClient) {
       
       tenantId = tenant.id;
       tenantSlug = tenant.slug;
+    }
+    // 2. Fall back to middleware-resolved tenant
+    else if (req.tenant) {
+      tenantId = req.tenant.tenantId;
+      tenantSlug = req.tenant.tenantSlug;
     }
     
     if (!tenantId) {
