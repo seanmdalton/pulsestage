@@ -15,10 +15,10 @@
     "db:push": "prisma db push",
     "db:seed": "node dist/seed-multi-tenant-data.js",
     "db:seed:tags": "node dist/seed-tags.js",
-    "db:seed:full": "node dist/seed-multi-tenant-data.js && node dist/seed-tags.js && node load-comprehensive-test-data.js",
+    "db:seed:full": "node dist/seed-multi-tenant-data.js && node dist/seed-tags.js",
     "db:seed:dev": "npm run build && node dist/seed-multi-tenant-data.js",
     "db:seed:tags:dev": "npm run build && node dist/seed-tags.js",
-    "db:seed:full:dev": "npm run build && node dist/seed-multi-tenant-data.js && node dist/seed-tags.js && node load-comprehensive-test-data.js",
+    "db:seed:full:dev": "npm run build && node dist/seed-multi-tenant-data.js && node dist/seed-tags.js",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {

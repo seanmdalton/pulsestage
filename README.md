@@ -40,7 +40,7 @@ cd pulsestage
 ./setup.sh
 docker compose up -d
 
-# Load demo data (teams, users, questions)
+# Load demo data (Acme Corp tenant with teams, users, questions)
 docker compose exec api npm run db:seed:full
 ```
 

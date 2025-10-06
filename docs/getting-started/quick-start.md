@@ -60,10 +60,10 @@ docker compose exec api npm run db:seed:full
 ```
 
 This adds:
-- 4 teams (Engineering, People, Product, General)
-- Test users with different roles
-- 100+ realistic questions with answers
-- Tags and interactions
+- Acme Corp tenant with 3 teams (Engineering, Product, Marketing)
+- 3 test users (Alice - Admin, Charlie - Owner, Emily - Member)
+- 6 sample questions
+- Default tags (Urgent, Feature Request, Answered Live, Currently Presenting)
 
 ### 5. Access PulseStage
 

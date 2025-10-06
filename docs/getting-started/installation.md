@@ -72,11 +72,10 @@ docker compose exec api npm run db:seed:full
 ```
 
 This creates:
-- Teams (Engineering, People, Product, General)
-- Test users with different roles
-- 100+ sample questions with answers
-- Tags (Urgent, Feature Request, Currently Presenting, etc.)
-- Upvotes and interactions
+- Acme Corp tenant with 3 teams (Engineering, Product, Marketing)
+- 3 test users (Alice - Admin, Charlie - Owner, Emily - Member)  
+- 6 sample questions
+- Default tags (Urgent, Feature Request, Answered Live, Currently Presenting)
 
 **Individual seed commands:**
 ```bash
