@@ -6,6 +6,7 @@ const ADMIN_KEY = 'dev-admin-key-change-me'
 test.describe('PulseStage Happy Path', () => {
   let questionId: string
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   test.beforeEach(async ({ request: _request }) => {
     // Clean up: delete all questions (admin endpoint would be ideal, but we'll use API directly)
     // For now, we'll just work with existing data

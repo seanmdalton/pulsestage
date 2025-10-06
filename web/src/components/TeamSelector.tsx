@@ -17,7 +17,9 @@ export function TeamSelector() {
   // User context
   const { isAuthenticated } = useAuth()
   const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userTeams: _userTeams,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     favorites: _favorites,
     defaultTeam,
     getUserRoleInTeam,

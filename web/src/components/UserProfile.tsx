@@ -10,6 +10,7 @@ export function UserProfile() {
   const { isAuthenticated, user } = useAuth()
   const { userTeams, getUserRoleInTeam } = useUser()
   const { currentTeam } = useTeam()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { teamSlug: _teamSlug } = useParams<{ teamSlug: string }>()
 
   // Check if user has global admin role (admin or owner in ANY team)

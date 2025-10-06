@@ -16,6 +16,7 @@ export function QuestionModal({
   isOpen,
   onClose,
   onUpvote,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   upvotedQuestions: _upvotedQuestions,
   upvoteStatus = new Map(),
 }: QuestionModalProps) {

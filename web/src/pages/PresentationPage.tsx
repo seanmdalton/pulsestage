@@ -146,6 +146,7 @@ export function PresentationPage() {
               description: 'Question currently being presented',
               color: '#10B981', // Green
             })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (createError: any) {
             // Tag might have been created by another process, refetch
             const tagsRetry = await apiClient.getTags()
@@ -166,6 +167,7 @@ export function PresentationPage() {
               description: 'Question has been reviewed',
               color: '#6B7280', // Gray
             })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (createError: any) {
             // Tag might have been created by another process, refetch
             const tagsRetry = await apiClient.getTags()

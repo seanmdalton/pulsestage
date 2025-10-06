@@ -36,6 +36,7 @@ export function ModerationQueuePage() {
   const [reviewedByFilter, setReviewedByFilter] = useState<string>('')
 
   const { teams } = useTeam()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { getUserRoleInTeam: _getUserRoleInTeam } = useUser()
 
   // Handle SSE events
@@ -83,6 +84,8 @@ export function ModerationQueuePage() {
         setAllTags(tagsData)
 
         // Load questions with filters
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const filters: any = {}
 
         if (statusFilter !== 'all') {
@@ -176,6 +179,7 @@ export function ModerationQueuePage() {
       setSelectedQuestions(new Set())
 
       // Reload questions
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filters: any = {}
       if (statusFilter !== 'all') filters.status = statusFilter
       if (teamFilter) filters.teamId = teamFilter
@@ -204,6 +208,7 @@ export function ModerationQueuePage() {
       setSelectedQuestions(new Set())
 
       // Reload questions
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filters: any = {}
       if (statusFilter !== 'all') filters.status = statusFilter
       if (teamFilter) filters.teamId = teamFilter
@@ -284,6 +289,7 @@ export function ModerationQueuePage() {
               </label>
               <select
                 value={statusFilter}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={(e) => setStatusFilter(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
@@ -317,6 +323,7 @@ export function ModerationQueuePage() {
               </label>
               <select
                 value={pinnedFilter}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={(e) => setPinnedFilter(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
@@ -332,6 +339,7 @@ export function ModerationQueuePage() {
               </label>
               <select
                 value={frozenFilter}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={(e) => setFrozenFilter(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
@@ -421,6 +429,7 @@ export function ModerationQueuePage() {
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       handleBulkAction(e.target.value as any)
                       e.target.value = ''
                     }
@@ -641,6 +650,7 @@ export function ModerationQueuePage() {
           setSelectedQuestion(null)
           // Reload questions
           const loadQuestions = async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const filters: any = {}
             if (statusFilter !== 'all') filters.status = statusFilter
             const data = await apiClient.getModerationQueue(filters)

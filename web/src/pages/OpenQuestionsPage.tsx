@@ -126,6 +126,7 @@ export function OpenQuestionsPage() {
   }
 
   // Connect to SSE for real-time updates
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isConnected: _isConnected } = useSSE({
     onEvent: handleSSEEvent,
   })

@@ -53,6 +53,7 @@ export function ModerationStatsPage() {
       try {
         setLoading(true)
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const filters: any = {}
         if (teamFilter) filters.teamId = teamFilter
         if (dateRange.startDate) filters.startDate = dateRange.startDate

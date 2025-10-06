@@ -32,5 +32,16 @@ if [ $API_LINT_EXIT_CODE -eq 1 ]; then
   exit 1
 fi
 
+echo "📝 Checking Web code quality..."
+(cd web && npm run lint)
+WEB_LINT_EXIT_CODE=$?
+
+# Only fail if there are actual errors (exit code 1), not warnings (exit code 2)
+if [ $WEB_LINT_EXIT_CODE -eq 1 ]; then
+  echo "❌ Web linting failed with errors. Please fix the errors before pushing."
+  echo "💡 Warnings are allowed but errors must be fixed."
+  exit 1
+fi
+
 echo "✅ All pre-push checks passed!"
-echo "ℹ️  Web linting temporarily disabled - will be addressed in separate task"
+echo "🎉 API tests, build, and linting (API + Web) all successful!"

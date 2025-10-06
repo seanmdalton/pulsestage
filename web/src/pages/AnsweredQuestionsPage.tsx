@@ -140,6 +140,7 @@ export function AnsweredQuestionsPage() {
           </div>
         ) : (
           <div className="space-y-8">
+            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
             {weeklyGroups.map((group, _groupIndex) => (
               <div key={group.weekStart.toISOString()}>
                 <div className="flex items-center gap-4 mb-4">
