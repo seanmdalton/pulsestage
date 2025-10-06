@@ -248,7 +248,7 @@ describe('RBAC & Team Scoping Tests', () => {
 
   describe('DELETE /questions/:id/tags/:tagId - Team Scoping', () => {
     let tag: any;
-    let questionTag: any;
+    let _questionTag: any;
 
     beforeEach(async () => {
       tag = await testPrisma.tag.create({
@@ -258,7 +258,7 @@ describe('RBAC & Team Scoping Tests', () => {
         },
       });
 
-      questionTag = await testPrisma.questionTag.create({
+      _questionTag = await testPrisma.questionTag.create({
         data: {
           questionId: engineeringQuestion.id,
           tagId: tag.id,
