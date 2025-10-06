@@ -20,13 +20,7 @@ import { tryGetTenantContext } from './tenantContext.js';
 /**
  * Models that are scoped by tenantId
  */
-const TENANT_SCOPED_MODELS = new Set([
-  'Team',
-  'Question',
-  'Tag',
-  'User',
-  'UserPreferences'
-]);
+const TENANT_SCOPED_MODELS = new Set(['Team', 'Question', 'Tag', 'User', 'UserPreferences']);
 
 /**
  * Check if a model requires tenant scoping
@@ -37,7 +31,7 @@ function isTenantScoped(model: string | undefined): boolean {
 
 /**
  * Prisma middleware to automatically scope queries by tenantId
- * 
+ *
  * This middleware ensures complete tenant isolation by:
  * - Injecting tenantId into all WHERE clauses for reads
  * - Adding tenantId to all CREATE operations
@@ -54,7 +48,7 @@ export function createTenantScopingMiddleware(): Prisma.Middleware {
 
     // Get current tenant context
     const tenantContext = tryGetTenantContext();
-    
+
     // If no tenant context, allow the query (for migrations, seeds, etc.)
     if (!tenantContext) {
       if (process.env.NODE_ENV === 'development') {
@@ -93,7 +87,7 @@ export function createTenantScopingMiddleware(): Prisma.Middleware {
         if (Array.isArray(params.args.data)) {
           params.args.data = params.args.data.map((record: any) => ({
             ...record,
-            tenantId
+            tenantId,
           }));
         }
         break;
@@ -134,9 +128,8 @@ export function createTenantScopingMiddleware(): Prisma.Middleware {
  */
 export function applyTenantMiddleware(prisma: any) {
   prisma.$use(createTenantScopingMiddleware());
-  
+
   if (process.env.NODE_ENV === 'development') {
     console.log('✅ Tenant scoping middleware applied to Prisma client');
   }
 }
-

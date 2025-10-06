@@ -46,10 +46,7 @@ export function tryGetTenantContext(): TenantContext | undefined {
 /**
  * Run a function within a tenant context
  */
-export function runInTenantContext<T>(
-  context: TenantContext,
-  fn: () => T
-): T {
+export function runInTenantContext<T>(context: TenantContext, fn: () => T): T {
   return tenantContextStorage.run(context, fn);
 }
 
@@ -59,4 +56,3 @@ export function runInTenantContext<T>(
 export function getTenantContextStorage() {
   return tenantContextStorage;
 }
-

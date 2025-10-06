@@ -29,7 +29,7 @@ describe('AuditService', () => {
 
     // Get default tenant
     const tenant = await prisma.tenant.findUniqueOrThrow({
-      where: { slug: 'default' }
+      where: { slug: 'default' },
     });
     testTenantId = tenant.id;
 
@@ -38,8 +38,8 @@ describe('AuditService', () => {
       data: {
         tenantId: testTenantId,
         email: 'audit-test@example.com',
-        name: 'Audit Test User'
-      }
+        name: 'Audit Test User',
+      },
     });
     testUserId = user.id;
   });
@@ -49,9 +49,9 @@ describe('AuditService', () => {
       const mockReq = {
         user: { id: testUserId, email: 'audit-test@example.com' },
         ip: '127.0.0.1',
-        get: (header: string) => header === 'user-agent' ? 'Test User Agent' : null,
+        get: (header: string) => (header === 'user-agent' ? 'Test User Agent' : null),
         socket: { remoteAddress: '127.0.0.1' },
-        tenant: { tenantId: testTenantId, tenantSlug: 'default' }
+        tenant: { tenantId: testTenantId, tenantSlug: 'default' },
       } as any as Request;
 
       // Set tenant context using AsyncLocalStorage
@@ -63,7 +63,7 @@ describe('AuditService', () => {
           entityId: 'test-123',
           before: { status: 'old' },
           after: { status: 'new' },
-          metadata: { testKey: 'testValue' }
+          metadata: { testKey: 'testValue' },
         });
       });
 
@@ -71,7 +71,7 @@ describe('AuditService', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const logs = await prisma.auditLog.findMany({
-        where: { tenantId: testTenantId }
+        where: { tenantId: testTenantId },
       });
 
       expect(logs).toHaveLength(1);
@@ -88,21 +88,21 @@ describe('AuditService', () => {
         ip: '127.0.0.1',
         get: () => null,
         socket: { remoteAddress: '127.0.0.1' },
-        tenant: { tenantId: testTenantId, tenantSlug: 'default' }
+        tenant: { tenantId: testTenantId, tenantSlug: 'default' },
       } as any as Request;
 
       const { runInTenantContext } = await import('../middleware/tenantContext.js');
       await runInTenantContext({ tenantId: testTenantId, tenantSlug: 'default' }, async () => {
         await auditService.log(mockReq, {
           action: 'system.cleanup',
-          entityType: 'System'
+          entityType: 'System',
         });
       });
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const logs = await prisma.auditLog.findMany({
-        where: { action: 'system.cleanup' }
+        where: { action: 'system.cleanup' },
       });
 
       expect(logs).toHaveLength(1);
@@ -121,7 +121,7 @@ describe('AuditService', () => {
             action: 'question.answer',
             entityType: 'Question',
             entityId: 'q1',
-            ipAddress: '127.0.0.1'
+            ipAddress: '127.0.0.1',
           },
           {
             tenantId: testTenantId,
@@ -129,15 +129,15 @@ describe('AuditService', () => {
             action: 'team.create',
             entityType: 'Team',
             entityId: 't1',
-            ipAddress: '127.0.0.1'
+            ipAddress: '127.0.0.1',
           },
           {
             tenantId: testTenantId,
             action: 'system.backup',
             entityType: 'System',
-            ipAddress: '127.0.0.1'
-          }
-        ]
+            ipAddress: '127.0.0.1',
+          },
+        ],
       });
     });
 
@@ -148,7 +148,7 @@ describe('AuditService', () => {
 
     it('should filter by action', async () => {
       const logs = await auditService.getLogs(testTenantId, {
-        action: 'question.answer'
+        action: 'question.answer',
       });
       expect(logs).toHaveLength(1);
       expect(logs[0].action).toBe('question.answer');
@@ -156,7 +156,7 @@ describe('AuditService', () => {
 
     it('should filter by entity type', async () => {
       const logs = await auditService.getLogs(testTenantId, {
-        entityType: 'Team'
+        entityType: 'Team',
       });
       expect(logs).toHaveLength(1);
       expect(logs[0].entityType).toBe('Team');
@@ -164,14 +164,14 @@ describe('AuditService', () => {
 
     it('should filter by user', async () => {
       const logs = await auditService.getLogs(testTenantId, {
-        userId: testUserId
+        userId: testUserId,
       });
       expect(logs).toHaveLength(2);
     });
 
     it('should respect limit', async () => {
       const logs = await auditService.getLogs(testTenantId, {
-        limit: 2
+        limit: 2,
       });
       expect(logs).toHaveLength(2);
     });
@@ -179,14 +179,14 @@ describe('AuditService', () => {
     it('should respect offset', async () => {
       const logs = await auditService.getLogs(testTenantId, {
         limit: 2,
-        offset: 1
+        offset: 1,
       });
       expect(logs).toHaveLength(2);
     });
 
     it('should include user details in results', async () => {
       const logs = await auditService.getLogs(testTenantId, {
-        action: 'question.answer'
+        action: 'question.answer',
       });
       expect(logs[0].user).toBeDefined();
       expect(logs[0].user?.email).toBe('audit-test@example.com');
@@ -201,21 +201,21 @@ describe('AuditService', () => {
             tenantId: testTenantId,
             action: 'question.answer',
             entityType: 'Question',
-            ipAddress: '127.0.0.1'
+            ipAddress: '127.0.0.1',
           },
           {
             tenantId: testTenantId,
             action: 'question.answer',
             entityType: 'Question',
-            ipAddress: '127.0.0.1'
+            ipAddress: '127.0.0.1',
           },
           {
             tenantId: testTenantId,
             action: 'team.create',
             entityType: 'Team',
-            ipAddress: '127.0.0.1'
-          }
-        ]
+            ipAddress: '127.0.0.1',
+          },
+        ],
       });
     });
 
@@ -226,7 +226,7 @@ describe('AuditService', () => {
 
     it('should count filtered logs', async () => {
       const count = await auditService.getCount(testTenantId, {
-        action: 'question.answer'
+        action: 'question.answer',
       });
       expect(count).toBe(2);
     });
@@ -238,8 +238,8 @@ describe('AuditService', () => {
       const otherTenant = await prisma.tenant.create({
         data: {
           slug: 'other-tenant',
-          name: 'Other Tenant'
-        }
+          name: 'Other Tenant',
+        },
       });
 
       // Create audit log in other tenant
@@ -248,16 +248,15 @@ describe('AuditService', () => {
           tenantId: otherTenant.id,
           action: 'secret.action',
           entityType: 'Secret',
-          ipAddress: '127.0.0.1'
-        }
+          ipAddress: '127.0.0.1',
+        },
       });
 
       // Query logs for test tenant
       const logs = await auditService.getLogs(testTenantId);
-      
+
       // Should not see the other tenant's log
       expect(logs.find(log => log.action === 'secret.action')).toBeUndefined();
     });
   });
 });
-

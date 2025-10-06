@@ -1,127 +1,144 @@
-import React, { useState, useEffect } from 'react';
-import { Modal } from './Modal';
-import { apiClient } from '../lib/api';
-import type { Question } from '../lib/api';
+import React, { useState, useEffect } from 'react'
+import { Modal } from './Modal'
+import { apiClient } from '../lib/api'
+import type { Question } from '../lib/api'
 
 interface Tag {
-  id: string;
-  name: string;
-  color: string;
+  id: string
+  name: string
+  color: string
 }
 
 interface ResponseModalProps {
-  question: Question | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: (updatedQuestion: Question) => void;
+  question: Question | null
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: (updatedQuestion: Question) => void
 }
 
-export function ResponseModal({ question, isOpen, onClose, onSuccess }: ResponseModalProps) {
-  const [response, setResponse] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [loadingTags, setLoadingTags] = useState(false);
+export function ResponseModal({
+  question,
+  isOpen,
+  onClose,
+  onSuccess,
+}: ResponseModalProps) {
+  const [response, setResponse] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [tags, setTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+  const [loadingTags, setLoadingTags] = useState(false)
 
   // Load tags when modal opens
   useEffect(() => {
     if (isOpen) {
-      loadTags();
+      loadTags()
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Reset form when modal opens/closes or question changes
   useEffect(() => {
     if (isOpen && question) {
-      setResponse('');
-      setError(null);
+      setResponse('')
+      setError(null)
       // Pre-select existing tags
-      const existingTagIds = new Set(question.tags?.map(qt => qt.tag.id) || []);
-      setSelectedTags(existingTagIds);
+      const existingTagIds = new Set(
+        question.tags?.map((qt) => qt.tag.id) || []
+      )
+      setSelectedTags(existingTagIds)
     }
-  }, [isOpen, question]);
+  }, [isOpen, question])
 
   const loadTags = async () => {
     try {
-      setLoadingTags(true);
-      const tagsData = await apiClient.getTags();
-      setTags(tagsData);
+      setLoadingTags(true)
+      const tagsData = await apiClient.getTags()
+      setTags(tagsData)
     } catch (err) {
-      console.error('Failed to load tags:', err);
+      console.error('Failed to load tags:', err)
     } finally {
-      setLoadingTags(false);
+      setLoadingTags(false)
     }
-  };
+  }
 
   const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => {
-      const newSet = new Set(prev);
+    setSelectedTags((prev) => {
+      const newSet = new Set(prev)
       if (newSet.has(tagId)) {
-        newSet.delete(tagId);
+        newSet.delete(tagId)
       } else {
-        newSet.add(tagId);
+        newSet.add(tagId)
       }
-      return newSet;
-    });
-  };
+      return newSet
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question || !response.trim()) return;
+    e.preventDefault()
+    if (!question || !response.trim()) return
 
-    setIsSubmitting(true);
-    setError(null);
+    setIsSubmitting(true)
+    setError(null)
 
     try {
       // Submit the response
       let updatedQuestion = await apiClient.respondToQuestionWithSession(
-        question.id, 
+        question.id,
         { response: response.trim() }
-      );
-      
+      )
+
       // Manage tags (add/remove)
-      const existingTagIds = new Set(question.tags?.map(qt => qt.tag.id) || []);
-      const tagsToAdd = Array.from(selectedTags).filter(id => !existingTagIds.has(id));
-      const tagsToRemove = Array.from(existingTagIds).filter(id => !selectedTags.has(id));
+      const existingTagIds = new Set(
+        question.tags?.map((qt) => qt.tag.id) || []
+      )
+      const tagsToAdd = Array.from(selectedTags).filter(
+        (id) => !existingTagIds.has(id)
+      )
+      const tagsToRemove = Array.from(existingTagIds).filter(
+        (id) => !selectedTags.has(id)
+      )
 
       // Add new tags
       for (const tagId of tagsToAdd) {
-        await apiClient.addTagToQuestion(question.id, tagId);
+        await apiClient.addTagToQuestion(question.id, tagId)
       }
 
       // Remove unselected tags
       for (const tagId of tagsToRemove) {
-        await apiClient.removeTagFromQuestion(question.id, tagId);
+        await apiClient.removeTagFromQuestion(question.id, tagId)
       }
 
       // Reload question to get updated tags
       if (tagsToAdd.length > 0 || tagsToRemove.length > 0) {
-        const questions = await apiClient.getQuestions('ANSWERED');
-        updatedQuestion = questions.find(q => q.id === question.id) || updatedQuestion;
+        const questions = await apiClient.getQuestions('ANSWERED')
+        updatedQuestion =
+          questions.find((q) => q.id === question.id) || updatedQuestion
       }
-      
-      onSuccess(updatedQuestion);
-      onClose();
+
+      onSuccess(updatedQuestion)
+      onClose()
     } catch (error) {
-      if (error instanceof Error && error.message.includes('authentication required')) {
-        setError('Your session has expired. Please refresh the page and log in again.');
+      if (
+        error instanceof Error &&
+        error.message.includes('authentication required')
+      ) {
+        setError(
+          'Your session has expired. Please refresh the page and log in again.'
+        )
       } else {
-        setError(error instanceof Error ? error.message : 'Failed to submit response');
+        setError(
+          error instanceof Error ? error.message : 'Failed to submit response'
+        )
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  if (!question) return null;
+  if (!question) return null
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      title="Respond to Question"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Respond to Question">
       <div className="p-6">
         {/* Question Display */}
         <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -159,14 +176,22 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
                         ? 'text-white ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
                         : 'opacity-60 hover:opacity-100'
                     }`}
-                    style={{ 
+                    style={{
                       backgroundColor: tag.color,
-                      opacity: selectedTags.has(tag.id) ? 1 : 0.6
+                      opacity: selectedTags.has(tag.id) ? 1 : 0.6,
                     }}
                   >
                     {selectedTags.has(tag.id) && (
-                      <svg className="w-3 h-3 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <svg
+                        className="w-3 h-3 inline-block mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     )}
                     {tag.name}
@@ -182,7 +207,10 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
           )}
 
           <div>
-            <label htmlFor="response" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="response"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Your Response
             </label>
             <textarea
@@ -224,9 +252,25 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
             >
               {isSubmitting ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Submitting...
                 </>
@@ -238,5 +282,5 @@ export function ResponseModal({ question, isOpen, onClose, onSuccess }: Response
         </form>
       </div>
     </Modal>
-  );
+  )
 }

@@ -1,150 +1,151 @@
-import { z } from 'zod';
-import type { components, operations } from './api-types';
+import { z } from 'zod'
+import type { components } from './api-types'
 
 // Re-export OpenAPI-generated types
-export type Question = components['schemas']['Question'];
-export type CreateQuestionRequest = components['schemas']['CreateQuestionRequest'];
-export type RespondRequest = components['schemas']['RespondRequest'];
-export type HealthResponse = components['schemas']['HealthResponse'];
+export type Question = components['schemas']['Question']
+export type CreateQuestionRequest =
+  components['schemas']['CreateQuestionRequest']
+export type RespondRequest = components['schemas']['RespondRequest']
+export type HealthResponse = components['schemas']['HealthResponse']
 
 // Team types (manual until we update OpenAPI spec)
 export interface Team {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name: string
+  slug: string
+  description?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
   _count?: {
-    questions: number;
-  };
+    questions: number
+  }
 }
 
 // Tag types
 export interface Tag {
-  id: string;
-  name: string;
-  description?: string | null;
-  color: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name: string
+  description?: string | null
+  color: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface QuestionTag {
-  id: string;
-  questionId: string;
-  tagId: string;
-  createdAt: string;
-  tag: Tag;
+  id: string
+  questionId: string
+  tagId: string
+  createdAt: string
+  tag: Tag
 }
 
 export interface CreateTagRequest {
-  name: string;
-  description?: string | null;
-  color?: string;
+  name: string
+  description?: string | null
+  color?: string
 }
 
 // User types
 export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  ssoId?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  email: string
+  name?: string
+  ssoId?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface TeamMembership {
-  id: string;
-  userId: string;
-  teamId: string;
-  role: 'member' | 'moderator' | 'admin' | 'owner';
-  createdAt: string;
-  user?: User;
-  team?: Team;
+  id: string
+  userId: string
+  teamId: string
+  role: 'member' | 'moderator' | 'admin' | 'owner'
+  createdAt: string
+  user?: User
+  team?: Team
 }
 
 export interface UserPreferences {
-  id: string;
-  userId: string;
-  favoriteTeams: string[]; // Array of team slugs
-  defaultTeamId?: string;
-  createdAt: string;
-  updatedAt: string;
-  defaultTeam?: Team;
+  id: string
+  userId: string
+  favoriteTeams: string[] // Array of team slugs
+  defaultTeamId?: string
+  createdAt: string
+  updatedAt: string
+  defaultTeam?: Team
 }
 
 // Enhanced team type with user context
 export interface TeamWithMembership extends Team {
-  userRole?: 'member' | 'moderator' | 'admin' | 'owner';
-  isFavorite?: boolean;
-  memberCount?: number;
-  members?: TeamMembership[];
+  userRole?: 'member' | 'moderator' | 'admin' | 'owner'
+  isFavorite?: boolean
+  memberCount?: number
+  members?: TeamMembership[]
 }
 
 // User management request types
 export interface CreateUserRequest {
-  email: string;
-  name?: string;
-  ssoId?: string;
+  email: string
+  name?: string
+  ssoId?: string
 }
 
 export interface UpdateUserPreferencesRequest {
-  favoriteTeams?: string[];
-  defaultTeamId?: string;
+  favoriteTeams?: string[]
+  defaultTeamId?: string
 }
 
 export interface AddTeamMemberRequest {
-  userId: string;
-  role?: 'member' | 'moderator' | 'admin' | 'owner';
+  userId: string
+  role?: 'member' | 'moderator' | 'admin' | 'owner'
 }
 
 export interface UpdateTeamMemberRequest {
-  role: 'member' | 'moderator' | 'admin' | 'owner';
+  role: 'member' | 'moderator' | 'admin' | 'owner'
 }
 
 // User context response types
 export interface UserContext {
-  user: User;
-  teams: TeamWithMembership[];
-  preferences: UserPreferences;
+  user: User
+  teams: TeamWithMembership[]
+  preferences: UserPreferences
 }
 
 export interface UserTeamsResponse {
-  teams: TeamWithMembership[];
-  favorites: string[];
-  defaultTeam?: Team;
+  teams: TeamWithMembership[]
+  favorites: string[]
+  defaultTeam?: Team
 }
 
 export interface ExportFilters {
-  teamId?: string;
-  status?: 'open' | 'answered' | 'both';
-  startDate?: string;
-  endDate?: string;
-  minUpvotes?: number;
-  maxUpvotes?: number;
-  tagIds?: string[];
-  hasResponse?: 'true' | 'false';
-  limit?: number;
+  teamId?: string
+  status?: 'open' | 'answered' | 'both'
+  startDate?: string
+  endDate?: string
+  minUpvotes?: number
+  maxUpvotes?: number
+  tagIds?: string[]
+  hasResponse?: 'true' | 'false'
+  limit?: number
 }
 
 export interface ExportPreview {
-  count: number;
-  preview: Question[];
-  filters: ExportFilters;
+  count: number
+  preview: Question[]
+  filters: ExportFilters
 }
 
 export interface CreateTeamRequest {
-  name: string;
-  slug: string;
-  description?: string;
+  name: string
+  slug: string
+  description?: string
 }
 
 export interface UpdateTeamRequest {
-  name?: string;
-  description?: string;
-  isActive?: boolean;
+  name?: string
+  description?: string
+  isActive?: boolean
 }
 
 // Zod schemas for runtime validation (kept for validation purposes)
@@ -156,10 +157,12 @@ const TeamSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  _count: z.object({
-    questions: z.number()
-  }).optional()
-});
+  _count: z
+    .object({
+      questions: z.number(),
+    })
+    .optional(),
+})
 
 const TagSchema = z.object({
   id: z.string(),
@@ -168,7 +171,7 @@ const TagSchema = z.object({
   color: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
-});
+})
 
 const QuestionTagSchema = z.object({
   id: z.string(),
@@ -176,7 +179,7 @@ const QuestionTagSchema = z.object({
   tagId: z.string(),
   createdAt: z.string(),
   tag: TagSchema,
-});
+})
 
 const QuestionSchema = z.object({
   id: z.string(),
@@ -198,48 +201,48 @@ const QuestionSchema = z.object({
   frozenBy: z.string().nullable().optional(),
   frozenAt: z.string().nullable().optional(),
   reviewedBy: z.string().nullable().optional(),
-  reviewedAt: z.string().nullable().optional()
-});
+  reviewedAt: z.string().nullable().optional(),
+})
 
-const CreateQuestionSchema = z.object({
+const _CreateQuestionSchema = z.object({
   body: z.string().min(3).max(2000),
-  teamId: z.string().optional()
-});
+  teamId: z.string().optional(),
+})
 
-const RespondSchema = z.object({
+const _RespondSchema = z.object({
   response: z.string().min(1).max(10000),
-});
+})
 
-const CreateTeamSchema = z.object({
+const _CreateTeamSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().min(1).max(50),
-  description: z.string().max(500).optional()
-});
+  description: z.string().max(500).optional(),
+})
 
-const UpdateTeamSchema = z.object({
+const _UpdateTeamSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-  isActive: z.boolean().optional()
-});
+  isActive: z.boolean().optional(),
+})
 
 const HealthSchema = z.object({
   ok: z.boolean(),
   service: z.string(),
-});
+})
 
 const ExportPreviewSchema = z.object({
   count: z.number(),
   preview: z.array(QuestionSchema),
-  filters: z.object({}).passthrough()
-});
+  filters: z.object({}).passthrough(),
+})
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 class ApiClient {
-  private baseUrl: string;
+  private baseUrl: string
 
   constructor(baseUrl: string = API_URL) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl
   }
 
   private async request<T>(
@@ -247,351 +250,467 @@ class ApiClient {
     options: RequestInit = {},
     schema: z.ZodSchema<T>
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
-    
-      // Add mock SSO and tenant headers for local development
-      const mockSSOUser = localStorage.getItem('mock-sso-user');
-      const mockTenant = localStorage.getItem('mock-tenant');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      };
-      
-      if (mockSSOUser) {
-        headers['x-mock-sso-user'] = mockSSOUser;
-      }
-      
-      // Add tenant header - defaults to 'default' if not set
-      headers['x-tenant-id'] = mockTenant || 'default';
-    
+    const url = `${this.baseUrl}${endpoint}`
+
+    // Add mock SSO and tenant headers for local development
+    const mockSSOUser = localStorage.getItem('mock-sso-user')
+    const mockTenant = localStorage.getItem('mock-tenant')
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    }
+
+    if (mockSSOUser) {
+      headers['x-mock-sso-user'] = mockSSOUser
+    }
+
+    // Add tenant header - defaults to 'default' if not set
+    headers['x-tenant-id'] = mockTenant || 'default'
+
     const response = await fetch(url, {
       headers,
       credentials: 'include', // Always include credentials for session cookies
       ...options,
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
-    const data = await response.json();
-    return schema.parse(data);
+    const data = await response.json()
+    return schema.parse(data)
   }
 
   async getHealth(): Promise<HealthResponse> {
-    return this.request('/health', {}, HealthSchema);
+    return this.request('/health', {}, HealthSchema)
   }
 
   async createQuestion(data: CreateQuestionRequest): Promise<Question> {
-    return this.request('/questions', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }, QuestionSchema);
+    return this.request(
+      '/questions',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      QuestionSchema
+    )
   }
 
   async getQuestions(
-    status?: 'OPEN' | 'ANSWERED', 
+    status?: 'OPEN' | 'ANSWERED',
     teamId?: string,
     filters?: {
-      search?: string;
-      tagId?: string;
-      dateFrom?: string;
-      dateTo?: string;
+      search?: string
+      tagId?: string
+      dateFrom?: string
+      dateTo?: string
     }
   ): Promise<Question[]> {
-    const params = new URLSearchParams();
-    if (status) params.append('status', status.toLowerCase());
-    if (teamId) params.append('teamId', teamId);
-    if (filters?.search) params.append('search', filters.search);
-    if (filters?.tagId) params.append('tagId', filters.tagId);
-    if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
-    if (filters?.dateTo) params.append('dateTo', filters.dateTo);
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return this.request(`/questions${queryString}`, {}, z.array(QuestionSchema));
+    const params = new URLSearchParams()
+    if (status) params.append('status', status.toLowerCase())
+    if (teamId) params.append('teamId', teamId)
+    if (filters?.search) params.append('search', filters.search)
+    if (filters?.tagId) params.append('tagId', filters.tagId)
+    if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
+    if (filters?.dateTo) params.append('dateTo', filters.dateTo)
+    const queryString = params.toString() ? `?${params.toString()}` : ''
+    return this.request(`/questions${queryString}`, {}, z.array(QuestionSchema))
   }
 
   async upvoteQuestion(id: string): Promise<Question> {
-    return this.request(`/questions/${id}/upvote`, {
-      method: 'POST',
-    }, QuestionSchema);
-  }
-
-  async getUpvoteStatus(id: string): Promise<{ hasUpvoted: boolean; canUpvote: boolean }> {
-    return this.request(`/questions/${id}/upvote-status`, {
-      method: 'GET',
-    }, z.object({
-      hasUpvoted: z.boolean(),
-      canUpvote: z.boolean()
-    }));
-  }
-
-  async respondToQuestion(id: string, data: RespondRequest, adminKey: string): Promise<Question> {
-    return this.request(`/questions/${id}/respond`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'x-admin-key': adminKey,
+    return this.request(
+      `/questions/${id}/upvote`,
+      {
+        method: 'POST',
       },
-    }, QuestionSchema);
+      QuestionSchema
+    )
+  }
+
+  async getUpvoteStatus(
+    id: string
+  ): Promise<{ hasUpvoted: boolean; canUpvote: boolean }> {
+    return this.request(
+      `/questions/${id}/upvote-status`,
+      {
+        method: 'GET',
+      },
+      z.object({
+        hasUpvoted: z.boolean(),
+        canUpvote: z.boolean(),
+      })
+    )
+  }
+
+  async respondToQuestion(
+    id: string,
+    data: RespondRequest,
+    adminKey: string
+  ): Promise<Question> {
+    return this.request(
+      `/questions/${id}/respond`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'x-admin-key': adminKey,
+        },
+      },
+      QuestionSchema
+    )
   }
 
   async searchQuestions(query: string, teamId?: string): Promise<Question[]> {
     if (!query || query.trim().length < 2) {
-      return [];
+      return []
     }
-    const params = new URLSearchParams();
-    params.append('q', query.trim());
-    if (teamId) params.append('teamId', teamId);
-    return this.request(`/questions/search?${params.toString()}`, {}, z.array(QuestionSchema));
+    const params = new URLSearchParams()
+    params.append('q', query.trim())
+    if (teamId) params.append('teamId', teamId)
+    return this.request(
+      `/questions/search?${params.toString()}`,
+      {},
+      z.array(QuestionSchema)
+    )
   }
 
   // Admin authentication methods
-  async adminLogin(adminKey: string): Promise<{ success: boolean; message: string; expiresIn: number }> {
+  async adminLogin(
+    adminKey: string
+  ): Promise<{ success: boolean; message: string; expiresIn: number }> {
     const AdminLoginResponseSchema = z.object({
       success: z.boolean(),
       message: z.string(),
-      expiresIn: z.number()
-    });
+      expiresIn: z.number(),
+    })
 
-    return this.request('/admin/login', {
-      method: 'POST',
-      body: JSON.stringify({ adminKey }),
-      credentials: 'include' // Important for session cookies
-    }, AdminLoginResponseSchema);
+    return this.request(
+      '/admin/login',
+      {
+        method: 'POST',
+        body: JSON.stringify({ adminKey }),
+        credentials: 'include', // Important for session cookies
+      },
+      AdminLoginResponseSchema
+    )
   }
 
   async adminLogout(): Promise<{ success: boolean; message: string }> {
     const AdminLogoutResponseSchema = z.object({
       success: z.boolean(),
-      message: z.string()
-    });
+      message: z.string(),
+    })
 
-    return this.request('/admin/logout', {
-      method: 'POST',
-      credentials: 'include'
-    }, AdminLogoutResponseSchema);
+    return this.request(
+      '/admin/logout',
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      AdminLogoutResponseSchema
+    )
   }
 
-  async getAdminStatus(): Promise<{ isAuthenticated: boolean; loginTime: number | null; sessionAge: number | null }> {
+  async getAdminStatus(): Promise<{
+    isAuthenticated: boolean
+    loginTime: number | null
+    sessionAge: number | null
+  }> {
     const AdminStatusSchema = z.object({
       isAuthenticated: z.boolean(),
       loginTime: z.number().nullable(),
-      sessionAge: z.number().nullable()
-    });
+      sessionAge: z.number().nullable(),
+    })
 
-    return this.request('/admin/status', {
-      credentials: 'include'
-    }, AdminStatusSchema);
+    return this.request(
+      '/admin/status',
+      {
+        credentials: 'include',
+      },
+      AdminStatusSchema
+    )
   }
 
   // Updated respond method that uses session auth instead of admin key
-  async respondToQuestionWithSession(id: string, data: RespondRequest): Promise<Question> {
-    return this.request(`/questions/${id}/respond`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      credentials: 'include' // Use session instead of admin key header
-    }, QuestionSchema);
+  async respondToQuestionWithSession(
+    id: string,
+    data: RespondRequest
+  ): Promise<Question> {
+    return this.request(
+      `/questions/${id}/respond`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        credentials: 'include', // Use session instead of admin key header
+      },
+      QuestionSchema
+    )
   }
 
   // Team management methods
   async getTeams(): Promise<Team[]> {
-    return this.request('/teams', {}, z.array(TeamSchema));
+    return this.request('/teams', {}, z.array(TeamSchema))
   }
 
   async getTeamBySlug(slug: string): Promise<Team> {
-    return this.request(`/teams/${slug}`, {}, TeamSchema);
+    return this.request(`/teams/${slug}`, {}, TeamSchema)
   }
 
   async createTeam(data: CreateTeamRequest): Promise<Team> {
-    return this.request('/teams', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, TeamSchema);
+    return this.request(
+      '/teams',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      TeamSchema
+    )
   }
 
   async updateTeam(id: string, data: UpdateTeamRequest): Promise<Team> {
-    return this.request(`/teams/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, TeamSchema);
+    return this.request(
+      `/teams/${id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      TeamSchema
+    )
   }
 
   async deleteTeam(id: string): Promise<{ success: boolean; message: string }> {
     const DeleteTeamResponseSchema = z.object({
       success: z.boolean(),
-      message: z.string()
-    });
+      message: z.string(),
+    })
 
-    return this.request(`/teams/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    }, DeleteTeamResponseSchema);
+    return this.request(
+      `/teams/${id}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+      DeleteTeamResponseSchema
+    )
   }
 
   // Tag management methods
   async getTags(): Promise<Tag[]> {
-    return this.request('/tags', {}, z.array(TagSchema));
+    return this.request('/tags', {}, z.array(TagSchema))
   }
 
   async createTag(data: CreateTagRequest): Promise<Tag> {
-    const CreateTagSchema = z.object({
+    const _CreateTagSchema = z.object({
       name: z.string().min(1).max(100),
       description: z.string().max(500).nullable().optional(),
-      color: z.string().regex(/^#[0-9A-F]{6}$/i).optional()
-    });
+      color: z
+        .string()
+        .regex(/^#[0-9A-F]{6}$/i)
+        .optional(),
+    })
 
-    return this.request('/tags', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, TagSchema);
+    return this.request(
+      '/tags',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      TagSchema
+    )
   }
 
-  async addTagToQuestion(questionId: string, tagId: string): Promise<{ success: boolean }> {
+  async addTagToQuestion(
+    questionId: string,
+    tagId: string
+  ): Promise<{ success: boolean }> {
     const AddTagResponseSchema = z.object({
-      success: z.boolean()
-    });
+      success: z.boolean(),
+    })
 
-    return this.request(`/questions/${questionId}/tags`, {
-      method: 'POST',
-      body: JSON.stringify({ tagId }),
-      credentials: 'include'
-    }, AddTagResponseSchema);
+    return this.request(
+      `/questions/${questionId}/tags`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ tagId }),
+        credentials: 'include',
+      },
+      AddTagResponseSchema
+    )
   }
 
-  async removeTagFromQuestion(questionId: string, tagId: string): Promise<{ success: boolean }> {
+  async removeTagFromQuestion(
+    questionId: string,
+    tagId: string
+  ): Promise<{ success: boolean }> {
     const RemoveTagResponseSchema = z.object({
-      success: z.boolean()
-    });
+      success: z.boolean(),
+    })
 
-    return this.request(`/questions/${questionId}/tags/${tagId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    }, RemoveTagResponseSchema);
+    return this.request(
+      `/questions/${questionId}/tags/${tagId}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+      RemoveTagResponseSchema
+    )
   }
 
   // Moderation methods
   async pinQuestion(questionId: string): Promise<Question> {
-    return this.request(`/questions/${questionId}/pin`, {
-      method: 'POST',
-      credentials: 'include'
-    }, QuestionSchema);
+    return this.request(
+      `/questions/${questionId}/pin`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      QuestionSchema
+    )
   }
 
   async freezeQuestion(questionId: string): Promise<Question> {
-    return this.request(`/questions/${questionId}/freeze`, {
-      method: 'POST',
-      credentials: 'include'
-    }, QuestionSchema);
+    return this.request(
+      `/questions/${questionId}/freeze`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      QuestionSchema
+    )
   }
 
   async getModerationQueue(filters?: {
-    status?: 'open' | 'answered';
-    teamId?: string;
-    isPinned?: boolean;
-    isFrozen?: boolean;
-    needsReview?: boolean;
-    reviewedBy?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<{ questions: Question[]; total: number; limit: number; offset: number }> {
-    const params = new URLSearchParams();
-    
+    status?: 'open' | 'answered'
+    teamId?: string
+    isPinned?: boolean
+    isFrozen?: boolean
+    needsReview?: boolean
+    reviewedBy?: string
+    limit?: number
+    offset?: number
+  }): Promise<{
+    questions: Question[]
+    total: number
+    limit: number
+    offset: number
+  }> {
+    const params = new URLSearchParams()
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          params.append(key, value.toString());
+          params.append(key, value.toString())
         }
-      });
+      })
     }
 
     const ModerationQueueSchema = z.object({
       questions: z.array(QuestionSchema),
       total: z.number(),
       limit: z.number(),
-      offset: z.number()
-    });
+      offset: z.number(),
+    })
 
-    return this.request(`/admin/moderation-queue?${params.toString()}`, {
-      credentials: 'include'
-    }, ModerationQueueSchema);
+    return this.request(
+      `/admin/moderation-queue?${params.toString()}`,
+      {
+        credentials: 'include',
+      },
+      ModerationQueueSchema
+    )
   }
 
-  async bulkTagQuestions(questionIds: string[], tagId: string, action: 'add' | 'remove'): Promise<{
-    success: boolean;
-    successCount: number;
-    errorCount: number;
-    total: number;
+  async bulkTagQuestions(
+    questionIds: string[],
+    tagId: string,
+    action: 'add' | 'remove'
+  ): Promise<{
+    success: boolean
+    successCount: number
+    errorCount: number
+    total: number
   }> {
     const BulkTagResponseSchema = z.object({
       success: z.boolean(),
       successCount: z.number(),
       errorCount: z.number(),
-      total: z.number()
-    });
+      total: z.number(),
+    })
 
-    return this.request('/admin/bulk-tag', {
-      method: 'POST',
-      body: JSON.stringify({ questionIds, tagId, action }),
-      credentials: 'include'
-    }, BulkTagResponseSchema);
+    return this.request(
+      '/admin/bulk-tag',
+      {
+        method: 'POST',
+        body: JSON.stringify({ questionIds, tagId, action }),
+        credentials: 'include',
+      },
+      BulkTagResponseSchema
+    )
   }
 
-  async bulkActionQuestions(questionIds: string[], action: 'pin' | 'unpin' | 'freeze' | 'unfreeze' | 'delete'): Promise<{
-    success: boolean;
-    successCount: number;
-    errorCount: number;
-    total: number;
+  async bulkActionQuestions(
+    questionIds: string[],
+    action: 'pin' | 'unpin' | 'freeze' | 'unfreeze' | 'delete'
+  ): Promise<{
+    success: boolean
+    successCount: number
+    errorCount: number
+    total: number
   }> {
     const BulkActionResponseSchema = z.object({
       success: z.boolean(),
       successCount: z.number(),
       errorCount: z.number(),
-      total: z.number()
-    });
+      total: z.number(),
+    })
 
-    return this.request('/admin/bulk-action', {
-      method: 'POST',
-      body: JSON.stringify({ questionIds, action }),
-      credentials: 'include'
-    }, BulkActionResponseSchema);
+    return this.request(
+      '/admin/bulk-action',
+      {
+        method: 'POST',
+        body: JSON.stringify({ questionIds, action }),
+        credentials: 'include',
+      },
+      BulkActionResponseSchema
+    )
   }
 
   async getModerationStats(filters?: {
-    teamId?: string;
-    startDate?: string;
-    endDate?: string;
+    teamId?: string
+    startDate?: string
+    endDate?: string
   }): Promise<{
     overall: {
-      totalQuestionsReviewed: number;
-      totalQuestionsAnswered: number;
-      totalQuestionsPinned: number;
-      totalQuestionsFrozen: number;
-      activeModerators: number;
-      avgResponseTime: number | null;
-    };
+      totalQuestionsReviewed: number
+      totalQuestionsAnswered: number
+      totalQuestionsPinned: number
+      totalQuestionsFrozen: number
+      activeModerators: number
+      avgResponseTime: number | null
+    }
     byModerator: Array<{
-      moderatorId: string;
-      moderatorName: string;
-      moderatorEmail: string;
-      questionsReviewed: number;
-      questionsAnswered: number;
-      questionsPinned: number;
-      questionsFrozen: number;
-      avgResponseTime: number | null;
-      teamsCount: number;
-    }>;
+      moderatorId: string
+      moderatorName: string
+      moderatorEmail: string
+      questionsReviewed: number
+      questionsAnswered: number
+      questionsPinned: number
+      questionsFrozen: number
+      avgResponseTime: number | null
+      teamsCount: number
+    }>
   }> {
-    const params = new URLSearchParams();
-    
+    const params = new URLSearchParams()
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          params.append(key, value.toString());
+          params.append(key, value.toString())
         }
-      });
+      })
     }
 
     const ModerationStatsSchema = z.object({
@@ -601,78 +720,96 @@ class ApiClient {
         totalQuestionsPinned: z.number(),
         totalQuestionsFrozen: z.number(),
         activeModerators: z.number(),
-        avgResponseTime: z.number().nullable()
-      }),
-      byModerator: z.array(z.object({
-        moderatorId: z.string(),
-        moderatorName: z.string(),
-        moderatorEmail: z.string(),
-        questionsReviewed: z.number(),
-        questionsAnswered: z.number(),
-        questionsPinned: z.number(),
-        questionsFrozen: z.number(),
         avgResponseTime: z.number().nullable(),
-        teamsCount: z.number()
-      }))
-    });
+      }),
+      byModerator: z.array(
+        z.object({
+          moderatorId: z.string(),
+          moderatorName: z.string(),
+          moderatorEmail: z.string(),
+          questionsReviewed: z.number(),
+          questionsAnswered: z.number(),
+          questionsPinned: z.number(),
+          questionsFrozen: z.number(),
+          avgResponseTime: z.number().nullable(),
+          teamsCount: z.number(),
+        })
+      ),
+    })
 
-    return this.request(`/admin/stats/moderation?${params.toString()}`, {
-      credentials: 'include'
-    }, ModerationStatsSchema);
+    return this.request(
+      `/admin/stats/moderation?${params.toString()}`,
+      {
+        credentials: 'include',
+      },
+      ModerationStatsSchema
+    )
   }
 
   // Export methods
   async getExportPreview(filters: ExportFilters): Promise<ExportPreview> {
-    const queryParams = new URLSearchParams();
-    
+    const queryParams = new URLSearchParams()
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
-          value.forEach(v => queryParams.append(key, v.toString()));
+          value.forEach((v) => queryParams.append(key, v.toString()))
         } else {
-          queryParams.append(key, value.toString());
+          queryParams.append(key, value.toString())
         }
       }
-    });
+    })
 
-    return this.request(`/admin/export/preview?${queryParams}`, {
-      credentials: 'include'
-    }, ExportPreviewSchema);
+    return this.request(
+      `/admin/export/preview?${queryParams}`,
+      {
+        credentials: 'include',
+      },
+      ExportPreviewSchema
+    )
   }
 
-  async downloadExport(filters: ExportFilters, format: 'csv' | 'json'): Promise<Blob> {
-    const queryParams = new URLSearchParams();
-    
+  async downloadExport(
+    filters: ExportFilters,
+    format: 'csv' | 'json'
+  ): Promise<Blob> {
+    const queryParams = new URLSearchParams()
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
-          value.forEach(v => queryParams.append(key, v.toString()));
+          value.forEach((v) => queryParams.append(key, v.toString()))
         } else {
-          queryParams.append(key, value.toString());
+          queryParams.append(key, value.toString())
         }
       }
-    });
-    
-    queryParams.append('format', format);
+    })
+
+    queryParams.append('format', format)
 
     // Get the mock SSO user and tenant headers from localStorage
-    const mockSSOUser = localStorage.getItem('mock-sso-user');
-    const mockTenant = localStorage.getItem('mock-tenant');
-    
-    const response = await fetch(`${this.baseUrl}/admin/export/download?${queryParams}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        ...(mockSSOUser && { 'x-mock-sso-user': mockSSOUser }),
-        'x-tenant-id': mockTenant || 'default'
+    const mockSSOUser = localStorage.getItem('mock-sso-user')
+    const mockTenant = localStorage.getItem('mock-tenant')
+
+    const response = await fetch(
+      `${this.baseUrl}/admin/export/download?${queryParams}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          ...(mockSSOUser && { 'x-mock-sso-user': mockSSOUser }),
+          'x-tenant-id': mockTenant || 'default',
+        },
       }
-    });
+    )
 
     if (!response.ok) {
-      throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Export failed: ${response.status} ${response.statusText}`
+      )
     }
 
-    return response.blob();
+    return response.blob()
   }
 
   // User management methods
@@ -683,19 +820,25 @@ class ApiClient {
       name: z.string().optional(),
       ssoId: z.string().optional(),
       createdAt: z.string(),
-      updatedAt: z.string()
-    });
+      updatedAt: z.string(),
+    })
 
-    return this.request('/users/me', {
-      credentials: 'include'
-    }, UserSchema);
+    return this.request(
+      '/users/me',
+      {
+        credentials: 'include',
+      },
+      UserSchema
+    )
   }
 
-  async updateUserPreferences(data: UpdateUserPreferencesRequest): Promise<UserPreferences> {
-    const UpdateUserPreferencesSchema = z.object({
+  async updateUserPreferences(
+    data: UpdateUserPreferencesRequest
+  ): Promise<UserPreferences> {
+    const _UpdateUserPreferencesSchema = z.object({
       favoriteTeams: z.array(z.string()).optional(),
-      defaultTeamId: z.string().optional()
-    });
+      defaultTeamId: z.string().optional(),
+    })
 
     const UserPreferencesSchema = z.object({
       id: z.string(),
@@ -704,14 +847,18 @@ class ApiClient {
       defaultTeamId: z.string().optional(),
       createdAt: z.string(),
       updatedAt: z.string(),
-      defaultTeam: TeamSchema.optional()
-    });
+      defaultTeam: TeamSchema.optional(),
+    })
 
-    return this.request('/users/me/preferences', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, UserPreferencesSchema);
+    return this.request(
+      '/users/me/preferences',
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      UserPreferencesSchema
+    )
   }
 
   async getUserTeams(): Promise<UserTeamsResponse> {
@@ -719,40 +866,54 @@ class ApiClient {
       userRole: z.enum(['member', 'moderator', 'admin', 'owner']).optional(),
       isFavorite: z.boolean().optional(),
       memberCount: z.number().optional(),
-      members: z.array(z.object({
-        id: z.string(),
-        userId: z.string(),
-        teamId: z.string(),
-        role: z.enum(['member', 'moderator', 'admin', 'owner']),
-        createdAt: z.string(),
-        user: z.object({
-          id: z.string(),
-          email: z.string().email(),
-          name: z.string().optional()
-        }).optional()
-      })).optional()
-    });
+      members: z
+        .array(
+          z.object({
+            id: z.string(),
+            userId: z.string(),
+            teamId: z.string(),
+            role: z.enum(['member', 'moderator', 'admin', 'owner']),
+            createdAt: z.string(),
+            user: z
+              .object({
+                id: z.string(),
+                email: z.string().email(),
+                name: z.string().optional(),
+              })
+              .optional(),
+          })
+        )
+        .optional(),
+    })
 
     const UserTeamsResponseSchema = z.object({
       teams: z.array(TeamWithMembershipSchema),
       favorites: z.array(z.string()),
-      defaultTeam: TeamSchema.nullable()
-    });
+      defaultTeam: TeamSchema.nullable(),
+    })
 
-    return this.request('/users/me/teams', {
-      credentials: 'include'
-    }, UserTeamsResponseSchema);
+    return this.request(
+      '/users/me/teams',
+      {
+        credentials: 'include',
+      },
+      UserTeamsResponseSchema
+    )
   }
 
   async toggleTeamFavorite(teamId: string): Promise<{ isFavorite: boolean }> {
     const ToggleFavoriteResponseSchema = z.object({
-      isFavorite: z.boolean()
-    });
+      isFavorite: z.boolean(),
+    })
 
-    return this.request(`/users/me/teams/${teamId}/favorite`, {
-      method: 'POST',
-      credentials: 'include'
-    }, ToggleFavoriteResponseSchema);
+    return this.request(
+      `/users/me/teams/${teamId}/favorite`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      ToggleFavoriteResponseSchema
+    )
   }
 
   async getUserQuestions(): Promise<Question[]> {
@@ -767,42 +928,54 @@ class ApiClient {
       updatedAt: z.string(),
       teamId: z.string().optional(),
       authorId: z.string().optional(),
-      team: z.object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().optional(),
-        isActive: z.boolean(),
-        createdAt: z.string(),
-        updatedAt: z.string()
-      }).optional(),
-      author: z.object({
-        id: z.string(),
-        email: z.string().email(),
-        name: z.string().optional(),
-        ssoId: z.string().optional(),
-        createdAt: z.string(),
-        updatedAt: z.string()
-      }).optional(),
-      tags: z.array(z.object({
-        id: z.string(),
-        questionId: z.string(),
-        tagId: z.string(),
-        createdAt: z.string(),
-        tag: z.object({
+      team: z
+        .object({
           id: z.string(),
           name: z.string(),
+          slug: z.string(),
           description: z.string().optional(),
-          color: z.string(),
+          isActive: z.boolean(),
           createdAt: z.string(),
-          updatedAt: z.string()
+          updatedAt: z.string(),
         })
-      })).optional()
-    });
+        .optional(),
+      author: z
+        .object({
+          id: z.string(),
+          email: z.string().email(),
+          name: z.string().optional(),
+          ssoId: z.string().optional(),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+        })
+        .optional(),
+      tags: z
+        .array(
+          z.object({
+            id: z.string(),
+            questionId: z.string(),
+            tagId: z.string(),
+            createdAt: z.string(),
+            tag: z.object({
+              id: z.string(),
+              name: z.string(),
+              description: z.string().optional(),
+              color: z.string(),
+              createdAt: z.string(),
+              updatedAt: z.string(),
+            }),
+          })
+        )
+        .optional(),
+    })
 
-    return this.request('/users/me/questions', {
-      credentials: 'include'
-    }, z.array(QuestionSchema));
+    return this.request(
+      '/users/me/questions',
+      {
+        credentials: 'include',
+      },
+      z.array(QuestionSchema)
+    )
   }
 
   // Team membership management (admin only)
@@ -813,23 +986,32 @@ class ApiClient {
       teamId: z.string(),
       role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
-      user: z.object({
-        id: z.string(),
-        email: z.string().email(),
-        name: z.string().optional()
-      }).optional()
-    });
+      user: z
+        .object({
+          id: z.string(),
+          email: z.string().email(),
+          name: z.string().optional(),
+        })
+        .optional(),
+    })
 
-    return this.request(`/teams/${teamId}/members`, {
-      credentials: 'include'
-    }, z.array(TeamMembershipSchema));
+    return this.request(
+      `/teams/${teamId}/members`,
+      {
+        credentials: 'include',
+      },
+      z.array(TeamMembershipSchema)
+    )
   }
 
-  async addTeamMember(teamId: string, data: AddTeamMemberRequest): Promise<TeamMembership> {
-    const AddTeamMemberSchema = z.object({
+  async addTeamMember(
+    teamId: string,
+    data: AddTeamMemberRequest
+  ): Promise<TeamMembership> {
+    const _AddTeamMemberSchema = z.object({
       userId: z.string(),
-      role: z.enum(['member', 'moderator', 'admin', 'owner']).optional()
-    });
+      role: z.enum(['member', 'moderator', 'admin', 'owner']).optional(),
+    })
 
     const TeamMembershipSchema = z.object({
       id: z.string(),
@@ -837,24 +1019,34 @@ class ApiClient {
       teamId: z.string(),
       role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
-      user: z.object({
-        id: z.string(),
-        email: z.string().email(),
-        name: z.string().optional()
-      }).optional()
-    });
+      user: z
+        .object({
+          id: z.string(),
+          email: z.string().email(),
+          name: z.string().optional(),
+        })
+        .optional(),
+    })
 
-    return this.request(`/teams/${teamId}/members`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, TeamMembershipSchema);
+    return this.request(
+      `/teams/${teamId}/members`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      TeamMembershipSchema
+    )
   }
 
-  async updateTeamMember(teamId: string, userId: string, data: UpdateTeamMemberRequest): Promise<TeamMembership> {
-    const UpdateTeamMemberSchema = z.object({
-      role: z.enum(['member', 'moderator', 'admin', 'owner'])
-    });
+  async updateTeamMember(
+    teamId: string,
+    userId: string,
+    data: UpdateTeamMemberRequest
+  ): Promise<TeamMembership> {
+    const _UpdateTeamMemberSchema = z.object({
+      role: z.enum(['member', 'moderator', 'admin', 'owner']),
+    })
 
     const TeamMembershipSchema = z.object({
       id: z.string(),
@@ -862,33 +1054,46 @@ class ApiClient {
       teamId: z.string(),
       role: z.enum(['member', 'moderator', 'admin', 'owner']),
       createdAt: z.string(),
-      user: z.object({
-        id: z.string(),
-        email: z.string().email(),
-        name: z.string().optional()
-      }).optional()
-    });
+      user: z
+        .object({
+          id: z.string(),
+          email: z.string().email(),
+          name: z.string().optional(),
+        })
+        .optional(),
+    })
 
-    return this.request(`/teams/${teamId}/members/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-      credentials: 'include'
-    }, TeamMembershipSchema);
+    return this.request(
+      `/teams/${teamId}/members/${userId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        credentials: 'include',
+      },
+      TeamMembershipSchema
+    )
   }
 
-  async removeTeamMember(teamId: string, userId: string): Promise<{ success: boolean }> {
+  async removeTeamMember(
+    teamId: string,
+    userId: string
+  ): Promise<{ success: boolean }> {
     const RemoveMemberResponseSchema = z.object({
-      success: z.boolean()
-    });
+      success: z.boolean(),
+    })
 
-    return this.request(`/teams/${teamId}/members/${userId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    }, RemoveMemberResponseSchema);
+    return this.request(
+      `/teams/${teamId}/members/${userId}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+      RemoveMemberResponseSchema
+    )
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient()
 
 // Default export for easier importing
-export default apiClient;
+export default apiClient

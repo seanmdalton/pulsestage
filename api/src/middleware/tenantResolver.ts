@@ -45,11 +45,11 @@ function resolveTenantSlug(req: Request): string {
   // 2. Check subdomain if multi-tenant mode is enabled
   if (env.MULTI_TENANT_MODE && env.BASE_DOMAIN) {
     const hostname = req.hostname || req.get('host')?.split(':')[0] || '';
-    
+
     // Remove base domain to get subdomain
     if (hostname.endsWith(env.BASE_DOMAIN)) {
       const subdomain = hostname.slice(0, -(env.BASE_DOMAIN.length + 1)); // +1 for the dot
-      
+
       if (subdomain && subdomain !== 'www') {
         if (process.env.NODE_ENV === 'development') {
           console.log(`🔍 Tenant resolved from subdomain: ${subdomain}`);
@@ -87,14 +87,15 @@ export function createTenantResolverMiddleware(prisma: PrismaClient) {
       if (!tenantSlug) {
         return res.status(404).json({
           error: 'Tenant not found',
-          message: 'Unable to resolve tenant from request. Please specify tenant via subdomain or header.'
+          message:
+            'Unable to resolve tenant from request. Please specify tenant via subdomain or header.',
         });
       }
 
       // Look up tenant in database
       const tenant = await prisma.tenant.findUnique({
         where: { slug: tenantSlug },
-        select: { id: true, slug: true, name: true }
+        select: { id: true, slug: true, name: true },
       });
 
       if (!tenant) {
@@ -103,14 +104,14 @@ export function createTenantResolverMiddleware(prisma: PrismaClient) {
         }
         return res.status(404).json({
           error: 'Tenant not found',
-          message: `Tenant '${tenantSlug}' does not exist.`
+          message: `Tenant '${tenantSlug}' does not exist.`,
         });
       }
 
       // Create tenant context
       const tenantContext: TenantContext = {
         tenantId: tenant.id,
-        tenantSlug: tenant.slug
+        tenantSlug: tenant.slug,
       };
 
       // Store in request for easy access
@@ -124,9 +125,8 @@ export function createTenantResolverMiddleware(prisma: PrismaClient) {
       console.error('Tenant resolver error:', error);
       res.status(500).json({
         error: 'Internal server error',
-        message: 'Failed to resolve tenant context'
+        message: 'Failed to resolve tenant context',
       });
     }
   };
 }
-

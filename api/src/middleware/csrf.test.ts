@@ -34,8 +34,8 @@ describe('CSRF Protection', () => {
         email: 'csrf-test@example.com',
         name: 'CSRF Test User',
         ssoId: 'csrf-test-sso',
-        tenantId: 'default-tenant-id'
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     testTeam = await testPrisma.team.create({
@@ -43,24 +43,22 @@ describe('CSRF Protection', () => {
         name: 'CSRF Test Team',
         slug: 'csrf-test',
         description: 'Test team for CSRF',
-        tenantId: 'default-tenant-id'
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     await testPrisma.teamMembership.create({
       data: {
         userId: testUser.id,
         teamId: testTeam.id,
-        role: 'admin'
-      }
+        role: 'admin',
+      },
     });
   });
 
   describe('GET /csrf-token', () => {
     it('should provide a CSRF token', async () => {
-      const response = await request(app)
-        .get('/csrf-token')
-        .set('x-tenant-id', 'default');
+      const response = await request(app).get('/csrf-token').set('x-tenant-id', 'default');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('csrfToken');
@@ -69,22 +67,20 @@ describe('CSRF Protection', () => {
 
       // Should set a cookie
       expect(response.headers['set-cookie']).toBeDefined();
-      const cookies = Array.isArray(response.headers['set-cookie']) 
-        ? response.headers['set-cookie'] 
+      const cookies = Array.isArray(response.headers['set-cookie'])
+        ? response.headers['set-cookie']
         : [response.headers['set-cookie']];
       expect(cookies.some((cookie: string) => cookie.startsWith('x-csrf-token='))).toBe(true);
     });
 
     it('should set HttpOnly and SameSite cookie attributes', async () => {
-      const response = await request(app)
-        .get('/csrf-token')
-        .set('x-tenant-id', 'default');
+      const response = await request(app).get('/csrf-token').set('x-tenant-id', 'default');
 
-      const cookies = Array.isArray(response.headers['set-cookie']) 
-        ? response.headers['set-cookie'] 
+      const cookies = Array.isArray(response.headers['set-cookie'])
+        ? response.headers['set-cookie']
         : [response.headers['set-cookie']];
       const csrfCookie = cookies.find((cookie: string) => cookie.startsWith('x-csrf-token='));
-      
+
       expect(csrfCookie).toBeDefined();
       expect(csrfCookie).toContain('HttpOnly');
       expect(csrfCookie).toContain('SameSite=Lax');
@@ -94,15 +90,13 @@ describe('CSRF Protection', () => {
   describe('CSRF Token Validation', () => {
     beforeEach(async () => {
       // Get a valid CSRF token
-      const tokenResponse = await request(app)
-        .get('/csrf-token')
-        .set('x-tenant-id', 'default');
+      const tokenResponse = await request(app).get('/csrf-token').set('x-tenant-id', 'default');
 
       csrfToken = tokenResponse.body.csrfToken;
-      
+
       // Extract cookie from response
-      const cookies = Array.isArray(tokenResponse.headers['set-cookie']) 
-        ? tokenResponse.headers['set-cookie'] 
+      const cookies = Array.isArray(tokenResponse.headers['set-cookie'])
+        ? tokenResponse.headers['set-cookie']
         : [tokenResponse.headers['set-cookie']];
       csrfCookie = cookies.find((cookie: string) => cookie.startsWith('x-csrf-token=')) || '';
     });
@@ -117,7 +111,7 @@ describe('CSRF Protection', () => {
         .send({
           name: 'Test Team',
           slug: 'test-team',
-          description: 'Test'
+          description: 'Test',
         });
 
       // Should succeed (not 403)
@@ -125,14 +119,11 @@ describe('CSRF Protection', () => {
     });
 
     it('should reject request without CSRF token', async () => {
-      const response = await request(app)
-        .post('/teams')
-        .set('x-tenant-id', 'default')
-        .send({
-          name: 'Test Team',
-          slug: 'test-team',
-          description: 'Test'
-        });
+      const response = await request(app).post('/teams').set('x-tenant-id', 'default').send({
+        name: 'Test Team',
+        slug: 'test-team',
+        description: 'Test',
+      });
 
       // Should fail with CSRF error (403) or auth error (401)
       expect([401, 403]).toContain(response.status);
@@ -146,7 +137,7 @@ describe('CSRF Protection', () => {
         .send({
           name: 'Test Team',
           slug: 'test-team',
-          description: 'Test'
+          description: 'Test',
         });
 
       expect([401, 403]).toContain(response.status);
@@ -161,7 +152,7 @@ describe('CSRF Protection', () => {
         .send({
           name: 'Mock Auth Team',
           slug: 'mock-auth-team',
-          description: 'Test'
+          description: 'Test',
         });
 
       // Should succeed without CSRF token when using mock auth
@@ -180,8 +171,8 @@ describe('CSRF Protection', () => {
           status: 'OPEN',
           upvotes: 1,
           teamId: testTeam.id,
-          tenantId: 'default-tenant-id'
-        }
+          tenantId: 'default-tenant-id',
+        },
       });
     });
 
@@ -195,13 +186,10 @@ describe('CSRF Protection', () => {
     });
 
     it('POST /teams should require CSRF token', async () => {
-      const response = await request(app)
-        .post('/teams')
-        .set('x-tenant-id', 'default')
-        .send({
-          name: 'CSRF Test',
-          slug: 'csrf-test-2'
-        });
+      const response = await request(app).post('/teams').set('x-tenant-id', 'default').send({
+        name: 'CSRF Test',
+        slug: 'csrf-test-2',
+      });
 
       expect([401, 403]).toContain(response.status);
     });
@@ -211,7 +199,7 @@ describe('CSRF Protection', () => {
         .put(`/teams/${testTeam.id}`)
         .set('x-tenant-id', 'default')
         .send({
-          name: 'Updated Name'
+          name: 'Updated Name',
         });
 
       expect([401, 403]).toContain(response.status);
@@ -226,13 +214,10 @@ describe('CSRF Protection', () => {
     });
 
     it('POST /tags should require CSRF token', async () => {
-      const response = await request(app)
-        .post('/tags')
-        .set('x-tenant-id', 'default')
-        .send({
-          name: 'CSRF Tag',
-          color: '#FF0000'
-        });
+      const response = await request(app).post('/tags').set('x-tenant-id', 'default').send({
+        name: 'CSRF Tag',
+        color: '#FF0000',
+      });
 
       expect([401, 403]).toContain(response.status);
     });
@@ -240,17 +225,13 @@ describe('CSRF Protection', () => {
 
   describe('Safe Methods (No CSRF Required)', () => {
     it('GET /questions should not require CSRF', async () => {
-      const response = await request(app)
-        .get('/questions')
-        .set('x-tenant-id', 'default');
+      const response = await request(app).get('/questions').set('x-tenant-id', 'default');
 
       expect(response.status).toBe(200);
     });
 
     it('GET /teams should not require CSRF', async () => {
-      const response = await request(app)
-        .get('/teams')
-        .set('x-tenant-id', 'default');
+      const response = await request(app).get('/teams').set('x-tenant-id', 'default');
 
       expect(response.status).toBe(200);
     });
@@ -265,4 +246,3 @@ describe('CSRF Protection', () => {
     });
   });
 });
-

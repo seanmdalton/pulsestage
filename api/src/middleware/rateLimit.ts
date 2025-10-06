@@ -15,11 +15,11 @@ export async function initRedis() {
 
   try {
     redisClient = createClient({
-      url: process.env.REDIS_URL || NETWORK.DEFAULT_REDIS_URL
+      url: process.env.REDIS_URL || NETWORK.DEFAULT_REDIS_URL,
     });
-    
-    redisClient.on('error', (err) => console.error('Redis Client Error', err));
-    
+
+    redisClient.on('error', err => console.error('Redis Client Error', err));
+
     await redisClient.connect();
     console.log('🔒 Redis connected for rate limiting (production mode)');
   } catch (error) {
@@ -28,7 +28,11 @@ export async function initRedis() {
   }
 }
 
-export function rateLimit(route: string, maxRequests: number = RATE_LIMITS.DEFAULT_REQUESTS_PER_MINUTE, windowMs: number = RATE_LIMITS.DEFAULT_WINDOW_MS) {
+export function rateLimit(
+  route: string,
+  maxRequests: number = RATE_LIMITS.DEFAULT_REQUESTS_PER_MINUTE,
+  windowMs: number = RATE_LIMITS.DEFAULT_WINDOW_MS
+) {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Skip rate limiting in development environment
     if (process.env.NODE_ENV === 'development') {
@@ -41,35 +45,35 @@ export function rateLimit(route: string, maxRequests: number = RATE_LIMITS.DEFAU
     }
 
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    
+
     // Include tenantId in rate limit key for per-tenant rate limiting
     const tenantContext = tryGetTenantContext();
     const tenantPart = tenantContext ? tenantContext.tenantId : 'no-tenant';
     const key = `rate:${route}:${tenantPart}:${ip}`;
-    
+
     try {
       const current = await redisClient.get(key);
       const count = current ? parseInt(current, 10) : 0;
 
       if (count >= maxRequests) {
-        return res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({ 
+        return res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({
           error: 'Too many requests',
-          message: `Rate limit exceeded. Maximum ${maxRequests} requests per minute.`
+          message: `Rate limit exceeded. Maximum ${maxRequests} requests per minute.`,
         });
       }
 
       // Increment counter
       const newCount = count + 1;
-      
+
       if (count === 0) {
         // First request - set with expiration
         await redisClient.set(key, newCount.toString(), {
-          EX: Math.ceil(windowMs / RATE_LIMITS.MS_PER_SECOND)
+          EX: Math.ceil(windowMs / RATE_LIMITS.MS_PER_SECOND),
         });
       } else {
         // Subsequent request - just increment
         await redisClient.set(key, newCount.toString(), {
-          KEEPTTL: true
+          KEEPTTL: true,
         });
       }
 

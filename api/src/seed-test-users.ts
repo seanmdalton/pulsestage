@@ -28,18 +28,18 @@ export async function seedTestUsers() {
     create: {
       id: 'default-tenant-id',
       slug: 'default',
-      name: 'Default Tenant'
-    }
+      name: 'Default Tenant',
+    },
   });
   console.log(`✅ Default tenant: ${tenant.name}`);
 
   // Get teams
   const engineeringTeam = await prisma.team.findUnique({
-    where: { tenantId_slug: { tenantId: tenant.id, slug: 'engineering' } }
+    where: { tenantId_slug: { tenantId: tenant.id, slug: 'engineering' } },
   });
 
   const productTeam = await prisma.team.findUnique({
-    where: { tenantId_slug: { tenantId: tenant.id, slug: 'product' } }
+    where: { tenantId_slug: { tenantId: tenant.id, slug: 'product' } },
   });
 
   // Create test users
@@ -48,35 +48,35 @@ export async function seedTestUsers() {
       email: 'john.doe@company.com',
       name: 'John Doe',
       ssoId: 'john.doe@company.com',
-      teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'admin' }] : []
+      teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'admin' }] : [],
     },
     {
       email: 'jane.smith@company.com',
       name: 'Jane Smith',
       ssoId: 'jane.smith@company.com',
-      teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'member' }] : []
+      teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'member' }] : [],
     },
     {
       email: 'bob.wilson@company.com',
       name: 'Bob Wilson',
       ssoId: 'bob.wilson@company.com',
-      teams: productTeam ? [{ teamId: productTeam.id, role: 'owner' }] : []
-    }
+      teams: productTeam ? [{ teamId: productTeam.id, role: 'owner' }] : [],
+    },
   ];
 
   for (const userData of users) {
     const { teams, ...userInfo } = userData;
-    
+
     const user = await prisma.user.upsert({
       where: { tenantId_email: { tenantId: tenant.id, email: userInfo.email } },
       update: {
         name: userInfo.name,
-        ssoId: userInfo.ssoId
+        ssoId: userInfo.ssoId,
       },
       create: {
         ...userInfo,
-        tenantId: tenant.id
-      }
+        tenantId: tenant.id,
+      },
     });
 
     console.log(`✅ Created/updated user: ${user.name} (${user.email})`);
@@ -87,17 +87,17 @@ export async function seedTestUsers() {
         where: {
           userId_teamId: {
             userId: user.id,
-            teamId: membership.teamId
-          }
+            teamId: membership.teamId,
+          },
         },
         update: {
-          role: membership.role
+          role: membership.role,
         },
         create: {
           userId: user.id,
           teamId: membership.teamId,
-          role: membership.role
-        }
+          role: membership.role,
+        },
       });
       console.log(`  ✅ Added to team with role: ${membership.role}`);
     }
@@ -109,7 +109,7 @@ export async function seedTestUsers() {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedTestUsers()
-    .catch((e) => {
+    .catch(e => {
       console.error(e);
       process.exit(1);
     })
@@ -117,4 +117,3 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       await prisma.$disconnect();
     });
 }
-

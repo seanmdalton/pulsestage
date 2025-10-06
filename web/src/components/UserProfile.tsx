@@ -1,78 +1,82 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth, useUser } from '../contexts/UserContext';
-import { useTeam } from '../contexts/TeamContext';
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth, useUser } from '../contexts/UserContext'
+import { useTeam } from '../contexts/TeamContext'
 
 export function UserProfile() {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
-  const { userTeams, getUserRoleInTeam } = useUser();
-  const { currentTeam } = useTeam();
-  const { teamSlug } = useParams<{ teamSlug: string }>();
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuth()
+  const { userTeams, getUserRoleInTeam } = useUser()
+  const { currentTeam } = useTeam()
+  const { teamSlug: _teamSlug } = useParams<{ teamSlug: string }>()
 
   // Check if user has global admin role (admin or owner in ANY team)
   // Admins and owners have global access, always show Admin Panel link
-  const hasGlobalAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
-  });
+  const hasGlobalAdminRole = userTeams.some((team) => {
+    const role = getUserRoleInTeam(team.id)
+    return role === 'admin' || role === 'owner'
+  })
 
   // Check if user has moderator role in the CURRENT team (team-scoped)
   // Moderators only see Admin Panel link when on their team
   const hasModeratorRoleInCurrentTeam = currentTeam
     ? (() => {
-        const role = getUserRoleInTeam(currentTeam.id);
-        return role === 'moderator';
+        const role = getUserRoleInTeam(currentTeam.id)
+        return role === 'moderator'
       })()
-    : userTeams.some(team => {
-        const role = getUserRoleInTeam(team.id);
-        return role === 'moderator';
-      });
+    : userTeams.some((team) => {
+        const role = getUserRoleInTeam(team.id)
+        return role === 'moderator'
+      })
 
   // Show Admin Panel if user is an admin/owner (global) OR a moderator in current team (team-scoped)
-  const hasAdminPanelAccess = hasGlobalAdminRole || hasModeratorRoleInCurrentTeam;
+  const hasAdminPanelAccess =
+    hasGlobalAdminRole || hasModeratorRoleInCurrentTeam
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false)
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Handle keyboard navigation
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (!isOpen) return;
-      
+      if (!isOpen) return
+
       if (event.key === 'Escape') {
-        setIsOpen(false);
+        setIsOpen(false)
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
 
   const handleLogout = () => {
     // Clear mock SSO user from localStorage
-    localStorage.removeItem('mock-sso-user');
+    localStorage.removeItem('mock-sso-user')
     // Dispatch custom event to notify UserContext of the change
-    window.dispatchEvent(new CustomEvent('mock-sso-changed'));
+    window.dispatchEvent(new CustomEvent('mock-sso-changed'))
     // Navigate to home page to reset user context
-    window.location.href = '/';
-  };
+    window.location.href = '/'
+  }
 
   const handleProfileClick = () => {
-    setIsOpen(false);
-    navigate('/profile');
-  };
+    setIsOpen(false)
+    navigate('/profile')
+  }
 
   // Show Login button if not authenticated
   if (!isAuthenticated || !user) {
@@ -81,23 +85,33 @@ export function UserProfile() {
         href="/sso-test.html"
         className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        <svg
+          className="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+          />
         </svg>
         Login
       </a>
-    );
+    )
   }
 
   // Get user initials for avatar
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -111,12 +125,12 @@ export function UserProfile() {
         <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
           {getInitials(user.name || user.email)}
         </div>
-        
+
         {/* User Name */}
         <span className="hidden sm:block truncate max-w-24">
           {user.name || user.email.split('@')[0]}
         </span>
-        
+
         {/* Dropdown Arrow */}
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -124,7 +138,12 @@ export function UserProfile() {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -145,7 +164,11 @@ export function UserProfile() {
                     {/* Global role badge for admins/owners */}
                     {hasGlobalAdminRole && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex-shrink-0">
-                        {userTeams.some(t => getUserRoleInTeam(t.id) === 'owner') ? 'Owner' : 'Admin'}
+                        {userTeams.some(
+                          (t) => getUserRoleInTeam(t.id) === 'owner'
+                        )
+                          ? 'Owner'
+                          : 'Admin'}
                       </span>
                     )}
                   </div>
@@ -161,34 +184,64 @@ export function UserProfile() {
               onClick={handleProfileClick}
               className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
               </svg>
               <span>View Profile</span>
             </button>
 
             <button
               onClick={() => {
-                setIsOpen(false);
-                navigate('/profile/favorites');
+                setIsOpen(false)
+                navigate('/profile/favorites')
               }}
               className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
               </svg>
               <span>Favorite Teams</span>
             </button>
 
             <button
               onClick={() => {
-                setIsOpen(false);
-                navigate('/profile/questions');
+                setIsOpen(false)
+                navigate('/profile/questions')
               }}
               className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span>My Questions</span>
             </button>
@@ -197,14 +250,29 @@ export function UserProfile() {
             {hasAdminPanelAccess && (
               <button
                 onClick={() => {
-                  setIsOpen(false);
-                  navigate('/admin');
+                  setIsOpen(false)
+                  navigate('/admin')
                 }}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
                 <span>Admin Panel</span>
               </button>
@@ -216,8 +284,18 @@ export function UserProfile() {
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center space-x-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
               <span>Logout</span>
             </button>
@@ -225,5 +303,5 @@ export function UserProfile() {
         </div>
       )}
     </div>
-  );
+  )
 }

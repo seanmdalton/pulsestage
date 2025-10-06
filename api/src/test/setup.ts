@@ -1,32 +1,35 @@
-import { beforeAll, afterAll, beforeEach } from "vitest";
-import { PrismaClient } from "@prisma/client";
-import { execSync } from "child_process";
-import { resetMockData } from "../middleware/mockAuth.js";
+import { beforeAll, afterAll, beforeEach } from 'vitest';
+import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
+import { resetMockData } from '../middleware/mockAuth.js';
 
 // Use a test database - set this BEFORE any imports that might use env
-const TEST_DATABASE_URL = process.env.DATABASE_URL || "postgresql://app:app@localhost:5432/ama_test";
+const TEST_DATABASE_URL =
+  process.env.DATABASE_URL || 'postgresql://app:app@localhost:5432/ama_test';
 process.env.DATABASE_URL = TEST_DATABASE_URL;
 
 export const testPrisma = new PrismaClient({
   datasources: {
     db: {
-      url: TEST_DATABASE_URL
-    }
-  }
+      url: TEST_DATABASE_URL,
+    },
+  },
 });
 
 beforeAll(async () => {
   // Push schema to test database with force reset for schema changes
-  execSync("npx prisma db push --skip-generate --force-reset --accept-data-loss", { 
-    stdio: "inherit",
-    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
+  execSync('npx prisma db push --skip-generate --force-reset --accept-data-loss', {
+    stdio: 'inherit',
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL },
   });
   await testPrisma.$connect();
-  
+
   // Apply full-text search migration
   try {
-    await testPrisma.$executeRawUnsafe(`ALTER TABLE "Question" ADD COLUMN IF NOT EXISTS "search_vector" tsvector`);
-    
+    await testPrisma.$executeRawUnsafe(
+      `ALTER TABLE "Question" ADD COLUMN IF NOT EXISTS "search_vector" tsvector`
+    );
+
     await testPrisma.$executeRawUnsafe(`
       CREATE OR REPLACE FUNCTION question_search_vector_update() RETURNS trigger AS $$
       BEGIN
@@ -37,8 +40,10 @@ beforeAll(async () => {
       END;
       $$ LANGUAGE plpgsql
     `);
-    
-    await testPrisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS question_search_vector_trigger ON "Question"`);
+
+    await testPrisma.$executeRawUnsafe(
+      `DROP TRIGGER IF EXISTS question_search_vector_trigger ON "Question"`
+    );
     await testPrisma.$executeRawUnsafe(`
       CREATE TRIGGER question_search_vector_trigger
         BEFORE INSERT OR UPDATE OF body, "responseText"
@@ -46,13 +51,15 @@ beforeAll(async () => {
         FOR EACH ROW
         EXECUTE FUNCTION question_search_vector_update()
     `);
-    
-    await testPrisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Question_search_vector_idx" ON "Question" USING GIN(search_vector)`);
+
+    await testPrisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS "Question_search_vector_idx" ON "Question" USING GIN(search_vector)`
+    );
   } catch (error) {
     // Migration might already be applied, continue
     console.log('Full-text search migration skipped (may already exist)');
   }
-  
+
   // Create default tenant for backward compatibility tests
   await testPrisma.tenant.upsert({
     where: { slug: 'default' },
@@ -60,8 +67,8 @@ beforeAll(async () => {
     create: {
       id: 'default-tenant-id',
       slug: 'default',
-      name: 'Default Tenant'
-    }
+      name: 'Default Tenant',
+    },
   });
 });
 
@@ -78,10 +85,10 @@ beforeEach(async () => {
   await testPrisma.tag.deleteMany();
   await testPrisma.tenant.deleteMany({
     where: {
-      slug: { not: 'default' }
-    }
+      slug: { not: 'default' },
+    },
   });
-  
+
   // Reset mock SSO data cache so tests can create their own users
   resetMockData();
 });
@@ -89,4 +96,3 @@ beforeEach(async () => {
 afterAll(async () => {
   await testPrisma.$disconnect();
 });
-

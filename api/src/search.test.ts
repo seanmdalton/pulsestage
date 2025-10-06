@@ -35,8 +35,8 @@ describe('Enhanced Search & Filtering', () => {
       data: {
         name: 'Search Test Team',
         slug: 'search-test',
-        tenantId: 'default-tenant-id'
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     // Create tags
@@ -44,16 +44,16 @@ describe('Enhanced Search & Filtering', () => {
       data: {
         name: 'urgent',
         color: '#FF0000',
-        tenantId: 'default-tenant-id'
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     tag2 = await testPrisma.tag.create({
       data: {
         name: 'follow-up',
         color: '#00FF00',
-        tenantId: 'default-tenant-id'
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     // Create questions with different content
@@ -64,8 +64,8 @@ describe('Enhanced Search & Filtering', () => {
         upvotes: 10,
         teamId: team.id,
         tenantId: 'default-tenant-id',
-        createdAt: new Date('2025-01-01')
-      }
+        createdAt: new Date('2025-01-01'),
+      },
     });
 
     question2 = await testPrisma.question.create({
@@ -75,8 +75,8 @@ describe('Enhanced Search & Filtering', () => {
         upvotes: 5,
         teamId: team.id,
         tenantId: 'default-tenant-id',
-        createdAt: new Date('2025-01-15')
-      }
+        createdAt: new Date('2025-01-15'),
+      },
     });
 
     question3 = await testPrisma.question.create({
@@ -87,23 +87,23 @@ describe('Enhanced Search & Filtering', () => {
         upvotes: 3,
         teamId: team.id,
         tenantId: 'default-tenant-id',
-        createdAt: new Date('2025-02-01')
-      }
+        createdAt: new Date('2025-02-01'),
+      },
     });
 
     // Add tags to questions
     await testPrisma.questionTag.create({
       data: {
         questionId: question1.id,
-        tagId: tag1.id
-      }
+        tagId: tag1.id,
+      },
     });
 
     await testPrisma.questionTag.create({
       data: {
         questionId: question2.id,
-        tagId: tag2.id
-      }
+        tagId: tag2.id,
+      },
     });
 
     // Update search vectors for existing questions
@@ -124,7 +124,7 @@ describe('Enhanced Search & Filtering', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1); // Only question1 is OPEN with "remote"
-      
+
       // Should include question1 (OPEN with "remote")
       const ids = response.body.map((q: any) => q.id);
       expect(ids).toContain(question1.id);
@@ -299,4 +299,3 @@ describe('Enhanced Search & Filtering', () => {
     });
   });
 });
-

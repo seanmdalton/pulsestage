@@ -1,98 +1,101 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../lib/api';
-import { useAdmin } from '../contexts/AdminContext';
-import { useUser } from '../contexts/UserContext';
-import { TeamManagement } from '../components/TeamManagement';
-import { TagManagement } from '../components/TagManagement';
-import { useTheme } from '../contexts/ThemeContext';
-import { ExportPage } from './ExportPage';
-import { AuditPage } from './AuditPage';
-import { ModerationQueuePage } from './ModerationQueuePage';
-import { ModerationStatsPage } from './ModerationStatsPage';
-import { setFormattedPageTitle } from '../utils/titleUtils';
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiClient } from '../lib/api'
+import { useAdmin } from '../contexts/AdminContext'
+import { useUser } from '../contexts/UserContext'
+import { TeamManagement } from '../components/TeamManagement'
+import { TagManagement } from '../components/TagManagement'
+import { useTheme } from '../contexts/ThemeContext'
+import { ExportPage } from './ExportPage'
+import { AuditPage } from './AuditPage'
+import { ModerationQueuePage } from './ModerationQueuePage'
+import { ModerationStatsPage } from './ModerationStatsPage'
+import { setFormattedPageTitle } from '../utils/titleUtils'
 
 export function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAdmin();
-  const { userTeams, getUserRoleInTeam } = useUser();
-  const { theme } = useTheme();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'moderation' | 'stats' | 'teams' | 'tags' | 'export' | 'audit'>('moderation');
-  const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'unhealthy'>('checking');
+  const { isAuthenticated, isLoading: authLoading } = useAdmin()
+  const { userTeams, getUserRoleInTeam } = useUser()
+  const { theme } = useTheme()
+  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<
+    'moderation' | 'stats' | 'teams' | 'tags' | 'export' | 'audit'
+  >('moderation')
+  const [healthStatus, setHealthStatus] = useState<
+    'checking' | 'healthy' | 'unhealthy'
+  >('checking')
 
   // Set page title
   useEffect(() => {
-    setFormattedPageTitle(undefined, 'admin');
-  }, []);
+    setFormattedPageTitle(undefined, 'admin')
+  }, [])
 
   // Check admin access and handle authentication
   useEffect(() => {
-    if (authLoading) return; // Wait for auth to load
+    if (authLoading) return // Wait for auth to load
 
     // Check if user has moderator role or higher in any team
-    const hasAdminRole = userTeams.some(team => {
-      const role = getUserRoleInTeam(team.id);
-      return role === 'moderator' || role === 'admin' || role === 'owner';
-    });
+    const hasAdminRole = userTeams.some((team) => {
+      const role = getUserRoleInTeam(team.id)
+      return role === 'moderator' || role === 'admin' || role === 'owner'
+    })
 
     if (userTeams.length === 0) {
       // No user context yet, wait for it to load
-      return;
+      return
     }
 
     if (!hasAdminRole) {
       // User doesn't have admin role, redirect to home
-      navigate('/all');
-      return;
+      navigate('/all')
+      return
     }
 
     // If user has admin role, we'll bypass the AdminContext authentication
     // and allow direct access to admin features
-  }, [authLoading, userTeams, getUserRoleInTeam, navigate]);
-
+  }, [authLoading, userTeams, getUserRoleInTeam, navigate])
 
   // Check API health status
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        await apiClient.getHealth();
-        setHealthStatus('healthy');
+        await apiClient.getHealth()
+        setHealthStatus('healthy')
       } catch {
-        setHealthStatus('unhealthy');
+        setHealthStatus('unhealthy')
       }
-    };
-    checkHealth();
-  }, []);
-
-
+    }
+    checkHealth()
+  }, [])
 
   // Check if user has moderator role or higher
-  const hasAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'moderator' || role === 'admin' || role === 'owner';
-  });
+  const hasAdminRole = userTeams.some((team) => {
+    const role = getUserRoleInTeam(team.id)
+    return role === 'moderator' || role === 'admin' || role === 'owner'
+  })
 
   // Check if user has full admin role (admin or owner) for admin-only features
-  const hasFullAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
-  });
+  const hasFullAdminRole = userTeams.some((team) => {
+    const role = getUserRoleInTeam(team.id)
+    return role === 'admin' || role === 'owner'
+  })
 
   // Show loading while checking user roles
   if (userTeams.length === 0) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+          Admin Panel
+        </h1>
         <div className="text-center py-8">
           <div className="text-gray-500 dark:text-gray-400">Loading...</div>
         </div>
       </div>
-    );
+    )
   }
 
   // Redirect if user doesn't have admin role
   if (!hasAdminRole) {
-    return null; // The useEffect will handle the redirect
+    return null // The useEffect will handle the redirect
   }
 
   return (
@@ -101,13 +104,19 @@ export function AdminPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
             {/* Icon only */}
-            <img 
-              src={theme === 'dark' ? '/pulsestage-icon-light.svg' : '/pulsestage-icon-dark.svg'}
+            <img
+              src={
+                theme === 'dark'
+                  ? '/pulsestage-icon-light.svg'
+                  : '/pulsestage-icon-dark.svg'
+              }
               alt="PulseStage Icon"
               className="h-12 w-12"
             />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Admin Panel
+              </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Manage questions and teams
               </p>
@@ -116,26 +125,28 @@ export function AdminPage() {
           <div className="flex gap-3 items-center">
             {/* API Status Indicator */}
             <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-md">
-              <div className="text-sm text-gray-500 dark:text-gray-400">API Status:</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                API Status:
+              </div>
               <div
                 data-testid="health-status"
                 className={`w-3 h-3 rounded-full ${
                   healthStatus === 'healthy'
                     ? 'bg-green-500'
                     : healthStatus === 'unhealthy'
-                    ? 'bg-red-500'
-                    : 'bg-yellow-500'
+                      ? 'bg-red-500'
+                      : 'bg-yellow-500'
                 }`}
                 title={
                   healthStatus === 'healthy'
                     ? 'API is healthy'
                     : healthStatus === 'unhealthy'
-                    ? 'API is unhealthy'
-                    : 'Checking API status...'
+                      ? 'API is unhealthy'
+                      : 'Checking API status...'
                 }
               />
             </div>
-            
+
             <button
               onClick={() => navigate('/all/open/present')}
               className="px-4 py-2 text-sm rounded-md transition-colors self-start sm:self-auto bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
@@ -173,50 +184,50 @@ export function AdminPage() {
               onClick={() => setActiveTab('teams')}
               className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'teams'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              Teams
+            </button>
+            <button
+              onClick={() => setActiveTab('tags')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'tags'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              Tags
+            </button>
+            {/* Export and Audit tabs - admin/owner only */}
+            {hasFullAdminRole && (
+              <>
+                <button
+                  onClick={() => setActiveTab('export')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'export'
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  Teams
+                  Export
                 </button>
                 <button
-                  onClick={() => setActiveTab('tags')}
+                  onClick={() => setActiveTab('audit')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'tags'
+                    activeTab === 'audit'
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  Tags
+                  Audit Log
                 </button>
-                {/* Export and Audit tabs - admin/owner only */}
-                {hasFullAdminRole && (
-                  <>
-                    <button
-                      onClick={() => setActiveTab('export')}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === 'export'
-                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                      }`}
-                    >
-                      Export
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('audit')}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === 'audit'
-                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                      }`}
-                    >
-                      Audit Log
-                    </button>
-                  </>
-                )}
+              </>
+            )}
           </nav>
         </div>
-        
+
         {/* Tab Content */}
         {activeTab === 'moderation' && <ModerationQueuePage />}
 
@@ -227,14 +238,14 @@ export function AdminPage() {
         {activeTab === 'tags' && <TagManagement />}
 
         {/* Export and Audit content - admin/owner only */}
-            {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
-            
-            {hasFullAdminRole && activeTab === 'audit' && (
-              <div className="mt-[-2rem]">
-                <AuditPage embedded={true} />
-              </div>
-            )}
+        {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
+
+        {hasFullAdminRole && activeTab === 'audit' && (
+          <div className="mt-[-2rem]">
+            <AuditPage embedded={true} />
+          </div>
+        )}
       </div>
     </>
-  );
+  )
 }

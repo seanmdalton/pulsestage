@@ -103,10 +103,13 @@ export function apiSecurityHeaders(): RequestHandler {
 
     // Additional security headers
     res.setHeader('X-XSS-Protection', '0'); // Disabled per modern best practices
-    
+
     // Permissions Policy (Helmet doesn't set this by default)
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
-    
+    res.setHeader(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+    );
+
     next();
   };
 }
@@ -133,7 +136,7 @@ export function developmentSecurityHeaders(): RequestHandler {
         upgradeInsecureRequests: [],
       },
     },
-    
+
     // Keep same security headers as production
     noSniff: true,
     referrerPolicy: {
@@ -155,8 +158,7 @@ export function developmentSecurityHeaders(): RequestHandler {
       policy: 'same-origin',
     },
     originAgentCluster: true,
-    
+
     strictTransportSecurity: false, // Disable HSTS in development
   });
 }
-

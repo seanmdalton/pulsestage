@@ -1,216 +1,263 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/api';
-import type { Question, Tag } from '../lib/api';
-import { useTeam } from '../contexts/TeamContext';
-import { useUser } from '../contexts/UserContext';
-import { ResponseModal } from '../components/ResponseModal';
-import { useSSE } from '../hooks/useSSE';
-import type { SSEEvent } from '../hooks/useSSE';
+import { useState, useEffect } from 'react'
+import { apiClient } from '../lib/api'
+import type { Question, Tag } from '../lib/api'
+import { useTeam } from '../contexts/TeamContext'
+import { useUser } from '../contexts/UserContext'
+import { ResponseModal } from '../components/ResponseModal'
+import { useSSE } from '../hooks/useSSE'
+import type { SSEEvent } from '../hooks/useSSE'
 
 export function ModerationQueuePage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(new Set());
-  const [allTags, setAllTags] = useState<Tag[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
+    new Set()
+  )
+  const [allTags, setAllTags] = useState<Tag[]>([])
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  )
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<'open' | 'answered' | 'all'>('open');
-  const [teamFilter, setTeamFilter] = useState<string>('');
-  const [pinnedFilter, setPinnedFilter] = useState<'all' | 'pinned' | 'unpinned'>('all');
-  const [frozenFilter, setFrozenFilter] = useState<'all' | 'frozen' | 'unfrozen'>('all');
-  const [needsReviewFilter, setNeedsReviewFilter] = useState(false);
-  const [reviewedByFilter, setReviewedByFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<'open' | 'answered' | 'all'>(
+    'open'
+  )
+  const [teamFilter, setTeamFilter] = useState<string>('')
+  const [pinnedFilter, setPinnedFilter] = useState<
+    'all' | 'pinned' | 'unpinned'
+  >('all')
+  const [frozenFilter, setFrozenFilter] = useState<
+    'all' | 'frozen' | 'unfrozen'
+  >('all')
+  const [needsReviewFilter, setNeedsReviewFilter] = useState(false)
+  const [reviewedByFilter, setReviewedByFilter] = useState<string>('')
 
-  const { teams } = useTeam();
-  const { user } = useUser();
+  const { teams } = useTeam()
+  const { user } = useUser()
 
   // Handle SSE events
   const handleSSEEvent = (event: SSEEvent) => {
-    if (['question:created', 'question:upvoted', 'question:answered', 'question:tagged', 'question:untagged', 'question:pinned', 'question:frozen'].includes(event.type)) {
-      const updatedQuestion = event.data as Question;
-      
-      setQuestions(prev => {
-        const existingIndex = prev.findIndex(q => q.id === updatedQuestion.id);
-        
+    if (
+      [
+        'question:created',
+        'question:upvoted',
+        'question:answered',
+        'question:tagged',
+        'question:untagged',
+        'question:pinned',
+        'question:frozen',
+      ].includes(event.type)
+    ) {
+      const updatedQuestion = event.data as Question
+
+      setQuestions((prev) => {
+        const existingIndex = prev.findIndex((q) => q.id === updatedQuestion.id)
+
         if (existingIndex >= 0) {
           // Update existing question
-          const newQuestions = [...prev];
-          newQuestions[existingIndex] = updatedQuestion;
-          return newQuestions;
+          const newQuestions = [...prev]
+          newQuestions[existingIndex] = updatedQuestion
+          return newQuestions
         } else if (event.type === 'question:created') {
           // Add new question
-          return [updatedQuestion, ...prev];
+          return [updatedQuestion, ...prev]
         }
-        
-        return prev;
-      });
-    }
-  };
 
-  useSSE({ onEvent: handleSSEEvent });
+        return prev
+      })
+    }
+  }
+
+  useSSE({ onEvent: handleSSEEvent })
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
-        
+        setLoading(true)
+
         // Load tags
-        const tagsData = await apiClient.getTags();
-        setAllTags(tagsData);
+        const tagsData = await apiClient.getTags()
+        setAllTags(tagsData)
 
         // Load questions with filters
-        const filters: any = {};
-        
+        const filters: any = {}
+
         if (statusFilter !== 'all') {
-          filters.status = statusFilter;
+          filters.status = statusFilter
         }
-        
+
         if (teamFilter) {
-          filters.teamId = teamFilter;
+          filters.teamId = teamFilter
         }
-        
+
         if (pinnedFilter === 'pinned') {
-          filters.isPinned = true;
+          filters.isPinned = true
         } else if (pinnedFilter === 'unpinned') {
-          filters.isPinned = false;
+          filters.isPinned = false
         }
-        
+
         if (frozenFilter === 'frozen') {
-          filters.isFrozen = true;
+          filters.isFrozen = true
         } else if (frozenFilter === 'unfrozen') {
-          filters.isFrozen = false;
+          filters.isFrozen = false
         }
-        
+
         if (needsReviewFilter) {
-          filters.needsReview = true;
+          filters.needsReview = true
         }
-        
+
         if (reviewedByFilter) {
-          filters.reviewedBy = reviewedByFilter;
+          filters.reviewedBy = reviewedByFilter
         }
 
-        const data = await apiClient.getModerationQueue(filters);
-        setQuestions(data.questions);
+        const data = await apiClient.getModerationQueue(filters)
+        setQuestions(data.questions)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load moderation queue');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load moderation queue'
+        )
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadData();
-  }, [statusFilter, teamFilter, pinnedFilter, frozenFilter, needsReviewFilter, reviewedByFilter]);
+    loadData()
+  }, [
+    statusFilter,
+    teamFilter,
+    pinnedFilter,
+    frozenFilter,
+    needsReviewFilter,
+    reviewedByFilter,
+  ])
 
   const handleSelectAll = () => {
     if (selectedQuestions.size === questions.length) {
-      setSelectedQuestions(new Set());
+      setSelectedQuestions(new Set())
     } else {
-      setSelectedQuestions(new Set(questions.map(q => q.id)));
+      setSelectedQuestions(new Set(questions.map((q) => q.id)))
     }
-  };
+  }
 
   const handleSelectQuestion = (questionId: string) => {
-    setSelectedQuestions(prev => {
-      const newSet = new Set(prev);
+    setSelectedQuestions((prev) => {
+      const newSet = new Set(prev)
       if (newSet.has(questionId)) {
-        newSet.delete(questionId);
+        newSet.delete(questionId)
       } else {
-        newSet.add(questionId);
+        newSet.add(questionId)
       }
-      return newSet;
-    });
-  };
+      return newSet
+    })
+  }
 
-  const handleBulkAction = async (action: 'pin' | 'unpin' | 'freeze' | 'unfreeze' | 'delete') => {
-    if (selectedQuestions.size === 0) return;
+  const handleBulkAction = async (
+    action: 'pin' | 'unpin' | 'freeze' | 'unfreeze' | 'delete'
+  ) => {
+    if (selectedQuestions.size === 0) return
 
-    if (action === 'delete' && !confirm(`Are you sure you want to delete ${selectedQuestions.size} question(s)? This cannot be undone.`)) {
-      return;
+    if (
+      action === 'delete' &&
+      !confirm(
+        `Are you sure you want to delete ${selectedQuestions.size} question(s)? This cannot be undone.`
+      )
+    ) {
+      return
     }
 
     try {
-      setBulkActionLoading(true);
-      await apiClient.bulkActionQuestions(Array.from(selectedQuestions), action);
-      
+      setBulkActionLoading(true)
+      await apiClient.bulkActionQuestions(Array.from(selectedQuestions), action)
+
       // Clear selection
-      setSelectedQuestions(new Set());
-      
+      setSelectedQuestions(new Set())
+
       // Reload questions
-      const filters: any = {};
-      if (statusFilter !== 'all') filters.status = statusFilter;
-      if (teamFilter) filters.teamId = teamFilter;
-      
-      const data = await apiClient.getModerationQueue(filters);
-      setQuestions(data.questions);
+      const filters: any = {}
+      if (statusFilter !== 'all') filters.status = statusFilter
+      if (teamFilter) filters.teamId = teamFilter
+
+      const data = await apiClient.getModerationQueue(filters)
+      setQuestions(data.questions)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bulk action failed');
+      setError(err instanceof Error ? err.message : 'Bulk action failed')
     } finally {
-      setBulkActionLoading(false);
+      setBulkActionLoading(false)
     }
-  };
+  }
 
   const handleBulkTag = async (tagId: string, action: 'add' | 'remove') => {
-    if (selectedQuestions.size === 0) return;
+    if (selectedQuestions.size === 0) return
 
     try {
-      setBulkActionLoading(true);
-      await apiClient.bulkTagQuestions(Array.from(selectedQuestions), tagId, action);
-      
+      setBulkActionLoading(true)
+      await apiClient.bulkTagQuestions(
+        Array.from(selectedQuestions),
+        tagId,
+        action
+      )
+
       // Clear selection
-      setSelectedQuestions(new Set());
-      
-      // Reload questions
-      const filters: any = {};
-      if (statusFilter !== 'all') filters.status = statusFilter;
-      if (teamFilter) filters.teamId = teamFilter;
-      
-      const data = await apiClient.getModerationQueue(filters);
-      setQuestions(data.questions);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bulk tag operation failed');
-    } finally {
-      setBulkActionLoading(false);
-    }
-  };
+      setSelectedQuestions(new Set())
 
-  const handleQuickAction = async (questionId: string, action: 'pin' | 'freeze') => {
-    try {
-      let updatedQuestion: Question;
-      
-      if (action === 'pin') {
-        updatedQuestion = await apiClient.pinQuestion(questionId);
-      } else {
-        updatedQuestion = await apiClient.freezeQuestion(questionId);
-      }
-      
-      // Update question in state immediately with the API response
-      setQuestions(prev => 
-        prev.map(q => q.id === questionId ? updatedQuestion : q)
-      );
+      // Reload questions
+      const filters: any = {}
+      if (statusFilter !== 'all') filters.status = statusFilter
+      if (teamFilter) filters.teamId = teamFilter
+
+      const data = await apiClient.getModerationQueue(filters)
+      setQuestions(data.questions)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Action failed');
+      setError(err instanceof Error ? err.message : 'Bulk tag operation failed')
+    } finally {
+      setBulkActionLoading(false)
     }
-  };
+  }
+
+  const handleQuickAction = async (
+    questionId: string,
+    action: 'pin' | 'freeze'
+  ) => {
+    try {
+      let updatedQuestion: Question
+
+      if (action === 'pin') {
+        updatedQuestion = await apiClient.pinQuestion(questionId)
+      } else {
+        updatedQuestion = await apiClient.freezeQuestion(questionId)
+      }
+
+      // Update question in state immediately with the API response
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? updatedQuestion : q))
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Action failed')
+    }
+  }
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400">Loading moderation queue...</div>
+          <div className="text-gray-500 dark:text-gray-400">
+            Loading moderation queue...
+          </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <>
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Moderation Queue</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Moderation Queue
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Manage and moderate questions across your teams
           </p>
@@ -219,7 +266,7 @@ export function ModerationQueuePage() {
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
             <div className="text-red-800 dark:text-red-300">{error}</div>
-            <button 
+            <button
               onClick={() => setError(null)}
               className="mt-2 text-sm text-red-600 dark:text-red-400 underline"
             >
@@ -256,8 +303,10 @@ export function ModerationQueuePage() {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="">All Teams</option>
-                {teams.map(team => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -300,19 +349,21 @@ export function ModerationQueuePage() {
                   onChange={(e) => setNeedsReviewFilter(e.target.checked)}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Needs Review</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Needs Review
+                </span>
               </label>
             </div>
 
             <div className="flex items-end justify-end">
               <button
                 onClick={() => {
-                  setStatusFilter('open');
-                  setTeamFilter('');
-                  setPinnedFilter('all');
-                  setFrozenFilter('all');
-                  setNeedsReviewFilter(false);
-                  setReviewedByFilter('');
+                  setStatusFilter('open')
+                  setTeamFilter('')
+                  setPinnedFilter('all')
+                  setFrozenFilter('all')
+                  setNeedsReviewFilter(false)
+                  setReviewedByFilter('')
                 }}
                 className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
@@ -327,18 +378,19 @@ export function ModerationQueuePage() {
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                {selectedQuestions.size} question{selectedQuestions.size !== 1 ? 's' : ''} selected
+                {selectedQuestions.size} question
+                {selectedQuestions.size !== 1 ? 's' : ''} selected
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 {/* Bulk Tag Dropdown */}
                 <div className="relative inline-block">
                   <select
                     onChange={(e) => {
                       if (e.target.value) {
-                        const [action, tagId] = e.target.value.split(':');
-                        handleBulkTag(tagId, action as 'add' | 'remove');
-                        e.target.value = '';
+                        const [action, tagId] = e.target.value.split(':')
+                        handleBulkTag(tagId, action as 'add' | 'remove')
+                        e.target.value = ''
                       }
                     }}
                     disabled={bulkActionLoading}
@@ -346,13 +398,20 @@ export function ModerationQueuePage() {
                   >
                     <option value="">Tag Actions...</option>
                     <optgroup label="Add Tag">
-                      {allTags.map(tag => (
-                        <option key={`add-${tag.id}`} value={`add:${tag.id}`}>+ {tag.name}</option>
+                      {allTags.map((tag) => (
+                        <option key={`add-${tag.id}`} value={`add:${tag.id}`}>
+                          + {tag.name}
+                        </option>
                       ))}
                     </optgroup>
                     <optgroup label="Remove Tag">
-                      {allTags.map(tag => (
-                        <option key={`remove-${tag.id}`} value={`remove:${tag.id}`}>- {tag.name}</option>
+                      {allTags.map((tag) => (
+                        <option
+                          key={`remove-${tag.id}`}
+                          value={`remove:${tag.id}`}
+                        >
+                          - {tag.name}
+                        </option>
                       ))}
                     </optgroup>
                   </select>
@@ -362,8 +421,8 @@ export function ModerationQueuePage() {
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
-                      handleBulkAction(e.target.value as any);
-                      e.target.value = '';
+                      handleBulkAction(e.target.value as any)
+                      e.target.value = ''
                     }
                   }}
                   disabled={bulkActionLoading}
@@ -374,7 +433,9 @@ export function ModerationQueuePage() {
                   <option value="unpin">📌 Unpin All</option>
                   <option value="freeze">❄️ Freeze All</option>
                   <option value="unfreeze">❄️ Unfreeze All</option>
-                  <option value="delete" className="text-red-600">🗑️ Delete All</option>
+                  <option value="delete" className="text-red-600">
+                    🗑️ Delete All
+                  </option>
                 </select>
 
                 <button
@@ -397,7 +458,10 @@ export function ModerationQueuePage() {
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={questions.length > 0 && selectedQuestions.size === questions.length}
+                      checked={
+                        questions.length > 0 &&
+                        selectedQuestions.size === questions.length
+                      }
                       onChange={handleSelectAll}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
@@ -425,13 +489,16 @@ export function ModerationQueuePage() {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {questions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <td
+                      colSpan={7}
+                      className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                    >
                       No questions found matching your filters
                     </td>
                   </tr>
                 ) : (
                   questions.map((question) => (
-                    <tr 
+                    <tr
                       key={question.id}
                       className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${selectedQuestions.has(question.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
                     >
@@ -446,17 +513,32 @@ export function ModerationQueuePage() {
                       <td className="px-6 py-4">
                         <div className="flex items-start space-x-2">
                           {question.isPinned && (
-                            <span className="text-yellow-500 text-lg" title="Pinned">📌</span>
+                            <span
+                              className="text-yellow-500 text-lg"
+                              title="Pinned"
+                            >
+                              📌
+                            </span>
                           )}
                           {question.isFrozen && (
-                            <span className="text-blue-400 text-lg" title="Frozen">❄️</span>
+                            <span
+                              className="text-blue-400 text-lg"
+                              title="Frozen"
+                            >
+                              ❄️
+                            </span>
                           )}
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {question.body.length > 100 ? question.body.substring(0, 100) + '...' : question.body}
+                              {question.body.length > 100
+                                ? question.body.substring(0, 100) + '...'
+                                : question.body}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Created {new Date(question.createdAt).toLocaleDateString()}
+                              Created{' '}
+                              {new Date(
+                                question.createdAt
+                              ).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -465,11 +547,13 @@ export function ModerationQueuePage() {
                         {question.team?.name || 'N/A'}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          question.status === 'ANSWERED'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                            : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            question.status === 'ANSWERED'
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                          }`}
+                        >
                           {question.status}
                         </span>
                       </td>
@@ -497,14 +581,18 @@ export function ModerationQueuePage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => handleQuickAction(question.id, 'pin')}
+                            onClick={() =>
+                              handleQuickAction(question.id, 'pin')
+                            }
                             className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
                             title={question.isPinned ? 'Unpin' : 'Pin'}
                           >
                             📌
                           </button>
                           <button
-                            onClick={() => handleQuickAction(question.id, 'freeze')}
+                            onClick={() =>
+                              handleQuickAction(question.id, 'freeze')
+                            }
                             className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isFrozen ? 'text-blue-400' : 'text-gray-400'}`}
                             title={question.isFrozen ? 'Unfreeze' : 'Freeze'}
                           >
@@ -513,8 +601,8 @@ export function ModerationQueuePage() {
                           {question.status === 'OPEN' && (
                             <button
                               onClick={() => {
-                                setSelectedQuestion(question);
-                                setIsModalOpen(true);
+                                setSelectedQuestion(question)
+                                setIsModalOpen(true)
                               }}
                               className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-green-600 dark:text-green-400"
                               title="Answer"
@@ -535,7 +623,8 @@ export function ModerationQueuePage() {
         {/* Summary */}
         <div className="text-sm text-gray-600 dark:text-gray-400">
           Showing {questions.length} question{questions.length !== 1 ? 's' : ''}
-          {selectedQuestions.size > 0 && ` • ${selectedQuestions.size} selected`}
+          {selectedQuestions.size > 0 &&
+            ` • ${selectedQuestions.size} selected`}
         </div>
       </div>
 
@@ -544,23 +633,22 @@ export function ModerationQueuePage() {
         question={selectedQuestion}
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          setSelectedQuestion(null);
+          setIsModalOpen(false)
+          setSelectedQuestion(null)
         }}
         onSuccess={() => {
-          setIsModalOpen(false);
-          setSelectedQuestion(null);
+          setIsModalOpen(false)
+          setSelectedQuestion(null)
           // Reload questions
           const loadQuestions = async () => {
-            const filters: any = {};
-            if (statusFilter !== 'all') filters.status = statusFilter;
-            const data = await apiClient.getModerationQueue(filters);
-            setQuestions(data.questions);
-          };
-          loadQuestions();
+            const filters: any = {}
+            if (statusFilter !== 'all') filters.status = statusFilter
+            const data = await apiClient.getModerationQueue(filters)
+            setQuestions(data.questions)
+          }
+          loadQuestions()
         }}
       />
     </>
-  );
+  )
 }
-

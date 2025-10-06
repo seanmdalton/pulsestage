@@ -19,13 +19,13 @@ import {
   getTenantContext,
   tryGetTenantContext,
   runInTenantContext,
-  TenantContext
+  TenantContext,
 } from './tenantContext.js';
 
 describe('tenantContext', () => {
   const mockContext: TenantContext = {
     tenantId: 'test-tenant-id',
-    tenantSlug: 'test-tenant'
+    tenantSlug: 'test-tenant',
   };
 
   describe('getTenantContext', () => {
@@ -80,7 +80,7 @@ describe('tenantContext', () => {
 
       runInTenantContext(outer, () => {
         expect(getTenantContext().tenantSlug).toBe('outer-slug');
-        
+
         runInTenantContext(inner, () => {
           expect(getTenantContext().tenantSlug).toBe('inner-slug');
         });
@@ -91,4 +91,3 @@ describe('tenantContext', () => {
     });
   });
 });
-

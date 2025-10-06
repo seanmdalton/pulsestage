@@ -30,14 +30,14 @@ describe('MDN HTTP Observatory Security Scan', () => {
     // Start Express app on test port
     const app = createApp(testPrisma);
     server = app.listen(TEST_PORT);
-    
+
     // Wait for server to be ready
     await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   afterAll(async () => {
     // Close server
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       server.close(() => resolve());
     });
   });
@@ -58,12 +58,12 @@ describe('MDN HTTP Observatory Security Scan', () => {
     // - No redirection (no HTTPS to redirect to)
     // Acceptable grade: C or better in dev
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    
+
     if (isDevelopment) {
       // Development mode: expect C grade due to unsafe-eval and no HSTS
       expect(result.scan.score).toBeGreaterThanOrEqual(40);
       expect(result.scan.grade).toMatch(/^[ABC]/); // Accept C or better
-      
+
       console.log('   ℹ️  Development mode: relaxed CSP for Vite HMR');
     } else {
       // Production mode: expect A grade
@@ -81,11 +81,11 @@ describe('MDN HTTP Observatory Security Scan', () => {
 
     const cspTest = result.tests['content-security-policy'];
     expect(cspTest).toBeDefined();
-    
+
     // In dev mode, CSP will have unsafe-eval (not ideal but needed for Vite)
     // In production, CSP should pass fully
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    
+
     if (isDevelopment) {
       // CSP exists but may have unsafe-eval
       expect(cspTest.result).toContain('csp-implemented');
@@ -134,4 +134,3 @@ describe('MDN HTTP Observatory Security Scan', () => {
     expect(Object.keys(result.tests).length).toBeGreaterThan(5);
   }, 30000);
 });
-

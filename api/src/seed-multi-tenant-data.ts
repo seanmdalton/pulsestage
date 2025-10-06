@@ -27,49 +27,49 @@ export async function seedMultiTenantData() {
     update: {},
     create: {
       slug: 'acme',
-      name: 'Acme Corp'
-    }
+      name: 'Acme Corp',
+    },
   });
   console.log(`✅ Created tenant: ${acmeTenant.name} (${acmeTenant.slug})`);
 
   // Create teams for Acme
   const acmeEngineering = await prisma.team.upsert({
-    where: { 
-      tenantId_slug: { tenantId: acmeTenant.id, slug: 'engineering' }
+    where: {
+      tenantId_slug: { tenantId: acmeTenant.id, slug: 'engineering' },
     },
     update: {},
     create: {
       tenantId: acmeTenant.id,
       name: 'Engineering',
       slug: 'engineering',
-      description: 'Engineering and development questions for Acme'
-    }
+      description: 'Engineering and development questions for Acme',
+    },
   });
 
   const acmeProduct = await prisma.team.upsert({
-    where: { 
-      tenantId_slug: { tenantId: acmeTenant.id, slug: 'product' }
+    where: {
+      tenantId_slug: { tenantId: acmeTenant.id, slug: 'product' },
     },
     update: {},
     create: {
       tenantId: acmeTenant.id,
       name: 'Product',
       slug: 'product',
-      description: 'Product and strategy questions for Acme'
-    }
+      description: 'Product and strategy questions for Acme',
+    },
   });
 
   const acmeMarketing = await prisma.team.upsert({
-    where: { 
-      tenantId_slug: { tenantId: acmeTenant.id, slug: 'marketing' }
+    where: {
+      tenantId_slug: { tenantId: acmeTenant.id, slug: 'marketing' },
     },
     update: {},
     create: {
       tenantId: acmeTenant.id,
       name: 'Marketing',
       slug: 'marketing',
-      description: 'Marketing and growth questions for Acme'
-    }
+      description: 'Marketing and growth questions for Acme',
+    },
   });
 
   console.log(`✅ Created teams: Engineering, Product, Marketing`);
@@ -80,7 +80,7 @@ export async function seedMultiTenantData() {
       email: 'alice.admin@acme.com',
       name: 'Alice Anderson',
       ssoId: 'alice.admin@acme.com',
-      teams: [{ teamId: acmeEngineering.id, role: 'admin' }]
+      teams: [{ teamId: acmeEngineering.id, role: 'admin' }],
     },
     {
       email: 'charlie.owner@acme.com',
@@ -88,8 +88,8 @@ export async function seedMultiTenantData() {
       ssoId: 'charlie.owner@acme.com',
       teams: [
         { teamId: acmeProduct.id, role: 'owner' },
-        { teamId: acmeMarketing.id, role: 'admin' }
-      ]
+        { teamId: acmeMarketing.id, role: 'admin' },
+      ],
     },
     {
       email: 'emily.member@acme.com',
@@ -97,26 +97,26 @@ export async function seedMultiTenantData() {
       ssoId: 'emily.member@acme.com',
       teams: [
         { teamId: acmeEngineering.id, role: 'member' },
-        { teamId: acmeProduct.id, role: 'member' }
-      ]
-    }
+        { teamId: acmeProduct.id, role: 'member' },
+      ],
+    },
   ];
 
   for (const userData of acmeUsers) {
     const { teams, ...userInfo } = userData;
-    
+
     const user = await prisma.user.upsert({
-      where: { 
-        tenantId_email: { tenantId: acmeTenant.id, email: userInfo.email }
+      where: {
+        tenantId_email: { tenantId: acmeTenant.id, email: userInfo.email },
       },
       update: {
         name: userInfo.name,
-        ssoId: userInfo.ssoId
+        ssoId: userInfo.ssoId,
       },
       create: {
         ...userInfo,
-        tenantId: acmeTenant.id
-      }
+        tenantId: acmeTenant.id,
+      },
     });
 
     console.log(`✅ Created user: ${user.name} (${user.email})`);
@@ -127,15 +127,15 @@ export async function seedMultiTenantData() {
         where: {
           userId_teamId: {
             userId: user.id,
-            teamId: membership.teamId
-          }
+            teamId: membership.teamId,
+          },
         },
         update: { role: membership.role },
         create: {
           userId: user.id,
           teamId: membership.teamId,
-          role: membership.role
-        }
+          role: membership.role,
+        },
       });
     }
   }
@@ -145,17 +145,17 @@ export async function seedMultiTenantData() {
     {
       body: 'What is our cloud infrastructure strategy?',
       teamId: acmeEngineering.id,
-      upvotes: 15
+      upvotes: 15,
     },
     {
       body: 'How do we handle database scaling?',
       teamId: acmeEngineering.id,
-      upvotes: 8
+      upvotes: 8,
     },
     {
       body: 'What features are planned for Q2?',
       teamId: acmeProduct.id,
-      upvotes: 22
+      upvotes: 22,
     },
     {
       body: 'How do we measure product success?',
@@ -163,26 +163,26 @@ export async function seedMultiTenantData() {
       upvotes: 12,
       status: 'ANSWERED' as const,
       responseText: 'We track user engagement, retention, and revenue metrics.',
-      respondedAt: new Date()
+      respondedAt: new Date(),
     },
     {
       body: 'What is our content marketing strategy?',
       teamId: acmeMarketing.id,
-      upvotes: 18
+      upvotes: 18,
     },
     {
       body: 'How do we approach social media?',
       teamId: acmeMarketing.id,
-      upvotes: 6
-    }
+      upvotes: 6,
+    },
   ];
 
   for (const qData of acmeQuestions) {
     await prisma.question.create({
       data: {
         ...qData,
-        tenantId: acmeTenant.id
-      }
+        tenantId: acmeTenant.id,
+      },
     });
   }
 
@@ -193,7 +193,7 @@ export async function seedMultiTenantData() {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedMultiTenantData()
-    .catch((e) => {
+    .catch(e => {
       console.error(e);
       process.exit(1);
     })
@@ -201,4 +201,3 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       await prisma.$disconnect();
     });
 }
-

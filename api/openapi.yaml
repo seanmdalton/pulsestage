@@ -419,8 +419,8 @@ components:
           format: uuid
           description: Team ID to associate the question with
       example:
-        body: "What inspired you to build this project?"
-        teamId: "550e8400-e29b-41d4-a716-446655440000"
+        body: 'What inspired you to build this project?'
+        teamId: '550e8400-e29b-41d4-a716-446655440000'
 
     RespondRequest:
       type: object
@@ -433,7 +433,7 @@ components:
           maxLength: 10000
           description: Admin response text
       example:
-        response: "I wanted to create a simple platform for community engagement."
+        response: 'I wanted to create a simple platform for community engagement.'
 
     CreateTeamRequest:
       type: object
@@ -457,9 +457,9 @@ components:
           maxLength: 500
           description: Team description
       example:
-        name: "Engineering Team"
-        slug: "engineering"
-        description: "Software development and engineering"
+        name: 'Engineering Team'
+        slug: 'engineering'
+        description: 'Software development and engineering'
 
     CreateTagRequest:
       type: object
@@ -480,9 +480,9 @@ components:
           pattern: '^#[0-9A-F]{6}$'
           description: Hex color code for the tag
       example:
-        name: "Currently Presenting"
-        description: "Question is currently being presented"
-        color: "#10B981"
+        name: 'Currently Presenting'
+        description: 'Question is currently being presented'
+        color: '#10B981'
 
     AddTagRequest:
       type: object
@@ -494,7 +494,7 @@ components:
           format: uuid
           description: Tag ID to add to the question
       example:
-        tagId: "550e8400-e29b-41d4-a716-446655440000"
+        tagId: '550e8400-e29b-41d4-a716-446655440000'
 
     AdminLoginRequest:
       type: object
@@ -505,7 +505,7 @@ components:
           type: string
           description: Admin authentication key
       example:
-        adminKey: "your-admin-key-here"
+        adminKey: 'your-admin-key-here'
 
     AdminLoginResponse:
       type: object
@@ -521,7 +521,7 @@ components:
           description: Login result message
       example:
         success: true
-        message: "Login successful"
+        message: 'Login successful'
 
     HealthResponse:
       type: object
@@ -537,7 +537,7 @@ components:
           description: Service name
       example:
         ok: true
-        service: "ama-api"
+        service: 'ama-api'
 
     Error:
       type: object
@@ -551,7 +551,7 @@ components:
           type: string
           description: Additional error details
       example:
-        error: "Validation failed"
+        error: 'Validation failed'
 
 paths:
   /health:
@@ -673,8 +673,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Too many requests"
-                message: "Rate limit exceeded. Maximum 10 requests per minute."
+                error: 'Too many requests'
+                message: 'Rate limit exceeded. Maximum 10 requests per minute.'
 
   /questions/{id}/upvote:
     post:
@@ -705,7 +705,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Not found"
+                error: 'Not found'
         '429':
           description: Rate limit exceeded
           content:
@@ -756,7 +756,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Unauthorized: Invalid or missing admin key"
+                error: 'Unauthorized: Invalid or missing admin key'
         '404':
           description: Question not found
           content:

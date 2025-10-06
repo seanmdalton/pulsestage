@@ -23,7 +23,7 @@ async function main() {
 
   // Get default tenant
   const defaultTenant = await prisma.tenant.findUnique({
-    where: { slug: 'default' }
+    where: { slug: 'default' },
   });
 
   if (!defaultTenant) {
@@ -33,7 +33,7 @@ async function main() {
 
   // Get all teams in default tenant
   const teams = await prisma.team.findMany({
-    where: { tenantId: defaultTenant.id }
+    where: { tenantId: defaultTenant.id },
   });
 
   if (teams.length === 0) {
@@ -47,14 +47,14 @@ async function main() {
       email: 'sarah@example.com',
       name: 'Sarah Wilson',
       ssoId: 'sarah-123',
-      teams: [teams[0].id, teams[1]?.id].filter(Boolean) // Engineering and Product teams
+      teams: [teams[0].id, teams[1]?.id].filter(Boolean), // Engineering and Product teams
     },
     {
       email: 'mike@example.com',
       name: 'Mike Chen',
       ssoId: 'mike-456',
-      teams: [teams[2]?.id, teams[3]?.id].filter(Boolean) // Design and Marketing teams
-    }
+      teams: [teams[2]?.id, teams[3]?.id].filter(Boolean), // Design and Marketing teams
+    },
   ];
 
   for (const mod of moderators) {
@@ -63,9 +63,9 @@ async function main() {
       where: {
         tenantId_email: {
           tenantId: defaultTenant.id,
-          email: mod.email
-        }
-      }
+          email: mod.email,
+        },
+      },
     });
 
     if (existingUser) {
@@ -79,8 +79,8 @@ async function main() {
         tenantId: defaultTenant.id,
         email: mod.email,
         name: mod.name,
-        ssoId: mod.ssoId
-      }
+        ssoId: mod.ssoId,
+      },
     });
 
     // Add team memberships with moderator role
@@ -89,8 +89,8 @@ async function main() {
         data: {
           userId: user.id,
           teamId: teamId,
-          role: 'moderator'
-        }
+          role: 'moderator',
+        },
       });
     }
 
@@ -99,12 +99,12 @@ async function main() {
 
   // Get Acme Corp tenant
   const acmeTenant = await prisma.tenant.findUnique({
-    where: { slug: 'acme' }
+    where: { slug: 'acme' },
   });
 
   if (acmeTenant) {
     const acmeTeams = await prisma.team.findMany({
-      where: { tenantId: acmeTenant.id }
+      where: { tenantId: acmeTenant.id },
     });
 
     if (acmeTeams.length > 0) {
@@ -113,16 +113,16 @@ async function main() {
         email: 'david@acme.com',
         name: 'David Martinez',
         ssoId: 'david-acme-789',
-        teams: [acmeTeams[0].id] // First team
+        teams: [acmeTeams[0].id], // First team
       };
 
       const existingAcmeUser = await prisma.user.findUnique({
         where: {
           tenantId_email: {
             tenantId: acmeTenant.id,
-            email: acmeModerator.email
-          }
-        }
+            email: acmeModerator.email,
+          },
+        },
       });
 
       if (!existingAcmeUser) {
@@ -131,16 +131,16 @@ async function main() {
             tenantId: acmeTenant.id,
             email: acmeModerator.email,
             name: acmeModerator.name,
-            ssoId: acmeModerator.ssoId
-          }
+            ssoId: acmeModerator.ssoId,
+          },
         });
 
         await prisma.teamMembership.create({
           data: {
             userId: acmeUser.id,
             teamId: acmeModerator.teams[0],
-            role: 'moderator'
-          }
+            role: 'moderator',
+          },
         });
 
         console.log(`✅ Created Acme moderator: ${acmeModerator.name} (${acmeModerator.email})`);
@@ -154,11 +154,10 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Error seeding moderators:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-

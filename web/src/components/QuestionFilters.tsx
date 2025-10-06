@@ -1,72 +1,75 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/api';
-import { useDebounce } from '../hooks/useDebounce';
+import { useState, useEffect } from 'react'
+import { apiClient } from '../lib/api'
+import { useDebounce } from '../hooks/useDebounce'
 
 interface Tag {
-  id: string;
-  name: string;
-  color: string;
+  id: string
+  name: string
+  color: string
 }
 
 interface QuestionFiltersProps {
-  onFilterChange: (filters: FilterState) => void;
-  currentFilters: FilterState;
+  onFilterChange: (filters: FilterState) => void
+  currentFilters: FilterState
 }
 
 export interface FilterState {
-  search?: string;
-  tagId?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  search?: string
+  tagId?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
-export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFiltersProps) {
-  const [search, setSearch] = useState(currentFilters.search || '');
-  const [selectedTagId, setSelectedTagId] = useState(currentFilters.tagId || '');
-  const [dateFrom, setDateFrom] = useState(currentFilters.dateFrom || '');
-  const [dateTo, setDateTo] = useState(currentFilters.dateTo || '');
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+export function QuestionFilters({
+  onFilterChange,
+  currentFilters,
+}: QuestionFiltersProps) {
+  const [search, setSearch] = useState(currentFilters.search || '')
+  const [selectedTagId, setSelectedTagId] = useState(currentFilters.tagId || '')
+  const [dateFrom, setDateFrom] = useState(currentFilters.dateFrom || '')
+  const [dateTo, setDateTo] = useState(currentFilters.dateTo || '')
+  const [tags, setTags] = useState<Tag[]>([])
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, 300)
 
   // Load tags for filter dropdown
   useEffect(() => {
     const loadTags = async () => {
       try {
-        const tagsData = await apiClient.getTags();
-        setTags(tagsData);
+        const tagsData = await apiClient.getTags()
+        setTags(tagsData)
       } catch (error) {
-        console.error('Failed to load tags:', error);
+        console.error('Failed to load tags:', error)
       }
-    };
-    loadTags();
-  }, []);
+    }
+    loadTags()
+  }, [])
 
   // Update filters when debounced search or other filters change
   useEffect(() => {
-    const filters: FilterState = {};
-    if (debouncedSearch.trim()) filters.search = debouncedSearch.trim();
-    if (selectedTagId) filters.tagId = selectedTagId;
-    if (dateFrom) filters.dateFrom = dateFrom;
-    if (dateTo) filters.dateTo = dateTo;
-    
-    onFilterChange(filters);
-  }, [debouncedSearch, selectedTagId, dateFrom, dateTo, onFilterChange]);
+    const filters: FilterState = {}
+    if (debouncedSearch.trim()) filters.search = debouncedSearch.trim()
+    if (selectedTagId) filters.tagId = selectedTagId
+    if (dateFrom) filters.dateFrom = dateFrom
+    if (dateTo) filters.dateTo = dateTo
+
+    onFilterChange(filters)
+  }, [debouncedSearch, selectedTagId, dateFrom, dateTo, onFilterChange])
 
   const clearFilters = () => {
-    setSearch('');
-    setSelectedTagId('');
-    setDateFrom('');
-    setDateTo('');
-  };
+    setSearch('')
+    setSelectedTagId('')
+    setDateFrom('')
+    setDateTo('')
+  }
 
   const activeFilterCount = [
     debouncedSearch,
     selectedTagId,
     dateFrom,
-    dateTo
-  ].filter(Boolean).length;
+    dateTo,
+  ].filter(Boolean).length
 
   return (
     <div className="space-y-4 mb-6">
@@ -74,8 +77,18 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
       <div className="flex gap-3 items-start">
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
           <input
@@ -90,8 +103,18 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
               onClick={() => setSearch('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
@@ -101,8 +124,18 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+            />
           </svg>
           <span>Filters</span>
           {activeFilterCount > 0 && (
@@ -179,8 +212,18 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
         <div className="flex flex-wrap gap-2">
           {debouncedSearch && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
               Search: "{debouncedSearch}"
               <button
@@ -194,7 +237,7 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
 
           {selectedTagId && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-              Tag: {tags.find(t => t.id === selectedTagId)?.name}
+              Tag: {tags.find((t) => t.id === selectedTagId)?.name}
               <button
                 onClick={() => setSelectedTagId('')}
                 className="ml-2 hover:text-purple-900 dark:hover:text-purple-100"
@@ -230,6 +273,5 @@ export function QuestionFilters({ onFilterChange, currentFilters }: QuestionFilt
         </div>
       )}
     </div>
-  );
+  )
 }
-

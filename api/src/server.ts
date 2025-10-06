@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { PrismaClient } from "@prisma/client";
-import { env } from "./env.js";
-import { initRedis } from "./middleware/rateLimit.js";
-import { initSessionStore } from "./middleware/session.js";
-import { createApp } from "./app.js";
+import { PrismaClient } from '@prisma/client';
+import { env } from './env.js';
+import { initRedis } from './middleware/rateLimit.js';
+import { initSessionStore } from './middleware/session.js';
+import { createApp } from './app.js';
 
 const prisma = new PrismaClient();
 
@@ -26,17 +26,17 @@ const prisma = new PrismaClient();
 async function autoBootstrap() {
   try {
     const tenantCount = await prisma.tenant.count();
-    
+
     if (tenantCount === 0) {
       console.log('🔧 Auto-bootstrap: No tenants found, creating default tenant...');
-      
+
       await prisma.tenant.create({
         data: {
           name: 'Default Organization',
-          slug: 'default'
-        }
+          slug: 'default',
+        },
       });
-      
+
       console.log('✅ Auto-bootstrap: Default tenant created');
       console.log('📝 Next steps:');
       console.log('   - Create teams via API: POST /admin/teams');
@@ -63,15 +63,15 @@ async function start() {
   } catch (error) {
     console.warn('Session store initialization failed, using memory store:', error);
   }
-  
+
   const app = createApp(prisma);
-  
+
   app.listen(env.PORT, async () => {
     // Ensure schema is present when running outside CI/container
-    try { 
-      await prisma.$executeRawUnsafe('SELECT 1'); 
+    try {
+      await prisma.$executeRawUnsafe('SELECT 1');
       console.log('Database connection verified');
-      
+
       // Auto-bootstrap if needed
       await autoBootstrap();
     } catch (error) {
@@ -84,4 +84,3 @@ async function start() {
 }
 
 start().catch(console.error);
-

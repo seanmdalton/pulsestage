@@ -21,7 +21,25 @@
     "postgresql"
   ],
   "scripts": {
-    "openapi:gen": "cd web && npm run openapi:gen"
+    "openapi:gen": "cd web && npm run openapi:gen",
+    "lint": "npm run lint:api && npm run lint:web",
+    "lint:api": "cd api && npm run lint",
+    "lint:web": "cd web && npm run lint",
+    "lint:fix": "npm run lint:fix:api && npm run lint:fix:web",
+    "lint:fix:api": "cd api && npm run lint:fix",
+    "lint:fix:web": "cd web && npm run lint:fix",
+    "format": "npm run format:api && npm run format:web",
+    "format:api": "cd api && npm run format",
+    "format:web": "cd web && npm run format",
+    "format:check": "npm run format:check:api && npm run format:check:web",
+    "format:check:api": "cd api && npm run format:check",
+    "format:check:web": "cd web && npm run format:check",
+    "test": "npm run test:api",
+    "test:api": "cd api && npm run test",
+    "test:web": "cd web && npm run test:e2e",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }
-

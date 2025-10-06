@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 
 export async function seedTags() {
   console.log('🏷️  Seeding default tags...');
-  
+
   try {
     // Ensure default tenant exists
     const tenant = await prisma.tenant.upsert({
@@ -29,27 +29,27 @@ export async function seedTags() {
       create: {
         id: 'default-tenant-id',
         slug: 'default',
-        name: 'Default Tenant'
-      }
+        name: 'Default Tenant',
+      },
     });
-    
+
     // Create "Currently Presenting" tag
     await prisma.tag.upsert({
-      where: { 
-        tenantId_name: { 
-          tenantId: tenant.id, 
-          name: 'Currently Presenting' 
-        }
+      where: {
+        tenantId_name: {
+          tenantId: tenant.id,
+          name: 'Currently Presenting',
+        },
       },
       update: {},
       create: {
         tenantId: tenant.id,
         name: 'Currently Presenting',
         description: 'Question is currently being presented in presentation mode',
-        color: '#10B981' // Green color
-      }
+        color: '#10B981', // Green color
+      },
     });
-    
+
     console.log('✅ Default tags seeded successfully');
   } catch (error) {
     console.error('❌ Error seeding tags:', error);
@@ -60,7 +60,7 @@ export async function seedTags() {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedTags()
-    .catch((e) => {
+    .catch(e => {
       console.error(e);
       process.exit(1);
     })

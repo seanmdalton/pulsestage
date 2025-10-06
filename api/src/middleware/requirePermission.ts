@@ -33,12 +33,14 @@ export function initPermissionMiddleware(prisma: PrismaClient) {
  */
 async function getUserHighestRole(userId: string): Promise<Role> {
   if (!prismaInstance) {
-    throw new Error('Permission middleware not initialized. Call initPermissionMiddleware() first.');
+    throw new Error(
+      'Permission middleware not initialized. Call initPermissionMiddleware() first.'
+    );
   }
 
   const memberships = await prismaInstance.teamMembership.findMany({
     where: { userId },
-    select: { role: true }
+    select: { role: true },
   });
 
   if (memberships.length === 0) {
@@ -61,10 +63,10 @@ async function getUserRoleInTeam(userId: string, teamId: string): Promise<Role |
     where: {
       userId_teamId: {
         userId,
-        teamId
-      }
+        teamId,
+      },
     },
-    select: { role: true }
+    select: { role: true },
   });
 
   return membership ? (membership.role as Role) : null;
@@ -72,7 +74,7 @@ async function getUserRoleInTeam(userId: string, teamId: string): Promise<Role |
 
 /**
  * Middleware factory that creates permission-checking middleware
- * 
+ *
  * @param permission - The permission required to access the route
  * @param options - Optional configuration
  *   - teamIdParam: Name of route param containing team ID (for team-scoped checks)
@@ -97,10 +99,10 @@ export function requirePermission(
             return next();
           }
         }
-        
-        return res.status(401).json({ 
+
+        return res.status(401).json({
           error: 'Unauthorized',
-          message: 'Authentication required'
+          message: 'Authentication required',
         });
       }
 
@@ -121,7 +123,7 @@ export function requirePermission(
           // User is not a member of this team
           // Check if they have global permissions (admin/owner)
           userRole = await getUserHighestRole(req.user.id);
-          
+
           // If they don't have permission to view all teams, deny access
           if (!hasPermission(userRole, 'team.view.all')) {
             await auditService.log(req, {
@@ -131,13 +133,13 @@ export function requirePermission(
                 permission,
                 reason: 'not_team_member',
                 teamId,
-                attemptedRole: userRole
-              }
+                attemptedRole: userRole,
+              },
             });
 
             return res.status(403).json({
               error: 'Forbidden',
-              message: 'You do not have permission to access this team'
+              message: 'You do not have permission to access this team',
             });
           }
         } else {
@@ -158,13 +160,13 @@ export function requirePermission(
             permission,
             userRole,
             teamId,
-            reason: 'insufficient_permissions'
-          }
+            reason: 'insufficient_permissions',
+          },
         });
 
         return res.status(403).json({
           error: 'Forbidden',
-          message: `This action requires ${permission} permission`
+          message: `This action requires ${permission} permission`,
         });
       }
 
@@ -177,9 +179,9 @@ export function requirePermission(
       next();
     } catch (error) {
       console.error('Permission check error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
-        message: 'Failed to verify permissions'
+        message: 'Failed to verify permissions',
       });
     }
   };
@@ -193,21 +195,21 @@ export function requireRole(minimumRole: Role) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ 
+        return res.status(401).json({
           error: 'Unauthorized',
-          message: 'Authentication required'
+          message: 'Authentication required',
         });
       }
 
       const userRole = await getUserHighestRole(req.user.id);
-      
+
       // Check role hierarchy
       const roleHierarchy: Record<Role, number> = {
         viewer: 1,
         member: 2,
         moderator: 3,
         admin: 4,
-        owner: 5
+        owner: 5,
       };
 
       if (roleHierarchy[userRole] < roleHierarchy[minimumRole]) {
@@ -217,13 +219,13 @@ export function requireRole(minimumRole: Role) {
           metadata: {
             requiredRole: minimumRole,
             userRole,
-            reason: 'insufficient_role'
-          }
+            reason: 'insufficient_role',
+          },
         });
 
         return res.status(403).json({
           error: 'Forbidden',
-          message: `This action requires at least ${minimumRole} role`
+          message: `This action requires at least ${minimumRole} role`,
         });
       }
 
@@ -231,9 +233,9 @@ export function requireRole(minimumRole: Role) {
       next();
     } catch (error) {
       console.error('Role check error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
-        message: 'Failed to verify role'
+        message: 'Failed to verify role',
       });
     }
   };
@@ -248,4 +250,3 @@ declare global {
     }
   }
 }
-

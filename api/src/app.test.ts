@@ -1,143 +1,153 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import request from "supertest";
-import { createApp } from "./app.js";
-import { testPrisma } from "./test/setup.js";
+import { describe, it, expect, beforeEach } from 'vitest';
+import request from 'supertest';
+import { createApp } from './app.js';
+import { testPrisma } from './test/setup.js';
 
 const app = createApp(testPrisma);
 
-describe("API Tests", () => {
-  describe("GET /health", () => {
-    it("should return health status", async () => {
-      const response = await request(app).get("/health");
+describe('API Tests', () => {
+  describe('GET /health', () => {
+    it('should return health status', async () => {
+      const response = await request(app).get('/health');
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ok: true, service: "ama-api" });
+      expect(response.body).toEqual({ ok: true, service: 'ama-api' });
     });
   });
 
-  describe("POST /questions", () => {
+  describe('POST /questions', () => {
     let testUser: any;
-    
+
     beforeEach(async () => {
       // Create a test user for authenticated requests
       const tenant = await testPrisma.tenant.findUnique({
-        where: { slug: 'default' }
+        where: { slug: 'default' },
       });
-      
+
       testUser = await testPrisma.user.create({
         data: {
           tenantId: tenant!.id,
           email: 'test@example.com',
           name: 'Test User',
-          ssoId: 'test-123'
-        }
+          ssoId: 'test-123',
+        },
       });
     });
 
-    it("should create a question with valid data", async () => {
+    it('should create a question with valid data', async () => {
       const response = await request(app)
-        .post("/questions")
+        .post('/questions')
         .set('x-mock-sso-user', testUser.email)
         .set('x-tenant-id', 'default')
-        .send({ body: "What is your favorite color?" });
+        .send({ body: 'What is your favorite color?' });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty("id");
-      expect(response.body.body).toBe("What is your favorite color?");
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.body).toBe('What is your favorite color?');
       expect(response.body.upvotes).toBe(1); // Author automatically upvotes their own question
-      expect(response.body.status).toBe("OPEN");
+      expect(response.body.status).toBe('OPEN');
     });
 
-    it("should reject question with body too short", async () => {
+    it('should reject question with body too short', async () => {
       const response = await request(app)
-        .post("/questions")
+        .post('/questions')
         .set('x-mock-sso-user', testUser.email)
         .set('x-tenant-id', 'default')
-        .send({ body: "Hi" });
+        .send({ body: 'Hi' });
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
 
-    it("should reject question with body too long", async () => {
+    it('should reject question with body too long', async () => {
       const response = await request(app)
-        .post("/questions")
+        .post('/questions')
         .set('x-mock-sso-user', testUser.email)
         .set('x-tenant-id', 'default')
-        .send({ body: "a".repeat(2001) });
+        .send({ body: 'a'.repeat(2001) });
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
 
-    it("should reject question with missing body", async () => {
+    it('should reject question with missing body', async () => {
       const response = await request(app)
-        .post("/questions")
+        .post('/questions')
         .set('x-mock-sso-user', testUser.email)
         .set('x-tenant-id', 'default')
         .send({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
-    
-    it("should reject unauthenticated requests", async () => {
+
+    it('should reject unauthenticated requests', async () => {
       const response = await request(app)
-        .post("/questions")
-        .send({ body: "What is your favorite color?" });
+        .post('/questions')
+        .send({ body: 'What is your favorite color?' });
 
       expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe("GET /questions", () => {
+  describe('GET /questions', () => {
     beforeEach(async () => {
       // Create test questions
       await testPrisma.question.create({
-        data: { body: "Open question 1", upvotes: 5, status: "OPEN", tenantId: "default-tenant-id" }
-      });
-      await testPrisma.question.create({
-        data: { body: "Open question 2", upvotes: 10, status: "OPEN", tenantId: "default-tenant-id" }
+        data: {
+          body: 'Open question 1',
+          upvotes: 5,
+          status: 'OPEN',
+          tenantId: 'default-tenant-id',
+        },
       });
       await testPrisma.question.create({
         data: {
-          body: "Answered question",
-          status: "ANSWERED",
-          responseText: "The answer",
+          body: 'Open question 2',
+          upvotes: 10,
+          status: 'OPEN',
+          tenantId: 'default-tenant-id',
+        },
+      });
+      await testPrisma.question.create({
+        data: {
+          body: 'Answered question',
+          status: 'ANSWERED',
+          responseText: 'The answer',
           respondedAt: new Date(),
-          tenantId: "default-tenant-id"
-        }
+          tenantId: 'default-tenant-id',
+        },
       });
     });
 
-    it("should return open questions by default", async () => {
-      const response = await request(app).get("/questions");
+    it('should return open questions by default', async () => {
+      const response = await request(app).get('/questions');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
-      expect(response.body[0].status).toBe("OPEN");
-      expect(response.body[1].status).toBe("OPEN");
+      expect(response.body[0].status).toBe('OPEN');
+      expect(response.body[1].status).toBe('OPEN');
     });
 
-    it("should return open questions when status=open", async () => {
-      const response = await request(app).get("/questions?status=open");
+    it('should return open questions when status=open', async () => {
+      const response = await request(app).get('/questions?status=open');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
-      expect(response.body.every((q: any) => q.status === "OPEN")).toBe(true);
+      expect(response.body.every((q: any) => q.status === 'OPEN')).toBe(true);
     });
 
-    it("should return answered questions when status=answered", async () => {
-      const response = await request(app).get("/questions?status=answered");
+    it('should return answered questions when status=answered', async () => {
+      const response = await request(app).get('/questions?status=answered');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(1);
-      expect(response.body[0].status).toBe("ANSWERED");
-      expect(response.body[0].responseText).toBe("The answer");
+      expect(response.body[0].status).toBe('ANSWERED');
+      expect(response.body[0].responseText).toBe('The answer');
     });
 
-    it("should return questions sorted by upvotes desc", async () => {
-      const response = await request(app).get("/questions?status=open");
+    it('should return questions sorted by upvotes desc', async () => {
+      const response = await request(app).get('/questions?status=open');
 
       expect(response.status).toBe(200);
       expect(response.body[0].upvotes).toBe(10);
@@ -145,29 +155,27 @@ describe("API Tests", () => {
     });
   });
 
-  describe("POST /questions/:id/upvote", () => {
-    it("should increment upvotes for existing question", async () => {
+  describe('POST /questions/:id/upvote', () => {
+    it('should increment upvotes for existing question', async () => {
       const question = await testPrisma.question.create({
-        data: { body: "Test question", upvotes: 0, tenantId: "default-tenant-id" }
+        data: { body: 'Test question', upvotes: 0, tenantId: 'default-tenant-id' },
       });
 
-      const response = await request(app)
-        .post(`/questions/${question.id}/upvote`);
+      const response = await request(app).post(`/questions/${question.id}/upvote`);
 
       expect(response.status).toBe(200);
       expect(response.body.upvotes).toBe(1);
     });
 
-    it("should return 404 for non-existent question", async () => {
-      const response = await request(app)
-        .post("/questions/non-existent-id/upvote");
+    it('should return 404 for non-existent question', async () => {
+      const response = await request(app).post('/questions/non-existent-id/upvote');
 
       expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe("POST /questions/:id/respond", () => {
+  describe('POST /questions/:id/respond', () => {
     let question: any;
     let adminUser: any;
     let testTeam: any;
@@ -176,20 +184,20 @@ describe("API Tests", () => {
       // Create a test team
       testTeam = await testPrisma.team.create({
         data: {
-          name: "Test Team",
-          slug: "test-team",
-          tenantId: "default-tenant-id"
-        }
+          name: 'Test Team',
+          slug: 'test-team',
+          tenantId: 'default-tenant-id',
+        },
       });
 
       // Create an admin user
       adminUser = await testPrisma.user.create({
         data: {
-          email: "admin@test.com",
-          name: "Admin User",
-          ssoId: "admin@test.com",
-          tenantId: "default-tenant-id"
-        }
+          email: 'admin@test.com',
+          name: 'Admin User',
+          ssoId: 'admin@test.com',
+          tenantId: 'default-tenant-id',
+        },
       });
 
       // Create team membership with admin role
@@ -197,40 +205,40 @@ describe("API Tests", () => {
         data: {
           userId: adminUser.id,
           teamId: testTeam.id,
-          role: "admin"
-        }
+          role: 'admin',
+        },
       });
 
       question = await testPrisma.question.create({
-        data: { body: "Test question", tenantId: "default-tenant-id" }
+        data: { body: 'Test question', tenantId: 'default-tenant-id' },
       });
     });
 
-    it("should respond to question with valid admin role", async () => {
+    it('should respond to question with valid admin role', async () => {
       const response = await request(app)
         .post(`/questions/${question.id}/respond`)
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "This is my answer" });
+        .send({ response: 'This is my answer' });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe("ANSWERED");
-      expect(response.body.responseText).toBe("This is my answer");
+      expect(response.body.status).toBe('ANSWERED');
+      expect(response.body.responseText).toBe('This is my answer');
       expect(response.body.respondedAt).toBeTruthy();
     });
 
-    it("should reject without authentication", async () => {
+    it('should reject without authentication', async () => {
       const response = await request(app)
         .post(`/questions/${question.id}/respond`)
         .set('x-tenant-id', 'default')
-        .send({ response: "This is my answer" });
+        .send({ response: 'This is my answer' });
 
       // CSRF check happens before auth, so expect 403 (CSRF failure) or 401 (auth failure)
       expect([401, 403]).toContain(response.status);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
 
-    it("should reject with missing response", async () => {
+    it('should reject with missing response', async () => {
       const response = await request(app)
         .post(`/questions/${question.id}/respond`)
         .set('x-mock-sso-user', adminUser.email)
@@ -238,30 +246,29 @@ describe("API Tests", () => {
         .send({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
 
-    it("should reject with response too short", async () => {
+    it('should reject with response too short', async () => {
       const response = await request(app)
         .post(`/questions/${question.id}/respond`)
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "" });
+        .send({ response: '' });
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
 
-    it("should return 404 for non-existent question", async () => {
+    it('should return 404 for non-existent question', async () => {
       const response = await request(app)
-        .post("/questions/non-existent-id/respond")
+        .post('/questions/non-existent-id/respond')
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "This is my answer" });
+        .send({ response: 'This is my answer' });
 
       expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
 });
-

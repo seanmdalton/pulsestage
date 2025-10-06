@@ -1,6 +1,6 @@
 /*
  * Mock Authentication Middleware
- * 
+ *
  * This simulates SSO authentication for local development.
  * In production, this would be replaced with real SSO integration.
  */
@@ -24,38 +24,38 @@ export function resetMockData() {
 // Function to load mock data from database
 async function loadMockData() {
   if (mockDataLoaded) return;
-  
+
   try {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔐 Loading mock SSO data from database...');
     }
-    
+
     // Load all users from all tenants for mock SSO
     const users = await prisma.user.findMany();
-    
+
     // Load team memberships
     const memberships = await prisma.teamMembership.findMany({
       where: {
         userId: {
-          in: users.map(u => u.id)
-        }
-      }
+          in: users.map(u => u.id),
+        },
+      },
     });
-    
+
     // Load user preferences
     const preferences = await prisma.userPreferences.findMany({
       where: {
         userId: {
-          in: users.map(u => u.id)
-        }
-      }
+          in: users.map(u => u.id),
+        },
+      },
     });
-    
+
     // Populate mock data arrays
     mockUsers.length = 0;
     mockTeamMemberships.length = 0;
     mockUserPreferences.length = 0;
-    
+
     // Add users with their roles from memberships
     for (const user of users) {
       const userMembership = memberships.find(m => m.userId === user.id);
@@ -65,34 +65,37 @@ async function loadMockData() {
         email: user.email,
         name: user.name || user.email,
         ssoId: user.ssoId || user.email,
-        role: userMembership?.role || 'member'
+        role: userMembership?.role || 'member',
       });
     }
-    
+
     // Add memberships
     for (const membership of memberships) {
       mockTeamMemberships.push({
         userId: membership.userId,
         teamId: membership.teamId,
-        role: membership.role
+        role: membership.role,
       });
     }
-    
+
     // Add preferences
     for (const preference of preferences) {
       mockUserPreferences.push({
         userId: preference.userId,
-        favoriteTeams: Array.isArray(preference.favoriteTeams) ? preference.favoriteTeams as string[] : [],
-        defaultTeamId: preference.defaultTeamId
+        favoriteTeams: Array.isArray(preference.favoriteTeams)
+          ? (preference.favoriteTeams as string[])
+          : [],
+        defaultTeamId: preference.defaultTeamId,
       });
     }
-    
+
     mockDataLoaded = true;
-    
+
     if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Loaded ${mockUsers.length} mock users, ${mockTeamMemberships.length} memberships, ${mockUserPreferences.length} preferences`);
+      console.log(
+        `✅ Loaded ${mockUsers.length} mock users, ${mockTeamMemberships.length} memberships, ${mockUserPreferences.length} preferences`
+      );
     }
-    
   } catch (error) {
     console.error('❌ Error loading mock SSO data:', error);
   }
@@ -126,7 +129,7 @@ const mockUserPreferences: Array<{
 declare global {
   namespace Express {
     interface Request {
-      user?: typeof mockUsers[0];
+      user?: (typeof mockUsers)[0];
     }
   }
 }
@@ -136,35 +139,37 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
   try {
     // Load mock data if not already loaded
     await loadMockData();
-    
+
     // Check for mock SSO header (simulating SSO provider)
     const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
-    
+
     if (mockSSOHeader) {
       // Find user by email or SSO ID
-      const user = mockUsers.find(u => 
-        u.email === mockSSOHeader || u.ssoId === mockSSOHeader
-      );
-      
+      const user = mockUsers.find(u => u.email === mockSSOHeader || u.ssoId === mockSSOHeader);
+
       if (user) {
         // Validate that user belongs to the current tenant
         const currentTenant = (req as any).tenant;
-        
+
         if (currentTenant && user.tenantId !== currentTenant.tenantId) {
           if (process.env.NODE_ENV === 'development') {
-            console.log(`❌ Mock SSO: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`);
+            console.log(
+              `❌ Mock SSO: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
+            );
           }
           // User belongs to different tenant - don't authenticate
           req.user = undefined;
         } else {
           req.user = user;
           if (process.env.NODE_ENV === 'development') {
-            console.log(`🔐 Mock SSO: Authenticated user ${user.name} (${user.email}) in tenant ${user.tenantId}`);
+            console.log(
+              `🔐 Mock SSO: Authenticated user ${user.name} (${user.email}) in tenant ${user.tenantId}`
+            );
           }
         }
       }
     }
-    
+
     next();
   } catch (error) {
     console.error('Error in mock auth middleware:', error);
@@ -177,21 +182,21 @@ export async function requireMockAuth(req: Request, res: Response, next: NextFun
   try {
     // Load mock data if not already loaded
     await loadMockData();
-    
+
     if (!req.user) {
       const currentTenant = (req as any).tenant;
-      const availableUsers = currentTenant 
+      const availableUsers = currentTenant
         ? mockUsers.filter(u => u.tenantId === currentTenant.tenantId)
         : mockUsers;
-      
+
       return res.status(401).json({
         error: 'Authentication required',
         message: 'Please provide x-mock-sso-user header for local testing',
         currentTenant: currentTenant?.tenantSlug || 'unknown',
-        availableUsers: availableUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId }))
+        availableUsers: availableUsers.map(u => ({ email: u.email, name: u.name, ssoId: u.ssoId })),
       });
     }
-    
+
     next();
   } catch (error) {
     console.error('Error in require mock auth middleware:', error);
@@ -202,27 +207,27 @@ export async function requireMockAuth(req: Request, res: Response, next: NextFun
 // Get user's teams with membership info
 export async function getUserTeamsWithMembership(userId: string, prisma: any) {
   await loadMockData();
-  
+
   const userMemberships = mockTeamMemberships.filter(m => m.userId === userId);
   const userPreferences = mockUserPreferences.find(p => p.userId === userId);
-  
+
   // Get real teams from database
   const realTeams = await prisma.team.findMany({
     where: { isActive: true },
     include: {
       _count: {
-        select: { questions: true }
-      }
-    }
+        select: { questions: true },
+      },
+    },
   });
-  
+
   // Map real teams to user context
   return realTeams.map((team: any) => {
     // Use real team ID directly since we updated mock data to use real IDs
     const membership = userMemberships.find(m => m.teamId === team.id);
     const isFavorite = userPreferences?.favoriteTeams.includes(team.id) || false;
     const isDefault = userPreferences?.defaultTeamId === team.id;
-    
+
     return {
       ...team,
       userRole: membership?.role || 'member', // Default to member for all teams
@@ -240,25 +245,27 @@ export async function getUserPreferences(userId: string): Promise<{
   defaultTeamId: string | null;
 }> {
   await loadMockData();
-  
-  return mockUserPreferences.find(p => p.userId === userId) || {
-    userId,
-    favoriteTeams: [],
-    defaultTeamId: null
-  };
+
+  return (
+    mockUserPreferences.find(p => p.userId === userId) || {
+      userId,
+      favoriteTeams: [],
+      defaultTeamId: null,
+    }
+  );
 }
 
 // Toggle team favorite
 export async function toggleTeamFavorite(userId: string, teamId: string) {
   const prefs = await getUserPreferences(userId);
   const isFavorite = prefs.favoriteTeams.includes(teamId);
-  
+
   if (isFavorite) {
     prefs.favoriteTeams = prefs.favoriteTeams.filter(id => id !== teamId);
   } else {
     prefs.favoriteTeams.push(teamId);
   }
-  
+
   return !isFavorite; // Return new favorite status
 }
 
@@ -270,11 +277,14 @@ export async function setDefaultTeam(userId: string, teamId: string) {
 }
 
 // Set user preferences (for updating the mock data cache)
-export async function setUserPreferences(userId: string, preferences: { favoriteTeams?: string[]; defaultTeamId?: string | null }) {
+export async function setUserPreferences(
+  userId: string,
+  preferences: { favoriteTeams?: string[]; defaultTeamId?: string | null }
+) {
   await loadMockData();
-  
-  let existingPrefs = mockUserPreferences.find(p => p.userId === userId);
-  
+
+  const existingPrefs = mockUserPreferences.find(p => p.userId === userId);
+
   if (existingPrefs) {
     // Update existing preferences
     if (preferences.favoriteTeams !== undefined) {
@@ -288,7 +298,7 @@ export async function setUserPreferences(userId: string, preferences: { favorite
     mockUserPreferences.push({
       userId,
       favoriteTeams: preferences.favoriteTeams || [],
-      defaultTeamId: preferences.defaultTeamId || null
+      defaultTeamId: preferences.defaultTeamId || null,
     });
   }
 }

@@ -8,12 +8,10 @@ export function requireAdminKey(req: Request, res: Response, next: NextFunction)
   }
 
   const providedKey = req.headers['x-admin-key'];
-  
+
   if (!providedKey || providedKey !== env.ADMIN_KEY) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing admin key' });
   }
 
   next();
 }
-
-

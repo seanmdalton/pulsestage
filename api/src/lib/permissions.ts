@@ -16,9 +16,9 @@
 
 /**
  * RBAC Permission System
- * 
+ *
  * Defines roles, permissions, and access control logic for the application.
- * 
+ *
  * Roles (in order of privilege):
  * - viewer: Anonymous/unauthenticated users
  * - member: Authenticated users who can submit and upvote
@@ -29,7 +29,7 @@
 
 export type Role = 'viewer' | 'member' | 'moderator' | 'admin' | 'owner';
 
-export type Permission = 
+export type Permission =
   // Questions
   | 'question.view'
   | 'question.submit'
@@ -45,21 +45,21 @@ export type Permission =
   | 'tag.edit'
   | 'tag.delete'
   // Teams
-  | 'team.view.own'     // View teams user is member of
-  | 'team.view.all'     // View all teams in tenant
+  | 'team.view.own' // View teams user is member of
+  | 'team.view.all' // View all teams in tenant
   | 'team.create'
   | 'team.edit'
   | 'team.delete'
   // Members
-  | 'member.view.own'   // View members of own teams
-  | 'member.view.all'   // View all members in tenant
+  | 'member.view.own' // View members of own teams
+  | 'member.view.all' // View all members in tenant
   | 'member.add'
   | 'member.edit'
   | 'member.remove'
   // Admin
-  | 'admin.access'      // Access admin panel
-  | 'audit.view'        // View audit logs
-  | 'data.export'       // Export data
+  | 'admin.access' // Access admin panel
+  | 'audit.view' // View audit logs
+  | 'data.export' // Export data
   | 'presentation.access'; // Access presentation mode
 
 /**
@@ -71,18 +71,18 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'question.upvote',
     'tag.view',
     'team.view.own',
-    'member.view.own'
+    'member.view.own',
   ]),
-  
+
   member: new Set([
     'question.view',
     'question.submit',
     'question.upvote',
     'tag.view',
     'team.view.own',
-    'member.view.own'
+    'member.view.own',
   ]),
-  
+
   moderator: new Set([
     'question.view',
     'question.submit',
@@ -96,9 +96,9 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'team.view.own',
     'member.view.own',
     'admin.access',
-    'presentation.access'
+    'presentation.access',
   ]),
-  
+
   admin: new Set([
     'question.view',
     'question.submit',
@@ -121,9 +121,9 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'admin.access',
     'audit.view',
     'data.export',
-    'presentation.access'
+    'presentation.access',
   ]),
-  
+
   owner: new Set([
     // Owner has all permissions
     'question.view',
@@ -149,8 +149,8 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
     'admin.access',
     'audit.view',
     'data.export',
-    'presentation.access'
-  ])
+    'presentation.access',
+  ]),
 };
 
 /**
@@ -191,12 +191,12 @@ export function getHighestRole(roles: string[]): Role {
     admin: 4,
     moderator: 3,
     member: 2,
-    viewer: 1
+    viewer: 1,
   };
-  
+
   let highestRole: Role = 'viewer';
   let highestLevel = 0;
-  
+
   for (const role of roles) {
     const level = roleHierarchy[role] || 0;
     if (level > highestLevel) {
@@ -204,7 +204,7 @@ export function getHighestRole(roles: string[]): Role {
       highestRole = role as Role;
     }
   }
-  
+
   return highestRole;
 }
 
@@ -218,9 +218,9 @@ export function isRoleAtLeast(role: Role, minimumRole: Role): boolean {
     member: 2,
     moderator: 3,
     admin: 4,
-    owner: 5
+    owner: 5,
   };
-  
+
   return roleHierarchy[role] >= roleHierarchy[minimumRole];
 }
 
@@ -240,9 +240,9 @@ export function getRoleName(role: Role): string {
     member: 'Member',
     moderator: 'Moderator',
     admin: 'Admin',
-    owner: 'Owner'
+    owner: 'Owner',
   };
-  
+
   return roleNames[role];
 }
 
@@ -255,9 +255,8 @@ export function getRoleDescription(role: Role): string {
     member: 'Can submit and upvote questions',
     moderator: 'Can answer questions and moderate content',
     admin: 'Full team and content management',
-    owner: 'Full access including user management'
+    owner: 'Full access including user management',
   };
-  
+
   return descriptions[role];
 }
-

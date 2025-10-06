@@ -1,21 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../lib/api';
-import type { ExportFilters, ExportPreview, Question, Team, Tag } from '../lib/api';
-import { useUser } from '../contexts/UserContext';
-import { setFormattedPageTitle } from '../utils/titleUtils';
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiClient } from '../lib/api'
+import type {
+  ExportFilters,
+  ExportPreview,
+  Question,
+  Team,
+  Tag,
+} from '../lib/api'
+import { useUser } from '../contexts/UserContext'
+import { setFormattedPageTitle } from '../utils/titleUtils'
 
 export function ExportPage() {
-  const { userTeams, getUserRoleInTeam, isLoading } = useUser();
-  const navigate = useNavigate();
-  
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [preview, setPreview] = useState<ExportPreview | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
+  const { userTeams, getUserRoleInTeam, isLoading } = useUser()
+  const navigate = useNavigate()
+
+  const [teams, setTeams] = useState<Team[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [preview, setPreview] = useState<ExportPreview | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const [filters, setFilters] = useState<ExportFilters>({
     teamId: 'all',
     status: 'both',
@@ -25,126 +31,131 @@ export function ExportPage() {
     tagIds: undefined,
     startDate: undefined,
     endDate: undefined,
-    limit: 100
-  });
+    limit: 100,
+  })
 
   // Set page title
   useEffect(() => {
-    setFormattedPageTitle(undefined, 'admin');
-  }, []);
+    setFormattedPageTitle(undefined, 'admin')
+  }, [])
 
   // Check if user has admin role
-  const hasAdminRole = userTeams.some(team => {
-    const role = getUserRoleInTeam(team.id);
-    return role === 'admin' || role === 'owner';
-  });
+  const hasAdminRole = userTeams.some((team) => {
+    const role = getUserRoleInTeam(team.id)
+    return role === 'admin' || role === 'owner'
+  })
 
   // Redirect if not authenticated or doesn't have admin role
   useEffect(() => {
     if (!isLoading && (!hasAdminRole || userTeams.length === 0)) {
-      navigate('/admin/login');
+      navigate('/admin/login')
     }
-  }, [hasAdminRole, userTeams.length, isLoading, navigate]);
+  }, [hasAdminRole, userTeams.length, isLoading, navigate])
 
   // Load teams and tags
   useEffect(() => {
     const loadData = async () => {
-      if (!hasAdminRole) return;
-      
+      if (!hasAdminRole) return
+
       try {
         const [teamsData, tagsData] = await Promise.all([
           apiClient.getTeams(),
-          apiClient.getTags()
-        ]);
-        setTeams(teamsData);
-        setTags(tagsData);
+          apiClient.getTags(),
+        ])
+        setTeams(teamsData)
+        setTags(tagsData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load data');
+        setError(err instanceof Error ? err.message : 'Failed to load data')
       }
-    };
+    }
 
-    loadData();
-  }, [hasAdminRole]);
+    loadData()
+  }, [hasAdminRole])
 
   // Load preview when filters change
   useEffect(() => {
     const loadPreview = async () => {
-      if (!hasAdminRole) return;
-      
-      setLoading(true);
-      try {
-        const previewData = await apiClient.getExportPreview(filters);
-        setPreview(previewData);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load preview');
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (!hasAdminRole) return
 
-    loadPreview();
-  }, [filters, hasAdminRole]);
+      setLoading(true)
+      try {
+        const previewData = await apiClient.getExportPreview(filters)
+        setPreview(previewData)
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load preview')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPreview()
+  }, [filters, hasAdminRole])
 
   const handleFilterChange = (key: keyof ExportFilters, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [key]: value
-    }));
-  };
+      [key]: value,
+    }))
+  }
 
   const handleDownload = async (format: 'csv' | 'json') => {
-    if (!preview) return;
-    
-    setExporting(true);
+    if (!preview) return
+
+    setExporting(true)
     try {
-      const blob = await apiClient.downloadExport(filters, format);
-      
+      const blob = await apiClient.downloadExport(filters, format)
+
       // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ama-export-${new Date().toISOString().split('T')[0]}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `ama-export-${new Date().toISOString().split('T')[0]}.${format}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
+      setError(err instanceof Error ? err.message : 'Export failed')
     } finally {
-      setExporting(false);
+      setExporting(false)
     }
-  };
+  }
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
-  };
+    return new Date(date).toLocaleDateString()
+  }
 
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto text-center py-8">
-        <div className="text-gray-500 dark:text-gray-400">Loading export page...</div>
+        <div className="text-gray-500 dark:text-gray-400">
+          Loading export page...
+        </div>
       </div>
-    );
+    )
   }
 
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Export Data</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+          Export Data
+        </h1>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
           <div className="text-red-800 dark:text-red-300">Error: {error}</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Export Data</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Export Data
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Export questions with full metadata for analysis and backup
           </p>
@@ -164,7 +175,7 @@ export function ExportPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               Export Filters
             </h2>
-            
+
             <div className="space-y-4">
               {/* Team Filter */}
               <div>
@@ -177,8 +188,10 @@ export function ExportPage() {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">All Teams</option>
-                  {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -208,14 +221,21 @@ export function ExportPage() {
                   <input
                     type="date"
                     value={filters.startDate || ''}
-                    onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        'startDate',
+                        e.target.value || undefined
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="Start date"
                   />
                   <input
                     type="date"
                     value={filters.endDate || ''}
-                    onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
+                    onChange={(e) =>
+                      handleFilterChange('endDate', e.target.value || undefined)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="End date"
                   />
@@ -232,7 +252,12 @@ export function ExportPage() {
                     type="number"
                     min="0"
                     value={filters.minUpvotes || ''}
-                    onChange={(e) => handleFilterChange('minUpvotes', e.target.value ? parseInt(e.target.value) : undefined)}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        'minUpvotes',
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="Min"
                   />
@@ -240,7 +265,12 @@ export function ExportPage() {
                     type="number"
                     min="0"
                     value={filters.maxUpvotes || ''}
-                    onChange={(e) => handleFilterChange('maxUpvotes', e.target.value ? parseInt(e.target.value) : undefined)}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        'maxUpvotes',
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="Max"
                   />
@@ -254,7 +284,12 @@ export function ExportPage() {
                 </label>
                 <select
                   value={filters.hasResponse || ''}
-                  onChange={(e) => handleFilterChange('hasResponse', e.target.value || undefined)}
+                  onChange={(e) =>
+                    handleFilterChange(
+                      'hasResponse',
+                      e.target.value || undefined
+                    )
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Either</option>
@@ -273,14 +308,22 @@ export function ExportPage() {
                     multiple
                     value={filters.tagIds || []}
                     onChange={(e) => {
-                      const selectedTags = Array.from(e.target.selectedOptions, option => option.value);
-                      handleFilterChange('tagIds', selectedTags.length > 0 ? selectedTags : undefined);
+                      const selectedTags = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      )
+                      handleFilterChange(
+                        'tagIds',
+                        selectedTags.length > 0 ? selectedTags : undefined
+                      )
                     }}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     size={3}
                   >
-                    {tags.map(tag => (
-                      <option key={tag.id} value={tag.id}>{tag.name}</option>
+                    {tags.map((tag) => (
+                      <option key={tag.id} value={tag.id}>
+                        {tag.name}
+                      </option>
                     ))}
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -319,7 +362,9 @@ export function ExportPage() {
 
             {loading ? (
               <div className="text-center py-8">
-                <div className="text-gray-500 dark:text-gray-400">Loading preview...</div>
+                <div className="text-gray-500 dark:text-gray-400">
+                  Loading preview...
+                </div>
               </div>
             ) : preview ? (
               <>
@@ -328,7 +373,8 @@ export function ExportPage() {
                     <strong>{preview.count}</strong> questions will be exported
                     {preview.count > 1000 && (
                       <div className="mt-1 text-orange-700 dark:text-orange-300">
-                        ⚠️ Large export detected. Download may take time and could timeout.
+                        ⚠️ Large export detected. Download may take time and
+                        could timeout.
                       </div>
                     )}
                   </div>
@@ -339,32 +385,54 @@ export function ExportPage() {
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-200 dark:border-gray-700">
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Question</th>
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Status</th>
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Upvotes</th>
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Team</th>
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Tags</th>
-                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">Created</th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Question
+                          </th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Status
+                          </th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Upvotes
+                          </th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Team
+                          </th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Tags
+                          </th>
+                          <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">
+                            Created
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {preview.preview.slice(0, 10).map((question) => (
-                          <tr key={question.id} className="border-b border-gray-100 dark:border-gray-700">
+                          <tr
+                            key={question.id}
+                            className="border-b border-gray-100 dark:border-gray-700"
+                          >
                             <td className="py-2 text-gray-900 dark:text-gray-100">
-                              <div className="max-w-xs truncate" title={question.body}>
+                              <div
+                                className="max-w-xs truncate"
+                                title={question.body}
+                              >
                                 {question.body}
                               </div>
                             </td>
                             <td className="py-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                question.status === 'OPEN' 
-                                  ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300'
-                                  : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
-                              }`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  question.status === 'OPEN'
+                                    ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300'
+                                    : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                                }`}
+                              >
                                 {question.status}
                               </span>
                             </td>
-                            <td className="py-2 text-gray-600 dark:text-gray-400">{question.upvotes}</td>
+                            <td className="py-2 text-gray-600 dark:text-gray-400">
+                              {question.upvotes}
+                            </td>
                             <td className="py-2 text-gray-600 dark:text-gray-400">
                               {question.team?.name || 'General'}
                             </td>
@@ -380,7 +448,9 @@ export function ExportPage() {
                                   </span>
                                 ))}
                                 {question.tags && question.tags.length > 2 && (
-                                  <span className="text-xs text-gray-500">+{question.tags.length - 2}</span>
+                                  <span className="text-xs text-gray-500">
+                                    +{question.tags.length - 2}
+                                  </span>
                                 )}
                               </div>
                             </td>
@@ -393,24 +463,29 @@ export function ExportPage() {
                     </table>
                     {preview.preview.length > 10 && (
                       <div className="text-center mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        Showing first 10 of {preview.preview.length} preview items
+                        Showing first 10 of {preview.preview.length} preview
+                        items
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="text-gray-500 dark:text-gray-400">No questions match the current filters</div>
+                    <div className="text-gray-500 dark:text-gray-400">
+                      No questions match the current filters
+                    </div>
                   </div>
                 )}
               </>
             ) : (
               <div className="text-center py-8">
-                <div className="text-gray-500 dark:text-gray-400">No preview available</div>
+                <div className="text-gray-500 dark:text-gray-400">
+                  No preview available
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

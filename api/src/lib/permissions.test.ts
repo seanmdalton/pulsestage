@@ -25,7 +25,7 @@ import {
   getRoleName,
   getRoleDescription,
   type Role,
-  type Permission
+  type Permission,
 } from './permissions.js';
 
 describe('Permission System', () => {
@@ -84,7 +84,7 @@ describe('Permission System', () => {
         'team.create',
         'member.edit',
         'audit.view',
-        'data.export'
+        'data.export',
       ];
       allPermissions.forEach(permission => {
         expect(hasPermission('owner', permission)).toBe(true);
@@ -238,4 +238,3 @@ describe('Permission System', () => {
     });
   });
 });
-

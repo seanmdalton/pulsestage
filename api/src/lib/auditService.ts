@@ -59,12 +59,14 @@ export class AuditService {
               after: entry.after || null,
               ipAddress,
               userAgent,
-              metadata: entry.metadata || null
-            }
+              metadata: entry.metadata || null,
+            },
           });
 
           if (process.env.NODE_ENV === 'development') {
-            console.log(`📋 Audit: ${entry.action} by ${req.user?.email || 'system'} on ${entry.entityType}`);
+            console.log(
+              `📋 Audit: ${entry.action} by ${req.user?.email || 'system'} on ${entry.entityType}`
+            );
           }
         } catch (error) {
           console.error('Failed to create audit log entry:', error);
@@ -99,7 +101,7 @@ export class AuditService {
     if (filters.action) where.action = filters.action;
     if (filters.entityType) where.entityType = filters.entityType;
     if (filters.entityId) where.entityId = filters.entityId;
-    
+
     if (filters.startDate || filters.endDate) {
       where.createdAt = {};
       if (filters.startDate) where.createdAt.gte = filters.startDate;
@@ -113,13 +115,13 @@ export class AuditService {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
+            name: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: filters.limit || 100,
-      skip: filters.offset || 0
+      skip: filters.offset || 0,
     });
 
     return logs;
@@ -143,7 +145,7 @@ export class AuditService {
     if (filters.userId) where.userId = filters.userId;
     if (filters.action) where.action = filters.action;
     if (filters.entityType) where.entityType = filters.entityType;
-    
+
     if (filters.startDate || filters.endDate) {
       where.createdAt = {};
       if (filters.startDate) where.createdAt.gte = filters.startDate;
@@ -168,4 +170,3 @@ export function initAuditService(prisma: PrismaClient) {
     console.log('✅ Audit service initialized');
   }
 }
-

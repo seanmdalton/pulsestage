@@ -1,121 +1,140 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/api';
-import { useTeam } from '../contexts/TeamContext';
+import { useState, useEffect } from 'react'
+import { apiClient } from '../lib/api'
+import { useTeam } from '../contexts/TeamContext'
 
 interface ModerationStats {
   overall: {
-    totalQuestionsReviewed: number;
-    totalQuestionsAnswered: number;
-    totalQuestionsPinned: number;
-    totalQuestionsFrozen: number;
-    activeModerators: number;
-    avgResponseTime: number | null;
-  };
+    totalQuestionsReviewed: number
+    totalQuestionsAnswered: number
+    totalQuestionsPinned: number
+    totalQuestionsFrozen: number
+    activeModerators: number
+    avgResponseTime: number | null
+  }
   byModerator: Array<{
-    moderatorId: string;
-    moderatorName: string;
-    moderatorEmail: string;
-    questionsReviewed: number;
-    questionsAnswered: number;
-    questionsPinned: number;
-    questionsFrozen: number;
-    avgResponseTime: number | null;
-    teamsCount: number;
-  }>;
+    moderatorId: string
+    moderatorName: string
+    moderatorEmail: string
+    questionsReviewed: number
+    questionsAnswered: number
+    questionsPinned: number
+    questionsFrozen: number
+    avgResponseTime: number | null
+    teamsCount: number
+  }>
 }
 
 export function ModerationStatsPage() {
   // Calculate default date range (last 30 days)
   const getDefaultDateRange = () => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 30);
-    
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - 30)
+
     return {
       startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0]
-    };
-  };
+      endDate: end.toISOString().split('T')[0],
+    }
+  }
 
-  const [stats, setStats] = useState<ModerationStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [teamFilter, setTeamFilter] = useState<string>('');
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>(getDefaultDateRange());
+  const [stats, setStats] = useState<ModerationStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [teamFilter, setTeamFilter] = useState<string>('')
+  const [dateRange, setDateRange] = useState<{
+    startDate: string
+    endDate: string
+  }>(getDefaultDateRange())
 
-  const { teams } = useTeam();
+  const { teams } = useTeam()
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        setLoading(true);
-        
-        const filters: any = {};
-        if (teamFilter) filters.teamId = teamFilter;
-        if (dateRange.startDate) filters.startDate = dateRange.startDate;
-        if (dateRange.endDate) filters.endDate = dateRange.endDate;
+        setLoading(true)
 
-        const data = await apiClient.getModerationStats(filters);
-        setStats(data);
+        const filters: any = {}
+        if (teamFilter) filters.teamId = teamFilter
+        if (dateRange.startDate) filters.startDate = dateRange.startDate
+        if (dateRange.endDate) filters.endDate = dateRange.endDate
+
+        const data = await apiClient.getModerationStats(filters)
+        setStats(data)
       } catch (err) {
-        console.error('Failed to load moderation stats:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load stats');
+        console.error('Failed to load moderation stats:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load stats')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadStats();
-  }, [teamFilter, dateRange.startDate, dateRange.endDate]);
+    loadStats()
+  }, [teamFilter, dateRange.startDate, dateRange.endDate])
 
   const formatMinutes = (minutes: number | null) => {
-    if (minutes === null) return 'N/A';
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
-  };
+    if (minutes === null) return 'N/A'
+    if (minutes < 60) return `${minutes}m`
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}h ${mins}m`
+  }
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400">Loading stats...</div>
+          <div className="text-gray-500 dark:text-gray-400">
+            Loading stats...
+          </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !stats) {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-          <div className="text-red-800 dark:text-red-300">Error: {error || 'No data available'}</div>
+          <div className="text-red-800 dark:text-red-300">
+            Error: {error || 'No data available'}
+          </div>
         </div>
       </div>
-    );
+    )
   }
 
   const formatDateRange = () => {
     if (dateRange.startDate && dateRange.endDate) {
-      const start = new Date(dateRange.startDate).toLocaleDateString();
-      const end = new Date(dateRange.endDate).toLocaleDateString();
-      return `${start} - ${end}`;
+      const start = new Date(dateRange.startDate).toLocaleDateString()
+      const end = new Date(dateRange.endDate).toLocaleDateString()
+      return `${start} - ${end}`
     }
-    return 'All Time';
-  };
+    return 'All Time'
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Moderation Stats</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          Moderation Stats
+        </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Track moderation activity and performance metrics
         </p>
         {/* Date Range Indicator */}
         <div className="mt-3 inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
-          <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
             Showing: {formatDateRange()}
@@ -126,11 +145,13 @@ export function ModerationStatsPage() {
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Filters
+          </h3>
           <button
             onClick={() => {
-              setTeamFilter('');
-              setDateRange(getDefaultDateRange());
+              setTeamFilter('')
+              setDateRange(getDefaultDateRange())
             }}
             className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
           >
@@ -148,8 +169,10 @@ export function ModerationStatsPage() {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="">All Teams</option>
-              {teams.map(team => (
-                <option key={team.id} value={team.id}>{team.name}</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
               ))}
             </select>
           </div>
@@ -161,7 +184,9 @@ export function ModerationStatsPage() {
             <input
               type="date"
               value={dateRange.startDate}
-              onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+              onChange={(e) =>
+                setDateRange((prev) => ({ ...prev, startDate: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -173,7 +198,9 @@ export function ModerationStatsPage() {
             <input
               type="date"
               value={dateRange.endDate}
-              onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+              onChange={(e) =>
+                setDateRange((prev) => ({ ...prev, endDate: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -183,28 +210,36 @@ export function ModerationStatsPage() {
       {/* Overall Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Questions Reviewed</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Questions Reviewed
+          </div>
           <div className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
             {stats.overall.totalQuestionsReviewed}
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Questions Answered</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Questions Answered
+          </div>
           <div className="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">
             {stats.overall.totalQuestionsAnswered}
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Questions Pinned</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Questions Pinned
+          </div>
           <div className="mt-2 text-3xl font-bold text-yellow-600 dark:text-yellow-400">
             {stats.overall.totalQuestionsPinned}
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Response Time</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Avg Response Time
+          </div>
           <div className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">
             {formatMinutes(stats.overall.avgResponseTime)}
           </div>
@@ -214,9 +249,12 @@ export function ModerationStatsPage() {
       {/* Per-Moderator Stats */}
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Moderator Performance</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            Moderator Performance
+          </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {stats.overall.activeModerators} active moderator{stats.overall.activeModerators !== 1 ? 's' : ''}
+            {stats.overall.activeModerators} active moderator
+            {stats.overall.activeModerators !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -250,13 +288,19 @@ export function ModerationStatsPage() {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {stats.byModerator.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan={7}
+                    className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                  >
                     No moderation activity yet
                   </td>
                 </tr>
               ) : (
                 stats.byModerator.map((mod) => (
-                  <tr key={mod.moderatorId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <tr
+                    key={mod.moderatorId}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -296,16 +340,22 @@ export function ModerationStatsPage() {
       {/* Additional Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Activity Breakdown</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Activity Breakdown
+          </h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Total Reviewed</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Total Reviewed
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {stats.overall.totalQuestionsReviewed}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Answered Rate</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Answered Rate
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {stats.overall.totalQuestionsReviewed > 0
                   ? `${Math.round((stats.overall.totalQuestionsAnswered / stats.overall.totalQuestionsReviewed) * 100)}%`
@@ -313,7 +363,9 @@ export function ModerationStatsPage() {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Questions Frozen</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Questions Frozen
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {stats.overall.totalQuestionsFrozen}
               </span>
@@ -322,32 +374,46 @@ export function ModerationStatsPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Team Activity</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Team Activity
+          </h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Active Moderators</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Active Moderators
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {stats.overall.activeModerators}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Avg per Moderator</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Avg per Moderator
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {stats.overall.activeModerators > 0
-                  ? Math.round(stats.overall.totalQuestionsReviewed / stats.overall.activeModerators)
+                  ? Math.round(
+                      stats.overall.totalQuestionsReviewed /
+                        stats.overall.activeModerators
+                    )
                   : 0}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Coverage</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Coverage
+              </span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {stats.byModerator.reduce((sum, mod) => sum + mod.teamsCount, 0)} team assignments
+                {stats.byModerator.reduce(
+                  (sum, mod) => sum + mod.teamsCount,
+                  0
+                )}{' '}
+                team assignments
               </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
-

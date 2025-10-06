@@ -29,10 +29,10 @@ describe('prismaMiddleware', () => {
 
     // Create test tenants
     const tenant1 = await testPrisma.tenant.create({
-      data: { slug: 'tenant1', name: 'Tenant 1' }
+      data: { slug: 'tenant1', name: 'Tenant 1' },
     });
     const tenant2 = await testPrisma.tenant.create({
-      data: { slug: 'tenant2', name: 'Tenant 2' }
+      data: { slug: 'tenant2', name: 'Tenant 2' },
     });
 
     tenant1Id = tenant1.id;
@@ -42,23 +42,17 @@ describe('prismaMiddleware', () => {
   describe('data isolation', () => {
     it('should isolate team data between tenants', async () => {
       // Create teams in different tenants
-      await runInTenantContext(
-        { tenantId: tenant1Id, tenantSlug: 'tenant1' },
-        async () => {
-          await testPrisma.team.create({
-            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id }
-          });
-        }
-      );
+      await runInTenantContext({ tenantId: tenant1Id, tenantSlug: 'tenant1' }, async () => {
+        await testPrisma.team.create({
+          data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id },
+        });
+      });
 
-      await runInTenantContext(
-        { tenantId: tenant2Id, tenantSlug: 'tenant2' },
-        async () => {
-          await testPrisma.team.create({
-            data: { name: 'Team B', slug: 'team-b', tenantId: tenant2Id }
-          });
-        }
-      );
+      await runInTenantContext({ tenantId: tenant2Id, tenantSlug: 'tenant2' }, async () => {
+        await testPrisma.team.create({
+          data: { name: 'Team B', slug: 'team-b', tenantId: tenant2Id },
+        });
+      });
 
       // Query from tenant1 - should only see tenant1's teams
       const teams1 = await runInTenantContext(
@@ -87,31 +81,25 @@ describe('prismaMiddleware', () => {
 
     it('should isolate user data between tenants', async () => {
       // Create users in different tenants
-      await runInTenantContext(
-        { tenantId: tenant1Id, tenantSlug: 'tenant1' },
-        async () => {
-          await testPrisma.user.create({
-            data: { 
-              email: 'user1@tenant1.com', 
-              name: 'User 1',
-              tenantId: tenant1Id 
-            }
-          });
-        }
-      );
+      await runInTenantContext({ tenantId: tenant1Id, tenantSlug: 'tenant1' }, async () => {
+        await testPrisma.user.create({
+          data: {
+            email: 'user1@tenant1.com',
+            name: 'User 1',
+            tenantId: tenant1Id,
+          },
+        });
+      });
 
-      await runInTenantContext(
-        { tenantId: tenant2Id, tenantSlug: 'tenant2' },
-        async () => {
-          await testPrisma.user.create({
-            data: { 
-              email: 'user1@tenant2.com',
-              name: 'User 1 (Tenant 2)',
-              tenantId: tenant2Id 
-            }
-          });
-        }
-      );
+      await runInTenantContext({ tenantId: tenant2Id, tenantSlug: 'tenant2' }, async () => {
+        await testPrisma.user.create({
+          data: {
+            email: 'user1@tenant2.com',
+            name: 'User 1 (Tenant 2)',
+            tenantId: tenant2Id,
+          },
+        });
+      });
 
       // Query from tenant1
       const users1 = await runInTenantContext(
@@ -142,30 +130,27 @@ describe('prismaMiddleware', () => {
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.create({
-            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id }
+            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id },
           });
         }
       );
 
       // Try to update from tenant2 - should not find the team
-      await runInTenantContext(
-        { tenantId: tenant2Id, tenantSlug: 'tenant2' },
-        async () => {
-          await expect(
-            testPrisma.team.update({
-              where: { id: team.id },
-              data: { name: 'Hacked Name' }
-            })
-          ).rejects.toThrow();
-        }
-      );
+      await runInTenantContext({ tenantId: tenant2Id, tenantSlug: 'tenant2' }, async () => {
+        await expect(
+          testPrisma.team.update({
+            where: { id: team.id },
+            data: { name: 'Hacked Name' },
+          })
+        ).rejects.toThrow();
+      });
 
       // Verify team name unchanged
       const verifyTeam = await runInTenantContext(
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.findUnique({
-            where: { id: team.id }
+            where: { id: team.id },
           });
         }
       );
@@ -179,29 +164,26 @@ describe('prismaMiddleware', () => {
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.create({
-            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id }
+            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id },
           });
         }
       );
 
       // Try to delete from tenant2 - should not find the team
-      await runInTenantContext(
-        { tenantId: tenant2Id, tenantSlug: 'tenant2' },
-        async () => {
-          await expect(
-            testPrisma.team.delete({
-              where: { id: team.id }
-            })
-          ).rejects.toThrow();
-        }
-      );
+      await runInTenantContext({ tenantId: tenant2Id, tenantSlug: 'tenant2' }, async () => {
+        await expect(
+          testPrisma.team.delete({
+            where: { id: team.id },
+          })
+        ).rejects.toThrow();
+      });
 
       // Verify team still exists
       const verifyTeam = await runInTenantContext(
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.findUnique({
-            where: { id: team.id }
+            where: { id: team.id },
           });
         }
       );
@@ -216,7 +198,7 @@ describe('prismaMiddleware', () => {
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.create({
-            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id }
+            data: { name: 'Team A', slug: 'team-a', tenantId: tenant1Id },
           });
         }
       );
@@ -227,10 +209,10 @@ describe('prismaMiddleware', () => {
     it('should automatically filter by tenantId on findMany', async () => {
       // Create data in both tenants
       await testPrisma.team.create({
-        data: { name: 'Team 1', slug: 'team-1', tenantId: tenant1Id }
+        data: { name: 'Team 1', slug: 'team-1', tenantId: tenant1Id },
       });
       await testPrisma.team.create({
-        data: { name: 'Team 2', slug: 'team-2', tenantId: tenant2Id }
+        data: { name: 'Team 2', slug: 'team-2', tenantId: tenant2Id },
       });
 
       // Query with tenant context
@@ -251,15 +233,15 @@ describe('prismaMiddleware', () => {
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.upsert({
-            where: { 
-              tenantId_slug: { tenantId: tenant1Id, slug: 'team-a' }
+            where: {
+              tenantId_slug: { tenantId: tenant1Id, slug: 'team-a' },
             },
-            create: { 
-              name: 'Team A', 
+            create: {
+              name: 'Team A',
               slug: 'team-a',
-              tenantId: tenant1Id 
+              tenantId: tenant1Id,
             },
-            update: { name: 'Team A Updated' }
+            update: { name: 'Team A Updated' },
           });
         }
       );
@@ -272,15 +254,15 @@ describe('prismaMiddleware', () => {
         { tenantId: tenant1Id, tenantSlug: 'tenant1' },
         async () => {
           return await testPrisma.team.upsert({
-            where: { 
-              tenantId_slug: { tenantId: tenant1Id, slug: 'team-a' }
+            where: {
+              tenantId_slug: { tenantId: tenant1Id, slug: 'team-a' },
             },
-            create: { 
-              name: 'Team A', 
+            create: {
+              name: 'Team A',
               slug: 'team-a',
-              tenantId: tenant1Id 
+              tenantId: tenant1Id,
             },
-            update: { name: 'Team A Updated' }
+            update: { name: 'Team A Updated' },
           });
         }
       );
@@ -290,4 +272,3 @@ describe('prismaMiddleware', () => {
     });
   });
 });
-

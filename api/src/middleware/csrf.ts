@@ -43,12 +43,12 @@ const {
   getCsrfTokenFromRequest: (req: Request) => {
     // Check multiple locations for the token
     return (
-      req.headers['x-csrf-token'] as string ||
+      (req.headers['x-csrf-token'] as string) ||
       req.body?.csrfToken ||
-      req.query?.csrfToken as string
+      (req.query?.csrfToken as string)
     );
   },
-  getSessionIdentifier: (req) => req.sessionID || 'anonymous', // Use session ID for token binding
+  getSessionIdentifier: req => req.sessionID || 'anonymous', // Use session ID for token binding
 });
 
 /**
@@ -76,17 +76,17 @@ export function validateCsrfToken() {
     }
 
     // Apply CSRF protection
-    doubleCsrfProtection(req, res, (error) => {
+    doubleCsrfProtection(req, res, error => {
       if (error) {
         if (error === invalidCsrfTokenError) {
           return res.status(403).json({
             error: 'CSRF token validation failed',
-            message: 'Invalid or missing CSRF token'
+            message: 'Invalid or missing CSRF token',
           });
         }
         return res.status(500).json({
           error: 'CSRF validation error',
-          message: 'Failed to validate CSRF token'
+          message: 'Failed to validate CSRF token',
         });
       }
       next();
@@ -115,4 +115,3 @@ declare global {
     }
   }
 }
-

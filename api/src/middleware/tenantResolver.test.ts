@@ -29,19 +29,19 @@ describe('tenantResolver', () => {
   beforeEach(() => {
     mockPrisma = {
       tenant: {
-        findUnique: vi.fn()
-      }
+        findUnique: vi.fn(),
+      },
     };
 
     mockReq = {
       headers: {},
       hostname: 'localhost',
-      get: vi.fn() as any
+      get: vi.fn() as any,
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis()
+      json: vi.fn().mockReturnThis(),
     };
 
     mockNext = vi.fn() as any;
@@ -53,7 +53,7 @@ describe('tenantResolver', () => {
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: 'alpha-id',
         slug: 'alpha',
-        name: 'Alpha Tenant'
+        name: 'Alpha Tenant',
       });
 
       const middleware = createTenantResolverMiddleware(mockPrisma as PrismaClient);
@@ -61,11 +61,11 @@ describe('tenantResolver', () => {
 
       expect(mockPrisma.tenant.findUnique).toHaveBeenCalledWith({
         where: { slug: 'alpha' },
-        select: { id: true, slug: true, name: true }
+        select: { id: true, slug: true, name: true },
       });
       expect(mockReq.tenant).toEqual({
         tenantId: 'alpha-id',
-        tenantSlug: 'alpha'
+        tenantSlug: 'alpha',
       });
       expect(mockNext).toHaveBeenCalled();
     });
@@ -82,7 +82,7 @@ describe('tenantResolver', () => {
       expect(mockRes.status).toHaveBeenCalledWith(404);
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Tenant not found',
-        message: "Tenant 'nonexistent' does not exist."
+        message: "Tenant 'nonexistent' does not exist.",
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -99,7 +99,7 @@ describe('tenantResolver', () => {
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Failed to resolve tenant context'
+        message: 'Failed to resolve tenant context',
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -111,11 +111,11 @@ describe('tenantResolver', () => {
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: 'alpha-id',
         slug: 'alpha',
-        name: 'Alpha Tenant'
+        name: 'Alpha Tenant',
       });
 
       const middleware = createTenantResolverMiddleware(mockPrisma as PrismaClient);
-      
+
       // Mock next to check context inside the middleware
       mockNext = vi.fn(() => {
         const context = getTenantContext();
@@ -127,4 +127,3 @@ describe('tenantResolver', () => {
     });
   });
 });
-

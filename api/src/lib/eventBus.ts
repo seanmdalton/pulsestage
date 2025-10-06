@@ -20,7 +20,7 @@ import { env } from '../env.js';
 /**
  * SSE Event types
  */
-export type SSEEventType = 
+export type SSEEventType =
   | 'question:created'
   | 'question:upvoted'
   | 'question:answered'
@@ -66,7 +66,7 @@ class EventBus {
       id: clientId,
       tenantId,
       res,
-      connectedAt: Date.now()
+      connectedAt: Date.now(),
     };
 
     if (!this.clients.has(tenantId)) {
@@ -76,7 +76,9 @@ class EventBus {
     this.clients.get(tenantId)!.push(client);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📡 SSE: Client ${clientId} connected to tenant ${tenantId} (total: ${this.getClientCount(tenantId)})`);
+      console.log(
+        `📡 SSE: Client ${clientId} connected to tenant ${tenantId} (total: ${this.getClientCount(tenantId)})`
+      );
     }
 
     return clientId;
@@ -92,13 +94,15 @@ class EventBus {
     const index = tenantClients.findIndex(c => c.id === clientId);
     if (index !== -1) {
       tenantClients.splice(index, 1);
-      
+
       if (tenantClients.length === 0) {
         this.clients.delete(tenantId);
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`📡 SSE: Client ${clientId} disconnected from tenant ${tenantId} (remaining: ${this.getClientCount(tenantId)})`);
+        console.log(
+          `📡 SSE: Client ${clientId} disconnected from tenant ${tenantId} (remaining: ${this.getClientCount(tenantId)})`
+        );
       }
     }
   }
@@ -130,7 +134,9 @@ class EventBus {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📡 SSE: Published ${event.type} to ${tenantClients.length} clients in tenant ${event.tenantId}`);
+      console.log(
+        `📡 SSE: Published ${event.type} to ${tenantClients.length} clients in tenant ${event.tenantId}`
+      );
     }
   }
 
@@ -145,7 +151,7 @@ class EventBus {
         type: 'heartbeat',
         tenantId,
         data: { timestamp: now },
-        timestamp: now
+        timestamp: now,
       };
 
       this.publish(heartbeatEvent);
@@ -209,11 +215,10 @@ class EventBus {
     return {
       totalConnections: this.getTotalClientCount(),
       tenantConnections: tenantMetrics,
-      tenantCount: this.clients.size
+      tenantCount: this.clients.size,
     };
   }
 }
 
 // Singleton instance
 export const eventBus = new EventBus();
-

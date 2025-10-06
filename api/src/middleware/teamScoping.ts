@@ -44,7 +44,7 @@ export function extractQuestionTeam() {
 
       const question = await prismaInstance.question.findUnique({
         where: { id: questionId },
-        select: { teamId: true }
+        select: { teamId: true },
       });
 
       if (!question) {
@@ -59,9 +59,9 @@ export function extractQuestionTeam() {
       next();
     } catch (error) {
       console.error('Team extraction error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
-        message: 'Failed to verify question team'
+        message: 'Failed to verify question team',
       });
     }
   };
@@ -70,7 +70,10 @@ export function extractQuestionTeam() {
 /**
  * Get teams that a user has a specific role in
  */
-export async function getUserTeamsByRole(userId: string, minimumRole: 'moderator' | 'admin' | 'owner'): Promise<string[]> {
+export async function getUserTeamsByRole(
+  userId: string,
+  minimumRole: 'moderator' | 'admin' | 'owner'
+): Promise<string[]> {
   if (!prismaInstance) {
     throw new Error('Team scoping middleware not initialized');
   }
@@ -80,7 +83,7 @@ export async function getUserTeamsByRole(userId: string, minimumRole: 'moderator
     member: 2,
     moderator: 3,
     admin: 4,
-    owner: 5
+    owner: 5,
   };
 
   const minimumRoleLevel = roleHierarchy[minimumRole];
@@ -91,13 +94,10 @@ export async function getUserTeamsByRole(userId: string, minimumRole: 'moderator
     },
     select: {
       teamId: true,
-      role: true
-    }
+      role: true,
+    },
   });
 
   // Filter memberships by role hierarchy
-  return memberships
-    .filter(m => roleHierarchy[m.role] >= minimumRoleLevel)
-    .map(m => m.teamId);
+  return memberships.filter(m => roleHierarchy[m.role] >= minimumRoleLevel).map(m => m.teamId);
 }
-

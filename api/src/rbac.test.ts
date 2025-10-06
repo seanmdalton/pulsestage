@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import request from "supertest";
-import { testPrisma } from "./test/setup.js";
-import { createApp } from "./app.js";
+import { describe, it, expect, beforeEach } from 'vitest';
+import request from 'supertest';
+import { testPrisma } from './test/setup.js';
+import { createApp } from './app.js';
 
 const app = createApp(testPrisma);
 
-describe("RBAC & Team Scoping Tests", () => {
+describe('RBAC & Team Scoping Tests', () => {
   let engineeringTeam: any;
   let peopleTeam: any;
   let adminUser: any;
@@ -34,48 +34,48 @@ describe("RBAC & Team Scoping Tests", () => {
     // Create teams
     engineeringTeam = await testPrisma.team.create({
       data: {
-        name: "Engineering",
-        slug: "engineering",
-        description: "Engineering team",
-        tenantId: "default-tenant-id"
-      }
+        name: 'Engineering',
+        slug: 'engineering',
+        description: 'Engineering team',
+        tenantId: 'default-tenant-id',
+      },
     });
 
     peopleTeam = await testPrisma.team.create({
       data: {
-        name: "People",
-        slug: "people",
-        description: "People team",
-        tenantId: "default-tenant-id"
-      }
+        name: 'People',
+        slug: 'people',
+        description: 'People team',
+        tenantId: 'default-tenant-id',
+      },
     });
 
     // Create users
     adminUser = await testPrisma.user.create({
       data: {
-        email: "admin@example.com",
-        name: "Admin User",
-        ssoId: "admin-sso",
-        tenantId: "default-tenant-id"
-      }
+        email: 'admin@example.com',
+        name: 'Admin User',
+        ssoId: 'admin-sso',
+        tenantId: 'default-tenant-id',
+      },
     });
 
     moderatorUser = await testPrisma.user.create({
       data: {
-        email: "moderator@example.com",
-        name: "Moderator User",
-        ssoId: "moderator-sso",
-        tenantId: "default-tenant-id"
-      }
+        email: 'moderator@example.com',
+        name: 'Moderator User',
+        ssoId: 'moderator-sso',
+        tenantId: 'default-tenant-id',
+      },
     });
 
     memberUser = await testPrisma.user.create({
       data: {
-        email: "member@example.com",
-        name: "Member User",
-        ssoId: "member-sso",
-        tenantId: "default-tenant-id"
-      }
+        email: 'member@example.com',
+        name: 'Member User',
+        ssoId: 'member-sso',
+        tenantId: 'default-tenant-id',
+      },
     });
 
     // Create team memberships
@@ -84,16 +84,16 @@ describe("RBAC & Team Scoping Tests", () => {
       data: {
         userId: adminUser.id,
         teamId: engineeringTeam.id,
-        role: "admin"
-      }
+        role: 'admin',
+      },
     });
 
     await testPrisma.teamMembership.create({
       data: {
         userId: adminUser.id,
         teamId: peopleTeam.id,
-        role: "admin"
-      }
+        role: 'admin',
+      },
     });
 
     // Moderator is moderator of Engineering only
@@ -101,8 +101,8 @@ describe("RBAC & Team Scoping Tests", () => {
       data: {
         userId: moderatorUser.id,
         teamId: engineeringTeam.id,
-        role: "moderator"
-      }
+        role: 'moderator',
+      },
     });
 
     // Member is member of People team
@@ -110,101 +110,101 @@ describe("RBAC & Team Scoping Tests", () => {
       data: {
         userId: memberUser.id,
         teamId: peopleTeam.id,
-        role: "member"
-      }
+        role: 'member',
+      },
     });
 
     // Create questions
     engineeringQuestion = await testPrisma.question.create({
       data: {
-        body: "Engineering question",
-        status: "OPEN",
+        body: 'Engineering question',
+        status: 'OPEN',
         upvotes: 5,
         teamId: engineeringTeam.id,
-        tenantId: "default-tenant-id"
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
 
     peopleQuestion = await testPrisma.question.create({
       data: {
-        body: "People question",
-        status: "OPEN",
+        body: 'People question',
+        status: 'OPEN',
         upvotes: 3,
         teamId: peopleTeam.id,
-        tenantId: "default-tenant-id"
-      }
+        tenantId: 'default-tenant-id',
+      },
     });
   });
 
-  describe("POST /questions/:id/respond - Team Scoping", () => {
-    it("should allow admin to answer any question", async () => {
+  describe('POST /questions/:id/respond - Team Scoping', () => {
+    it('should allow admin to answer any question', async () => {
       const response = await request(app)
         .post(`/questions/${engineeringQuestion.id}/respond`)
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Admin answer" });
+        .send({ response: 'Admin answer' });
 
       expect(response.status).toBe(200);
-      expect(response.body.responseText).toBe("Admin answer");
+      expect(response.body.responseText).toBe('Admin answer');
     });
 
-    it("should allow moderator to answer questions from their team", async () => {
+    it('should allow moderator to answer questions from their team', async () => {
       const response = await request(app)
         .post(`/questions/${engineeringQuestion.id}/respond`)
         .set('x-mock-sso-user', moderatorUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Moderator answer" });
+        .send({ response: 'Moderator answer' });
 
       expect(response.status).toBe(200);
-      expect(response.body.responseText).toBe("Moderator answer");
+      expect(response.body.responseText).toBe('Moderator answer');
     });
 
-    it("should deny moderator answering questions from other teams", async () => {
+    it('should deny moderator answering questions from other teams', async () => {
       const response = await request(app)
         .post(`/questions/${peopleQuestion.id}/respond`)
         .set('x-mock-sso-user', moderatorUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Moderator answer" });
+        .send({ response: 'Moderator answer' });
 
       expect(response.status).toBe(403);
-      expect(response.body.error).toBe("Forbidden");
+      expect(response.body.error).toBe('Forbidden');
     });
 
-    it("should deny member from answering questions", async () => {
+    it('should deny member from answering questions', async () => {
       const response = await request(app)
         .post(`/questions/${peopleQuestion.id}/respond`)
         .set('x-mock-sso-user', memberUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Member answer" });
+        .send({ response: 'Member answer' });
 
       expect(response.status).toBe(403);
-      expect(response.body.error).toBe("Forbidden");
+      expect(response.body.error).toBe('Forbidden');
     });
 
-    it("should deny unauthenticated requests", async () => {
+    it('should deny unauthenticated requests', async () => {
       const response = await request(app)
         .post(`/questions/${engineeringQuestion.id}/respond`)
-        .send({ response: "Anonymous answer" });
+        .send({ response: 'Anonymous answer' });
 
       // CSRF check happens before auth, so expect 403 (CSRF) or 401 (auth)
       expect([401, 403]).toContain(response.status);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe("POST /questions/:id/tags - Team Scoping", () => {
+  describe('POST /questions/:id/tags - Team Scoping', () => {
     let tag: any;
 
     beforeEach(async () => {
       tag = await testPrisma.tag.create({
         data: {
-          name: "important",
-          tenantId: "default-tenant-id"
-        }
+          name: 'important',
+          tenantId: 'default-tenant-id',
+        },
       });
     });
 
-    it("should allow admin to tag any question", async () => {
+    it('should allow admin to tag any question', async () => {
       const response = await request(app)
         .post(`/questions/${engineeringQuestion.id}/tags`)
         .set('x-mock-sso-user', adminUser.email)
@@ -214,7 +214,7 @@ describe("RBAC & Team Scoping Tests", () => {
       expect(response.status).toBe(200);
     });
 
-    it("should allow moderator to tag questions from their team", async () => {
+    it('should allow moderator to tag questions from their team', async () => {
       const response = await request(app)
         .post(`/questions/${engineeringQuestion.id}/tags`)
         .set('x-mock-sso-user', moderatorUser.email)
@@ -224,7 +224,7 @@ describe("RBAC & Team Scoping Tests", () => {
       expect(response.status).toBe(200);
     });
 
-    it("should deny moderator tagging questions from other teams", async () => {
+    it('should deny moderator tagging questions from other teams', async () => {
       const response = await request(app)
         .post(`/questions/${peopleQuestion.id}/tags`)
         .set('x-mock-sso-user', moderatorUser.email)
@@ -232,10 +232,10 @@ describe("RBAC & Team Scoping Tests", () => {
         .send({ tagId: tag.id });
 
       expect(response.status).toBe(403);
-      expect(response.body.error).toBe("Forbidden");
+      expect(response.body.error).toBe('Forbidden');
     });
 
-    it("should deny member from tagging questions", async () => {
+    it('should deny member from tagging questions', async () => {
       const response = await request(app)
         .post(`/questions/${peopleQuestion.id}/tags`)
         .set('x-mock-sso-user', memberUser.email)
@@ -246,27 +246,27 @@ describe("RBAC & Team Scoping Tests", () => {
     });
   });
 
-  describe("DELETE /questions/:id/tags/:tagId - Team Scoping", () => {
+  describe('DELETE /questions/:id/tags/:tagId - Team Scoping', () => {
     let tag: any;
     let questionTag: any;
 
     beforeEach(async () => {
       tag = await testPrisma.tag.create({
         data: {
-          name: "remove-test",
-          tenantId: "default-tenant-id"
-        }
+          name: 'remove-test',
+          tenantId: 'default-tenant-id',
+        },
       });
 
       questionTag = await testPrisma.questionTag.create({
         data: {
           questionId: engineeringQuestion.id,
-          tagId: tag.id
-        }
+          tagId: tag.id,
+        },
       });
     });
 
-    it("should allow admin to remove tag from any question", async () => {
+    it('should allow admin to remove tag from any question', async () => {
       const response = await request(app)
         .delete(`/questions/${engineeringQuestion.id}/tags/${tag.id}`)
         .set('x-mock-sso-user', adminUser.email)
@@ -289,8 +289,8 @@ describe("RBAC & Team Scoping Tests", () => {
       await testPrisma.questionTag.create({
         data: {
           questionId: peopleQuestion.id,
-          tagId: tag.id
-        }
+          tagId: tag.id,
+        },
       });
 
       const response = await request(app)
@@ -302,24 +302,24 @@ describe("RBAC & Team Scoping Tests", () => {
     });
   });
 
-  describe("GET /questions - Team Filtering", () => {
+  describe('GET /questions - Team Filtering', () => {
     let generalQuestion: any;
 
     beforeEach(async () => {
       // Create a question without a team
       generalQuestion = await testPrisma.question.create({
         data: {
-          body: "General question",
-          status: "OPEN",
+          body: 'General question',
+          status: 'OPEN',
           upvotes: 1,
-          tenantId: "default-tenant-id"
-        }
+          tenantId: 'default-tenant-id',
+        },
       });
     });
 
-    it("should return all questions for admin", async () => {
+    it('should return all questions for admin', async () => {
       const response = await request(app)
-        .get("/questions")
+        .get('/questions')
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default');
 
@@ -329,7 +329,7 @@ describe("RBAC & Team Scoping Tests", () => {
 
     it("should filter questions to moderator's teams only", async () => {
       const response = await request(app)
-        .get("/questions")
+        .get('/questions')
         .set('x-mock-sso-user', moderatorUser.email)
         .set('x-tenant-id', 'default');
 
@@ -341,7 +341,7 @@ describe("RBAC & Team Scoping Tests", () => {
 
     it("should filter questions to member's teams", async () => {
       const response = await request(app)
-        .get("/questions")
+        .get('/questions')
         .set('x-mock-sso-user', memberUser.email)
         .set('x-tenant-id', 'default');
 
@@ -351,17 +351,15 @@ describe("RBAC & Team Scoping Tests", () => {
       expect(response.body[0].teamId).toBe(peopleTeam.id);
     });
 
-    it("should return all questions for unauthenticated users", async () => {
-      const response = await request(app)
-        .get("/questions")
-        .set('x-tenant-id', 'default');
+    it('should return all questions for unauthenticated users', async () => {
+      const response = await request(app).get('/questions').set('x-tenant-id', 'default');
 
       expect(response.status).toBe(200);
       // Unauthenticated users see all questions
       expect(response.body.length).toBe(3);
     });
 
-    it("should respect teamId filter parameter", async () => {
+    it('should respect teamId filter parameter', async () => {
       const response = await request(app)
         .get(`/questions?teamId=${engineeringTeam.id}`)
         .set('x-mock-sso-user', adminUser.email)
@@ -373,26 +371,26 @@ describe("RBAC & Team Scoping Tests", () => {
     });
   });
 
-  describe("Permission Audit Logging", () => {
-    it("should deny permission and respond with 403", async () => {
+  describe('Permission Audit Logging', () => {
+    it('should deny permission and respond with 403', async () => {
       // Moderator tries to answer question from another team
       const response = await request(app)
         .post(`/questions/${peopleQuestion.id}/respond`)
         .set('x-mock-sso-user', moderatorUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Unauthorized attempt" });
+        .send({ response: 'Unauthorized attempt' });
 
       // Permission should be denied
       expect(response.status).toBe(403);
       expect(response.body.error).toBe('Forbidden');
-      
+
       // Note: Audit logging is tested separately in auditService.test.ts
       // The audit log functionality works in production but has tenant context
       // limitations in test environments
     });
   });
 
-  describe("Cross-Tenant Isolation", () => {
+  describe('Cross-Tenant Isolation', () => {
     let otherTenantUser: any;
     let otherTenantQuestion: any;
 
@@ -400,29 +398,29 @@ describe("RBAC & Team Scoping Tests", () => {
       // Create another tenant first
       await testPrisma.tenant.create({
         data: {
-          id: "other-tenant-id",
-          name: "Other Tenant",
-          slug: "other-tenant"
-        }
+          id: 'other-tenant-id',
+          name: 'Other Tenant',
+          slug: 'other-tenant',
+        },
       });
 
       // Create another tenant's data
       otherTenantUser = await testPrisma.user.create({
         data: {
-          email: "other@example.com",
-          name: "Other Tenant User",
-          ssoId: "other-sso",
-          tenantId: "other-tenant-id"
-        }
+          email: 'other@example.com',
+          name: 'Other Tenant User',
+          ssoId: 'other-sso',
+          tenantId: 'other-tenant-id',
+        },
       });
 
       otherTenantQuestion = await testPrisma.question.create({
         data: {
-          body: "Other tenant question",
-          status: "OPEN",
+          body: 'Other tenant question',
+          status: 'OPEN',
           upvotes: 1,
-          tenantId: "other-tenant-id"
-        }
+          tenantId: 'other-tenant-id',
+        },
       });
     });
 
@@ -432,15 +430,15 @@ describe("RBAC & Team Scoping Tests", () => {
         .post(`/questions/${otherTenantQuestion.id}/respond`)
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default')
-        .send({ response: "Cross-tenant attempt" });
+        .send({ response: 'Cross-tenant attempt' });
 
       // Should fail because tenant middleware filters by tenant
       expect(response.status).toBe(404);
     });
 
-    it("should filter questions by tenant", async () => {
+    it('should filter questions by tenant', async () => {
       const response = await request(app)
-        .get("/questions")
+        .get('/questions')
         .set('x-mock-sso-user', adminUser.email)
         .set('x-tenant-id', 'default');
 
@@ -451,4 +449,3 @@ describe("RBAC & Team Scoping Tests", () => {
     });
   });
 });
-

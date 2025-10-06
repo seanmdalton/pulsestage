@@ -1,26 +1,26 @@
-import { Link, useLocation } from 'react-router-dom';
-import { ThemeToggle } from './ThemeToggle';
-import { TeamSelector } from './TeamSelector';
-import { UserProfile } from './UserProfile';
-import { PulseStageLogo } from './PulseStageLogo';
-import { useTeam, getTeamSlug } from '../contexts/TeamContext';
+import { Link, useLocation } from 'react-router-dom'
+import { ThemeToggle } from './ThemeToggle'
+import { TeamSelector } from './TeamSelector'
+import { UserProfile } from './UserProfile'
+import { PulseStageLogo } from './PulseStageLogo'
+import { useTeam, getTeamSlug } from '../contexts/TeamContext'
 
 export function Navbar() {
-  const location = useLocation();
-  const { currentTeam } = useTeam();
+  const location = useLocation()
+  const { currentTeam } = useTeam()
 
   // Generate team-aware navigation items (Admin moved to user dropdown)
-  const teamSlug = getTeamSlug(currentTeam);
+  const teamSlug = getTeamSlug(currentTeam)
   const navItems = [
     { path: `/${teamSlug}`, label: 'Submit Question' },
     { path: `/${teamSlug}/open`, label: 'Open Questions' },
     { path: `/${teamSlug}/answered`, label: 'Answered Questions' },
-  ];
+  ]
 
   // Helper function to check if a nav item is active
   const isActiveNavItem = (itemPath: string) => {
-    return location.pathname === itemPath;
-  };
+    return location.pathname === itemPath
+  }
 
   return (
     <nav className="bg-white dark:bg-pulse-dark shadow-sm border-b border-gray-200 dark:border-pulse-surface">
@@ -29,10 +29,10 @@ export function Navbar() {
           <div className="flex items-center space-x-6">
             {/* PulseStage Logo */}
             <PulseStageLogo size="md" showWordmark={true} className="mr-4" />
-            
+
             {/* Team Selector */}
             <TeamSelector />
-            
+
             {/* Navigation Items */}
             <div className="flex space-x-6">
               {navItems.map((item) => (
@@ -50,7 +50,7 @@ export function Navbar() {
               ))}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             <UserProfile />
@@ -58,6 +58,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-  );
+  )
 }
-

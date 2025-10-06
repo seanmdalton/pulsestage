@@ -1,22 +1,18 @@
-import React from 'react';
-import { Modal } from './Modal';
-import type { Question } from '../lib/api';
+import React from 'react'
+import { Modal } from './Modal'
+import type { Question } from '../lib/api'
 
 interface AnswerModalProps {
-  question: Question | null;
-  isOpen: boolean;
-  onClose: () => void;
+  question: Question | null
+  isOpen: boolean
+  onClose: () => void
 }
 
 export function AnswerModal({ question, isOpen, onClose }: AnswerModalProps) {
-  if (!question) return null;
+  if (!question) return null
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      title="Question & Answer"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Question & Answer">
       <div className="p-6">
         {/* Question Section */}
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -28,7 +24,9 @@ export function AnswerModal({ question, isOpen, onClose }: AnswerModalProps) {
               <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-xs font-medium">
                 {question.upvotes} upvote{question.upvotes !== 1 ? 's' : ''}
               </span>
-              <span>Asked {new Date(question.createdAt).toLocaleDateString()}</span>
+              <span>
+                Asked {new Date(question.createdAt).toLocaleDateString()}
+              </span>
             </div>
           </div>
           <p className="text-blue-900 dark:text-blue-100 leading-relaxed text-base">
@@ -43,7 +41,10 @@ export function AnswerModal({ question, isOpen, onClose }: AnswerModalProps) {
               Answer
             </h3>
             <div className="text-sm text-green-700 dark:text-green-300">
-              Answered {question.respondedAt ? new Date(question.respondedAt).toLocaleDateString() : 'Unknown'}
+              Answered{' '}
+              {question.respondedAt
+                ? new Date(question.respondedAt).toLocaleDateString()
+                : 'Unknown'}
             </div>
           </div>
           <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -64,5 +65,5 @@ export function AnswerModal({ question, isOpen, onClose }: AnswerModalProps) {
         </div>
       </div>
     </Modal>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext'
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <button
@@ -26,5 +26,5 @@ export function ThemeToggle() {
         </svg>
       )}
     </button>
-  );
+  )
 }

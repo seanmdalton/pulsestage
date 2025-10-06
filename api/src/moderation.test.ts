@@ -33,8 +33,8 @@ afterEach(async () => {
   await testPrisma.tag.deleteMany();
   await testPrisma.tenant.deleteMany({
     where: {
-      slug: { not: 'default' }
-    }
+      slug: { not: 'default' },
+    },
   });
 });
 
@@ -49,18 +49,33 @@ describe('Moderation Features', () => {
         tenantId: defaultTenant.id,
         name: 'Engineering',
         slug: 'engineering',
-        description: 'Engineering team'
-      }
+        description: 'Engineering team',
+      },
     });
 
     adminUser = await testPrisma.user.create({
-      data: { email: 'admin@example.com', name: 'Admin User', ssoId: 'admin-sso', tenantId: defaultTenant.id }
+      data: {
+        email: 'admin@example.com',
+        name: 'Admin User',
+        ssoId: 'admin-sso',
+        tenantId: defaultTenant.id,
+      },
     });
     moderatorUser = await testPrisma.user.create({
-      data: { email: 'moderator@example.com', name: 'Moderator User', ssoId: 'moderator-sso', tenantId: defaultTenant.id }
+      data: {
+        email: 'moderator@example.com',
+        name: 'Moderator User',
+        ssoId: 'moderator-sso',
+        tenantId: defaultTenant.id,
+      },
     });
     memberUser = await testPrisma.user.create({
-      data: { email: 'member@example.com', name: 'Member User', ssoId: 'member-sso', tenantId: defaultTenant.id }
+      data: {
+        email: 'member@example.com',
+        name: 'Member User',
+        ssoId: 'member-sso',
+        tenantId: defaultTenant.id,
+      },
     });
 
     await testPrisma.teamMembership.createMany({
@@ -68,14 +83,14 @@ describe('Moderation Features', () => {
         { userId: adminUser.id, teamId: team.id, role: 'admin' },
         { userId: moderatorUser.id, teamId: team.id, role: 'moderator' },
         { userId: memberUser.id, teamId: team.id, role: 'member' },
-      ]
+      ],
     });
 
     tag1 = await testPrisma.tag.create({
-      data: { tenantId: defaultTenant.id, name: 'Important', color: '#FF0000' }
+      data: { tenantId: defaultTenant.id, name: 'Important', color: '#FF0000' },
     });
     tag2 = await testPrisma.tag.create({
-      data: { tenantId: defaultTenant.id, name: 'Urgent', color: '#FFA500' }
+      data: { tenantId: defaultTenant.id, name: 'Urgent', color: '#FFA500' },
     });
 
     question1 = await testPrisma.question.create({
@@ -84,8 +99,8 @@ describe('Moderation Features', () => {
         body: 'What is our remote work policy?',
         status: 'OPEN',
         upvotes: 10,
-        teamId: team.id
-      }
+        teamId: team.id,
+      },
     });
     question2 = await testPrisma.question.create({
       data: {
@@ -93,8 +108,8 @@ describe('Moderation Features', () => {
         body: 'When is the next all-hands?',
         status: 'OPEN',
         upvotes: 5,
-        teamId: team.id
-      }
+        teamId: team.id,
+      },
     });
     question3 = await testPrisma.question.create({
       data: {
@@ -105,8 +120,8 @@ describe('Moderation Features', () => {
         upvotes: 20,
         teamId: team.id,
         reviewedBy: moderatorUser.id,
-        reviewedAt: new Date()
-      }
+        reviewedAt: new Date(),
+      },
     });
   });
 
@@ -132,7 +147,7 @@ describe('Moderation Features', () => {
       // First pin it
       await testPrisma.question.update({
         where: { id: question1.id },
-        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() }
+        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() },
       });
 
       // Then unpin
@@ -169,10 +184,10 @@ describe('Moderation Features', () => {
 
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
       const auditLogs = await testPrisma.auditLog.findMany({
-        where: { 
+        where: {
           action: 'question.pin',
-          tenantId: defaultTenant!.id
-        }
+          tenantId: defaultTenant!.id,
+        },
       });
 
       expect(auditLogs.length).toBeGreaterThan(0);
@@ -198,7 +213,7 @@ describe('Moderation Features', () => {
       // First freeze it
       await testPrisma.question.update({
         where: { id: question1.id },
-        data: { isFrozen: true, frozenBy: moderatorUser.id, frozenAt: new Date() }
+        data: { isFrozen: true, frozenBy: moderatorUser.id, frozenAt: new Date() },
       });
 
       // Then unfreeze
@@ -223,10 +238,10 @@ describe('Moderation Features', () => {
 
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
       const auditLogs = await testPrisma.auditLog.findMany({
-        where: { 
+        where: {
           action: 'question.freeze',
-          tenantId: defaultTenant!.id
-        }
+          tenantId: defaultTenant!.id,
+        },
       });
 
       expect(auditLogs.length).toBeGreaterThan(0);
@@ -243,7 +258,7 @@ describe('Moderation Features', () => {
         .send({
           questionIds: [question1.id, question2.id],
           tagId: tag1.id,
-          action: 'add'
+          action: 'add',
         });
 
       expect(response.status).toBe(200);
@@ -254,10 +269,10 @@ describe('Moderation Features', () => {
 
       // Verify tags were added
       const q1Tags = await testPrisma.questionTag.findMany({
-        where: { questionId: question1.id }
+        where: { questionId: question1.id },
       });
       const q2Tags = await testPrisma.questionTag.findMany({
-        where: { questionId: question2.id }
+        where: { questionId: question2.id },
       });
 
       expect(q1Tags.some(qt => qt.tagId === tag1.id)).toBe(true);
@@ -269,8 +284,8 @@ describe('Moderation Features', () => {
       await testPrisma.questionTag.createMany({
         data: [
           { questionId: question1.id, tagId: tag1.id },
-          { questionId: question2.id, tagId: tag1.id }
-        ]
+          { questionId: question2.id, tagId: tag1.id },
+        ],
       });
 
       const response = await request(app)
@@ -280,7 +295,7 @@ describe('Moderation Features', () => {
         .send({
           questionIds: [question1.id, question2.id],
           tagId: tag1.id,
-          action: 'remove'
+          action: 'remove',
         });
 
       expect(response.status).toBe(200);
@@ -288,7 +303,7 @@ describe('Moderation Features', () => {
 
       // Verify tags were removed
       const q1Tags = await testPrisma.questionTag.findMany({
-        where: { questionId: question1.id }
+        where: { questionId: question1.id },
       });
 
       expect(q1Tags.length).toBe(0);
@@ -302,7 +317,7 @@ describe('Moderation Features', () => {
         .send({
           questionIds: [question1.id],
           tagId: tag1.id,
-          action: 'add'
+          action: 'add',
         });
 
       expect(response.status).toBe(403);
@@ -316,7 +331,7 @@ describe('Moderation Features', () => {
         .send({
           questionIds: [question1.id, question2.id],
           tagId: tag1.id,
-          action: 'add'
+          action: 'add',
         });
 
       expect(response.status).toBe(200);
@@ -324,16 +339,16 @@ describe('Moderation Features', () => {
 
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
       const auditLogs = await testPrisma.auditLog.findMany({
-        where: { 
+        where: {
           action: 'bulk.tag.add',
-          tenantId: defaultTenant!.id
-        }
+          tenantId: defaultTenant!.id,
+        },
       });
 
       expect(auditLogs.length).toBeGreaterThan(0);
       expect(auditLogs[0].metadata).toMatchObject({
         tagId: tag1.id,
-        successCount: 2
+        successCount: 2,
       });
     });
   });
@@ -346,7 +361,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com')
         .send({
           questionIds: [question1.id, question2.id],
-          action: 'pin'
+          action: 'pin',
         });
 
       expect(response.status).toBe(200);
@@ -369,7 +384,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'moderator@example.com')
         .send({
           questionIds: [question1.id, question2.id],
-          action: 'freeze'
+          action: 'freeze',
         });
 
       expect(response.status).toBe(200);
@@ -387,7 +402,7 @@ describe('Moderation Features', () => {
       // First pin them
       await testPrisma.question.updateMany({
         where: { id: { in: [question1.id, question2.id] } },
-        data: { isPinned: true, pinnedBy: adminUser.id, pinnedAt: new Date() }
+        data: { isPinned: true, pinnedBy: adminUser.id, pinnedAt: new Date() },
       });
 
       const response = await request(app)
@@ -396,7 +411,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com')
         .send({
           questionIds: [question1.id, question2.id],
-          action: 'unpin'
+          action: 'unpin',
         });
 
       expect(response.status).toBe(200);
@@ -414,7 +429,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com')
         .send({
           questionIds: [question1.id, question2.id],
-          action: 'delete'
+          action: 'delete',
         });
 
       expect(response.status).toBe(200);
@@ -435,7 +450,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'member@example.com')
         .send({
           questionIds: [question1.id],
-          action: 'pin'
+          action: 'pin',
         });
 
       expect(response.status).toBe(403);
@@ -448,7 +463,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com')
         .send({
           questionIds: [question1.id, question2.id],
-          action: 'pin'
+          action: 'pin',
         });
 
       expect(response.status).toBe(200);
@@ -456,15 +471,15 @@ describe('Moderation Features', () => {
 
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
       const auditLogs = await testPrisma.auditLog.findMany({
-        where: { 
+        where: {
           action: 'bulk.pin',
-          tenantId: defaultTenant!.id
-        }
+          tenantId: defaultTenant!.id,
+        },
       });
 
       expect(auditLogs.length).toBeGreaterThan(0);
       expect(auditLogs[0].metadata).toMatchObject({
-        successCount: 2
+        successCount: 2,
       });
     });
   });
@@ -507,7 +522,7 @@ describe('Moderation Features', () => {
       // Pin question1
       await testPrisma.question.update({
         where: { id: question1.id },
-        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() }
+        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() },
       });
 
       const response = await request(app)
@@ -525,7 +540,7 @@ describe('Moderation Features', () => {
       // Freeze question2
       await testPrisma.question.update({
         where: { id: question2.id },
-        data: { isFrozen: true, frozenBy: moderatorUser.id, frozenAt: new Date() }
+        data: { isFrozen: true, frozenBy: moderatorUser.id, frozenAt: new Date() },
       });
 
       const response = await request(app)
@@ -565,7 +580,7 @@ describe('Moderation Features', () => {
       // Pin question2 (5 upvotes)
       await testPrisma.question.update({
         where: { id: question2.id },
-        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() }
+        data: { isPinned: true, pinnedBy: moderatorUser.id, pinnedAt: new Date() },
       });
 
       const response = await request(app)
@@ -612,13 +627,13 @@ describe('Moderation Features', () => {
           reviewedBy: moderatorUser.id,
           reviewedAt: new Date(),
           isPinned: true,
-          pinnedBy: moderatorUser.id
-        }
+          pinnedBy: moderatorUser.id,
+        },
       });
 
       // Create another reviewed question by adminUser
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
-      
+
       await testPrisma.question.create({
         data: {
           tenantId: defaultTenant!.id,
@@ -629,8 +644,8 @@ describe('Moderation Features', () => {
           reviewedBy: adminUser.id,
           reviewedAt: new Date(),
           isFrozen: true,
-          frozenBy: adminUser.id
-        }
+          frozenBy: adminUser.id,
+        },
       });
     });
 
@@ -660,7 +675,9 @@ describe('Moderation Features', () => {
       expect(response.body.byModerator.length).toBe(2);
 
       // Find moderatorUser's stats
-      const modStats = response.body.byModerator.find((s: any) => s.moderatorId === moderatorUser.id);
+      const modStats = response.body.byModerator.find(
+        (s: any) => s.moderatorId === moderatorUser.id
+      );
       expect(modStats).toBeDefined();
       expect(modStats.questionsReviewed).toBe(1);
       expect(modStats.questionsAnswered).toBe(1);
@@ -685,7 +702,9 @@ describe('Moderation Features', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       const response = await request(app)
-        .get(`/admin/stats/moderation?startDate=${yesterday.toISOString().split('T')[0]}&endDate=${tomorrow.toISOString().split('T')[0]}`)
+        .get(
+          `/admin/stats/moderation?startDate=${yesterday.toISOString().split('T')[0]}&endDate=${tomorrow.toISOString().split('T')[0]}`
+        )
         .set('x-tenant-id', 'default')
         .set('x-mock-sso-user', 'admin@example.com');
 
@@ -724,8 +743,9 @@ describe('Moderation Features', () => {
 
       // Verify sorting - each moderator should have >= next moderator
       for (let i = 0; i < response.body.byModerator.length - 1; i++) {
-        expect(response.body.byModerator[i].questionsReviewed)
-          .toBeGreaterThanOrEqual(response.body.byModerator[i + 1].questionsReviewed);
+        expect(response.body.byModerator[i].questionsReviewed).toBeGreaterThanOrEqual(
+          response.body.byModerator[i + 1].questionsReviewed
+        );
       }
     });
   });
@@ -736,15 +756,15 @@ describe('Moderation Features', () => {
 
     beforeEach(async () => {
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
-      
+
       // Create a second team
       team2 = await testPrisma.team.create({
         data: {
           tenantId: defaultTenant!.id,
           name: 'Product',
           slug: 'product',
-          description: 'Product team'
-        }
+          description: 'Product team',
+        },
       });
 
       // Moderator is NOT a member of team2
@@ -753,8 +773,8 @@ describe('Moderation Features', () => {
         data: {
           userId: adminUser.id,
           teamId: team2.id,
-          role: 'admin'
-        }
+          role: 'admin',
+        },
       });
 
       // Create a question in team2
@@ -764,8 +784,8 @@ describe('Moderation Features', () => {
           body: 'Product team question',
           status: 'OPEN',
           upvotes: 3,
-          teamId: team2.id
-        }
+          teamId: team2.id,
+        },
       });
     });
 
@@ -776,7 +796,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'moderator@example.com');
 
       expect(response.status).toBe(200);
-      
+
       // Should only see questions from team (Engineering), not team2 (Product)
       const questionIds = response.body.questions.map((q: any) => q.id);
       expect(questionIds).toContain(question1.id); // Engineering question
@@ -791,7 +811,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com');
 
       expect(response.status).toBe(200);
-      
+
       // Should see questions from ALL teams
       const questionIds = response.body.questions.map((q: any) => q.id);
       expect(questionIds).toContain(question1.id); // Engineering question
@@ -816,8 +836,8 @@ describe('Moderation Features', () => {
           reviewedBy: adminUser.id,
           reviewedAt: new Date(),
           status: 'ANSWERED',
-          responseText: 'Answer for product team'
-        }
+          responseText: 'Answer for product team',
+        },
       });
 
       const response = await request(app)
@@ -826,7 +846,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'moderator@example.com');
 
       expect(response.status).toBe(200);
-      
+
       // Stats should only include question3 (Engineering team, reviewed by moderator)
       // Should NOT include question4 (Product team, reviewed by admin)
       expect(response.body.overall.totalQuestionsReviewed).toBe(1);
@@ -840,8 +860,8 @@ describe('Moderation Features', () => {
           reviewedBy: adminUser.id,
           reviewedAt: new Date(),
           status: 'ANSWERED',
-          responseText: 'Answer for product team'
-        }
+          responseText: 'Answer for product team',
+        },
       });
 
       const response = await request(app)
@@ -850,7 +870,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com');
 
       expect(response.status).toBe(200);
-      
+
       // Should include both question3 and question4
       expect(response.body.overall.totalQuestionsReviewed).toBeGreaterThanOrEqual(2); // At least question3 and question4
     });
@@ -887,7 +907,7 @@ describe('Moderation Features', () => {
     it('should not allow duplicate tags in bulk operation', async () => {
       // Add tag1 to question1
       await testPrisma.questionTag.create({
-        data: { questionId: question1.id, tagId: tag1.id }
+        data: { questionId: question1.id, tagId: tag1.id },
       });
 
       // Try to add again via bulk operation
@@ -898,7 +918,7 @@ describe('Moderation Features', () => {
         .send({
           questionIds: [question1.id],
           tagId: tag1.id,
-          action: 'add'
+          action: 'add',
         });
 
       // Should succeed (upsert handles duplicates)
@@ -907,7 +927,7 @@ describe('Moderation Features', () => {
 
       // Verify only one tag exists
       const tags = await testPrisma.questionTag.findMany({
-        where: { questionId: question1.id, tagId: tag1.id }
+        where: { questionId: question1.id, tagId: tag1.id },
       });
       expect(tags.length).toBe(1);
     });
@@ -921,7 +941,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'admin@example.com')
         .send({
           questionIds: [question1.id, nonExistentId],
-          action: 'pin'
+          action: 'pin',
         });
 
       expect(response.status).toBe(200);
@@ -931,4 +951,3 @@ describe('Moderation Features', () => {
     });
   });
 });
-

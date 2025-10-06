@@ -7,30 +7,31 @@ export function requireAdminSession(req: Request, res: Response, next: NextFunct
     isAdmin: req.session?.isAdmin,
     loginTime: req.session?.loginTime,
     path: req.path,
-    method: req.method
+    method: req.method,
   });
 
   if (!req.session?.isAdmin) {
     console.log('❌ Admin session rejected: no admin session');
-    return res.status(401).json({ 
+    return res.status(401).json({
       error: 'Admin authentication required',
-      loginRequired: true 
+      loginRequired: true,
     });
   }
-  
+
   // Check session age (optional additional security)
   const loginTime = req.session.loginTime;
-  if (loginTime && Date.now() - loginTime > 8 * 60 * 60 * 1000) { // 8 hours max
+  if (loginTime && Date.now() - loginTime > 8 * 60 * 60 * 1000) {
+    // 8 hours max
     console.log('❌ Admin session expired');
-    req.session.destroy((err) => {
+    req.session.destroy(err => {
       if (err) console.error('Session destroy error:', err);
     });
-    return res.status(401).json({ 
+    return res.status(401).json({
       error: 'Session expired',
-      loginRequired: true 
+      loginRequired: true,
     });
   }
-  
+
   console.log('✅ Admin session valid');
   next();
 }

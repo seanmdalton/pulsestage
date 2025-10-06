@@ -21,16 +21,19 @@ This migration adds multi-tenancy support with zero downtime:
 ### Running Migrations
 
 **For existing deployments (with data):**
+
 ```bash
 npx prisma migrate deploy
 ```
 
 **For new deployments:**
+
 ```bash
 npx prisma db push
 ```
 
 **To reset database (development only):**
+
 ```bash
 npx prisma migrate reset
 ```
@@ -56,4 +59,3 @@ npx prisma migrate reset
 - New tenants can be created via the org signup API
 - Users are permanently bound to their tenant
 - Tenant isolation is enforced at the database level
-
