@@ -125,20 +125,38 @@ export function PresentationPage() {
 
         // Create "Currently Presenting" tag if it doesn't exist
         if (!currentlyPresentingTag) {
-          currentlyPresentingTag = await apiClient.createTag({
-            name: 'Currently Presenting',
-            description: 'Question currently being presented',
-            color: '#10B981' // Green
-          });
+          try {
+            currentlyPresentingTag = await apiClient.createTag({
+              name: 'Currently Presenting',
+              description: 'Question currently being presented',
+              color: '#10B981' // Green
+            });
+          } catch (createError: any) {
+            // Tag might have been created by another process, refetch
+            const tagsRetry = await apiClient.getTags();
+            currentlyPresentingTag = tagsRetry.find(t => t.name === 'Currently Presenting');
+            if (!currentlyPresentingTag) {
+              throw createError; // Re-throw if still not found
+            }
+          }
         }
 
         // Create "Reviewed" tag if it doesn't exist
         if (!reviewedTag) {
-          reviewedTag = await apiClient.createTag({
-            name: 'Reviewed',
-            description: 'Question has been reviewed',
-            color: '#6B7280' // Gray
-          });
+          try {
+            reviewedTag = await apiClient.createTag({
+              name: 'Reviewed',
+              description: 'Question has been reviewed',
+              color: '#6B7280' // Gray
+            });
+          } catch (createError: any) {
+            // Tag might have been created by another process, refetch
+            const tagsRetry = await apiClient.getTags();
+            reviewedTag = tagsRetry.find(t => t.name === 'Reviewed');
+            if (!reviewedTag) {
+              throw createError; // Re-throw if still not found
+            }
+          }
         }
 
         setCurrentlyPresentingTag(currentlyPresentingTag);
