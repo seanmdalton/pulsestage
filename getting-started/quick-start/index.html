@@ -601,18 +601,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-load-demo-data" class="md-nav__link">
+  <a href="#4-access-pulsestage" class="md-nav__link">
     <span class="md-ellipsis">
-      4. Load Demo Data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-access-pulsestage" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Access PulseStage
+      4. Access PulseStage
     </span>
   </a>
   
@@ -624,37 +615,28 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#first-steps" class="md-nav__link">
+  <a href="#setup-wizard" class="md-nav__link">
     <span class="md-ellipsis">
-      First Steps
+      Setup Wizard
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="First Steps">
+    <nav class="md-nav" aria-label="Setup Wizard">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#select-a-tenant" class="md-nav__link">
+  <a href="#option-1-load-demo-data-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      Select a Tenant
+      Option 1: Load Demo Data (Recommended)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#choose-a-test-user" class="md-nav__link">
+  <a href="#option-2-create-your-own-organization" class="md-nav__link">
     <span class="md-ellipsis">
-      Choose a Test User
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#submit-your-first-question" class="md-nav__link">
-    <span class="md-ellipsis">
-      Submit Your First Question
+      Option 2: Create Your Own Organization
     </span>
   </a>
   
@@ -666,9 +648,42 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-next" class="md-nav__link">
+  <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
-      What's Next?
+      Next Steps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sign-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sign In
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explore-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Explore Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Mode
     </span>
   </a>
   
@@ -683,6 +698,15 @@
   
     <nav class="md-nav" aria-label="Troubleshooting">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup-wizard-doesnt-appear" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup Wizard Doesn't Appear
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#services-wont-start" class="md-nav__link">
@@ -713,6 +737,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's Next?
+    </span>
+  </a>
   
 </li>
       
@@ -783,7 +816,7 @@
   
   
   <span class="md-ellipsis">
-    First Steps
+    First Steps with PulseStage
     
   </span>
   
@@ -2720,78 +2753,133 @@
 - <strong>API</strong> server on port 3000 (<a href="https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api">ghcr.io/seanmdalton/pulsestage-api:latest</a>)
 - <strong>Web</strong> frontend on port 5173 (<a href="https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web">ghcr.io/seanmdalton/pulsestage-web:latest</a>)</p>
 <p>The API automatically creates a default tenant on first startup (auto-bootstrap).</p>
-<h3 id="4-load-demo-data">4. Load Demo Data<a class="headerlink" href="#4-load-demo-data" title="Anchor link to this section">&para;</a></h3>
-<p>Load teams, users, and sample questions:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>db:seed:full
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>api<span class="w">    </span><span class="c1"># Reload mock SSO users</span>
-</span></code></pre></div>
-<p>This adds:
-- Acme Corp tenant with 3 teams (Engineering, Product, Marketing)
-- 3 test users (Alice - Admin, Charlie - Owner, Emily - Member)
-- 6 sample questions
-- Default tags (Urgent, Feature Request, Answered Live, Currently Presenting)</p>
-<p><strong>Note</strong>: The API restart is needed to reload mock SSO users from the database.</p>
-<h3 id="5-access-pulsestage">5. Access PulseStage<a class="headerlink" href="#5-access-pulsestage" title="Anchor link to this section">&para;</a></h3>
+<h3 id="4-access-pulsestage">4. Access PulseStage<a class="headerlink" href="#4-access-pulsestage" title="Anchor link to this section">&para;</a></h3>
 <p>Open your browser and navigate to:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://localhost:5173
 </span></code></pre></div>
-<h2 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Anchor link to this section">&para;</a></h2>
-<h3 id="select-a-tenant">Select a Tenant<a class="headerlink" href="#select-a-tenant" title="Anchor link to this section">&para;</a></h3>
-<p>PulseStage supports multi-tenancy. The default tenant is available at:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>http://localhost:5173/
-</span></code></pre></div>
-<p>Or to see the SSO test page with all users:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>http://localhost:5173/sso-test.html
-</span></code></pre></div>
-<h3 id="choose-a-test-user">Choose a Test User<a class="headerlink" href="#choose-a-test-user" title="Anchor link to this section">&para;</a></h3>
-<p>Access the SSO test page to see all available users:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>http://localhost:5173/sso-test.html
-</span></code></pre></div>
-<p><strong>Default Tenant:</strong>
-- <strong>John Doe</strong> (john.doe@company.com) - Owner (full access)
-- <strong>Mike Chen</strong> (mike.chen@company.com) - Moderator (People team)
-- <strong>Sarah Wilson</strong> (sarah.wilson@company.com) - Moderator (Engineering team)
-- <strong>Emily Rodriguez</strong> (emily.rodriguez@company.com) - Moderator (multiple teams)
-- <strong>Alex Kim</strong> (alex.kim@company.com) - Member
-- <strong>Anonymous</strong> - View without logging in</p>
-<p><strong>Acme Corp Tenant:</strong>
-- <strong>Alice Johnson</strong> (alice@acme.corp) - Admin role
-- <strong>Bob Wilson</strong> (bob@acme.corp) - Moderator
-- <strong>Charlie Davis</strong> (charlie@acme.corp) - Member</p>
-<h3 id="submit-your-first-question">Submit Your First Question<a class="headerlink" href="#submit-your-first-question" title="Anchor link to this section">&para;</a></h3>
+<p>You'll see the <strong>Setup Wizard</strong> which guides you through initial setup.</p>
+<h2 id="setup-wizard">Setup Wizard<a class="headerlink" href="#setup-wizard" title="Anchor link to this section">&para;</a></h2>
+<p>On first visit, PulseStage presents a setup wizard with two options:</p>
+<h3 id="option-1-load-demo-data-recommended">Option 1: Load Demo Data (Recommended)<a class="headerlink" href="#option-1-load-demo-data-recommended" title="Anchor link to this section">&para;</a></h3>
+<p>Perfect for exploring PulseStage's features:</p>
 <ol>
-<li>Click on a user to log in</li>
+<li>Click <strong>"Load Demo Data"</strong></li>
+<li>Click <strong>"Continue"</strong></li>
+<li>Wait ~5-10 seconds for the system to:</li>
+<li>Create Acme Corp tenant</li>
+<li>Add 3 teams (Engineering, Product, Marketing)</li>
+<li>Create 4 demo users (Alice, Charlie, David, Emily)</li>
+<li>Generate 6 sample questions</li>
+<li>Add default tags</li>
+<li><strong>System will restart automatically</strong> to load the new users</li>
+</ol>
+<p>Demo includes:
+- <strong>Alice Anderson</strong> (alice.admin@acme.com) - Admin, Engineering team
+- <strong>Charlie Chen</strong> (charlie.owner@acme.com) - Owner, Product &amp; Marketing teams
+- <strong>David Martinez</strong> (david@acme.com) - Moderator, Engineering team
+- <strong>Emily Evans</strong> (emily.member@acme.com) - Member, Engineering &amp; Product teams</p>
+<h3 id="option-2-create-your-own-organization">Option 2: Create Your Own Organization<a class="headerlink" href="#option-2-create-your-own-organization" title="Anchor link to this section">&para;</a></h3>
+<p>For starting fresh with your own setup:</p>
+<ol>
+<li>Click <strong>"Set up a new team"</strong></li>
+<li><strong>Name your organization</strong> (e.g., "My Company")</li>
+<li><strong>Create admin user</strong> with your name and email</li>
+<li><strong>Create your first team</strong> (e.g., "Engineering")</li>
+<li><strong>System will restart automatically</strong> to create your account</li>
+<li>Navigate to <code>/sso-test.html</code> to sign in with your new account</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
+<h3 id="sign-in">Sign In<a class="headerlink" href="#sign-in" title="Anchor link to this section">&para;</a></h3>
+<p>After setup completes, navigate to:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173/sso-test.html
+</span></code></pre></div>
+<p><strong>For Demo Data:</strong>
+- You'll see all 4 demo users listed
+- Click any user to sign in
+- Try different users to explore different roles</p>
+<p><strong>For Custom Setup:</strong>
+- You'll see your admin user
+- Click to sign in with your account</p>
+<h3 id="explore-features">Explore Features<a class="headerlink" href="#explore-features" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Submit Your First Question</strong></li>
 <li>Navigate to any team page</li>
 <li>Click "Submit Question"</li>
-<li>Enter your question and submit!</li>
+<li>
+<p>Enter your question and submit!</p>
+</li>
+<li>
+<p><strong>Try Presentation Mode</strong> (Moderator+)</p>
+</li>
+<li>Open a team with questions</li>
+<li>Click "Presentation Mode"</li>
+<li>
+<p>Perfect for live town halls</p>
+</li>
+<li>
+<p><strong>Access Admin Panel</strong> (Admin+)</p>
+</li>
+<li>Click your profile → "Admin Panel"</li>
+<li>Explore team management, user management, analytics</li>
+<li>
+<p>View audit logs and exports</p>
+</li>
+<li>
+<p><strong>Manage Teams</strong> (Admin+)</p>
+</li>
+<li>Create additional teams</li>
+<li>Add/remove members</li>
+<li>Configure team settings</li>
 </ol>
-<h2 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><a href="../installation/">Installation Guide</a> - Detailed setup instructions</li>
-<li><a href="../configuration/">Configuration</a> - Environment variables and settings</li>
-<li><a href="../first-steps/">First Steps</a> - Guided tour of PulseStage</li>
-</ul>
+<h2 id="development-mode">Development Mode<a class="headerlink" href="#development-mode" title="Anchor link to this section">&para;</a></h2>
+<p>For local development with live code changes:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Initialize and install dependencies</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>make<span class="w"> </span>setup
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>make<span class="w"> </span>install
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Start with local builds (hot reload)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>make<span class="w"> </span>dev
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># In another terminal, seed demo data</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>make<span class="w"> </span>db-seed
+</span></code></pre></div>
+<p>See <strong><a href="../../DEVELOPMENT.md">DEVELOPMENT.md</a></strong> for the complete development workflow.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="setup-wizard-doesnt-appear">Setup Wizard Doesn't Appear<a class="headerlink" href="#setup-wizard-doesnt-appear" title="Anchor link to this section">&para;</a></h3>
+<p>Clear your browser's localStorage:
+1. Open DevTools (F12)
+2. Go to <strong>Application</strong> → <strong>Local Storage</strong> → <code>http://localhost:5173</code>
+3. Click <strong>"Clear All"</strong>
+4. Refresh the page</p>
+<p>Or use an <strong>incognito/private window</strong>.</p>
 <h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Anchor link to this section">&para;</a></h3>
 <p>Check if ports are already in use:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Check port 5173 (web)</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Check port 3000 (api)</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Check port 5432 (database)</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check port 5173 (web)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Check port 3000 (api)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Check port 5432 (database)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
 </span></code></pre></div>
 <h3 id="database-connection-issues">Database Connection Issues<a class="headerlink" href="#database-connection-issues" title="Anchor link to this section">&para;</a></h3>
 <p>Ensure PostgreSQL is running:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
 </span></code></pre></div>
 <p>All services should show "Up" status.</p>
 <h3 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Anchor link to this section">&para;</a></h3>
 <ul>
 <li>Check the <a href="../installation/">Installation Guide</a> for detailed troubleshooting</li>
 <li>Visit our <a href="https://github.com/seanmdalton/pulsestage/issues">GitHub Issues</a></li>
+<li>See <a href="../../TROUBLESHOOTING.md">TROUBLESHOOTING.md</a></li>
+</ul>
+<h2 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><a href="../installation/">Installation Guide</a> - Detailed setup instructions</li>
+<li><a href="../configuration/">Configuration</a> - Environment variables and settings</li>
+<li><a href="../first-steps/">First Steps</a> - Guided tour of PulseStage features</li>
+<li><a href="../../DEVELOPMENT.md">Development Guide</a> - For contributors</li>
 </ul>
 
 
@@ -2815,7 +2903,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 6, 2025 00:02:50 UTC"><span class="timeago" datetime="2025-10-06T00:02:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 6, 2025 00:02:50 UTC">2025-10-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 7, 2025 12:40:52 UTC"><span class="timeago" datetime="2025-10-07T12:40:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 7, 2025 12:40:52 UTC">2025-10-07</span>
   </span>
 
     
