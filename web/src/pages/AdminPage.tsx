@@ -5,6 +5,7 @@ import { useAdmin } from '../contexts/AdminContext'
 import { useUser } from '../contexts/UserContext'
 import { TeamManagement } from '../components/TeamManagement'
 import { TagManagement } from '../components/TagManagement'
+import { Settings } from '../components/Settings'
 import { useTheme } from '../contexts/ThemeContext'
 import { ExportPage } from './ExportPage'
 import { AuditPage } from './AuditPage'
@@ -18,7 +19,7 @@ export function AdminPage() {
   const { theme } = useTheme()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<
-    'moderation' | 'stats' | 'teams' | 'tags' | 'export' | 'audit'
+    'moderation' | 'stats' | 'teams' | 'tags' | 'export' | 'audit' | 'settings'
   >('moderation')
   const [healthStatus, setHealthStatus] = useState<
     'checking' | 'healthy' | 'unhealthy'
@@ -223,6 +224,16 @@ export function AdminPage() {
                 >
                   Audit Log
                 </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'settings'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  Settings
+                </button>
               </>
             )}
           </nav>
@@ -245,6 +256,8 @@ export function AdminPage() {
             <AuditPage embedded={true} />
           </div>
         )}
+
+        {hasFullAdminRole && activeTab === 'settings' && <Settings />}
       </div>
     </>
   )

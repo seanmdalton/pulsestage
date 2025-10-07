@@ -166,6 +166,349 @@ export function createApp(prisma: PrismaClient) {
   // CSRF token endpoint - frontend can call this to get a token
   app.get('/csrf-token', provideCsrfToken(), csrfTokenEndpoint());
 
+  // ============================================================================
+  // SETUP WIZARD ENDPOINTS
+  // ============================================================================
+  // These endpoints support the first-time setup experience
+  // No authentication required since setup happens before users exist
+
+  // Check if setup wizard is needed
+  app.get('/setup/status', async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+          needsSetup: true,
+        });
+      }
+
+      // Check if any teams exist in this tenant
+      const teamCount = await prisma.team.count({
+        where: { tenantId },
+      });
+
+      // Check if any users exist in this tenant
+      const userCount = await prisma.user.count({
+        where: { tenantId },
+      });
+
+      res.json({
+        needsSetup: teamCount === 0,
+        teamCount,
+        userCount,
+        tenantId,
+        tenantSlug: req.tenant?.tenantSlug,
+      });
+    } catch (error) {
+      console.error('Error checking setup status:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to check setup status',
+        needsSetup: true, // Fail open to allow setup attempts
+      });
+    }
+  });
+
+  // Create first team during setup
+  const setupTeamSchema = z.object({
+    name: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_NAME),
+    slug: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_SLUG).regex(VALIDATION_PATTERNS.TEAM_SLUG),
+    description: z.string().max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION).optional(),
+    loadDemoData: z.boolean().optional(),
+  });
+
+  app.post('/setup/team', async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      // Verify setup is actually needed (prevent duplicate setup)
+      const existingTeamCount = await prisma.team.count({
+        where: { tenantId },
+      });
+
+      if (existingTeamCount > 0) {
+        return res.status(HTTP_STATUS.CONFLICT).json({
+          error: 'Setup already completed',
+          message: 'Teams already exist in this tenant',
+        });
+      }
+
+      const parse = setupTeamSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Invalid request',
+          details: parse.error.flatten(),
+        });
+      }
+
+      const { name, slug, description, loadDemoData } = parse.data;
+
+      // Create the team
+      const team = await prisma.team.create({
+        data: {
+          name,
+          slug,
+          description: description || '',
+          tenantId,
+          isActive: true,
+        },
+      });
+
+      console.log(`✅ Setup: Created first team "${name}" (${slug})`);
+
+      res.json({
+        success: true,
+        team: {
+          id: team.id,
+          name: team.name,
+          slug: team.slug,
+          description: team.description,
+          isActive: team.isActive,
+          tenantId: team.tenantId,
+          createdAt: team.createdAt.toISOString(),
+          updatedAt: team.updatedAt.toISOString(),
+        },
+        message: loadDemoData
+          ? 'Team created. Demo data will be loaded next.'
+          : 'Team created successfully. Ready to use!',
+      });
+    } catch (error: any) {
+      console.error('Error during team setup:', error);
+
+      // Handle unique constraint violations
+      if (error.code === 'P2002') {
+        return res.status(HTTP_STATUS.CONFLICT).json({
+          error: 'Team slug already exists',
+          message: 'Please choose a different slug',
+        });
+      }
+
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to create team',
+        message: error.message,
+      });
+    }
+  });
+
+  // Update tenant/organization name during setup
+  const setupTenantSchema = z.object({
+    name: z.string().min(1).max(100),
+  });
+
+  app.patch('/setup/tenant', async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const parse = setupTenantSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Invalid request',
+          details: parse.error.flatten(),
+        });
+      }
+
+      const { name } = parse.data;
+
+      // Update tenant name
+      const tenant = await prisma.tenant.update({
+        where: { id: tenantId },
+        data: { name },
+      });
+
+      console.log(`✅ Setup: Updated organization name to "${name}"`);
+
+      res.json({
+        success: true,
+        tenant: {
+          id: tenant.id,
+          name: tenant.name,
+          slug: tenant.slug,
+        },
+        message: 'Organization name updated successfully',
+      });
+    } catch (error: any) {
+      console.error('Error updating tenant:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to update organization name',
+        message: error.message,
+      });
+    }
+  });
+
+  // Create admin user during setup
+  const setupAdminSchema = z.object({
+    name: z.string().min(1).max(100),
+    email: z.string().email().max(255),
+    teamId: z.string().uuid(),
+  });
+
+  app.post('/setup/admin-user', async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const parse = setupAdminSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Invalid request',
+          details: parse.error.flatten(),
+        });
+      }
+
+      const { name, email, teamId } = parse.data;
+
+      // Verify team exists and belongs to this tenant
+      const team = await prisma.team.findUnique({
+        where: { id: teamId },
+      });
+
+      if (!team || team.tenantId !== tenantId) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Team not found',
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email,
+          tenantId,
+        },
+      });
+
+      if (existingUser) {
+        return res.status(HTTP_STATUS.CONFLICT).json({
+          error: 'User already exists',
+          message: 'A user with this email already exists in this tenant',
+        });
+      }
+
+      // Create the admin user
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          tenantId,
+          ssoId: email, // Use email as SSO ID for mock SSO
+        },
+      });
+
+      // Create team membership with owner role
+      await prisma.teamMembership.create({
+        data: {
+          userId: user.id,
+          teamId,
+          role: 'owner',
+        },
+      });
+
+      console.log(`✅ Setup: Created admin user "${name}" (${email}) as owner of team`);
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        message: 'Admin user created successfully. API will restart to load users...',
+      });
+
+      // Self-restart to reload mock SSO users
+      // Docker's restart policy will automatically restart the container
+      console.log('🔄 Restarting API to reload mock SSO users...');
+      setTimeout(() => {
+        // eslint-disable-next-line no-process-exit
+        process.exit(0);
+      }, 2000); // Give response time to reach the client
+    } catch (error: any) {
+      console.error('Error creating admin user:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to create admin user',
+        message: error.message,
+      });
+    }
+  });
+
+  // Load demo data during setup
+  app.post('/setup/demo-data', async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      // Note: No need to check for existing teams - demo data creates its own teams
+
+      // Import and execute seed scripts
+      // Note: These are the same scripts used for `npm run db:seed:full`
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
+
+      console.log('🌱 Loading demo data...');
+
+      try {
+        // Run the seed scripts
+        await execAsync('node dist/seed-multi-tenant-data.js', {
+          cwd: join(__dirname, '..'),
+          env: { ...process.env, TENANT_ID: tenantId },
+        });
+
+        await execAsync('node dist/seed-tags.js', {
+          cwd: join(__dirname, '..'),
+          env: { ...process.env, TENANT_ID: tenantId },
+        });
+
+        console.log('✅ Demo data loaded successfully');
+
+        res.json({
+          success: true,
+          message: 'Demo data loaded successfully. API will restart automatically in 2 seconds...',
+          restartRequired: true,
+        });
+
+        // Self-restart to reload mock SSO users
+        // Docker's restart policy will automatically restart the container
+        console.log('🔄 Restarting API to reload mock SSO users...');
+        setTimeout(() => {
+          // eslint-disable-next-line no-process-exit
+          process.exit(0);
+        }, 2000); // Give response time to reach the client
+      } catch (seedError: any) {
+        console.error('Seed script error:', seedError);
+        throw new Error(`Seed scripts failed: ${seedError.message}`);
+      }
+    } catch (error: any) {
+      console.error('Error loading demo data:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to load demo data',
+        message: error.message,
+      });
+    }
+  });
+
   // SSE endpoint for real-time updates
   // Note: EventSource doesn't support custom headers, so we also check query param
   app.get('/events', async (req, res) => {
@@ -588,6 +931,125 @@ export function createApp(prisma: PrismaClient) {
       loginTime: loginTime || null,
       sessionAge: loginTime ? Date.now() - loginTime : null,
     });
+  });
+
+  // Get tenant settings (admin only)
+  app.get('/admin/settings', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Tenant not found',
+        });
+      }
+
+      res.json({
+        tenant: {
+          id: tenant.id,
+          name: tenant.name,
+          slug: tenant.slug,
+          createdAt: tenant.createdAt.toISOString(),
+          updatedAt: tenant.updatedAt.toISOString(),
+        },
+      });
+    } catch (error: any) {
+      console.error('Error fetching tenant settings:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch settings',
+        message: error.message,
+      });
+    }
+  });
+
+  // Update tenant settings (admin only)
+  const updateTenantSettingsSchema = z.object({
+    name: z.string().min(1).max(100).optional(),
+  });
+
+  app.patch('/admin/settings', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const parse = updateTenantSettingsSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Invalid request',
+          details: parse.error.flatten(),
+        });
+      }
+
+      const { name } = parse.data;
+
+      // Build update data
+      const updateData: any = {};
+      if (name !== undefined) {
+        updateData.name = name;
+      }
+
+      // Update tenant
+      const tenant = await prisma.tenant.update({
+        where: { id: tenantId },
+        data: updateData,
+      });
+
+      console.log(`✅ Admin: Updated tenant settings for "${tenant.name}"`);
+
+      // Log audit event
+      if (req.user) {
+        await prisma.auditLog.create({
+          data: {
+            userId: req.user.id,
+            action: 'tenant.update',
+            entityType: 'tenant',
+            entityId: tenant.id,
+            metadata: { changes: updateData },
+            tenantId,
+          },
+        });
+      }
+
+      res.json({
+        success: true,
+        tenant: {
+          id: tenant.id,
+          name: tenant.name,
+          slug: tenant.slug,
+          createdAt: tenant.createdAt.toISOString(),
+          updatedAt: tenant.updatedAt.toISOString(),
+        },
+        message: 'Settings updated successfully',
+      });
+    } catch (error: any) {
+      console.error('Error updating tenant settings:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to update settings',
+        message: error.message,
+      });
+    }
   });
 
   // Team management endpoints

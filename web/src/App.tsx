@@ -25,17 +25,57 @@ import { PresentationPage } from './pages/PresentationPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
+import { SetupWizard } from './components/SetupWizard'
 import { AdminProvider } from './contexts/AdminContext'
 import { TeamProvider } from './contexts/TeamContext'
 import { UserProvider } from './contexts/UserContext'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { getBaseTitle } from './utils/titleUtils'
+import { apiClient } from './lib/api'
 
 function App() {
+  const [needsSetup, setNeedsSetup] = useState<boolean | null>(null)
+  const [checkingSetup, setCheckingSetup] = useState(true)
+
+  // Check if setup is needed on app load
+  useEffect(() => {
+    async function checkSetupStatus() {
+      try {
+        const status = await apiClient.getSetupStatus()
+        setNeedsSetup(status.needsSetup)
+      } catch (error) {
+        console.error('Failed to check setup status:', error)
+        // On error, assume setup is not needed to allow app to load
+        setNeedsSetup(false)
+      } finally {
+        setCheckingSetup(false)
+      }
+    }
+
+    checkSetupStatus()
+  }, [])
+
   // Set default page title
   useEffect(() => {
     document.title = getBaseTitle()
   }, [])
+
+  // Show loading state while checking setup
+  if (checkingSetup) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show setup wizard if needed
+  if (needsSetup) {
+    return <SetupWizard onComplete={() => setNeedsSetup(false)} />
+  }
 
   return (
     <Router>

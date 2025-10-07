@@ -786,6 +786,69 @@ class ApiClient {
     return response.blob()
   }
 
+  // Admin settings methods
+  async getAdminSettings(): Promise<{
+    tenant: {
+      id: string
+      name: string
+      slug: string
+      createdAt: string
+      updatedAt: string
+    }
+  }> {
+    const ResponseSchema = z.object({
+      tenant: z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+      }),
+    })
+
+    return this.request(
+      '/admin/settings',
+      {
+        credentials: 'include',
+      },
+      ResponseSchema
+    )
+  }
+
+  async updateAdminSettings(data: { name?: string }): Promise<{
+    success: boolean
+    tenant: {
+      id: string
+      name: string
+      slug: string
+      createdAt: string
+      updatedAt: string
+    }
+    message: string
+  }> {
+    const ResponseSchema = z.object({
+      success: z.boolean(),
+      tenant: z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+      }),
+      message: z.string(),
+    })
+
+    return this.request(
+      '/admin/settings',
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        body: JSON.stringify(data),
+      },
+      ResponseSchema
+    )
+  }
+
   // User management methods
   async getCurrentUser(): Promise<User> {
     const UserSchema = z.object({
@@ -1055,6 +1118,134 @@ class ApiClient {
         credentials: 'include',
       },
       RemoveMemberResponseSchema
+    )
+  }
+
+  // Setup wizard methods
+  async getSetupStatus(): Promise<{
+    needsSetup: boolean
+    teamCount: number
+    userCount: number
+    tenantId: string
+    tenantSlug: string
+  }> {
+    const SetupStatusSchema = z.object({
+      needsSetup: z.boolean(),
+      teamCount: z.number(),
+      userCount: z.number(),
+      tenantId: z.string(),
+      tenantSlug: z.string(),
+    })
+
+    return this.request('/setup/status', {}, SetupStatusSchema)
+  }
+
+  async updateSetupTenant(data: { name: string }): Promise<{
+    success: boolean
+    tenant: {
+      id: string
+      name: string
+      slug: string
+    }
+    message: string
+  }> {
+    const ResponseSchema = z.object({
+      success: z.boolean(),
+      tenant: z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+      }),
+      message: z.string(),
+    })
+
+    return this.request(
+      '/setup/tenant',
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      },
+      ResponseSchema
+    )
+  }
+
+  async createSetupTeam(data: {
+    name: string
+    slug: string
+    description?: string
+    loadDemoData?: boolean
+  }): Promise<{
+    success: boolean
+    team: Team
+    message: string
+  }> {
+    const SetupTeamResponseSchema = z.object({
+      success: z.boolean(),
+      team: TeamSchema,
+      message: z.string(),
+    })
+
+    return this.request(
+      '/setup/team',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      SetupTeamResponseSchema
+    )
+  }
+
+  async loadSetupDemoData(): Promise<{
+    success: boolean
+    message: string
+    restartRequired: boolean
+  }> {
+    const DemoDataResponseSchema = z.object({
+      success: z.boolean(),
+      message: z.string(),
+      restartRequired: z.boolean(),
+    })
+
+    return this.request(
+      '/setup/demo-data',
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+      },
+      DemoDataResponseSchema
+    )
+  }
+
+  async createSetupAdminUser(data: {
+    name: string
+    email: string
+    teamId: string
+  }): Promise<{
+    success: boolean
+    user: {
+      id: string
+      email: string
+      name: string
+    }
+    message: string
+  }> {
+    const AdminUserResponseSchema = z.object({
+      success: z.boolean(),
+      user: z.object({
+        id: z.string(),
+        email: z.string(),
+        name: z.string(),
+      }),
+      message: z.string(),
+    })
+
+    return this.request(
+      '/setup/admin-user',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      AdminUserResponseSchema
     )
   }
 }

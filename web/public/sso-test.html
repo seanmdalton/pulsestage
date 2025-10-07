@@ -169,11 +169,10 @@
       <h1>🔐 Mock SSO Testing (Multi-Tenant)</h1>
 
       <div class="instructions">
-        <h3>How to Test Multi-Tenant SSO Locally</h3>
+        <h3>Demo User Selection</h3>
         <p>
-          This page simulates SSO authentication for local development with
-          multi-tenancy support. Select a tenant, then select a user from that
-          tenant to authenticate.
+          Select a demo user below to sign in and explore PulseStage with
+          pre-populated data.
         </p>
 
         <h4>Multi-Tenancy Notes:</h4>
@@ -191,15 +190,13 @@
         style="display: none"
       ></div>
 
-      <div class="tenant-selector">
-        <label for="tenantSelect">Select Tenant:</label>
-        <select id="tenantSelect" onchange="handleTenantChange()">
-          <option value="">-- Select a Tenant --</option>
-          <option value="default">Default Tenant (default)</option>
-          <option value="acme">Acme Corp (acme)</option>
-        </select>
-        <p style="margin-top: 10px; font-size: 14px; color: #666">
-          Each tenant has completely isolated data, teams, and users.
+      <div class="tenant-selector" id="tenantInfo">
+        <label><span id="tenantLabel">Loading...</span></label>
+        <p
+          style="margin-top: 10px; font-size: 14px; color: #666"
+          id="tenantDescription"
+        >
+          Loading user information...
         </p>
       </div>
 
@@ -299,23 +296,55 @@
         ],
       }
 
-      // Handle tenant change
-      function handleTenantChange() {
-        const tenantSelect = document.getElementById('tenantSelect')
-        selectedTenant = tenantSelect.value
+      // Auto-select tenant based on setup (default for default install, acme for demo)
+      const setupTenant = localStorage.getItem('setup-tenant') || 'acme'
+      selectedTenant = setupTenant
 
-        if (selectedTenant) {
-          renderUsers(selectedTenant)
-          showCurrentContext()
-        } else {
-          document.getElementById('usersList').innerHTML = ''
-          hideCurrentContext()
-        }
+      // Update tenant info display
+      const tenantLabel = document.getElementById('tenantLabel')
+      const tenantDescription = document.getElementById('tenantDescription')
+      if (setupTenant === 'default') {
+        if (tenantLabel)
+          tenantLabel.innerHTML = 'Your Organization: <strong>Default</strong>'
+        if (tenantDescription)
+          tenantDescription.textContent =
+            'Sign in with your admin account to access your team.'
+      } else {
+        if (tenantLabel)
+          tenantLabel.innerHTML = 'Demo Tenant: <strong>Acme Corp</strong>'
+        if (tenantDescription)
+          tenantDescription.textContent =
+            'Choose a demo user below to sign in and explore the pre-configured teams and questions.'
       }
+
+      renderUsers(setupTenant)
 
       // Render users for selected tenant
       function renderUsers(tenant) {
-        const users = tenantUsers[tenant] || []
+        let users = tenantUsers[tenant] || []
+
+        // For default tenant, check if we have a dynamically created admin user
+        if (tenant === 'default') {
+          const setupAdminUser = localStorage.getItem('setup-admin-user')
+          if (setupAdminUser) {
+            try {
+              const adminUser = JSON.parse(setupAdminUser)
+              users = [
+                {
+                  email: adminUser.email,
+                  name: adminUser.name,
+                  role: adminUser.role,
+                  teams: adminUser.teams,
+                },
+              ]
+              // Clear it after reading
+              localStorage.removeItem('setup-admin-user')
+            } catch (e) {
+              console.error('Failed to parse setup admin user:', e)
+            }
+          }
+        }
+
         const usersList = document.getElementById('usersList')
 
         if (users.length === 0) {
@@ -424,9 +453,9 @@
         window.dispatchEvent(new CustomEvent('mock-sso-changed'))
 
         selectedUser = null
-        selectedTenant = null
-        document.getElementById('tenantSelect').value = ''
+        selectedTenant = 'acme'
         document.getElementById('usersList').innerHTML = ''
+        renderUsers('acme')
 
         hideCurrentContext()
         showStatus('🚪 Logged out. Now in anonymous mode.', 'success')
@@ -446,15 +475,15 @@
       // Initialize on page load
       window.addEventListener('DOMContentLoaded', () => {
         const currentUser = localStorage.getItem('mock-sso-user')
-        const currentTenant = localStorage.getItem('mock-tenant')
+        const setupAdminEmail = localStorage.getItem('setup-admin-email')
+        const currentTenant = localStorage.getItem('mock-tenant') || 'acme'
 
         if (currentUser && currentTenant) {
-          // Set the tenant selector
-          document.getElementById('tenantSelect').value = currentTenant
+          // Set the tenant
           selectedTenant = currentTenant
 
-          // Render users for that tenant
-          renderUsers(currentTenant)
+          // Render users for that tenant (always acme for demo)
+          renderUsers('acme')
 
           // Highlight the current user
           setTimeout(() => {
@@ -467,6 +496,34 @@
           }, 100)
 
           showCurrentContext()
+        } else if (setupAdminEmail) {
+          // New admin just created - show welcome message
+          const statusDiv = document.getElementById('status')
+          if (statusDiv) {
+            statusDiv.innerHTML = `
+              <div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #1e40af; margin: 0 0 10px 0;">👋 Welcome, Admin!</h3>
+                <p style="color: #1e40af; margin: 0;">Your account <strong>${setupAdminEmail}</strong> has been created as the team owner.</p>
+                <p style="color: #1e40af; margin: 10px 0 0 0; font-size: 14px;">Click "Sign In" below to access your team.</p>
+              </div>
+            `
+          }
+
+          // Clear the setup flag
+          localStorage.removeItem('setup-admin-email')
+
+          // Auto-select the admin user
+          selectedUser = setupAdminEmail
+
+          // Highlight their card
+          setTimeout(() => {
+            document.querySelectorAll('.user-card').forEach((card) => {
+              if (card.dataset.user === setupAdminEmail) {
+                card.classList.add('selected')
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }
+            })
+          }, 100)
         }
       })
     </script>

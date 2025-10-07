@@ -1,6 +1,7 @@
 services:
   api:
     image: ghcr.io/seanmdalton/pulsestage-api:latest
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/ama
       PORT: "3000"
@@ -11,6 +12,8 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
       ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}
       CSRF_SECRET: ${CSRF_SECRET}
+      MOCK_SSO: "true"
+      SSO_PROVIDER: "mock"
     ports:
       - "3000:3000"
     depends_on:
