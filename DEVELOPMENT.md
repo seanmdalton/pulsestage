@@ -33,15 +33,14 @@ This guide covers the streamlined local development workflow for PulseStage.
    make dev
    ```
 
-4. **Seed database** (in another terminal):
-   ```bash
-   make db-seed
-   ```
-
-5. **Access the application:**
+4. **Access the application:**
    - Web: http://localhost:5173
    - API: http://localhost:3000
    - API Docs: http://localhost:3000/docs
+
+5. **Load data** (choose one):
+   - **Via Setup Wizard** (recommended): Open http://localhost:5173 and follow the wizard
+   - **Via CLI** (development): `make db-seed` (in another terminal)
 
 ---
 
@@ -87,9 +86,11 @@ make format       # Format code (Prettier)
 ### Database
 
 ```bash
-make db-seed      # Seed database with demo data
+make db-seed      # Seed database with demo data (development only)
 make db-reset     # Reset and reseed database from scratch
 ```
+
+**Note**: For production/first-time users, use the Setup Wizard instead (opens automatically at http://localhost:5173).
 
 ---
 

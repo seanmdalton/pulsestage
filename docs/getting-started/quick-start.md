@@ -51,24 +51,7 @@ Services started:
 
 The API automatically creates a default tenant on first startup (auto-bootstrap).
 
-### 4. Load Demo Data
-
-Load teams, users, and sample questions:
-
-```bash
-docker compose exec api npm run db:seed:full
-docker compose restart api    # Reload mock SSO users
-```
-
-This adds:
-- Acme Corp tenant with 3 teams (Engineering, Product, Marketing)
-- 3 test users (Alice - Admin, Charlie - Owner, Emily - Member)
-- 6 sample questions
-- Default tags (Urgent, Feature Request, Answered Live, Currently Presenting)
-
-**Note**: The API restart is needed to reload mock SSO users from the database.
-
-### 5. Access PulseStage
+### 4. Access PulseStage
 
 Open your browser and navigate to:
 
@@ -76,57 +59,113 @@ Open your browser and navigate to:
 http://localhost:5173
 ```
 
-## First Steps
+You'll see the **Setup Wizard** which guides you through initial setup.
 
-### Select a Tenant
+## Setup Wizard
 
-PulseStage supports multi-tenancy. The default tenant is available at:
+On first visit, PulseStage presents a setup wizard with two options:
 
-```
-http://localhost:5173/
-```
+### Option 1: Load Demo Data (Recommended)
 
-Or to see the SSO test page with all users:
+Perfect for exploring PulseStage's features:
+
+1. Click **"Load Demo Data"**
+2. Click **"Continue"**
+3. Wait ~5-10 seconds for the system to:
+   - Create Acme Corp tenant
+   - Add 3 teams (Engineering, Product, Marketing)
+   - Create 4 demo users (Alice, Charlie, David, Emily)
+   - Generate 6 sample questions
+   - Add default tags
+4. **System will restart automatically** to load the new users
+
+Demo includes:
+- **Alice Anderson** (alice.admin@acme.com) - Admin, Engineering team
+- **Charlie Chen** (charlie.owner@acme.com) - Owner, Product & Marketing teams
+- **David Martinez** (david@acme.com) - Moderator, Engineering team
+- **Emily Evans** (emily.member@acme.com) - Member, Engineering & Product teams
+
+### Option 2: Create Your Own Organization
+
+For starting fresh with your own setup:
+
+1. Click **"Set up a new team"**
+2. **Name your organization** (e.g., "My Company")
+3. **Create admin user** with your name and email
+4. **Create your first team** (e.g., "Engineering")
+5. **System will restart automatically** to create your account
+6. Navigate to `/sso-test.html` to sign in with your new account
+
+## Next Steps
+
+### Sign In
+
+After setup completes, navigate to:
 
 ```
 http://localhost:5173/sso-test.html
 ```
 
-### Choose a Test User
+**For Demo Data:**
+- You'll see all 4 demo users listed
+- Click any user to sign in
+- Try different users to explore different roles
 
-Access the SSO test page to see all available users:
+**For Custom Setup:**
+- You'll see your admin user
+- Click to sign in with your account
 
+### Explore Features
+
+1. **Submit Your First Question**
+   - Navigate to any team page
+   - Click "Submit Question"
+   - Enter your question and submit!
+
+2. **Try Presentation Mode** (Moderator+)
+   - Open a team with questions
+   - Click "Presentation Mode"
+   - Perfect for live town halls
+
+3. **Access Admin Panel** (Admin+)
+   - Click your profile → "Admin Panel"
+   - Explore team management, user management, analytics
+   - View audit logs and exports
+
+4. **Manage Teams** (Admin+)
+   - Create additional teams
+   - Add/remove members
+   - Configure team settings
+
+## Development Mode
+
+For local development with live code changes:
+
+```bash
+# Initialize and install dependencies
+make setup
+make install
+
+# Start with local builds (hot reload)
+make dev
+
+# In another terminal, seed demo data
+make db-seed
 ```
-http://localhost:5173/sso-test.html
-```
 
-**Default Tenant:**
-- **John Doe** (john.doe@company.com) - Owner (full access)
-- **Mike Chen** (mike.chen@company.com) - Moderator (People team)
-- **Sarah Wilson** (sarah.wilson@company.com) - Moderator (Engineering team)
-- **Emily Rodriguez** (emily.rodriguez@company.com) - Moderator (multiple teams)
-- **Alex Kim** (alex.kim@company.com) - Member
-- **Anonymous** - View without logging in
-
-**Acme Corp Tenant:**
-- **Alice Johnson** (alice@acme.corp) - Admin role
-- **Bob Wilson** (bob@acme.corp) - Moderator
-- **Charlie Davis** (charlie@acme.corp) - Member
-
-### Submit Your First Question
-
-1. Click on a user to log in
-2. Navigate to any team page
-3. Click "Submit Question"
-4. Enter your question and submit!
-
-## What's Next?
-
-- [Installation Guide](installation.md) - Detailed setup instructions
-- [Configuration](configuration.md) - Environment variables and settings
-- [First Steps](first-steps.md) - Guided tour of PulseStage
+See **[DEVELOPMENT.md](../../DEVELOPMENT.md)** for the complete development workflow.
 
 ## Troubleshooting
+
+### Setup Wizard Doesn't Appear
+
+Clear your browser's localStorage:
+1. Open DevTools (F12)
+2. Go to **Application** → **Local Storage** → `http://localhost:5173`
+3. Click **"Clear All"**
+4. Refresh the page
+
+Or use an **incognito/private window**.
 
 ### Services Won't Start
 
@@ -157,4 +196,11 @@ All services should show "Up" status.
 
 - Check the [Installation Guide](installation.md) for detailed troubleshooting
 - Visit our [GitHub Issues](https://github.com/seanmdalton/pulsestage/issues)
+- See [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md)
 
+## What's Next?
+
+- [Installation Guide](installation.md) - Detailed setup instructions
+- [Configuration](configuration.md) - Environment variables and settings
+- [First Steps](first-steps.md) - Guided tour of PulseStage features
+- [Development Guide](../../DEVELOPMENT.md) - For contributors

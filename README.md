@@ -42,14 +42,13 @@ git clone https://github.com/seanmdalton/pulsestage.git
 cd pulsestage
 ./setup.sh
 docker compose up -d
-
-# Load demo data (Acme Corp tenant with teams, users, questions)
-docker compose exec api npm run db:seed:full
-docker compose restart api    # Reload mock SSO users
 ```
 
-Visit [http://localhost:5173](http://localhost:5173) and you're ready to go!
+Visit [http://localhost:5173](http://localhost:5173) and follow the **Setup Wizard** to:
+- ✨ Load demo data with sample teams, users, and questions
+- 🏢 Or create your own organization from scratch
 
+**First-time user experience**: Guided setup wizard automatically appears when no teams exist.  
 **Auto-bootstrap**: Default tenant is automatically created on first startup.  
 **Published images**: Uses containers from GitHub Registry ([API](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api) | [Web](https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web)).
 
@@ -83,6 +82,7 @@ For local development with live code changes:
 make setup      # Initialize environment
 make install    # Install dependencies
 make dev        # Start with local builds (hot reload)
+make db-seed    # Load demo data (development only)
 ```
 
 See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow guide.
@@ -91,7 +91,6 @@ See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow g
 - `make test` - Run all tests
 - `make validate-ci` - Run all CI checks locally
 - `make lint-fix` - Fix linting issues
-- `make db-seed` - Load demo data
 
 ## Documentation
 
@@ -108,29 +107,9 @@ See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow g
 - **Backend**: Node.js 24 LTS, Express, TypeScript
 - **Database**: PostgreSQL 16 with Prisma ORM
 - **Cache**: Redis 7 for rate limiting
-- **Testing**: Vitest (208 tests), Playwright E2E
+- **Testing**: Vitest (231 tests), Playwright E2E
 - **Deployment**: Docker Compose
 - **Security**: Helmet, CSRF protection, Content Security Policy, Audit logging
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development environment
-docker compose up -d db redis
-cd api && npm run dev &
-cd web && npm run dev
-
-# Run tests
-npm test
-
-# Run E2E tests
-cd web && npx playwright test
-```
-
-See the [Development Guide](https://seanmdalton.github.io/pulsestage/development/setup/) for detailed instructions.
 
 ## Contributing
 
