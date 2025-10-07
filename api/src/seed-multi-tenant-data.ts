@@ -92,6 +92,12 @@ export async function seedMultiTenantData() {
       ],
     },
     {
+      email: 'david@acme.com',
+      name: 'David Martinez',
+      ssoId: 'david@acme.com',
+      teams: [{ teamId: acmeEngineering.id, role: 'moderator' }],
+    },
+    {
       email: 'emily.member@acme.com',
       name: 'Emily Evans',
       ssoId: 'emily.member@acme.com',
