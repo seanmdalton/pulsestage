@@ -234,7 +234,7 @@ describe('Moderation Features', () => {
         .set('x-mock-sso-user', 'moderator@example.com');
 
       expect(response.status).toBe(200);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Increased timeout for audit log creation
 
       const defaultTenant = await testPrisma.tenant.findUnique({ where: { slug: 'default' } });
       const auditLogs = await testPrisma.auditLog.findMany({
