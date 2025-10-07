@@ -198,7 +198,7 @@ export function Settings() {
         setSuccess('No changes to save')
         setTimeout(() => setSuccess(null), 2000)
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to save settings:', err)
       // Try to extract the error message from the API response
       const errorMessage =

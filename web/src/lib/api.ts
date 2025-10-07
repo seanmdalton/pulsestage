@@ -944,9 +944,9 @@ class ApiClient {
     )
   }
 
-  async updateTenantSettings(data: Record<string, any>): Promise<{
+  async updateTenantSettings(data: Partial<TenantSettingsType>): Promise<{
     success: boolean
-    settings: any
+    settings: TenantSettingsType
     message: string
   }> {
     const ResponseSchema = z.object({
