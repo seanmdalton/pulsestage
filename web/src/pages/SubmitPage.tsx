@@ -158,16 +158,6 @@ export function SubmitPage() {
     }
   }, [question, hasAttemptedSubmit])
 
-  // Check if the current question meets validation requirements (for button disable)
-  const isQuestionValid = () => {
-    if (!settings || !question.trim()) return false
-    const trimmedLength = question.trim().length
-    return (
-      trimmedLength >= settings.questions.minLength &&
-      trimmedLength <= settings.questions.maxLength
-    )
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!question.trim() || !currentTeam || !settings) return
@@ -325,12 +315,7 @@ export function SubmitPage() {
 
         <button
           type="submit"
-          disabled={
-            !question.trim() ||
-            isSubmitting ||
-            !currentTeam ||
-            !isQuestionValid()
-          }
+          disabled={!question.trim() || isSubmitting || !currentTeam}
           className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting
