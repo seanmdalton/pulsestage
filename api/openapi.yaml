@@ -1732,3 +1732,495 @@ paths:
           description: Team not found
         '500':
           $ref: '#/components/responses/InternalServerError'
+
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get all users
+      description: Retrieve all users with their team memberships and stats (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      responses:
+        '200':
+          description: List of users with memberships
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        email:
+                          type: string
+                        name:
+                          type: string
+                          nullable: true
+                        ssoId:
+                          type: string
+                          nullable: true
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        memberships:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              teamId:
+                                type: string
+                                format: uuid
+                              role:
+                                type: string
+                                enum: [member, moderator, admin, owner]
+                              createdAt:
+                                type: string
+                                format: date-time
+                              team:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                  name:
+                                    type: string
+                                  slug:
+                                    type: string
+                                  isActive:
+                                    type: boolean
+                        _count:
+                          type: object
+                          properties:
+                            questions:
+                              type: integer
+                            upvotes:
+                              type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/settings:
+    get:
+      tags:
+        - Admin
+      summary: Get organization settings
+      description: Retrieve tenant-level settings (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      responses:
+        '200':
+          description: Organization settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenant:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                      slug:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '404':
+          description: Tenant not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - Admin
+      summary: Update organization settings
+      description: Update tenant-level settings like organization name (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Organization name
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  tenant:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                      slug:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  message:
+                    type: string
+        '400':
+          description: Invalid request data
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /teams/{teamId}/members:
+    get:
+      tags:
+        - Teams
+      summary: Get team members
+      description: Retrieve all members of a specific team (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID
+      responses:
+        '200':
+          description: List of team members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        userId:
+                          type: string
+                          format: uuid
+                        teamId:
+                          type: string
+                          format: uuid
+                        role:
+                          type: string
+                          enum: [member, moderator, admin, owner]
+                        createdAt:
+                          type: string
+                          format: date-time
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            email:
+                              type: string
+                            name:
+                              type: string
+                              nullable: true
+                            ssoId:
+                              type: string
+                              nullable: true
+                            createdAt:
+                              type: string
+                              format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '404':
+          description: Team not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Teams
+      summary: Add member to team
+      description: Add a user to a team with a specific role (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  description: User ID to add to the team
+                role:
+                  type: string
+                  enum: [member, moderator, admin, owner]
+                  default: member
+                  description: Role to assign to the user
+      responses:
+        '200':
+          description: User added to team successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  membership:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      userId:
+                        type: string
+                        format: uuid
+                      teamId:
+                        type: string
+                        format: uuid
+                      role:
+                        type: string
+                        enum: [member, moderator, admin, owner]
+                      createdAt:
+                        type: string
+                        format: date-time
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          email:
+                            type: string
+                          name:
+                            type: string
+                            nullable: true
+                      team:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          name:
+                            type: string
+                          slug:
+                            type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid request data
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '404':
+          description: User or team not found
+        '409':
+          description: User is already a member of this team
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /teams/{teamId}/members/{userId}:
+    put:
+      tags:
+        - Teams
+      summary: Update team member role
+      description: Change a user's role within a team (admin/owner only)
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [member, moderator, admin, owner]
+                  description: New role for the user
+      responses:
+        '200':
+          description: User role updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  membership:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      userId:
+                        type: string
+                        format: uuid
+                      teamId:
+                        type: string
+                        format: uuid
+                      role:
+                        type: string
+                        enum: [member, moderator, admin, owner]
+                      createdAt:
+                        type: string
+                        format: date-time
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          email:
+                            type: string
+                          name:
+                            type: string
+                            nullable: true
+                      team:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          name:
+                            type: string
+                          slug:
+                            type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid role
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '404':
+          description: User is not a member of this team
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Teams
+      summary: Remove member from team
+      description: Remove a user from a team (admin/owner only). Cannot remove the last owner.
+      security:
+        - MockSSO: []
+        - TenantHeader: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+      responses:
+        '200':
+          description: User removed from team successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Cannot remove the last owner from a team
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - requires admin or owner role
+        '404':
+          description: User is not a member of this team
+        '500':
+          $ref: '#/components/responses/InternalServerError'

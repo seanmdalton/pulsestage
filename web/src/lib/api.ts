@@ -13,7 +13,7 @@ export interface Team {
   id: string
   name: string
   slug: string
-  description?: string
+  description?: string | null
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -153,7 +153,7 @@ const TeamSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -1246,6 +1246,249 @@ class ApiClient {
         body: JSON.stringify(data),
       },
       AdminUserResponseSchema
+    )
+  }
+
+  // ========================================
+  // Admin User Management Methods
+  // ========================================
+
+  async getAdminUsers(): Promise<{
+    users: Array<{
+      id: string
+      email: string
+      name: string | null
+      ssoId: string | null
+      createdAt: string
+      updatedAt: string
+      memberships: Array<{
+        id: string
+        teamId: string
+        role: 'member' | 'moderator' | 'admin' | 'owner'
+        createdAt: string
+        team: {
+          id: string
+          name: string
+          slug: string
+          isActive: boolean
+        }
+      }>
+      _count: {
+        questions: number
+        upvotes: number
+      }
+    }>
+  }> {
+    const AdminUsersResponseSchema = z.object({
+      users: z.array(
+        z.object({
+          id: z.string(),
+          email: z.string(),
+          name: z.string().nullable(),
+          ssoId: z.string().nullable(),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+          memberships: z.array(
+            z.object({
+              id: z.string(),
+              teamId: z.string(),
+              role: z.enum(['member', 'moderator', 'admin', 'owner']),
+              createdAt: z.string(),
+              team: z.object({
+                id: z.string(),
+                name: z.string(),
+                slug: z.string(),
+                isActive: z.boolean(),
+              }),
+            })
+          ),
+          _count: z.object({
+            questions: z.number(),
+            upvotes: z.number(),
+          }),
+        })
+      ),
+    })
+
+    return this.request('/admin/users', {}, AdminUsersResponseSchema)
+  }
+
+  async getTeamMembers(teamId: string): Promise<{
+    members: Array<{
+      id: string
+      userId: string
+      teamId: string
+      role: 'member' | 'moderator' | 'admin' | 'owner'
+      createdAt: string
+      user: {
+        id: string
+        email: string
+        name: string | null
+        ssoId: string | null
+        createdAt: string
+      }
+    }>
+  }> {
+    const TeamMembersResponseSchema = z.object({
+      members: z.array(
+        z.object({
+          id: z.string(),
+          userId: z.string(),
+          teamId: z.string(),
+          role: z.enum(['member', 'moderator', 'admin', 'owner']),
+          createdAt: z.string(),
+          user: z.object({
+            id: z.string(),
+            email: z.string(),
+            name: z.string().nullable(),
+            ssoId: z.string().nullable(),
+            createdAt: z.string(),
+          }),
+        })
+      ),
+    })
+
+    return this.request(
+      `/teams/${teamId}/members`,
+      {},
+      TeamMembersResponseSchema
+    )
+  }
+
+  async addTeamMember(
+    teamId: string,
+    data: {
+      userId: string
+      role?: 'member' | 'moderator' | 'admin' | 'owner'
+    }
+  ): Promise<{
+    success: boolean
+    membership: {
+      id: string
+      userId: string
+      teamId: string
+      role: 'member' | 'moderator' | 'admin' | 'owner'
+      createdAt: string
+      user: {
+        id: string
+        email: string
+        name: string | null
+      }
+      team: {
+        id: string
+        name: string
+        slug: string
+      }
+    }
+    message: string
+  }> {
+    const AddMemberResponseSchema = z.object({
+      success: z.boolean(),
+      membership: z.object({
+        id: z.string(),
+        userId: z.string(),
+        teamId: z.string(),
+        role: z.enum(['member', 'moderator', 'admin', 'owner']),
+        createdAt: z.string(),
+        user: z.object({
+          id: z.string(),
+          email: z.string(),
+          name: z.string().nullable(),
+        }),
+        team: z.object({
+          id: z.string(),
+          name: z.string(),
+          slug: z.string(),
+        }),
+      }),
+      message: z.string(),
+    })
+
+    return this.request(
+      `/teams/${teamId}/members`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      AddMemberResponseSchema
+    )
+  }
+
+  async updateTeamMemberRole(
+    teamId: string,
+    userId: string,
+    role: 'member' | 'moderator' | 'admin' | 'owner'
+  ): Promise<{
+    success: boolean
+    membership: {
+      id: string
+      userId: string
+      teamId: string
+      role: 'member' | 'moderator' | 'admin' | 'owner'
+      createdAt: string
+      user: {
+        id: string
+        email: string
+        name: string | null
+      }
+      team: {
+        id: string
+        name: string
+        slug: string
+      }
+    }
+    message: string
+  }> {
+    const UpdateMemberResponseSchema = z.object({
+      success: z.boolean(),
+      membership: z.object({
+        id: z.string(),
+        userId: z.string(),
+        teamId: z.string(),
+        role: z.enum(['member', 'moderator', 'admin', 'owner']),
+        createdAt: z.string(),
+        user: z.object({
+          id: z.string(),
+          email: z.string(),
+          name: z.string().nullable(),
+        }),
+        team: z.object({
+          id: z.string(),
+          name: z.string(),
+          slug: z.string(),
+        }),
+      }),
+      message: z.string(),
+    })
+
+    return this.request(
+      `/teams/${teamId}/members/${userId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+      },
+      UpdateMemberResponseSchema
+    )
+  }
+
+  async removeTeamMember(
+    teamId: string,
+    userId: string
+  ): Promise<{
+    success: boolean
+    message: string
+  }> {
+    const RemoveMemberResponseSchema = z.object({
+      success: z.boolean(),
+      message: z.string(),
+    })
+
+    return this.request(
+      `/teams/${teamId}/members/${userId}`,
+      {
+        method: 'DELETE',
+      },
+      RemoveMemberResponseSchema
     )
   }
 }

@@ -37,7 +37,6 @@ import {
   MODERATION,
 } from './constants.js';
 import { createSessionMiddleware } from './middleware/session.js';
-import { requireAdminSession } from './middleware/adminSession.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { requireAdminRole } from './middleware/requireAdminRole.js';
 import {
@@ -1063,12 +1062,20 @@ export function createApp(prisma: PrismaClient) {
         VALIDATION_PATTERNS.TEAM_SLUG,
         'Slug must contain only lowercase letters, numbers, and hyphens'
       ),
-    description: z.string().max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION).optional(),
+    description: z
+      .string()
+      .max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION)
+      .optional()
+      .transform(val => (val === '' ? undefined : val)),
   });
 
   const updateTeamSchema = z.object({
     name: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_NAME).optional(),
-    description: z.string().max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION).optional(),
+    description: z
+      .string()
+      .max(DATABASE_LIMITS.MAX_TEAM_DESCRIPTION)
+      .optional()
+      .transform(val => (val === '' ? undefined : val)),
     isActive: z.boolean().optional(),
   });
 
@@ -1081,6 +1088,7 @@ export function createApp(prisma: PrismaClient) {
           _count: {
             select: {
               questions: { where: { status: 'OPEN' } }, // Only count open questions
+              memberships: true, // Count members
             },
           },
         },
@@ -1108,6 +1116,7 @@ export function createApp(prisma: PrismaClient) {
           _count: {
             select: {
               questions: { where: { status: 'OPEN' } }, // Only count open questions
+              memberships: true, // Count members
             },
           },
         },
@@ -1155,6 +1164,7 @@ export function createApp(prisma: PrismaClient) {
           _count: {
             select: {
               questions: { where: { status: 'OPEN' } }, // Only count open questions
+              memberships: true, // Count members
             },
           },
         },
@@ -1202,6 +1212,7 @@ export function createApp(prisma: PrismaClient) {
             _count: {
               select: {
                 questions: { where: { status: 'OPEN' } }, // Only count open questions
+                memberships: true, // Count members
               },
             },
           },
@@ -2932,34 +2943,513 @@ export function createApp(prisma: PrismaClient) {
     res.json({ isFavorite });
   });
 
-  // Team membership management endpoints (admin only - placeholder)
-  app.get('/teams/:teamId/members', requireAdminSession, (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      message: 'Team membership management not implemented yet',
-    });
+  // ========================================
+  // Admin User Management Endpoints
+  // ========================================
+
+  // Get all users with their team memberships (admin only)
+  app.get('/admin/users', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const users = await prisma.user.findMany({
+        where: { tenantId },
+        include: {
+          teamMemberships: {
+            include: {
+              team: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  isActive: true,
+                },
+              },
+            },
+            orderBy: { createdAt: 'asc' },
+          },
+          _count: {
+            select: {
+              questions: true,
+              upvotes: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      res.json({
+        users: users.map(user => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          ssoId: user.ssoId,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+          memberships: user.teamMemberships.map(m => ({
+            id: m.id,
+            teamId: m.teamId,
+            role: m.role,
+            createdAt: m.createdAt.toISOString(),
+            team: m.team,
+          })),
+          _count: user._count,
+        })),
+      });
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch users',
+        message: error.message,
+      });
+    }
   });
 
-  app.post('/teams/:teamId/members', requireAdminSession, (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      message: 'Team membership management not implemented yet',
-    });
+  // Get team members (admin only)
+  app.get('/teams/:teamId/members', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const tenantId = req.tenant?.tenantId;
+
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      // Verify team exists and belongs to tenant
+      const team = await prisma.team.findUnique({
+        where: { id: teamId },
+      });
+
+      if (!team || team.tenantId !== tenantId) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Team not found',
+        });
+      }
+
+      const memberships = await prisma.teamMembership.findMany({
+        where: { teamId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              ssoId: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: [
+          { role: 'asc' }, // owner, admin, moderator, member
+          { createdAt: 'asc' },
+        ],
+      });
+
+      res.json({
+        members: memberships.map(m => ({
+          id: m.id,
+          userId: m.userId,
+          teamId: m.teamId,
+          role: m.role,
+          createdAt: m.createdAt.toISOString(),
+          user: {
+            ...m.user,
+            createdAt: m.user.createdAt.toISOString(),
+          },
+        })),
+      });
+    } catch (error: any) {
+      console.error('Error fetching team members:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch team members',
+        message: error.message,
+      });
+    }
   });
 
-  app.put('/teams/:teamId/members/:userId', requireAdminSession, (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      message: 'Team membership management not implemented yet',
-    });
+  // Add member to team (admin only)
+  const addTeamMemberSchema = z.object({
+    userId: z.string().uuid(),
+    role: z.enum(['member', 'moderator', 'admin', 'owner']).default('member'),
   });
 
-  app.delete('/teams/:teamId/members/:userId', requireAdminSession, (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      message: 'Team membership management not implemented yet',
-    });
+  app.post(
+    '/teams/:teamId/members',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { teamId } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        const parse = addTeamMemberSchema.safeParse(req.body);
+        if (!parse.success) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid request',
+            details: parse.error.flatten(),
+          });
+        }
+
+        const { userId, role } = parse.data;
+
+        // Verify team exists and belongs to tenant
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        if (!team || team.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Team not found',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Check if membership already exists
+        const existingMembership = await prisma.teamMembership.findFirst({
+          where: {
+            userId,
+            teamId,
+          },
+        });
+
+        if (existingMembership) {
+          return res.status(HTTP_STATUS.CONFLICT).json({
+            error: 'User is already a member of this team',
+            message: 'Use PUT to update the role instead',
+          });
+        }
+
+        // Create membership
+        const membership = await prisma.teamMembership.create({
+          data: {
+            userId,
+            teamId,
+            role,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+            team: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        });
+
+        console.log(`✅ Admin: Added user ${user.email} to team ${team.name} with role ${role}`);
+
+        // Audit log
+        if (req.user) {
+          await prisma.auditLog.create({
+            data: {
+              userId: req.user.id,
+              action: 'team.member.add',
+              entityType: 'team',
+              entityId: teamId,
+              metadata: { userId, role, teamName: team.name, userEmail: user.email },
+              tenantId,
+            },
+          });
+        }
+
+        res.json({
+          success: true,
+          membership: {
+            id: membership.id,
+            userId: membership.userId,
+            teamId: membership.teamId,
+            role: membership.role,
+            createdAt: membership.createdAt.toISOString(),
+            user: membership.user,
+            team: membership.team,
+          },
+          message: 'User added to team successfully',
+        });
+      } catch (error: any) {
+        console.error('Error adding team member:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to add team member',
+          message: error.message,
+        });
+      }
+    }
+  );
+
+  // Update team member role (admin only)
+  const updateTeamMemberSchema = z.object({
+    role: z.enum(['member', 'moderator', 'admin', 'owner']),
   });
+
+  app.put(
+    '/teams/:teamId/members/:userId',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { teamId, userId } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        const parse = updateTeamMemberSchema.safeParse(req.body);
+        if (!parse.success) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid request',
+            details: parse.error.flatten(),
+          });
+        }
+
+        const { role } = parse.data;
+
+        // Verify team exists and belongs to tenant
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        if (!team || team.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Team not found',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Find membership
+        const membership = await prisma.teamMembership.findFirst({
+          where: {
+            userId,
+            teamId,
+          },
+        });
+
+        if (!membership) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User is not a member of this team',
+          });
+        }
+
+        // Update role
+        const updatedMembership = await prisma.teamMembership.update({
+          where: { id: membership.id },
+          data: { role },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+            team: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        });
+
+        console.log(
+          `✅ Admin: Updated ${user.email} role in team ${team.name} from ${membership.role} to ${role}`
+        );
+
+        // Audit log
+        if (req.user) {
+          await prisma.auditLog.create({
+            data: {
+              userId: req.user.id,
+              action: 'team.member.update',
+              entityType: 'team',
+              entityId: teamId,
+              metadata: {
+                userId,
+                oldRole: membership.role,
+                newRole: role,
+                teamName: team.name,
+                userEmail: user.email,
+              },
+              tenantId,
+            },
+          });
+        }
+
+        res.json({
+          success: true,
+          membership: {
+            id: updatedMembership.id,
+            userId: updatedMembership.userId,
+            teamId: updatedMembership.teamId,
+            role: updatedMembership.role,
+            createdAt: updatedMembership.createdAt.toISOString(),
+            user: updatedMembership.user,
+            team: updatedMembership.team,
+          },
+          message: 'User role updated successfully',
+        });
+      } catch (error: any) {
+        console.error('Error updating team member role:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to update team member role',
+          message: error.message,
+        });
+      }
+    }
+  );
+
+  // Remove member from team (admin only)
+  app.delete(
+    '/teams/:teamId/members/:userId',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { teamId, userId } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Verify team exists and belongs to tenant
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        if (!team || team.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Team not found',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Find membership
+        const membership = await prisma.teamMembership.findFirst({
+          where: {
+            userId,
+            teamId,
+          },
+        });
+
+        if (!membership) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User is not a member of this team',
+          });
+        }
+
+        // Check if this is the last owner
+        if (membership.role === 'owner') {
+          const ownerCount = await prisma.teamMembership.count({
+            where: {
+              teamId,
+              role: 'owner',
+            },
+          });
+
+          if (ownerCount <= 1) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: 'Cannot remove the last owner from a team',
+              message:
+                'Assign another member as owner before removing this user, or delete the team instead',
+            });
+          }
+        }
+
+        // Delete membership
+        await prisma.teamMembership.delete({
+          where: { id: membership.id },
+        });
+
+        console.log(`✅ Admin: Removed user ${user.email} from team ${team.name}`);
+
+        // Audit log
+        if (req.user) {
+          await prisma.auditLog.create({
+            data: {
+              userId: req.user.id,
+              action: 'team.member.remove',
+              entityType: 'team',
+              entityId: teamId,
+              metadata: {
+                removedUserId: userId,
+                role: membership.role,
+                teamName: team.name,
+                userEmail: user.email,
+              },
+              tenantId,
+            },
+          });
+        }
+
+        res.json({
+          success: true,
+          message: 'User removed from team successfully',
+        });
+      } catch (error: any) {
+        console.error('Error removing team member:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to remove team member',
+          message: error.message,
+        });
+      }
+    }
+  );
 
   return app;
 }

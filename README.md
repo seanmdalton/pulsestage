@@ -22,6 +22,9 @@
 - 🔍 **Advanced search** with full-text search, filters, and date ranges
 - 🏷️ **Tagging system** for organizing and categorizing questions
 - 📌 **Moderation tools** - Pin, freeze, and bulk operations
+- 👤 **User management** - Change roles, manage team memberships
+- ⚙️ **Admin panel** - Organization settings, team/user management, analytics
+- 🎯 **Setup wizard** - First-time installation guide with demo data option
 - 📊 **Analytics dashboard** for moderation metrics and performance
 - 📤 **Exports** (CSV/JSON) for follow-ups and accountability  
 - 🔒 **Audit logging** for compliance and security

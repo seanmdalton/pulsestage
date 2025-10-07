@@ -206,8 +206,24 @@ export async function requireMockAuth(req: Request, res: Response, next: NextFun
 export async function getUserTeamsWithMembership(userId: string, prisma: any) {
   await loadMockData();
 
-  const userMemberships = mockTeamMemberships.filter(m => m.userId === userId);
-  const userPreferences = mockUserPreferences.find(p => p.userId === userId);
+  // Fetch fresh memberships from database (not from cache)
+  // This ensures role changes are reflected immediately
+  const userMemberships = await prisma.teamMembership.findMany({
+    where: { userId },
+    select: {
+      teamId: true,
+      role: true,
+    },
+  });
+
+  // Fetch preferences from database
+  const userPreferences = await prisma.userPreferences.findUnique({
+    where: { userId },
+    select: {
+      favoriteTeams: true,
+      defaultTeamId: true,
+    },
+  });
 
   // Get real teams from database
   const realTeams = await prisma.team.findMany({
@@ -222,8 +238,11 @@ export async function getUserTeamsWithMembership(userId: string, prisma: any) {
   // Map real teams to user context
   return realTeams.map((team: any) => {
     // Use real team ID directly since we updated mock data to use real IDs
-    const membership = userMemberships.find(m => m.teamId === team.id);
-    const isFavorite = userPreferences?.favoriteTeams.includes(team.id) || false;
+    const membership = userMemberships.find((m: any) => m.teamId === team.id);
+    const favoriteTeamsArray = Array.isArray(userPreferences?.favoriteTeams)
+      ? userPreferences.favoriteTeams
+      : [];
+    const isFavorite = favoriteTeamsArray.includes(team.id) || false;
     const isDefault = userPreferences?.defaultTeamId === team.id;
 
     return {
