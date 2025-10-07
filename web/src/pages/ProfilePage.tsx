@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth, useUser } from '../contexts/UserContext'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 
 export function ProfilePage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
   const {
     userTeams,
@@ -27,6 +28,17 @@ export function ProfilePage() {
     }
   }
   const activeTab = getActiveTab()
+
+  // Navigate to different tabs
+  const setActiveTab = (tab: 'overview' | 'favorites' | 'questions') => {
+    if (tab === 'overview') {
+      navigate('/profile')
+    } else if (tab === 'favorites') {
+      navigate('/profile/favorites')
+    } else if (tab === 'questions') {
+      navigate('/profile/questions')
+    }
+  }
 
   // Set page title
   useEffect(() => {
