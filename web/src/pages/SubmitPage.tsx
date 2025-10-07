@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiClient } from '../lib/api'
+import { apiClient, type TenantSettingsType } from '../lib/api'
 import type { Question } from '../lib/api'
 import { useDebounce } from '../hooks/useDebounce'
 import { SearchResults } from '../components/SearchResults'
@@ -19,6 +19,8 @@ export function SubmitPage() {
   const [upvoteStatus, setUpvoteStatus] = useState<
     Map<string, { hasUpvoted: boolean; canUpvote: boolean }>
   >(new Map())
+  const [settings, setSettings] = useState<TenantSettingsType | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const { currentTeam } = useTeamFromUrl()
   const debouncedQuestion = useDebounce(question, 300) // 300ms delay
@@ -27,6 +29,45 @@ export function SubmitPage() {
   useEffect(() => {
     setFormattedPageTitle(currentTeam?.slug, 'submit')
   }, [currentTeam?.slug])
+
+  // Load tenant settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const tenantSettings = await apiClient.getTenantSettings()
+        setSettings(tenantSettings.settings)
+      } catch (error) {
+        console.error('Failed to load tenant settings:', error)
+        // Use defaults if loading fails
+        setSettings({
+          questions: { minLength: 10, maxLength: 2000 },
+          users: { defaultRole: 'member' },
+          security: {
+            sessionTimeout: 8,
+            adminSessionTimeout: 8,
+            rateLimits: {
+              questionsPerHour: 10,
+              upvotesPerMinute: 20,
+              responsesPerHour: 5,
+              searchPerMinute: 30,
+            },
+          },
+          branding: {
+            primaryColor: '#3B82F6',
+            accentColor: '#10B981',
+            logoUrl: null,
+            faviconUrl: null,
+          },
+          features: {
+            allowAnonymousQuestions: true,
+            requireQuestionApproval: false,
+            enableEmailNotifications: false,
+          },
+        })
+      }
+    }
+    loadSettings()
+  }, [])
 
   // Search for similar questions when user types
   useEffect(() => {
@@ -108,9 +149,49 @@ export function SubmitPage() {
     }
   }
 
+  // Real-time validation
+  useEffect(() => {
+    if (!settings || !question) {
+      setValidationError(null)
+      return
+    }
+
+    const trimmedLength = question.trim().length
+    if (trimmedLength === 0) {
+      setValidationError(null)
+    } else if (trimmedLength < settings.questions.minLength) {
+      setValidationError(
+        `Question must be at least ${settings.questions.minLength} characters (currently ${trimmedLength})`
+      )
+    } else if (trimmedLength > settings.questions.maxLength) {
+      setValidationError(
+        `Question must not exceed ${settings.questions.maxLength} characters (currently ${trimmedLength})`
+      )
+    } else {
+      setValidationError(null)
+    }
+  }, [question, settings])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!question.trim() || !currentTeam) return // Don't allow submission without a team
+    if (!question.trim() || !currentTeam || !settings) return
+
+    // Validate before submitting
+    const trimmedLength = question.trim().length
+    if (trimmedLength < settings.questions.minLength) {
+      setMessage({
+        type: 'error',
+        text: `Question must be at least ${settings.questions.minLength} characters`,
+      })
+      return
+    }
+    if (trimmedLength > settings.questions.maxLength) {
+      setMessage({
+        type: 'error',
+        text: `Question must not exceed ${settings.questions.maxLength} characters`,
+      })
+      return
+    }
 
     setIsSubmitting(true)
     setMessage(null)
@@ -121,6 +202,7 @@ export function SubmitPage() {
         teamId: currentTeam.id,
       })
       setQuestion('')
+      setValidationError(null)
       setMessage({
         type: 'success',
         text: `Question submitted successfully to ${currentTeam.name}!`,
@@ -184,6 +266,12 @@ export function SubmitPage() {
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Your Question
+            {settings && (
+              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                ({settings.questions.minLength}-{settings.questions.maxLength}{' '}
+                characters)
+              </span>
+            )}
           </label>
           <textarea
             id="question"
@@ -194,15 +282,32 @@ export function SubmitPage() {
                 ? 'Ask your question here...'
                 : 'Please select a team first to submit questions'
             }
-            className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              !currentTeam ? 'opacity-50 cursor-not-allowed' : ''
+            className={`w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${
+              !currentTeam
+                ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-600'
+                : validationError
+                  ? 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
             }`}
             rows={6}
-            maxLength={2000}
+            maxLength={settings?.questions.maxLength || 2000}
             disabled={isSubmitting || !currentTeam}
           />
-          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {question.length}/2000 characters
+          <div className="mt-1 flex justify-between items-start">
+            <div
+              className={`text-sm ${
+                validationError
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}
+            >
+              {validationError || (
+                <>
+                  {question.trim().length}/
+                  {settings?.questions.maxLength || 2000} characters
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -220,14 +325,21 @@ export function SubmitPage() {
 
         <button
           type="submit"
-          disabled={!question.trim() || isSubmitting || !currentTeam}
+          disabled={
+            !question.trim() ||
+            isSubmitting ||
+            !currentTeam ||
+            !!validationError
+          }
           className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting
             ? 'Submitting...'
             : !currentTeam
               ? 'Select a Team First'
-              : 'Submit Question'}
+              : validationError
+                ? 'Fix Validation Errors'
+                : 'Submit Question'}
         </button>
       </form>
 

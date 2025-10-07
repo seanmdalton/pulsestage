@@ -411,9 +411,9 @@ components:
       properties:
         body:
           type: string
-          minLength: 3
-          maxLength: 2000
-          description: Question text
+          minLength: 1
+          maxLength: 5000
+          description: Question text (actual limits are configured per-tenant in admin settings, defaults to 10-2000 characters)
         teamId:
           type: string
           format: uuid

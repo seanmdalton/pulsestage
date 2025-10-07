@@ -567,17 +567,29 @@ export function createApp(prisma: PrismaClient) {
     });
   });
 
-  const createQuestionSchema = z.object({
-    body: z.string().min(3).max(2000),
-    teamId: z.string().optional(),
-  });
-
   // Rate limited: 10 requests per minute per IP
   app.post(
     '/questions',
     rateLimit('create-question', RATE_LIMITS.CREATE_QUESTION),
     requirePermission('question.submit'),
     async (req, res) => {
+      // Fetch tenant settings for dynamic validation
+      const { getTenantSettings } = await import('./lib/settingsService.js');
+      const settings = await getTenantSettings(prisma, req.tenant!.tenantId);
+
+      // Create schema with tenant-specific limits
+      const createQuestionSchema = z.object({
+        body: z
+          .string()
+          .min(settings.questions.minLength, {
+            message: `Question must be at least ${settings.questions.minLength} characters`,
+          })
+          .max(settings.questions.maxLength, {
+            message: `Question must not exceed ${settings.questions.maxLength} characters`,
+          }),
+        teamId: z.string().optional(),
+      });
+
       const parse = createQuestionSchema.safeParse(req.body);
       if (!parse.success)
         return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });

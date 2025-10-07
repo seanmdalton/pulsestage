@@ -3,8 +3,11 @@ import type { components } from './api-types'
 
 // Re-export OpenAPI-generated types
 export type Question = components['schemas']['Question']
-export type CreateQuestionRequest =
-  components['schemas']['CreateQuestionRequest']
+// Override CreateQuestionRequest to include teamId (OpenAPI spec has it but types are out of sync)
+export interface CreateQuestionRequest {
+  body: string
+  teamId?: string
+}
 export type RespondRequest = components['schemas']['RespondRequest']
 export type HealthResponse = components['schemas']['HealthResponse']
 
@@ -82,6 +85,38 @@ export interface TeamWithMembership extends Team {
   isFavorite?: boolean
   memberCount?: number
   members?: TeamMembership[]
+}
+
+// Tenant Settings type (matches backend DEFAULT_SETTINGS)
+export interface TenantSettingsType {
+  questions: {
+    minLength: number
+    maxLength: number
+  }
+  users: {
+    defaultRole: 'viewer' | 'member' | 'moderator' | 'admin' | 'owner'
+  }
+  security: {
+    sessionTimeout: number
+    adminSessionTimeout: number
+    rateLimits: {
+      questionsPerHour: number
+      upvotesPerMinute: number
+      responsesPerHour: number
+      searchPerMinute: number
+    }
+  }
+  branding: {
+    primaryColor: string
+    accentColor: string
+    logoUrl: string | null
+    faviconUrl: string | null
+  }
+  features: {
+    allowAnonymousQuestions: boolean
+    requireQuestionApproval: boolean
+    enableEmailNotifications: boolean
+  }
 }
 
 // User management request types
@@ -863,40 +898,7 @@ class ApiClient {
 
   // Tenant Settings methods (advanced configuration)
   async getTenantSettings(): Promise<{
-    settings: {
-      questions: {
-        minLength: number
-        maxLength: number
-      }
-      users: {
-        defaultRole: string
-      }
-      security: {
-        sessionTimeout: number
-        adminSessionTimeout: number
-        rateLimits: {
-          questionsPerHour: number
-          upvotesPerMinute: number
-          responsesPerHour: number
-          searchPerMinute: number
-        }
-      }
-      branding: {
-        logo: string | null
-        logoUrl: string | null
-        primaryColor: string
-        accentColor: string
-        welcomeMessage: string
-        showWelcomeMessage: boolean
-      }
-      features: {
-        tagging: boolean
-        search: boolean
-        presentationMode: boolean
-        exports: boolean
-        auditLogs: boolean
-      }
-    }
+    settings: TenantSettingsType
   }> {
     const ResponseSchema = z.object({
       settings: z.object({
@@ -905,7 +907,13 @@ class ApiClient {
           maxLength: z.number(),
         }),
         users: z.object({
-          defaultRole: z.string(),
+          defaultRole: z.enum([
+            'viewer',
+            'member',
+            'moderator',
+            'admin',
+            'owner',
+          ]),
         }),
         security: z.object({
           sessionTimeout: z.number(),
@@ -918,19 +926,15 @@ class ApiClient {
           }),
         }),
         branding: z.object({
-          logo: z.string().nullable(),
-          logoUrl: z.string().nullable(),
           primaryColor: z.string(),
           accentColor: z.string(),
-          welcomeMessage: z.string(),
-          showWelcomeMessage: z.boolean(),
+          logoUrl: z.string().nullable(),
+          faviconUrl: z.string().nullable(),
         }),
         features: z.object({
-          tagging: z.boolean(),
-          search: z.boolean(),
-          presentationMode: z.boolean(),
-          exports: z.boolean(),
-          auditLogs: z.boolean(),
+          allowAnonymousQuestions: z.boolean(),
+          requireQuestionApproval: z.boolean(),
+          enableEmailNotifications: z.boolean(),
         }),
       }),
     })
