@@ -28,6 +28,23 @@ model Tenant {
   users             User[]
   userPreferences   UserPreferences[]
   auditLogs         AuditLog[]
+  settings          TenantSettings?
+}
+
+// Tenant-level settings (configurable via Admin UI)
+model TenantSettings {
+  id        String   @id @default(uuid())
+  tenantId  String   @unique
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // JSON field for flexibility - stores all configuration
+  // Structure: { questions: {...}, users: {...}, security: {...}, branding: {...}, features: {...} }
+  settings  Json     @default("{}")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([tenantId])
 }
 
 model Team {

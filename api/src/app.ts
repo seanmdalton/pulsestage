@@ -1051,6 +1051,78 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // Tenant settings endpoints (advanced configuration)
+  app.get('/admin/tenant-settings', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const { getTenantSettings } = await import('./lib/settingsService.js');
+      const settings = await getTenantSettings(prisma, tenantId);
+
+      res.json({
+        settings,
+      });
+    } catch (error: any) {
+      console.error('Error fetching tenant settings:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch tenant settings',
+        message: error.message,
+      });
+    }
+  });
+
+  app.patch('/admin/tenant-settings', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      const { updateTenantSettings } = await import('./lib/settingsService.js');
+
+      // Update settings
+      const settings = await updateTenantSettings(prisma, tenantId, req.body);
+
+      // Log the change
+      if (req.user) {
+        await auditService.log(req, {
+          action: 'tenant.settings.update',
+          entityType: 'TenantSettings',
+          entityId: tenantId,
+          metadata: { updates: req.body },
+        });
+      }
+
+      res.json({
+        success: true,
+        settings,
+        message: 'Tenant settings updated successfully',
+      });
+    } catch (error: any) {
+      console.error('Error updating tenant settings:', error);
+
+      // Return validation errors with 400 status
+      if (error.message && error.message.includes('must')) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Validation failed',
+          message: error.message,
+        });
+      }
+
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to update tenant settings',
+        message: error.message,
+      });
+    }
+  });
+
   // Team management endpoints
   const createTeamSchema = z.object({
     name: z.string().min(1).max(DATABASE_LIMITS.MAX_TEAM_NAME),

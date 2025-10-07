@@ -238,7 +238,7 @@ class ApiClient {
     const mockTenant = localStorage.getItem('mock-tenant')
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     }
 
     if (mockSSOUser) {
@@ -255,7 +255,19 @@ class ApiClient {
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      // Try to extract error message from response body
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        if (errorData.message) {
+          errorMessage = errorData.message
+        } else if (errorData.error) {
+          errorMessage = errorData.error
+        }
+      } catch {
+        // If parsing fails, use default error message
+      }
+      throw new Error(errorMessage)
     }
 
     const data = await response.json()
@@ -840,6 +852,111 @@ class ApiClient {
 
     return this.request(
       '/admin/settings',
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        body: JSON.stringify(data),
+      },
+      ResponseSchema
+    )
+  }
+
+  // Tenant Settings methods (advanced configuration)
+  async getTenantSettings(): Promise<{
+    settings: {
+      questions: {
+        minLength: number
+        maxLength: number
+      }
+      users: {
+        defaultRole: string
+      }
+      security: {
+        sessionTimeout: number
+        adminSessionTimeout: number
+        rateLimits: {
+          questionsPerHour: number
+          upvotesPerMinute: number
+          responsesPerHour: number
+          searchPerMinute: number
+        }
+      }
+      branding: {
+        logo: string | null
+        logoUrl: string | null
+        primaryColor: string
+        accentColor: string
+        welcomeMessage: string
+        showWelcomeMessage: boolean
+      }
+      features: {
+        tagging: boolean
+        search: boolean
+        presentationMode: boolean
+        exports: boolean
+        auditLogs: boolean
+      }
+    }
+  }> {
+    const ResponseSchema = z.object({
+      settings: z.object({
+        questions: z.object({
+          minLength: z.number(),
+          maxLength: z.number(),
+        }),
+        users: z.object({
+          defaultRole: z.string(),
+        }),
+        security: z.object({
+          sessionTimeout: z.number(),
+          adminSessionTimeout: z.number(),
+          rateLimits: z.object({
+            questionsPerHour: z.number(),
+            upvotesPerMinute: z.number(),
+            responsesPerHour: z.number(),
+            searchPerMinute: z.number(),
+          }),
+        }),
+        branding: z.object({
+          logo: z.string().nullable(),
+          logoUrl: z.string().nullable(),
+          primaryColor: z.string(),
+          accentColor: z.string(),
+          welcomeMessage: z.string(),
+          showWelcomeMessage: z.boolean(),
+        }),
+        features: z.object({
+          tagging: z.boolean(),
+          search: z.boolean(),
+          presentationMode: z.boolean(),
+          exports: z.boolean(),
+          auditLogs: z.boolean(),
+        }),
+      }),
+    })
+
+    return this.request(
+      '/admin/tenant-settings',
+      {
+        credentials: 'include',
+      },
+      ResponseSchema
+    )
+  }
+
+  async updateTenantSettings(data: Record<string, any>): Promise<{
+    success: boolean
+    settings: any
+    message: string
+  }> {
+    const ResponseSchema = z.object({
+      success: z.boolean(),
+      settings: z.any(),
+      message: z.string(),
+    })
+
+    return this.request(
+      '/admin/tenant-settings',
       {
         method: 'PATCH',
         credentials: 'include',
