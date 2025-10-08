@@ -5,8 +5,7 @@
  * Suitable for self-hosted deployments or custom mail servers
  */
 
-import nodemailer from 'nodemailer';
-import type { Transporter } from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 import type { IEmailService, EmailOptions, EmailSendResult, EmailServiceConfig } from '../types.js';
 
 export class SMTPEmailService implements IEmailService {

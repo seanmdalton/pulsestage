@@ -8,9 +8,6 @@ import { Queue, Worker, Job } from 'bullmq';
 import { getEmailService } from '../email/emailService.js';
 import { renderQuestionAnsweredEmail } from '../email/templates.js';
 import type { EmailOptions } from '../email/types.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
 
 /**
  * Email job data structure
