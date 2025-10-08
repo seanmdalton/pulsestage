@@ -12,20 +12,20 @@
         <meta name="author" content="Sean Dalton">
       
       
-        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/environment/">
+        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/email-configuration/">
       
       
-        <link rel="prev" href="../production/">
+        <link rel="prev" href="../environment/">
       
       
-        <link rel="next" href="../email-configuration/">
+        <link rel="next" href="../monitoring/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
     
     
-  <title>Environment Variables - PulseStage Documentation</title>
+  <title>Email Configuration - PulseStage Documentation</title>
 
     
       <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#environment-variables" class="md-skip">
+        <a href="#email-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Environment Variables
+              Email Configuration
             
           </span>
         </div>
@@ -2361,6 +2361,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Environment Variables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -2378,7 +2401,7 @@
   
   
   <span class="md-ellipsis">
-    Environment Variables
+    Email Configuration
     
   </span>
   
@@ -2391,7 +2414,7 @@
   
   
   <span class="md-ellipsis">
-    Environment Variables
+    Email Configuration
     
   </span>
   
@@ -2414,55 +2437,130 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Quick Start
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#core-configuration" class="md-nav__link">
+  <a href="#email-system-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      Core Configuration
+      Email System Architecture
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Core Configuration">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-email-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Email Providers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Email Providers">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#database" class="md-nav__link">
+  <a href="#1-resend-recommended-for-production" class="md-nav__link">
     <span class="md-ellipsis">
-      Database
+      1. Resend (Recommended for Production)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#redis" class="md-nav__link">
+  <a href="#2-smtp-sendgrid-aws-ses-custom" class="md-nav__link">
     <span class="md-ellipsis">
-      Redis
+      2. SMTP (SendGrid, AWS SES, Custom)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. SMTP (SendGrid, AWS SES, Custom)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-sendgrid" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: SendGrid
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#api-server" class="md-nav__link">
+  <a href="#option-b-aws-ses" class="md-nav__link">
     <span class="md-ellipsis">
-      API Server
+      Option B: AWS SES
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#admin-authentication" class="md-nav__link">
+  <a href="#option-c-generic-smtp-gmail-outlook-etc" class="md-nav__link">
     <span class="md-ellipsis">
-      Admin Authentication
+      Option C: Generic SMTP (Gmail, Outlook, etc.)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-for-all-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required for All Providers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smtp-specific-when-email_providersmtp" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMTP-Specific (when EMAIL_PROVIDER=smtp)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resend-specific-when-email_providerresend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resend-Specific (when EMAIL_PROVIDER=resend)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional
     </span>
   </a>
   
@@ -2474,46 +2572,37 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multi-tenancy" class="md-nav__link">
+  <a href="#dns-configuration-for-email-deliverability" class="md-nav__link">
     <span class="md-ellipsis">
-      Multi-Tenancy
+      DNS Configuration for Email Deliverability
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#email-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Email Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Email Configuration">
+    <nav class="md-nav" aria-label="DNS Configuration for Email Deliverability">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#core-email-settings" class="md-nav__link">
+  <a href="#spf-sender-policy-framework" class="md-nav__link">
     <span class="md-ellipsis">
-      Core Email Settings
+      SPF (Sender Policy Framework)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#smtp-configuration" class="md-nav__link">
+  <a href="#dkim-domainkeys-identified-mail" class="md-nav__link">
     <span class="md-ellipsis">
-      SMTP Configuration
+      DKIM (DomainKeys Identified Mail)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#resend-configuration" class="md-nav__link">
+  <a href="#dmarc-domain-based-message-authentication" class="md-nav__link">
     <span class="md-ellipsis">
-      Resend Configuration
+      DMARC (Domain-based Message Authentication)
     </span>
   </a>
   
@@ -2525,64 +2614,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#server-sent-events-sse" class="md-nav__link">
+  <a href="#testing-your-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      Server-Sent Events (SSE)
+      Testing Your Configuration
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#frontend-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Frontend Configuration
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-only-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development-Only Variables
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-configurations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Configurations
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Example Configurations">
+    <nav class="md-nav" aria-label="Testing Your Configuration">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#local-development-docker-composeoverrideyaml" class="md-nav__link">
+  <a href="#1-verify-services-are-running" class="md-nav__link">
     <span class="md-ellipsis">
-      Local Development (docker-compose.override.yaml)
+      1. Verify Services are Running
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#production-awsdigitaloceanetc" class="md-nav__link">
+  <a href="#2-send-a-test-email" class="md-nav__link">
     <span class="md-ellipsis">
-      Production (AWS/DigitalOcean/etc.)
+      2. Send a Test Email
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#production-multi-tenant-saas" class="md-nav__link">
+  <a href="#3-monitor-the-email-queue" class="md-nav__link">
     <span class="md-ellipsis">
-      Production Multi-Tenant (SaaS)
+      3. Monitor the Email Queue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-check-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Check Logs
     </span>
   </a>
   
@@ -2590,66 +2661,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Best Practices
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Security Best Practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-never-commit-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Never Commit Secrets
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-use-secrets-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Use Secrets Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-rotate-credentials-regularly" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Rotate Credentials Regularly
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-principle-of-least-privilege" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Principle of Least Privilege
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Validation
-    </span>
-  </a>
   
 </li>
       
@@ -2664,27 +2675,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#api-wont-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      API won't start
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cors-errors-in-browser" class="md-nav__link">
-    <span class="md-ellipsis">
-      CORS errors in browser
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#emails-not-sending" class="md-nav__link">
     <span class="md-ellipsis">
-      Emails not sending
+      Emails Not Sending
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emails-going-to-spam" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emails Going to Spam
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-email-failure-rate" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Email Failure Rate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-not-receiving-emails" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Not Receiving Emails
     </span>
   </a>
   
@@ -2696,9 +2716,87 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reference" class="md-nav__link">
+  <a href="#monitoring-in-production" class="md-nav__link">
     <span class="md-ellipsis">
-      Reference
+      Monitoring in Production
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring in Production">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-to-watch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics to Watch
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-monitoring-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Monitoring Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-email-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Email Preferences
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-custom-email-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Custom Email Templates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Considerations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      FAQ
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
     </span>
   </a>
   
@@ -2708,29 +2806,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../email-configuration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Email Configuration
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -2914,223 +2989,213 @@
   
 
 
-<h1 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Anchor link to this section">&para;</a></h1>
-<p>This document provides a comprehensive reference for all environment variables used by PulseStage.</p>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Anchor link to this section">&para;</a></h2>
-<p>Copy the example environment file and customize it for your deployment:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cp<span class="w"> </span>env.example<span class="w"> </span>.env
+<h1 id="email-configuration">Email Configuration<a class="headerlink" href="#email-configuration" title="Anchor link to this section">&para;</a></h1>
+<p>PulseStage includes a flexible email notification system that supports multiple providers. This guide covers production email setup for real deployments.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
+<p>Email notifications are sent when:
+- A user's question is answered by a moderator
+- Future: Welcome emails, moderator digests, weekly summaries (planned)</p>
+<p>Users can opt out of email notifications via their profile settings.</p>
+<h2 id="email-system-architecture">Email System Architecture<a class="headerlink" href="#email-system-architecture" title="Anchor link to this section">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Question Answered
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>       ↓
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  Queue Email Job (Redis BullMQ)
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>       ↓
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  Email Worker (Background)
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>       ↓
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  Render React Email Template
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>       ↓
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  Send via Provider (SMTP/Resend)
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>       ↓
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  Audit Log (Success/Failure)
 </span></code></pre></div>
-<p>Then edit <code>.env</code> with your specific values.</p>
-<h2 id="core-configuration">Core Configuration<a class="headerlink" href="#core-configuration" title="Anchor link to this section">&para;</a></h2>
-<h3 id="database">Database<a class="headerlink" href="#database" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Key Components:</strong>
+- <strong>Queue</strong>: Redis BullMQ for reliable background processing
+- <strong>Worker</strong>: Processes 5 concurrent emails with 3 retry attempts
+- <strong>Templates</strong>: React Email components for type-safe, maintainable emails
+- <strong>Providers</strong>: Pluggable abstraction (SMTP, Resend, AWS SES, SendGrid)</p>
+<h2 id="supported-email-providers">Supported Email Providers<a class="headerlink" href="#supported-email-providers" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-resend-recommended-for-production">1. Resend (Recommended for Production)<a class="headerlink" href="#1-resend-recommended-for-production" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Best for:</strong> Modern SaaS deployments, easy setup, great developer experience</p>
+<p><strong>Pros:</strong>
+- Simple API key authentication
+- Built-in domain verification
+- Excellent deliverability
+- Generous free tier (3,000 emails/month)
+- React Email native support</p>
+<p><strong>Setup:</strong></p>
+<ol>
+<li>
+<p><strong>Sign up</strong> at <a href="https://resend.com">resend.com</a></p>
+</li>
+<li>
+<p><strong>Add and verify your domain:</strong></p>
+</li>
+<li>Go to Domains → Add Domain</li>
+<li>Add DNS records (SPF, DKIM, DMARC) provided by Resend</li>
+<li>
+<p>Wait for verification (usually &lt; 5 minutes)</p>
+</li>
+<li>
+<p><strong>Generate API key:</strong></p>
+</li>
+<li>Go to API Keys → Create API Key</li>
+<li>
+<p>Copy the key (starts with <code>re_</code>)</p>
+</li>
+<li>
+<p><strong>Configure environment variables:</strong></p>
+</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Email Provider</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>resend
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">RESEND_API_KEY</span><span class="o">=</span>re_xxxxxxxxxxxxxxxxxxxx
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Email Sender (must be from your verified domain)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>noreply@yourdomain.com
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>PulseStage
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Frontend URL (for email links)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://yourdomain.com
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Redis (required for email queue)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://your-redis-server:6379
+</span></code></pre></div>
+<ol>
+<li><strong>Test your configuration:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Restart the API service to pick up new environment variables</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>api
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Check logs to verify email worker started</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;📧 Email worker started&quot;</span>
+</span></code></pre></div>
+<h3 id="2-smtp-sendgrid-aws-ses-custom">2. SMTP (SendGrid, AWS SES, Custom)<a class="headerlink" href="#2-smtp-sendgrid-aws-ses-custom" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Best for:</strong> Existing email infrastructure, enterprise compliance requirements</p>
+<p><strong>Pros:</strong>
+- Works with any SMTP provider
+- Enterprise-friendly
+- Full control over infrastructure</p>
+<h4 id="option-a-sendgrid">Option A: SendGrid<a class="headerlink" href="#option-a-sendgrid" title="Anchor link to this section">&para;</a></h4>
+<p><strong>Setup:</strong></p>
+<ol>
+<li>
+<p><strong>Sign up</strong> at <a href="https://sendgrid.com">sendgrid.com</a></p>
+</li>
+<li>
+<p><strong>Verify your sender identity:</strong></p>
+</li>
+<li>Settings → Sender Authentication</li>
+<li>
+<p>Either verify a single email address (for testing) or your domain (for production)</p>
+</li>
+<li>
+<p><strong>Create an API key:</strong></p>
+</li>
+<li>Settings → API Keys → Create API Key</li>
+<li>Choose "Full Access" or "Restricted Access" with Mail Send permission</li>
+<li>
+<p>Copy the API key (starts with <code>SG.</code>)</p>
+</li>
+<li>
+<p><strong>Configure environment variables:</strong></p>
+</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Email Provider</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>smtp
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># SMTP Configuration (SendGrid)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>smtp.sendgrid.net
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">587</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">SMTP_SECURE</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nv">SMTP_USER</span><span class="o">=</span>apikey
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nv">SMTP_PASS</span><span class="o">=</span>SG.xxxxxxxxxxxxxxxxxxxx
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1"># Email Sender</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>noreply@yourdomain.com
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>PulseStage
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="c1"># Frontend URL</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://yourdomain.com
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="c1"># Redis</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://your-redis-server:6379
+</span></code></pre></div>
+<h4 id="option-b-aws-ses">Option B: AWS SES<a class="headerlink" href="#option-b-aws-ses" title="Anchor link to this section">&para;</a></h4>
+<p><strong>Setup:</strong></p>
+<ol>
+<li><strong>Verify your domain in AWS SES:</strong></li>
+<li>AWS Console → SES → Verified Identities → Create Identity</li>
+<li>
+<p>Add DNS records (DKIM, SPF) to your domain</p>
+</li>
+<li>
+<p><strong>Create SMTP credentials:</strong></p>
+</li>
+<li>Account Dashboard → SMTP Settings → Create SMTP Credentials</li>
+<li>
+<p>Save the username and password</p>
+</li>
+<li>
+<p><strong>Request production access</strong> (removes 200 emails/day limit):</p>
+</li>
+<li>
+<p>Account Dashboard → Sending Statistics → Request Production Access</p>
+</li>
+<li>
+<p><strong>Configure environment variables:</strong></p>
+</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Email Provider</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>smtp
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># SMTP Configuration (AWS SES)</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>email-smtp.us-east-1.amazonaws.com<span class="w">  </span><span class="c1"># Use your region</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">587</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="nv">SMTP_SECURE</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="nv">SMTP_USER</span><span class="o">=</span>AKIAIOSFODNN7EXAMPLE<span class="w">  </span><span class="c1"># Your SMTP username</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="nv">SMTP_PASS</span><span class="o">=</span>wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY<span class="w">  </span><span class="c1"># Your SMTP password</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># Email Sender (must be verified in SES)</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>noreply@yourdomain.com
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>PulseStage
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="c1"># Frontend URL</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://yourdomain.com
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="c1"># Redis</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://your-redis-server:6379
+</span></code></pre></div>
+<h4 id="option-c-generic-smtp-gmail-outlook-etc">Option C: Generic SMTP (Gmail, Outlook, etc.)<a class="headerlink" href="#option-c-generic-smtp-gmail-outlook-etc" title="Anchor link to this section">&para;</a></h4>
+<p><strong>⚠️ Not recommended for production</strong> - Use for development/testing only.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Email Provider</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>smtp
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># SMTP Configuration (Gmail example)</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>smtp.gmail.com
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">587</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="nv">SMTP_SECURE</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="nv">SMTP_USER</span><span class="o">=</span>your-email@gmail.com
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="nv">SMTP_PASS</span><span class="o">=</span>your-app-specific-password
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="c1"># Email Sender</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>your-email@gmail.com
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>PulseStage
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1"># Frontend URL</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://yourdomain.com
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="c1"># Redis</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://your-redis-server:6379
+</span></code></pre></div>
+<p><strong>Note:</strong> Gmail requires an "App Password" (not your regular password). Go to Google Account → Security → 2-Step Verification → App Passwords.</p>
+<h2 id="environment-variables-reference">Environment Variables Reference<a class="headerlink" href="#environment-variables-reference" title="Anchor link to this section">&para;</a></h2>
+<h3 id="required-for-all-providers">Required for All Providers<a class="headerlink" href="#required-for-all-providers" title="Anchor link to this section">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>DATABASE_URL</code></td>
-<td>PostgreSQL connection string</td>
-<td>✅ Yes</td>
-<td>-</td>
-<td><code>postgresql://user:pass@host:5432/dbname</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Format:</strong> <code>postgresql://[user]:[password]@[host]:[port]/[database]?schema=[schema]</code></p>
-<p><strong>Production recommendations:</strong>
-- Use connection pooling (e.g., PgBouncer)
-- Enable SSL: Add <code>?sslmode=require</code> to the URL
-- Use a dedicated database user with minimal permissions
-- Separate read replicas for analytics queries (future)</p>
-<h3 id="redis">Redis<a class="headerlink" href="#redis" title="Anchor link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>REDIS_URL</code></td>
-<td>Full Redis connection string</td>
-<td>⚠️ One of <code>REDIS_URL</code> or <code>REDIS_HOST</code></td>
-<td>-</td>
-<td><code>redis://redis:6379</code></td>
-</tr>
-<tr>
-<td><code>REDIS_HOST</code></td>
-<td>Redis hostname</td>
-<td>⚠️ One of <code>REDIS_URL</code> or <code>REDIS_HOST</code></td>
-<td><code>localhost</code></td>
-<td><code>redis</code></td>
-</tr>
-<tr>
-<td><code>REDIS_PORT</code></td>
-<td>Redis port</td>
-<td>No</td>
-<td><code>6379</code></td>
-<td><code>6379</code></td>
-</tr>
-<tr>
-<td><code>REDIS_PASSWORD</code></td>
-<td>Redis authentication password</td>
-<td>No</td>
-<td>-</td>
-<td><code>your-redis-password</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Used for:</strong>
-- Session storage
-- Rate limiting
-- Email queue (BullMQ)</p>
-<p><strong>Production recommendations:</strong>
-- Enable authentication (<code>requirepass</code> in redis.conf)
-- Use Redis 7+ for best performance
-- Consider Redis Cluster for high availability
-- Monitor memory usage (set <code>maxmemory</code> policy)</p>
-<h3 id="api-server">API Server<a class="headerlink" href="#api-server" title="Anchor link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>PORT</code></td>
-<td>API server port</td>
-<td>No</td>
-<td><code>3000</code></td>
-<td><code>3000</code></td>
-</tr>
-<tr>
-<td><code>NODE_ENV</code></td>
-<td>Environment mode</td>
-<td>No</td>
-<td><code>development</code></td>
-<td><code>production</code></td>
-</tr>
-<tr>
-<td><code>CORS_ORIGIN</code></td>
-<td>Allowed CORS origins (comma-separated)</td>
-<td>✅ Yes</td>
-<td><code>http://localhost:5173</code></td>
-<td><code>https://app.yourdomain.com,https://admin.yourdomain.com</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong><code>NODE_ENV</code> behavior:</strong>
-- <code>development</code>: Rate limiting disabled, verbose logging
-- <code>production</code>: Rate limiting enabled, error logging only</p>
-<p><strong>CORS configuration:</strong>
-- Development: Use <code>http://localhost:5173</code>
-- Production: Use your actual frontend domain(s)
-- Multiple origins: Separate with commas (no spaces)</p>
-<h3 id="admin-authentication">Admin Authentication<a class="headerlink" href="#admin-authentication" title="Anchor link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ADMIN_KEY</code></td>
-<td>Admin API key for protected endpoints</td>
-<td>✅ Yes</td>
-<td>-</td>
-<td><code>your-secure-random-string-min-32-chars</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>⚠️ Security:</strong>
-- Generate a secure random string: <code>openssl rand -hex 32</code>
-- Never commit this to version control
-- Rotate periodically (every 90 days recommended)
-- Use your secrets manager in production (AWS Secrets Manager, HashiCorp Vault, etc.)</p>
-<p><strong>Used for:</strong>
-- <code>/admin/*</code> endpoints
-- Health dashboard
-- Email queue status
-- System metrics</p>
-<h2 id="multi-tenancy">Multi-Tenancy<a class="headerlink" href="#multi-tenancy" title="Anchor link to this section">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>MULTI_TENANT_MODE</code></td>
-<td>Enable multi-tenant subdomain routing</td>
-<td>No</td>
-<td><code>false</code></td>
-<td><code>true</code> or <code>false</code></td>
-</tr>
-<tr>
-<td><code>BASE_DOMAIN</code></td>
-<td>Base domain for tenant resolution</td>
-<td>⚠️ Required if <code>MULTI_TENANT_MODE=true</code></td>
-<td>-</td>
-<td><code>pulsestage.com</code></td>
-</tr>
-<tr>
-<td><code>TENANT_HEADER</code></td>
-<td>Header name for tenant override</td>
-<td>No</td>
-<td><code>x-tenant-id</code></td>
-<td><code>x-tenant-slug</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Single-tenant mode</strong> (<code>MULTI_TENANT_MODE=false</code>):
-- One organization per deployment
-- Simpler setup, perfect for most use cases
-- Default tenant automatically created on first startup</p>
-<p><strong>Multi-tenant mode</strong> (<code>MULTI_TENANT_MODE=true</code>):
-- Multiple organizations on one deployment
-- Subdomain-based routing: <code>acme.pulsestage.com</code> → ACME tenant
-- Requires <code>BASE_DOMAIN</code> to be set
-- See <a href="../../architecture/multi-tenancy/">Multi-Tenancy Architecture</a> for details</p>
-<p><strong>Tenant resolution order</strong> (when <code>MULTI_TENANT_MODE=true</code>):
-1. <code>x-tenant-id</code> or <code>x-tenant-slug</code> header (if present)
-2. Subdomain extraction from <code>Host</code> header
-3. Falls back to default tenant</p>
-<h2 id="email-configuration">Email Configuration<a class="headerlink" href="#email-configuration" title="Anchor link to this section">&para;</a></h2>
-<p>See <a href="../email-configuration/">Email Configuration Guide</a> for complete setup instructions.</p>
-<h3 id="core-email-settings">Core Email Settings<a class="headerlink" href="#core-email-settings" title="Anchor link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
 <th>Example</th>
 </tr>
 </thead>
@@ -3138,349 +3203,392 @@
 <tr>
 <td><code>EMAIL_PROVIDER</code></td>
 <td>Email service to use</td>
-<td>✅ Yes</td>
-<td>-</td>
 <td><code>smtp</code> or <code>resend</code></td>
 </tr>
 <tr>
 <td><code>EMAIL_FROM</code></td>
 <td>Sender email address</td>
-<td>✅ Yes</td>
-<td>-</td>
 <td><code>noreply@yourdomain.com</code></td>
 </tr>
 <tr>
 <td><code>EMAIL_FROM_NAME</code></td>
 <td>Sender display name</td>
-<td>No</td>
 <td><code>PulseStage</code></td>
-<td><code>Your Company AMA</code></td>
 </tr>
 <tr>
 <td><code>FRONTEND_URL</code></td>
-<td>Frontend URL for email links</td>
-<td>✅ Yes</td>
-<td>-</td>
+<td>Your frontend URL (for email links)</td>
 <td><code>https://yourdomain.com</code></td>
+</tr>
+<tr>
+<td><code>REDIS_URL</code> or <code>REDIS_HOST</code></td>
+<td>Redis connection for email queue</td>
+<td><code>redis://redis:6379</code></td>
 </tr>
 </tbody>
 </table>
-<h3 id="smtp-configuration">SMTP Configuration<a class="headerlink" href="#smtp-configuration" title="Anchor link to this section">&para;</a></h3>
-<p>Only required when <code>EMAIL_PROVIDER=smtp</code>.</p>
+<h3 id="smtp-specific-when-email_providersmtp">SMTP-Specific (when <code>EMAIL_PROVIDER=smtp</code>)<a class="headerlink" href="#smtp-specific-when-email_providersmtp" title="Anchor link to this section">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Description</th>
-<th>Required</th>
-<th>Default</th>
 <th>Example</th>
+<th>Required</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>SMTP_HOST</code></td>
 <td>SMTP server hostname</td>
-<td>✅ Yes</td>
-<td>-</td>
 <td><code>smtp.sendgrid.net</code></td>
+<td>Yes</td>
 </tr>
 <tr>
 <td><code>SMTP_PORT</code></td>
 <td>SMTP server port</td>
-<td>✅ Yes</td>
-<td>-</td>
 <td><code>587</code></td>
+<td>Yes</td>
 </tr>
 <tr>
 <td><code>SMTP_SECURE</code></td>
 <td>Use TLS (true for 465, false for 587)</td>
-<td>✅ Yes</td>
-<td>-</td>
 <td><code>true</code> or <code>false</code></td>
+<td>Yes</td>
 </tr>
 <tr>
 <td><code>SMTP_USER</code></td>
 <td>SMTP username</td>
-<td>⚠️ Usually required</td>
-<td>-</td>
 <td><code>apikey</code></td>
+<td>No*</td>
 </tr>
 <tr>
 <td><code>SMTP_PASS</code></td>
 <td>SMTP password</td>
-<td>⚠️ Usually required</td>
-<td>-</td>
 <td><code>SG.xxxxx</code></td>
+<td>No*</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Common SMTP providers:</strong>
-- <strong>SendGrid</strong>: <code>smtp.sendgrid.net:587</code>, user=<code>apikey</code>, pass=<code>SG.xxxxx</code>
-- <strong>AWS SES</strong>: <code>email-smtp.us-east-1.amazonaws.com:587</code>, SMTP credentials from IAM
-- <strong>Mailgun</strong>: <code>smtp.mailgun.org:587</code>, username/password from Mailgun
-- <strong>Gmail</strong> (dev only): <code>smtp.gmail.com:587</code>, use App Password</p>
-<h3 id="resend-configuration">Resend Configuration<a class="headerlink" href="#resend-configuration" title="Anchor link to this section">&para;</a></h3>
-<p>Only required when <code>EMAIL_PROVIDER=resend</code>.</p>
+<p>*Required for authenticated SMTP. Leave empty for local Mailpit testing.</p>
+<h3 id="resend-specific-when-email_providerresend">Resend-Specific (when <code>EMAIL_PROVIDER=resend</code>)<a class="headerlink" href="#resend-specific-when-email_providerresend" title="Anchor link to this section">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Description</th>
-<th>Required</th>
-<th>Default</th>
 <th>Example</th>
+<th>Required</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>RESEND_API_KEY</code></td>
 <td>Resend API key</td>
-<td>✅ Yes</td>
-<td>-</td>
-<td><code>re_xxxxxxxxxxxxx</code></td>
+<td><code>re_xxxxx</code></td>
+<td>Yes</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Setup:</strong>
-1. Sign up at <a href="https://resend.com">resend.com</a>
-2. Verify your sending domain
-3. Generate API key (starts with <code>re_</code>)</p>
-<h2 id="server-sent-events-sse">Server-Sent Events (SSE)<a class="headerlink" href="#server-sent-events-sse" title="Anchor link to this section">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>SSE_HEARTBEAT_INTERVAL</code></td>
-<td>Heartbeat interval in milliseconds</td>
-<td>No</td>
-<td><code>30000</code> (30s)</td>
-<td><code>15000</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Purpose:</strong> Keep SSE connections alive through proxies/load balancers.</p>
-<p><strong>Recommendations:</strong>
-- Default (30s) works for most deployments
-- Lower (15s) if connections drop frequently
-- Higher (60s) to reduce server load (if stable network)</p>
-<h2 id="frontend-configuration">Frontend Configuration<a class="headerlink" href="#frontend-configuration" title="Anchor link to this section">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-<th>Required</th>
-<th>Default</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WEBSITE_TITLE</code></td>
-<td>Browser tab title</td>
-<td>No</td>
-<td><code>PulseStage</code></td>
-<td><code>Your Company AMA</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Note:</strong> Frontend-specific variables are configured in <code>web/.env</code> (not shown here). See <code>web/README.md</code>.</p>
-<h2 id="development-only-variables">Development-Only Variables<a class="headerlink" href="#development-only-variables" title="Anchor link to this section">&para;</a></h2>
-<p>These are used for local development and testing. <strong>Do not use in production.</strong></p>
+<h3 id="optional">Optional<a class="headerlink" href="#optional" title="Anchor link to this section">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Description</th>
 <th>Default</th>
-<th>Example</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>MOCK_AUTH</code></td>
-<td>Enable mock SSO authentication</td>
-<td><code>false</code></td>
-<td><code>true</code></td>
+<td><code>REDIS_PORT</code></td>
+<td>Redis port</td>
+<td><code>6379</code></td>
 </tr>
 <tr>
-<td><code>LOG_LEVEL</code></td>
-<td>Logging verbosity</td>
-<td><code>info</code></td>
-<td><code>debug</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="example-configurations">Example Configurations<a class="headerlink" href="#example-configurations" title="Anchor link to this section">&para;</a></h2>
-<h3 id="local-development-docker-composeoverrideyaml">Local Development (docker-compose.override.yaml)<a class="headerlink" href="#local-development-docker-composeoverrideyaml" title="Anchor link to this section">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">environment</span><span class="p">:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">DATABASE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgresql://app:app@db:5432/ama</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">REDIS_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis://redis:6379</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">CORS_ORIGIN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:5173</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">NODE_ENV</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">ADMIN_KEY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-admin-key</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="c1"># Email (Mailpit)</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">EMAIL_PROVIDER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">smtp</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="nt">SMTP_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mailpit</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nt">SMTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1025</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nt">SMTP_SECURE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span><span class="nt">EMAIL_FROM</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">noreply@pulsestage.local</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="nt">FRONTEND_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:5173</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="c1"># Single-tenant mode</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="nt">MULTI_TENANT_MODE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-</span></code></pre></div>
-<h3 id="production-awsdigitaloceanetc">Production (AWS/DigitalOcean/etc.)<a class="headerlink" href="#production-awsdigitaloceanetc" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Database</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://pulsestage:SECURE_PASSWORD@db.internal:5432/pulsestage?sslmode<span class="o">=</span>require
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Redis</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://:SECURE_REDIS_PASSWORD@redis.internal:6379
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># API</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nv">PORT</span><span class="o">=</span><span class="m">3000</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>https://ama.yourcompany.com
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="nv">ADMIN_KEY</span><span class="o">=</span>&lt;generated-with-openssl-rand-hex-32&gt;
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># Email (Resend)</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>resend
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="nv">RESEND_API_KEY</span><span class="o">=</span>re_xxxxxxxxxxxx
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>noreply@yourcompany.com
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>Company<span class="w"> </span>AMA
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://ama.yourcompany.com
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="c1"># Single-tenant</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="nv">MULTI_TENANT_MODE</span><span class="o">=</span><span class="nb">false</span>
-</span></code></pre></div>
-<h3 id="production-multi-tenant-saas">Production Multi-Tenant (SaaS)<a class="headerlink" href="#production-multi-tenant-saas" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Database</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://pulsestage:SECURE_PASSWORD@db.internal:5432/pulsestage?sslmode<span class="o">=</span>require
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Redis</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://:SECURE_REDIS_PASSWORD@redis.internal:6379
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># API</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nv">PORT</span><span class="o">=</span><span class="m">3000</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>https://*.pulsestage.com
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="nv">ADMIN_KEY</span><span class="o">=</span>&lt;generated-with-openssl-rand-hex-32&gt;
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># Email (Resend)</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>resend
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="nv">RESEND_API_KEY</span><span class="o">=</span>re_xxxxxxxxxxxx
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="nv">EMAIL_FROM</span><span class="o">=</span>noreply@pulsestage.com
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="nv">EMAIL_FROM_NAME</span><span class="o">=</span>PulseStage
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://pulsestage.com
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="c1"># Multi-tenant</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="nv">MULTI_TENANT_MODE</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="nv">BASE_DOMAIN</span><span class="o">=</span>pulsestage.com
-</span></code></pre></div>
-<h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Anchor link to this section">&para;</a></h2>
-<h3 id="1-never-commit-secrets">1. Never Commit Secrets<a class="headerlink" href="#1-never-commit-secrets" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># ❌ Bad: Committed .env file</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>add<span class="w"> </span>.env
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add config&quot;</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># ✅ Good: .env is in .gitignore</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>git<span class="w"> </span>add<span class="w"> </span>env.example
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add example config&quot;</span>
-</span></code></pre></div>
-<h3 id="2-use-secrets-management">2. Use Secrets Management<a class="headerlink" href="#2-use-secrets-management" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Development:</strong>
-- Store in <code>.env</code> file (already ignored by git)
-- Share securely via 1Password, LastPass, etc.</p>
-<p><strong>Production:</strong>
-- AWS: Secrets Manager, Systems Manager Parameter Store
-- Kubernetes: Secrets, External Secrets Operator
-- Docker Swarm: Docker Secrets
-- Ansible: Ansible Vault</p>
-<h3 id="3-rotate-credentials-regularly">3. Rotate Credentials Regularly<a class="headerlink" href="#3-rotate-credentials-regularly" title="Anchor link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Credential</th>
-<th>Rotation Frequency</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ADMIN_KEY</code></td>
-<td>Every 90 days</td>
-</tr>
-<tr>
-<td>Database password</td>
-<td>Every 180 days</td>
-</tr>
-<tr>
+<td><code>REDIS_PASSWORD</code></td>
 <td>Redis password</td>
-<td>Every 180 days</td>
-</tr>
-<tr>
-<td>Email API keys</td>
-<td>Every 180 days or on compromise</td>
+<td>(empty)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="4-principle-of-least-privilege">4. Principle of Least Privilege<a class="headerlink" href="#4-principle-of-least-privilege" title="Anchor link to this section">&para;</a></h3>
-<ul>
-<li>Database user: Only <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code> (no <code>DROP</code>, <code>ALTER</code>)</li>
-<li>Redis: Use ACLs if available (Redis 6+)</li>
-<li>Email API keys: Restricted to "Mail Send" permission only</li>
-</ul>
-<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Anchor link to this section">&para;</a></h2>
-<p>Check your configuration is correct:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Check API starts without errors</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>--tail<span class="w"> </span><span class="m">50</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Verify database connection</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>db<span class="w"> </span>pull
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># Verify Redis connection</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>node<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;const Redis = require(&#39;ioredis&#39;); const r = new Redis({host:&#39;redis&#39;}); r.ping().then(console.log)&quot;</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="c1"># Verify email configuration</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>curl<span class="w"> </span>http://localhost:3000/admin/email-queue<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;X-Admin-Key: your-admin-key&quot;</span>
+<h2 id="dns-configuration-for-email-deliverability">DNS Configuration for Email Deliverability<a class="headerlink" href="#dns-configuration-for-email-deliverability" title="Anchor link to this section">&para;</a></h2>
+<p>To ensure your emails reach inboxes (not spam), configure these DNS records:</p>
+<h3 id="spf-sender-policy-framework">SPF (Sender Policy Framework)<a class="headerlink" href="#spf-sender-policy-framework" title="Anchor link to this section">&para;</a></h3>
+<p>Authorizes your email provider to send on your behalf.</p>
+<p><strong>Example for Resend:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Type: TXT
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Name: @
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Value: v=spf1 include:_spf.resend.com ~all
+</span></code></pre></div></p>
+<p><strong>Example for SendGrid:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Type: TXT
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Name: @
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Value: v=spf1 include:sendgrid.net ~all
+</span></code></pre></div></p>
+<p><strong>Example for AWS SES:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Type: TXT
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Name: @
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Value: v=spf1 include:amazonses.com ~all
+</span></code></pre></div></p>
+<h3 id="dkim-domainkeys-identified-mail">DKIM (DomainKeys Identified Mail)<a class="headerlink" href="#dkim-domainkeys-identified-mail" title="Anchor link to this section">&para;</a></h3>
+<p>Cryptographically signs your emails.</p>
+<p><strong>Your provider will give you specific DKIM records.</strong> Example from Resend:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Type: TXT
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Name: resend._domainkey
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Value: p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC...
+</span></code></pre></div></p>
+<h3 id="dmarc-domain-based-message-authentication">DMARC (Domain-based Message Authentication)<a class="headerlink" href="#dmarc-domain-based-message-authentication" title="Anchor link to this section">&para;</a></h3>
+<p>Tells recipients what to do with emails that fail SPF/DKIM.</p>
+<p><strong>Basic DMARC record:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Type: TXT
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Name: _dmarc
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>Value: v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
+</span></code></pre></div></p>
+<p><strong>Production DMARC record (after testing):</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Type: TXT
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Name: _dmarc
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Value: v=DMARC1; p=quarantine; rua=mailto:dmarc@yourdomain.com; pct=100
+</span></code></pre></div></p>
+<h2 id="testing-your-configuration">Testing Your Configuration<a class="headerlink" href="#testing-your-configuration" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-verify-services-are-running">1. Verify Services are Running<a class="headerlink" href="#1-verify-services-are-running" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check API logs for email worker</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;📧 Email worker started&quot;</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Check Redis connectivity</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>node<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;const Redis = require(&#39;ioredis&#39;); const r = new Redis({host:&#39;redis&#39;}); r.ping().then(console.log)&quot;</span>
+</span></code></pre></div>
+<h3 id="2-send-a-test-email">2. Send a Test Email<a class="headerlink" href="#2-send-a-test-email" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Log in to PulseStage as a regular user</li>
+<li>Submit a question in any team</li>
+<li>Log in as a moderator/admin</li>
+<li>Answer the question</li>
+<li>Check your email inbox (or your email provider's logs)</li>
+</ol>
+<h3 id="3-monitor-the-email-queue">3. Monitor the Email Queue<a class="headerlink" href="#3-monitor-the-email-queue" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Via API:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>curl<span class="w"> </span>https://yourdomain.com/admin/email-queue<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;X-Admin-Key: your-admin-key&quot;</span>
+</span></code></pre></div></p>
+<p><strong>Via Health Dashboard:</strong>
+- Log in as an admin
+- Navigate to Admin → Health Dashboard
+- View "Email Queue" section</p>
+<p><strong>Expected healthy state:</strong>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&quot;waiting&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="nt">&quot;completed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">150</span><span class="p">,</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">  </span><span class="nt">&quot;delayed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">  </span><span class="nt">&quot;paused&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<h3 id="4-check-logs">4. Check Logs<a class="headerlink" href="#4-check-logs" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Watch for email activity</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>-f<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;📧|✅.*sent&quot;</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Look for errors</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;error|Error|ERROR&quot;</span>
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
-<h3 id="api-wont-start">API won't start<a class="headerlink" href="#api-wont-start" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Check logs:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
-</span></code></pre></div></p>
-<p><strong>Common issues:</strong>
-- <code>DATABASE_URL</code> malformed → Check syntax
-- Can't connect to Redis → Verify <code>REDIS_URL</code> and Redis is running
-- <code>ADMIN_KEY</code> not set → Add to environment variables</p>
-<h3 id="cors-errors-in-browser">CORS errors in browser<a class="headerlink" href="#cors-errors-in-browser" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Symptom:</strong> Console shows "CORS policy: No 'Access-Control-Allow-Origin' header"</p>
-<p><strong>Fix:</strong> Ensure <code>CORS_ORIGIN</code> matches your frontend URL exactly.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Development</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>http://localhost:5173
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Production</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>https://ama.yourcompany.com
+<h3 id="emails-not-sending">Emails Not Sending<a class="headerlink" href="#emails-not-sending" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Symptom:</strong> Questions are answered but no emails arrive.</p>
+<p><strong>Diagnosis:</strong></p>
+<ol>
+<li>
+<p><strong>Check email worker started:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;📧 Email worker started&quot;</span>
 </span></code></pre></div>
-<h3 id="emails-not-sending">Emails not sending<a class="headerlink" href="#emails-not-sending" title="Anchor link to this section">&para;</a></h3>
-<p>See <a href="../email-configuration/#troubleshooting">Email Configuration Guide</a>.</p>
-<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Anchor link to this section">&para;</a></h2>
-<p>For more information:
-- <a href="../production/">Production Deployment Guide</a>
-- <a href="../email-configuration/">Email Configuration</a>
-- <a href="../../architecture/multi-tenancy/">Multi-Tenancy Architecture</a>
-- <a href="../../security/overview/">Security Overview</a></p>
+   If missing: Check <code>REDIS_URL</code> environment variable.</p>
+</li>
+<li>
+<p><strong>Check if jobs are queued:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>curl<span class="w"> </span>https://yourdomain.com/admin/email-queue<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-Admin-Key: your-key&quot;</span>
+</span></code></pre></div>
+   If <code>waiting</code> &gt; 0: Jobs queued but not processing (worker issue).
+   If <code>failed</code> &gt; 0: Jobs failed (check logs for errors).</p>
+</li>
+<li>
+<p><strong>Check for SMTP authentication errors:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;auth&quot;</span>
+</span></code></pre></div>
+   Common issue: Wrong <code>SMTP_USER</code> or <code>SMTP_PASS</code>.</p>
+</li>
+<li>
+<p><strong>Verify provider credentials:</strong></p>
+</li>
+<li>Resend: Test API key at <a href="https://resend.com/api-keys">resend.com/api-keys</a></li>
+<li>SendGrid: Check key hasn't expired</li>
+<li>AWS SES: Verify SMTP credentials are correct</li>
+</ol>
+<h3 id="emails-going-to-spam">Emails Going to Spam<a class="headerlink" href="#emails-going-to-spam" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Symptom:</strong> Emails arrive but in spam folder.</p>
+<p><strong>Fix:</strong></p>
+<ol>
+<li><strong>Add SPF, DKIM, DMARC records</strong> (see DNS Configuration above)</li>
+<li><strong>Verify your domain</strong> with your email provider</li>
+<li><strong>Use a real domain</strong> (not <code>localhost</code>, <code>example.com</code>, etc.)</li>
+<li><strong>Warm up your domain</strong> by sending gradually increasing volumes</li>
+<li><strong>Check your sender reputation</strong> at <a href="https://www.mail-tester.com/">mail-tester.com</a></li>
+</ol>
+<h3 id="high-email-failure-rate">High Email Failure Rate<a class="headerlink" href="#high-email-failure-rate" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Symptom:</strong> Many jobs in <code>failed</code> status.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Check recent failed jobs</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>redis<span class="w"> </span>redis-cli<span class="w"> </span>LRANGE<span class="w"> </span><span class="s2">&quot;bull:email:failed&quot;</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+<p><strong>Common causes:</strong>
+- Invalid recipient email addresses
+- Rate limiting by email provider (throttle sending)
+- Domain not verified
+- Quota exceeded</p>
+<p><strong>Fix:</strong>
+- For transient errors: Jobs auto-retry 3 times with backoff
+- For permanent errors: Check audit logs and fix root cause</p>
+<h3 id="user-not-receiving-emails">User Not Receiving Emails<a class="headerlink" href="#user-not-receiving-emails" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Symptom:</strong> Some users report not getting notifications.</p>
+<p><strong>Diagnosis:</strong></p>
+<ol>
+<li><strong>Check user's email preferences:</strong></li>
+<li>User Profile → Settings → Email Notifications</li>
+<li>
+<p>Ensure "Receive email notifications" is enabled</p>
+</li>
+<li>
+<p><strong>Verify email address is correct:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span>-c<span class="w"> </span><span class="s2">&quot;SELECT id, email FROM \&quot;User\&quot; WHERE email = &#39;user@example.com&#39;;&quot;</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Check if email was sent:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span>
+</span></code></pre></div>
+   Should see: <code>📧 Queued email notification for user@example.com</code></p>
+</li>
+</ol>
+<h2 id="monitoring-in-production">Monitoring in Production<a class="headerlink" href="#monitoring-in-production" title="Anchor link to this section">&para;</a></h2>
+<h3 id="metrics-to-watch">Metrics to Watch<a class="headerlink" href="#metrics-to-watch" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Email Queue Size</strong> (<code>waiting</code>, <code>active</code>)</li>
+<li>Should typically be 0-5</li>
+<li>
+<p>Alert if &gt; 100 (backlog building up)</p>
+</li>
+<li>
+<p><strong>Failed Email Rate</strong> (<code>failed</code> / <code>completed</code>)</p>
+</li>
+<li>Should be &lt; 1%</li>
+<li>
+<p>Alert if &gt; 5%</p>
+</li>
+<li>
+<p><strong>Processing Time</strong></p>
+</li>
+<li>Most emails should send within 5 seconds</li>
+<li>Alert if average &gt; 30 seconds</li>
+</ol>
+<h3 id="recommended-monitoring-setup">Recommended Monitoring Setup<a class="headerlink" href="#recommended-monitoring-setup" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Option 1: Health Dashboard</strong>
+- Admin → Health Dashboard
+- Auto-refreshes every 5 seconds
+- Shows queue status, counts, and error rates</p>
+<p><strong>Option 2: API Endpoint</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Add to your monitoring tool (Datadog, New Relic, etc.)</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>GET<span class="w"> </span>/admin/email-queue
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>GET<span class="w"> </span>/admin/health
+</span></code></pre></div></p>
+<p><strong>Option 3: Logs</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Export logs to your log aggregation service</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span>-f<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;📧\|✅.*sent\|❌.*failed&quot;</span>
+</span></code></pre></div></p>
+<h2 id="user-email-preferences">User Email Preferences<a class="headerlink" href="#user-email-preferences" title="Anchor link to this section">&para;</a></h2>
+<p>Users can control email notifications via their profile:</p>
+<ol>
+<li><strong>Navigate to Profile</strong></li>
+<li>
+<p>Click user menu (top right) → Profile</p>
+</li>
+<li>
+<p><strong>Email Notifications Section</strong></p>
+</li>
+<li>Toggle "Receive email notifications when your questions are answered"</li>
+<li>Changes save automatically</li>
+</ol>
+<p><strong>Technical Implementation:</strong>
+- Stored in <code>UserPreferences</code> table (<code>emailNotifications</code> field)
+- Defaults to <code>true</code> for new users
+- Checked before queuing email jobs</p>
+<h2 id="adding-custom-email-templates">Adding Custom Email Templates<a class="headerlink" href="#adding-custom-email-templates" title="Anchor link to this section">&para;</a></h2>
+<p>See <a href="../development/email-templates.md">Development Guide: Email Templates</a> for instructions on creating new email templates with React Email.</p>
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Anchor link to this section">&para;</a></h2>
+<ol>
+<li><strong>Protect API Keys:</strong></li>
+<li>Never commit API keys to version control</li>
+<li>Use environment variables or secrets management (e.g., AWS Secrets Manager)</li>
+<li>
+<p>Rotate keys periodically</p>
+</li>
+<li>
+<p><strong>Rate Limiting:</strong></p>
+</li>
+<li>PulseStage automatically queues emails (no unbounded sending)</li>
+<li>BullMQ worker processes 5 concurrent emails max</li>
+<li>
+<p>Configure your email provider's rate limits</p>
+</li>
+<li>
+<p><strong>Email Content:</strong></p>
+</li>
+<li>All email content is HTML-escaped by React Email</li>
+<li>User input (question/answer text) is sanitized</li>
+<li>
+<p>Links include full URLs (no relative paths)</p>
+</li>
+<li>
+<p><strong>Unsubscribe:</strong></p>
+</li>
+<li>All emails include unsubscribe link (profile settings)</li>
+<li>Consider adding one-click unsubscribe header (future)</li>
+</ol>
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Anchor link to this section">&para;</a></h2>
+<p><strong>Q: Can I use multiple email providers?</strong><br />
+A: No, only one provider can be active at a time. Set <code>EMAIL_PROVIDER</code> to either <code>smtp</code> or <code>resend</code>.</p>
+<p><strong>Q: Does PulseStage support email attachments?</strong><br />
+A: Not currently. All emails are HTML + plain text only.</p>
+<p><strong>Q: What happens if Redis goes down?</strong><br />
+A: New email jobs cannot be queued. Existing jobs remain in Redis and process when it recovers. No emails are lost.</p>
+<p><strong>Q: Can I customize email templates?</strong><br />
+A: Yes! Email templates are React components in <code>api/src/emails/</code>. See development docs for details.</p>
+<p><strong>Q: How do I test email without sending real emails?</strong><br />
+A: Use Mailpit for local development (see <a href="../../development/email-testing/">Email Testing Guide</a>).</p>
+<p><strong>Q: What's the maximum email throughput?</strong><br />
+A: BullMQ worker processes 5 concurrent emails. Typical rate: 50-100 emails/minute. Configurable in <code>emailQueue.ts</code>.</p>
+<p><strong>Q: Are emails sent synchronously or asynchronously?</strong><br />
+A: Asynchronously. When a question is answered, the API queues the email and returns immediately. A background worker sends it within 1-5 seconds.</p>
+<p><strong>Q: Can I see sent email history?</strong><br />
+A: Yes, via audit logs. Future: Admin UI for email history/analytics.</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li>✅ Configure your email provider</li>
+<li>✅ Add DNS records for deliverability</li>
+<li>✅ Test with a few users</li>
+<li>✅ Monitor email queue in production</li>
+<li>🔜 Add custom email templates (future)</li>
+<li>🔜 Configure weekly digest emails (future)</li>
+<li>🔜 Set up email analytics dashboard (future)</li>
+</ul>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><a href="https://react.email">React Email Documentation</a></li>
+<li><a href="https://resend.com/docs">Resend Documentation</a></li>
+<li><a href="https://docs.sendgrid.com/">SendGrid Documentation</a></li>
+<li><a href="https://docs.aws.amazon.com/ses/">AWS SES Documentation</a></li>
+<li><a href="https://docs.bullmq.io/">BullMQ Documentation</a></li>
+<li><a href="https://www.mail-tester.com/">Mail Tester (Check Email Deliverability)</a></li>
+</ul>
 
 
 
@@ -3513,7 +3621,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 19:43:35 UTC"><span class="timeago" datetime="2025-10-04T19:43:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 19:43:35 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 8, 2025 13:37:30 UTC"><span class="timeago" datetime="2025-10-08T13:37:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 8, 2025 13:37:30 UTC">2025-10-08</span>
   </span>
 
     
@@ -3550,7 +3658,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../production/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Production">
+          <a href="../environment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Environment Variables">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3560,20 +3668,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Production
+                Environment Variables
               </div>
             </div>
           </a>
         
         
           
-          <a href="../email-configuration/" class="md-footer__link md-footer__link--next" aria-label="Next: Email Configuration">
+          <a href="../monitoring/" class="md-footer__link md-footer__link--next" aria-label="Next: Monitoring">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Email Configuration
+                Monitoring
               </div>
             </div>
             <div class="md-footer__button md-icon">
