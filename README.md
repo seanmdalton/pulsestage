@@ -27,6 +27,7 @@
 - 🎯 **Setup wizard** - First-time installation guide with demo data option
 - 📊 **Analytics dashboard** for moderation metrics and performance
 - 📤 **Exports** (CSV/JSON) for follow-ups and accountability  
+- 📧 **Email notifications** - Notify users when their questions are answered
 - 🔒 **Audit logging** for compliance and security
 - 🔄 **Real-time updates** via Server-Sent Events (SSE)
 - 🐳 **Self-hostable** with Docker, open source (Apache-2.0)
@@ -40,8 +41,8 @@
 ```bash
 git clone https://github.com/seanmdalton/pulsestage.git
 cd pulsestage
-./setup.sh
-docker compose up -d
+make setup
+make start
 ```
 
 Visit [http://localhost:5173](http://localhost:5173) and follow the **Setup Wizard** to:
@@ -73,6 +74,9 @@ Full-text search with PostgreSQL GIN indexes, prefix matching for substrings, fi
 
 ### 📌 Moderation Queue & Tools
 Dedicated moderation interface with bulk operations (pin, freeze, tag, delete), quick actions, comprehensive filters, and real-time updates. Track moderation activity with detailed analytics per moderator.
+
+### 📧 Email Notifications
+Automatic email notifications when questions are answered with customizable user preferences. Supports SMTP (SendGrid, AWS SES, etc.) and Resend. Includes Redis-backed queue with retry logic for reliability. Local development uses Mailpit for testing.
 
 ## Development
 

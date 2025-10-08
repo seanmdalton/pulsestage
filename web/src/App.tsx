@@ -24,6 +24,7 @@ import { AuditPage } from './pages/AuditPage'
 import { PresentationPage } from './pages/PresentationPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { HealthDashboardPage } from './pages/HealthDashboardPage'
+import { QuestionDetailPage } from './pages/QuestionDetailPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
@@ -145,6 +146,12 @@ function App() {
                         <Route
                           path="/profile/questions"
                           element={<ProfilePage />}
+                        />
+
+                        {/* Question detail route */}
+                        <Route
+                          path="/questions/:id"
+                          element={<QuestionDetailPage />}
                         />
                       </Routes>
                     </main>

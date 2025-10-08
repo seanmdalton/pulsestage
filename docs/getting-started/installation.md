@@ -28,10 +28,10 @@ cd pulsestage
 
 ### 2. Configure Environment
 
-Run the setup script to generate secure configuration:
+Run the setup command to generate secure configuration:
 
 ```bash
-./setup.sh
+make setup
 ```
 
 This automatically:
@@ -58,7 +58,7 @@ Then edit `.env` and set:
 ### 3. Start Services
 
 ```bash
-docker compose up -d
+make start
 ```
 
 This pulls and runs the latest published images from GitHub Container Registry:
@@ -84,7 +84,7 @@ See the [Quick Start Guide](quick-start.md#setup-wizard) for detailed wizard ins
 Check all services are running:
 
 ```bash
-docker compose ps
+make status
 ```
 
 Expected output:
@@ -215,11 +215,22 @@ Then update `CORS_ORIGIN` in `.env` to match your new web port.
 Check PostgreSQL is running:
 
 ```bash
+make logs-db
+```
+
+Or manually:
+```bash
 docker compose logs db
 ```
 
 Reset database if needed:
 
+```bash
+make clean
+make start
+```
+
+Or manually:
 ```bash
 docker compose down -v
 docker compose up -d
@@ -257,9 +268,17 @@ Check Docker logs:
 
 ```bash
 # All services
-docker compose logs
+make logs
 
 # Specific service
+make logs-api
+make logs-web  
+make logs-db
+```
+
+Or manually with docker compose:
+```bash
+docker compose logs
 docker compose logs api
 docker compose logs db
 ```
@@ -274,14 +293,17 @@ Common issues:
 To upgrade to the latest version:
 
 ```bash
-# Pull latest images
-docker compose pull
-
-# Restart services
-docker compose up -d
-
-# Database migrations are applied automatically on startup
+# Pull latest images and restart
+make update
 ```
+
+Or manually:
+```bash
+docker compose pull
+docker compose up -d
+```
+
+**Note**: Database migrations are applied automatically on startup.
 
 For local development builds:
 
@@ -297,7 +319,7 @@ To completely remove PulseStage:
 
 ```bash
 # Stop and remove all containers and volumes
-docker compose down -v
+make clean
 
 # Remove images (optional)
 docker rmi ghcr.io/seanmdalton/pulsestage-api:latest

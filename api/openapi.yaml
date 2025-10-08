@@ -356,6 +356,7 @@ components:
         - userId
         - favoriteTeams
         - defaultTeamId
+        - emailNotifications
         - createdAt
         - updatedAt
       properties:
@@ -374,6 +375,10 @@ components:
           format: uuid
           nullable: true
           description: Default team ID
+        emailNotifications:
+          type: boolean
+          description: Whether to receive email notifications
+          default: true
         createdAt:
           type: string
           format: date-time
@@ -675,6 +680,37 @@ paths:
               example:
                 error: 'Too many requests'
                 message: 'Rate limit exceeded. Maximum 10 requests per minute.'
+
+  /questions/{id}:
+    get:
+      tags:
+        - Questions
+      summary: Get a question by ID
+      description: Retrieve a single question with all its details including team, author, and tags
+      operationId: getQuestionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '404':
+          description: Question not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Question not found'
 
   /questions/{id}/upvote:
     post:
@@ -1662,7 +1698,7 @@ paths:
       tags:
         - Users
       summary: Update user preferences
-      description: Update user preferences including favorite teams and default team
+      description: Update user preferences including favorite teams, default team, and email notifications
       security:
         - MockSSO: []
       requestBody:
@@ -1683,6 +1719,9 @@ paths:
                   format: uuid
                   nullable: true
                   description: Default team ID
+                emailNotifications:
+                  type: boolean
+                  description: Whether to receive email notifications
       responses:
         '200':
           description: Preferences updated successfully
@@ -1910,6 +1949,128 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           description: Forbidden - requires admin or owner role
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/health:
+    get:
+      tags:
+        - Admin
+      summary: Get system health metrics
+      description: Retrieve detailed health metrics including database, Redis, SSE connections, and memory usage (admin only)
+      security:
+        - AdminKey: []
+      responses:
+        '200':
+          description: System health metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'healthy'
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    description: Server uptime in seconds
+                  database:
+                    type: object
+                    properties:
+                      connected:
+                        type: boolean
+                      poolSize:
+                        type: number
+                      activeConnections:
+                        type: number
+                  redis:
+                    type: object
+                    properties:
+                      connected:
+                        type: boolean
+                      sessionStore:
+                        type: boolean
+                  sse:
+                    type: object
+                    properties:
+                      totalConnections:
+                        type: number
+                      tenantConnections:
+                        type: object
+                        additionalProperties:
+                          type: number
+                  memory:
+                    type: object
+                    properties:
+                      heapUsed:
+                        type: number
+                        description: Heap used in bytes
+                      heapTotal:
+                        type: number
+                        description: Total heap in bytes
+                      external:
+                        type: number
+                        description: External memory in bytes
+                      rss:
+                        type: number
+                        description: Resident Set Size in bytes
+                  data:
+                    type: object
+                    properties:
+                      tenants:
+                        type: number
+                      teams:
+                        type: number
+                      users:
+                        type: number
+                      questions:
+                        type: number
+                      upvotes:
+                        type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/email-queue:
+    get:
+      tags:
+        - Admin
+      summary: Get email queue status
+      description: Retrieve the status of the email background job queue (admin only)
+      security:
+        - AdminKey: []
+      responses:
+        '200':
+          description: Email queue status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  waiting:
+                    type: number
+                    description: Number of jobs waiting to be processed
+                  active:
+                    type: number
+                    description: Number of jobs currently being processed
+                  completed:
+                    type: number
+                    description: Number of completed jobs
+                  failed:
+                    type: number
+                    description: Number of failed jobs
+                  delayed:
+                    type: number
+                    description: Number of delayed jobs
+                  paused:
+                    type: boolean
+                    description: Whether the queue is paused
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
 

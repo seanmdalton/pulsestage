@@ -275,6 +275,53 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // Email queue status - admin only
+  app.get('/admin/email-queue', requirePermission('admin.access'), async (_req, res) => {
+    try {
+      const { getQueueMetrics, getRecentJobs } = await import('./lib/queue/emailQueue.js');
+
+      const metrics = await getQueueMetrics();
+      const recentJobs = await getRecentJobs(20);
+
+      res.json({
+        metrics,
+        recentJobs: {
+          active: recentJobs.active.map((job: any) => ({
+            id: job.id,
+            name: job.name,
+            data: job.data,
+            attemptsMade: job.attemptsMade,
+            processedOn: job.processedOn,
+          })),
+          waiting: recentJobs.waiting.map((job: any) => ({
+            id: job.id,
+            name: job.name,
+            data: job.data,
+            timestamp: job.timestamp,
+          })),
+          completed: recentJobs.completed.map((job: any) => ({
+            id: job.id,
+            name: job.name,
+            finishedOn: job.finishedOn,
+            returnvalue: job.returnvalue,
+          })),
+          failed: recentJobs.failed.map((job: any) => ({
+            id: job.id,
+            name: job.name,
+            failedReason: job.failedReason,
+            attemptsMade: job.attemptsMade,
+            finishedOn: job.finishedOn,
+          })),
+        },
+      });
+    } catch (error) {
+      console.error('Email queue status error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to get email queue status',
+      });
+    }
+  });
+
   // CSRF token endpoint - frontend can call this to get a token
   app.get('/csrf-token', provideCsrfToken(), csrfTokenEndpoint());
 
@@ -974,6 +1021,35 @@ export function createApp(prisma: PrismaClient) {
     res.json(list);
   });
 
+  // Get a single question by ID
+  app.get('/questions/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const question = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          team: true,
+          author: true,
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      });
+
+      if (!question) {
+        return res.status(404).json({ error: 'Question not found' });
+      }
+
+      res.json(question);
+    } catch (error) {
+      console.error('Error fetching question:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: 'Failed to fetch question' });
+    }
+  });
+
   // Rate limited: 10 requests per minute per IP
   app.post(
     '/questions/:id/upvote',
@@ -1654,6 +1730,37 @@ export function createApp(prisma: PrismaClient) {
           data: q,
           timestamp: Date.now(),
         });
+
+        // Send email notification to question author (if they have notifications enabled)
+        if (q.author) {
+          try {
+            // Check if author has email notifications enabled
+            const authorPreferences = await prisma.userPreferences.findUnique({
+              where: { userId: q.author.id },
+            });
+
+            if (!authorPreferences || authorPreferences.emailNotifications !== false) {
+              // Queue email (non-blocking)
+              const { queueQuestionAnsweredEmail } = await import('./lib/queue/emailQueue.js');
+              const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+              await queueQuestionAnsweredEmail({
+                to: q.author.email,
+                toName: q.author.name || 'User',
+                questionBody: q.body,
+                answerBody: parse.data.response,
+                responderName: req.user?.name || 'Moderator',
+                questionUrl: `${baseUrl}/questions/${q.id}`,
+                unsubscribeUrl: `${baseUrl}/profile?section=notifications`,
+              });
+
+              console.log(`📧 Queued email notification for ${q.author.email}`);
+            }
+          } catch (emailError) {
+            // Don't fail the response if email queueing fails
+            console.error('Failed to queue email notification:', emailError);
+          }
+        }
 
         res.json(q);
       } catch {
@@ -3206,22 +3313,26 @@ export function createApp(prisma: PrismaClient) {
 
   // Update user preferences
   app.put('/users/me/preferences', requireMockAuth, async (req, res) => {
-    const { favoriteTeams, defaultTeamId } = req.body;
+    const { favoriteTeams, defaultTeamId, emailNotifications } = req.body;
     const userId = req.user!.id;
 
     try {
+      // Build update object with only provided fields
+      const updateData: any = {};
+      if (favoriteTeams !== undefined) updateData.favoriteTeams = favoriteTeams;
+      if (defaultTeamId !== undefined) updateData.defaultTeamId = defaultTeamId;
+      if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications;
+
       // Update database
       const updatedPreferences = await prisma.userPreferences.upsert({
         where: { userId },
-        update: {
-          favoriteTeams: favoriteTeams !== undefined ? favoriteTeams : undefined,
-          defaultTeamId: defaultTeamId !== undefined ? defaultTeamId : undefined,
-        },
+        update: updateData,
         create: {
           userId,
           tenantId: req.tenant!.tenantId,
           favoriteTeams: favoriteTeams || [],
           defaultTeamId: defaultTeamId || null,
+          emailNotifications: emailNotifications !== undefined ? emailNotifications : true,
         },
         include: {
           defaultTeam: true,
@@ -3232,6 +3343,7 @@ export function createApp(prisma: PrismaClient) {
       await setUserPreferences(userId, {
         favoriteTeams: updatedPreferences.favoriteTeams as string[],
         defaultTeamId: updatedPreferences.defaultTeamId || null,
+        emailNotifications: updatedPreferences.emailNotifications,
       });
 
       res.json(updatedPreferences);

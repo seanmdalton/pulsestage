@@ -17,12 +17,12 @@ git clone https://github.com/seanmdalton/pulsestage.git
 cd pulsestage
 ```
 
-### 2. Run Setup Script
+### 2. Run Setup
 
-The setup script creates your environment configuration with secure secrets:
+The setup command creates your environment configuration with secure secrets:
 
 ```bash
-./setup.sh
+make setup
 ```
 
 This will:
@@ -36,7 +36,7 @@ This will:
 ### 3. Start the Services
 
 ```bash
-docker compose up -d
+make start
 ```
 
 This will:

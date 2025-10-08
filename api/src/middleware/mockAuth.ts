@@ -86,6 +86,7 @@ async function loadMockData() {
           ? (preference.favoriteTeams as string[])
           : [],
         defaultTeamId: preference.defaultTeamId,
+        emailNotifications: preference.emailNotifications ?? true,
       });
     }
 
@@ -123,6 +124,7 @@ const mockUserPreferences: Array<{
   userId: string;
   favoriteTeams: string[];
   defaultTeamId: string | null;
+  emailNotifications: boolean;
 }> = [];
 
 // Extend Request type to include user
@@ -260,6 +262,7 @@ export async function getUserPreferences(userId: string): Promise<{
   userId: string;
   favoriteTeams: string[];
   defaultTeamId: string | null;
+  emailNotifications: boolean;
 }> {
   await loadMockData();
 
@@ -268,6 +271,7 @@ export async function getUserPreferences(userId: string): Promise<{
       userId,
       favoriteTeams: [],
       defaultTeamId: null,
+      emailNotifications: true,
     }
   );
 }
@@ -296,7 +300,11 @@ export async function setDefaultTeam(userId: string, teamId: string) {
 // Set user preferences (for updating the mock data cache)
 export async function setUserPreferences(
   userId: string,
-  preferences: { favoriteTeams?: string[]; defaultTeamId?: string | null }
+  preferences: {
+    favoriteTeams?: string[];
+    defaultTeamId?: string | null;
+    emailNotifications?: boolean;
+  }
 ) {
   await loadMockData();
 
@@ -310,12 +318,17 @@ export async function setUserPreferences(
     if (preferences.defaultTeamId !== undefined) {
       existingPrefs.defaultTeamId = preferences.defaultTeamId;
     }
+    if (preferences.emailNotifications !== undefined) {
+      existingPrefs.emailNotifications = preferences.emailNotifications;
+    }
   } else {
     // Create new preferences
     mockUserPreferences.push({
       userId,
       favoriteTeams: preferences.favoriteTeams || [],
       defaultTeamId: preferences.defaultTeamId || null,
+      emailNotifications:
+        preferences.emailNotifications !== undefined ? preferences.emailNotifications : true,
     });
   }
 }

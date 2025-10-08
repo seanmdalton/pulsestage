@@ -176,13 +176,14 @@ model TeamMembership {
 
 // User preferences and settings
 model UserPreferences {
-  id             String   @id @default(uuid())
-  tenantId       String
-  userId         String   @unique
-  favoriteTeams  Json     @default("[]") // Array of team slugs
-  defaultTeamId  String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  tenantId             String
+  userId               String   @unique
+  favoriteTeams        Json     @default("[]") // Array of team slugs
+  defaultTeamId        String?
+  emailNotifications   Boolean  @default(true) // Receive email notifications
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
   
   // Relationships
   tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)

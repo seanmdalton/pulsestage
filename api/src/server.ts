@@ -19,6 +19,7 @@ import { env } from './env.js';
 import { initRedis } from './middleware/rateLimit.js';
 import { initSessionStore } from './middleware/session.js';
 import { createApp } from './app.js';
+import { startEmailWorker } from './lib/queue/emailQueue.js';
 
 const prisma = new PrismaClient();
 
@@ -62,6 +63,13 @@ async function start() {
     await initSessionStore();
   } catch (error) {
     console.warn('Session store initialization failed, using memory store:', error);
+  }
+
+  // Start email worker (non-blocking)
+  try {
+    startEmailWorker();
+  } catch (error) {
+    console.warn('Email worker initialization failed, emails will not be sent:', error);
   }
 
   const app = createApp(prisma);

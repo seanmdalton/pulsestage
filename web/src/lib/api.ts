@@ -371,6 +371,10 @@ class ApiClient {
     return this.request(`/questions${queryString}`, {}, z.array(QuestionSchema))
   }
 
+  async getQuestion(id: string): Promise<Question> {
+    return this.request(`/questions/${id}`, {}, QuestionSchema)
+  }
+
   async upvoteQuestion(id: string): Promise<Question> {
     return this.request(
       `/questions/${id}/upvote`,

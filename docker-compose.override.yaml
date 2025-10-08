@@ -13,6 +13,19 @@
 services:
   api:
     build: ./api
+    environment:
+      # Email configuration for testing with Mailpit
+      EMAIL_PROVIDER: smtp
+      EMAIL_FROM: noreply@pulsestage.local
+      EMAIL_FROM_NAME: PulseStage (Dev)
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      FRONTEND_URL: http://localhost:5173
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
   
   web:
     build: ./web
