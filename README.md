@@ -119,6 +119,13 @@ See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow g
 
 We welcome contributions! Please see our [Contributing Guide](https://seanmdalton.github.io/pulsestage/development/contributing/) for details.
 
+### Contributors
+
+Thank you to all the amazing people who have contributed to PulseStage! 🎉
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.

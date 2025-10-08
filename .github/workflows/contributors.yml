@@ -1,0 +1,41 @@
+name: Contributors
+
+on:
+  # Run on pushes to main (when new commits are added)
+  push:
+    branches:
+      - main
+  # Run on a schedule (weekly on Sundays at midnight)
+  schedule:
+    - cron: '0 0 * * 0'
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-contributors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update contributors list
+        uses: akhilmhdh/contributors-readme-action@v2.3.10
+        with:
+          image_size: 100
+          columns_per_row: 7
+          collaborators: 'all'
+          use_username: true
+          readme_path: 'README.md'
+          committer_username: 'github-actions[bot]'
+          committer_email: '41898282+github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: update contributors list [skip ci]'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
