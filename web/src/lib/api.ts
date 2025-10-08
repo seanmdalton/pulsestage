@@ -1163,64 +1163,6 @@ class ApiClient {
     )
   }
 
-  // Team membership management (admin only)
-  async getTeamMembers(teamId: string): Promise<TeamMembership[]> {
-    const TeamMembershipSchema = z.object({
-      id: z.string(),
-      userId: z.string(),
-      teamId: z.string(),
-      role: z.enum(['member', 'moderator', 'admin', 'owner']),
-      createdAt: z.string(),
-      user: z
-        .object({
-          id: z.string(),
-          email: z.string().email(),
-          name: z.string().optional(),
-        })
-        .optional(),
-    })
-
-    return this.request(
-      `/teams/${teamId}/members`,
-      {
-        credentials: 'include',
-      },
-      z.array(TeamMembershipSchema)
-    )
-  }
-
-  async addTeamMember(
-    teamId: string,
-    data: AddTeamMemberRequest
-  ): Promise<TeamMembership> {
-    // Schema validation removed as it's not currently used
-
-    const TeamMembershipSchema = z.object({
-      id: z.string(),
-      userId: z.string(),
-      teamId: z.string(),
-      role: z.enum(['member', 'moderator', 'admin', 'owner']),
-      createdAt: z.string(),
-      user: z
-        .object({
-          id: z.string(),
-          email: z.string().email(),
-          name: z.string().optional(),
-        })
-        .optional(),
-    })
-
-    return this.request(
-      `/teams/${teamId}/members`,
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
-        credentials: 'include',
-      },
-      TeamMembershipSchema
-    )
-  }
-
   async updateTeamMember(
     teamId: string,
     userId: string,

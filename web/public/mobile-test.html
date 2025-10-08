@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    />
+    <title>Mobile Viewer Test - PulseStage</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: white;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-size: 28px;
+      }
+      .test-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 10px;
+      }
+      .test-section h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+      .pass {
+        background: #4caf50;
+      }
+      .fail {
+        background: #f44336;
+      }
+      .info {
+        background: #2196f3;
+      }
+      pre {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin-top: 10px;
+        font-size: 12px;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        width: 100%;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      .link {
+        color: #fff;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📱 Mobile Viewer Diagnostics</h1>
+
+      <div class="test-section">
+        <h2>Environment Info</h2>
+        <pre id="env-info">Loading...</pre>
+      </div>
+
+      <div class="test-section">
+        <h2>Module Script Test</h2>
+        <div id="module-test">Testing...</div>
+      </div>
+
+      <div class="test-section">
+        <h2>API Connectivity</h2>
+        <div id="api-test">Testing...</div>
+      </div>
+
+      <div class="test-section">
+        <h2>Viewport Info</h2>
+        <pre id="viewport-info">Loading...</pre>
+      </div>
+
+      <button onclick="runTests()">🔄 Re-run Tests</button>
+      <button onclick="goToApp()">🚀 Go to Full App</button>
+    </div>
+
+    <script>
+      function getEnvInfo() {
+        return {
+          userAgent: navigator.userAgent,
+          viewport: `${window.innerWidth}x${window.innerHeight}`,
+          screen: `${screen.width}x${screen.height}`,
+          pixelRatio: window.devicePixelRatio,
+          platform: navigator.platform,
+          language: navigator.language,
+          online: navigator.onLine,
+          cookieEnabled: navigator.cookieEnabled,
+          location: window.location.href,
+          referrer: document.referrer || 'none',
+          inIframe: window !== window.parent,
+          protocols: {
+            http: window.location.protocol === 'http:',
+            https: window.location.protocol === 'https:',
+            file: window.location.protocol === 'file:',
+          },
+        }
+      }
+
+      function displayEnvInfo() {
+        const info = getEnvInfo()
+        document.getElementById('env-info').textContent = JSON.stringify(
+          info,
+          null,
+          2
+        )
+      }
+
+      function displayViewportInfo() {
+        const info = {
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight,
+          outerWidth: window.outerWidth,
+          outerHeight: window.outerHeight,
+          screenWidth: screen.width,
+          screenHeight: screen.height,
+          availWidth: screen.availWidth,
+          availHeight: screen.availHeight,
+          pixelRatio: window.devicePixelRatio,
+          orientation: screen.orientation?.type || 'unknown',
+        }
+        document.getElementById('viewport-info').textContent = JSON.stringify(
+          info,
+          null,
+          2
+        )
+      }
+
+      async function testModuleScript() {
+        const container = document.getElementById('module-test')
+        try {
+          // Try to dynamically import a module
+          const testModule = `
+            export const testValue = 'Module scripts working!';
+          `
+          const blob = new Blob([testModule], { type: 'text/javascript' })
+          const url = URL.createObjectURL(blob)
+
+          const module = await import(url)
+          URL.revokeObjectURL(url)
+
+          container.innerHTML = `
+            <div class="status pass">✓ Module scripts supported</div>
+            <pre>ES6 modules are working correctly</pre>
+          `
+        } catch (error) {
+          container.innerHTML = `
+            <div class="status fail">✗ Module script error</div>
+            <pre>${error.message}</pre>
+          `
+        }
+      }
+
+      async function testAPI() {
+        const container = document.getElementById('api-test')
+        try {
+          const response = await fetch('/api/health')
+          const data = await response.json()
+
+          container.innerHTML = `
+            <div class="status pass">✓ API Connected</div>
+            <pre>Status: ${response.status}
+Response: ${JSON.stringify(data, null, 2)}</pre>
+          `
+        } catch (error) {
+          container.innerHTML = `
+            <div class="status fail">✗ API Connection Failed</div>
+            <pre>Error: ${error.message}
+This might be a CORS or network issue.</pre>
+          `
+        }
+      }
+
+      function runTests() {
+        displayEnvInfo()
+        displayViewportInfo()
+        testModuleScript()
+        testAPI()
+      }
+
+      function goToApp() {
+        window.location.href = '/'
+      }
+
+      // Run tests on load
+      runTests()
+
+      // Update viewport info on resize
+      window.addEventListener('resize', displayViewportInfo)
+    </script>
+  </body>
+</html>
