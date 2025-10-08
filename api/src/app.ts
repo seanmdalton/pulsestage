@@ -166,6 +166,117 @@ export function createApp(prisma: PrismaClient) {
   app.get('/csrf-token', provideCsrfToken(), csrfTokenEndpoint());
 
   // ============================================================================
+  // MOCK SSO ENDPOINTS (Development Only)
+  // ============================================================================
+  // These endpoints support the mock SSO testing page
+  // Only available when MOCK_SSO=true
+
+  if (process.env.MOCK_SSO === 'true') {
+    // Get all tenants for mock SSO tenant selection
+    app.get('/mock-sso/tenants', async (req, res) => {
+      try {
+        const tenants = await prisma.tenant.findMany({
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        res.json({ tenants });
+      } catch (error) {
+        console.error('Error fetching tenants for mock SSO:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to fetch tenants',
+        });
+      }
+    });
+
+    // Get all users for a specific tenant for mock SSO user selection
+    app.get('/mock-sso/users/:tenantSlug', async (req, res) => {
+      try {
+        const { tenantSlug } = req.params;
+
+        const tenant = await prisma.tenant.findUnique({
+          where: { slug: tenantSlug },
+        });
+
+        if (!tenant) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Tenant not found',
+          });
+        }
+
+        // Run the query in the correct tenant context
+        // This is necessary because Prisma middleware automatically scopes queries by tenant
+        const { runInTenantContext } = await import('./middleware/tenantContext.js');
+
+        const { formattedUsers } = await runInTenantContext(
+          { tenantId: tenant.id, tenantSlug: tenant.slug },
+          async () => {
+            const users = await prisma.user.findMany({
+              where: {}, // Let middleware inject tenantId
+              include: {
+                teamMemberships: {
+                  include: {
+                    team: {
+                      select: {
+                        name: true,
+                        slug: true,
+                      },
+                    },
+                  },
+                },
+              },
+              orderBy: { createdAt: 'asc' },
+            });
+
+            // Format users for mock SSO display
+            const formattedUsers = users.map(user => {
+              // Get the highest role across all teams
+              const roles = user.teamMemberships.map(m => m.role);
+              const roleHierarchy = ['viewer', 'member', 'moderator', 'admin', 'owner'];
+              const highestRole =
+                roles.sort((a, b) => roleHierarchy.indexOf(b) - roleHierarchy.indexOf(a))[0] ||
+                'member';
+
+              // Format teams string
+              const teamsString = user.teamMemberships
+                .map(m => `${m.team.name} (${m.role})`)
+                .join(', ');
+
+              return {
+                email: user.email,
+                name: user.name,
+                role: highestRole,
+                teams: teamsString || 'No teams',
+              };
+            });
+
+            return { formattedUsers };
+          }
+        );
+
+        res.json({
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            slug: tenant.slug,
+          },
+          users: formattedUsers,
+        });
+      } catch (error) {
+        console.error('Error fetching users for mock SSO:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to fetch users',
+        });
+      }
+    });
+  }
+
+  // ============================================================================
   // SETUP WIZARD ENDPOINTS
   // ============================================================================
   // These endpoints support the first-time setup experience
