@@ -1405,6 +1405,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    System Design
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1416,6 +1429,406 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Design Principles
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Design Principles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-security-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Security First
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-multi-tenancy-by-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Multi-Tenancy by Default
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-real-time-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Real-Time First
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Developer Experience
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Components
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-react-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend (React Application)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-api-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backend (API Server)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database (PostgreSQL)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-layer-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache Layer (Redis)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Architectural Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Architectural Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-multi-tenant-context-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Multi-Tenant Context Pattern
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-role-based-access-control-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Role-Based Access Control (RBAC)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-event-driven-real-time-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Event-Driven Real-Time Updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-audit-logging-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Audit Logging Pattern
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-input-validation-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Input Validation Pattern
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scalability-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scalability Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scalability Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Capacity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#horizontal-scaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Horizontal Scaling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimizations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#defense-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defense in Depth
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Threat Model
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring &amp; Observability
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring &amp; Observability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Capabilities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-architecture-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Architecture Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Architecture Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#short-term-1-3-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Short-Term (1-3 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-term-3-6-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Medium-Term (3-6 months)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-term-6-12-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      Long-Term (6-12 months)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-choices-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technology Choices &amp; Rationale
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions?
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1480,7 +1893,7 @@
   
   
   <span class="md-ellipsis">
-    Multi Tenancy
+    Multi-Tenancy Architecture
     
   </span>
   
@@ -1503,7 +1916,7 @@
   
   
   <span class="md-ellipsis">
-    Real Time
+    Real-Time Architecture
     
   </span>
   
@@ -2506,7 +2919,413 @@
 
 
 <h1 id="system-design">System Design<a class="headerlink" href="#system-design" title="Anchor link to this section">&para;</a></h1>
-<p>Documentation coming soon...</p>
+<p>This document provides a comprehensive overview of PulseStage's architecture, design decisions, and technical implementation.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
+<p>PulseStage is a production-ready, multi-tenant Q&amp;A platform designed for organizational town halls and all-hands meetings. It follows a <strong>three-tier architecture</strong> with modern best practices for security, scalability, and maintainability.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────┐
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                        Users/Clients                         │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│              (Browsers, Mobile, Integrations)                │
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└───────────────────────────┬─────────────────────────────────┘
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                            │
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                            ▼
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>┌─────────────────────────────────────────────────────────────┐
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│                     Presentation Layer                       │
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│                  React 19 + TypeScript + Vite                │
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│     • Real-time SSE • Dark Mode • Responsive Design         │
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>└───────────────────────────┬─────────────────────────────────┘
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                            │
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                            ▼
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>┌─────────────────────────────────────────────────────────────┐
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│                      Application Layer                       │
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│                 Node.js 24 + Express + TypeScript            │
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│   • RBAC Middleware • Multi-tenant Context • Rate Limiting   │
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   • CSRF Protection • Audit Logging • SSE Broadcasting       │
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>└───────────────────────────┬─────────────────────────────────┘
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                            │
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                ┌───────────┴───────────┐
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                ▼                       ▼
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>┌──────────────────────────┐  ┌─────────────────────┐
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│      Data Layer          │  │    Cache Layer      │
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│  PostgreSQL 16 + Prisma  │  │      Redis 7        │
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  • Multi-tenant          │  │  • Rate Limits      │
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│  • Full-text Search      │  │  • Sessions         │
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  • Audit Logs            │  │                     │
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>└──────────────────────────┘  └─────────────────────┘
+</span></code></pre></div>
+<h2 id="core-design-principles">Core Design Principles<a class="headerlink" href="#core-design-principles" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-security-first">1. <strong>Security First</strong><a class="headerlink" href="#1-security-first" title="Anchor link to this section">&para;</a></h3>
+<p>Every layer implements defense-in-depth:
+- Authentication &amp; authorization at multiple layers
+- CSRF protection on all state-changing operations
+- Comprehensive audit logging
+- Security headers (CSP, HSTS, X-Frame-Options)
+- Rate limiting per tenant and per IP</p>
+<h3 id="2-multi-tenancy-by-default">2. <strong>Multi-Tenancy by Default</strong><a class="headerlink" href="#2-multi-tenancy-by-default" title="Anchor link to this section">&para;</a></h3>
+<p>Complete tenant isolation:
+- Automatic tenant context injection via middleware
+- Prisma middleware enforces tenant filtering on all queries
+- No cross-tenant data leakage
+- Per-tenant configuration and settings</p>
+<h3 id="3-real-time-first">3. <strong>Real-Time First</strong><a class="headerlink" href="#3-real-time-first" title="Anchor link to this section">&para;</a></h3>
+<p>Built for live collaboration:
+- Server-Sent Events (SSE) for instant updates
+- Per-tenant event broadcasting
+- Automatic connection management and cleanup
+- Heartbeat mechanism for connection health</p>
+<h3 id="4-developer-experience">4. <strong>Developer Experience</strong><a class="headerlink" href="#4-developer-experience" title="Anchor link to this section">&para;</a></h3>
+<p>Optimized for maintainability:
+- Type safety throughout (TypeScript strict mode)
+- Comprehensive test coverage (243+ tests)
+- Automated CI/CD with security scanning
+- Docker-based development workflow</p>
+<h2 id="system-components">System Components<a class="headerlink" href="#system-components" title="Anchor link to this section">&para;</a></h2>
+<h3 id="frontend-react-application">Frontend (React Application)<a class="headerlink" href="#frontend-react-application" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Technology Stack:</strong>
+- React 19 with Hooks and Context API
+- TypeScript 5.9 (strict mode)
+- Tailwind CSS for styling
+- Vite 7 for build tooling
+- React Router 7 for navigation</p>
+<p><strong>Key Features:</strong>
+- Component-based architecture with reusable UI components
+- Context providers for state management (Auth, Team, Theme, SSE)
+- Real-time updates via EventSource (SSE)
+- Dark mode with system preference detection
+- Responsive design (mobile-first)</p>
+<p><strong>State Management:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>AuthContext → User authentication state
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>TeamContext → Current team and available teams
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ThemeContext → Dark/light mode preference
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>SSEContext → Real-time event connection
+</span></code></pre></div></p>
+<h3 id="backend-api-server">Backend (API Server)<a class="headerlink" href="#backend-api-server" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Technology Stack:</strong>
+- Node.js 24 LTS
+- Express 4 web framework
+- TypeScript 5.9 (strict mode)
+- Prisma ORM for database access
+- Redis for caching and sessions</p>
+<p><strong>Middleware Stack:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Request Flow:
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  ┌─────────────────────────────────────────┐
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  │  1. CORS &amp; Security Headers (Helmet)   │
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  │  2. Body Parser &amp; Cookie Parser         │
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  │  3. Tenant Resolver                     │
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  │  4. Session Management                  │
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  │  5. Mock Auth (dev) / SSO (prod)       │
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  │  6. CSRF Token Validation              │
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>  │  7. Rate Limiting                       │
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  │  8. Permission Check (RBAC)            │
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  │  9. Team Scoping (for moderators)      │
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  │  10. Route Handler                      │
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  │  11. Audit Logging (on write ops)      │
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  │  12. SSE Event Broadcasting            │
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>  └─────────────────────────────────────────┘
+</span></code></pre></div></p>
+<h3 id="database-postgresql">Database (PostgreSQL)<a class="headerlink" href="#database-postgresql" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Schema Design:</strong>
+- Normalized schema with proper foreign keys
+- Tenant-scoped data model (all tables include <code>tenantId</code>)
+- Full-text search with GIN indexes and tsvector
+- Audit log as append-only table
+- Cascading deletes for data integrity</p>
+<p><strong>Key Tables:</strong>
+- <code>Tenant</code> - Organization/tenant isolation
+- <code>Team</code> - Departments or groups within a tenant
+- <code>Question</code> - User-submitted questions
+- <code>User</code> - User accounts (linked to SSO)
+- <code>TeamMembership</code> - User roles per team
+- <code>Tag</code> - Question categorization
+- <code>Upvote</code> - Individual upvote tracking (not just counts)
+- <code>AuditLog</code> - Immutable log of all admin actions</p>
+<p><strong>Indexing Strategy:</strong>
+- Primary keys (UUID)
+- Foreign key indexes (automatic cascades)
+- Composite indexes: <code>(tenantId, status)</code>, <code>(tenantId, teamId)</code>
+- Full-text search: GIN index on <code>search_vector</code> column
+- Audit log: Descending index on <code>(tenantId, createdAt)</code></p>
+<h3 id="cache-layer-redis">Cache Layer (Redis)<a class="headerlink" href="#cache-layer-redis" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Usage:</strong>
+- <strong>Rate Limiting</strong>: Sliding window counters per tenant+IP
+- <strong>Session Storage</strong>: Server-side session data
+- <strong>Future</strong>: Cache frequently accessed data (teams, tags)</p>
+<p><strong>Configuration:</strong>
+- Graceful degradation (memory fallback if Redis unavailable)
+- TTL-based expiration
+- Connection pooling</p>
+<h2 id="key-architectural-patterns">Key Architectural Patterns<a class="headerlink" href="#key-architectural-patterns" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-multi-tenant-context-pattern">1. Multi-Tenant Context Pattern<a class="headerlink" href="#1-multi-tenant-context-pattern" title="Anchor link to this section">&para;</a></h3>
+<p>Every request carries a tenant context:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// Tenant resolution (from subdomain, header, or session)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">Request</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">Tenant</span><span class="w"> </span><span class="nx">Resolver</span><span class="w"> </span><span class="nx">Middleware</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">AsyncLocalStorage</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">// Automatic tenant filtering in Prisma</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nx">Prisma</span><span class="w"> </span><span class="nx">Middleware</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">Inject</span><span class="w"> </span><span class="nx">tenantId</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">queries</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">Database</span>
+</span></code></pre></div>
+<p><strong>Benefits:</strong>
+- No manual tenant filtering in application code
+- Impossible to forget tenant checks
+- Centralized tenant context management</p>
+<h3 id="2-role-based-access-control-rbac">2. Role-Based Access Control (RBAC)<a class="headerlink" href="#2-role-based-access-control-rbac" title="Anchor link to this section">&para;</a></h3>
+<p>Five-role hierarchy with permissions:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Viewer → Member → Moderator → Admin → Owner
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  ↓        ↓          ↓          ↓       ↓
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a> Read    Submit    Answer+    Global   Full
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>         Upvote    Tag+Pin     Admin   Control
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                   (Team-
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                   Scoped)
+</span></code></pre></div>
+<p><strong>Permission Enforcement:</strong>
+- Middleware: <code>requirePermission('question.answer')</code>
+- Route-level: <code>requireRole('admin')</code>
+- Frontend: Conditional UI rendering based on role</p>
+<p><strong>Team Scoping:</strong>
+- Moderators limited to assigned teams
+- Admins and Owners have global access
+- Team membership tracked in <code>TeamMembership</code> table</p>
+<h3 id="3-event-driven-real-time-updates">3. Event-Driven Real-Time Updates<a class="headerlink" href="#3-event-driven-real-time-updates" title="Anchor link to this section">&para;</a></h3>
+<p>Server-Sent Events (SSE) for push updates:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// Event flow</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nx">User</span><span class="w"> </span><span class="nx">Action</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">Handler</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">Database</span><span class="w"> </span><span class="nx">Update</span><span class="w"> </span><span class="err">→</span><span class="w"> </span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nx">eventBus</span><span class="p">.</span><span class="nx">publish</span><span class="p">()</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">All</span><span class="w"> </span><span class="nx">Connected</span><span class="w"> </span><span class="nx">Clients</span><span class="w"> </span><span class="p">(</span><span class="nx">per</span><span class="w"> </span><span class="nx">tenant</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1">// Event types</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">created</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">upvoted</span><span class="w">  </span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">answered</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">tagged</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">pinned</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="o">-</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="kt">frozen</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="o">-</span><span class="w"> </span><span class="nx">heartbeat</span><span class="w"> </span><span class="p">(</span><span class="nx">keepalive</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Connection Management:</strong>
+- Per-tenant client tracking
+- Automatic dead connection cleanup
+- Periodic heartbeat (30s default)
+- Reconnection handling on client side</p>
+<h3 id="4-audit-logging-pattern">4. Audit Logging Pattern<a class="headerlink" href="#4-audit-logging-pattern" title="Anchor link to this section">&para;</a></h3>
+<p>Immutable audit trail for compliance:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// Logged on every admin/moderator action</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">{</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nx">actor</span><span class="o">:</span><span class="w"> </span><span class="kt">userId</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;question.answer&quot;</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nx">entityType</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Question&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nx">entityId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;uuid&quot;</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nx">before</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;OPEN&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">responseText</span><span class="o">:</span><span class="w"> </span><span class="kt">null</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="nx">after</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ANSWERED&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">responseText</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Here&#39;s the answer...&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nx">ipAddress</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nx">userAgent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Mozilla/5.0...&quot;</span><span class="p">,</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="nx">metadata</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">teamName</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Engineering&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">questionPreview</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>Audit Log Uses:</strong>
+- Compliance and security tracking
+- Debug and troubleshooting
+- Moderation analytics
+- User activity reports</p>
+<h3 id="5-input-validation-pattern">5. Input Validation Pattern<a class="headerlink" href="#5-input-validation-pattern" title="Anchor link to this section">&para;</a></h3>
+<p>Zod schemas for type-safe validation:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// Shared validation schemas</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">QuestionSchema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">min</span><span class="p">(</span><span class="mf">3</span><span class="p">).</span><span class="nx">max</span><span class="p">(</span><span class="mf">2000</span><span class="p">),</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nx">teamId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">uuid</span><span class="p">().</span><span class="nx">optional</span><span class="p">()</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">});</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1">// Runtime validation + TypeScript types</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="kd">const</span><span class="w"> </span><span class="nx">validatedData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">QuestionSchema</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
+</span></code></pre></div>
+<h2 id="scalability-considerations">Scalability Considerations<a class="headerlink" href="#scalability-considerations" title="Anchor link to this section">&para;</a></h2>
+<h3 id="current-capacity">Current Capacity<a class="headerlink" href="#current-capacity" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Designed for:</strong>
+- 1,000+ concurrent users per tenant
+- 10,000+ questions per tenant
+- 100+ teams per tenant
+- 10+ tenants on shared infrastructure</p>
+<h3 id="horizontal-scaling">Horizontal Scaling<a class="headerlink" href="#horizontal-scaling" title="Anchor link to this section">&para;</a></h3>
+<p><strong>What scales:</strong>
+- ✅ API servers (stateless, no shared memory)
+- ✅ Database read replicas (PostgreSQL streaming replication)
+- ✅ Redis cluster (distributed caching)</p>
+<p><strong>What doesn't scale (yet):</strong>
+- ⚠️ SSE connections (in-memory per API instance)
+  - <strong>Solution</strong>: Redis Pub/Sub for multi-instance broadcasting
+- ⚠️ File uploads (if added in future)
+  - <strong>Solution</strong>: Object storage (S3, MinIO)</p>
+<h3 id="performance-optimizations">Performance Optimizations<a class="headerlink" href="#performance-optimizations" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Current:</strong>
+- Database connection pooling
+- Prepared statements via Prisma
+- Indexed queries (all tenant-scoped queries use indexes)
+- Debounced search (client-side)</p>
+<p><strong>Future:</strong>
+- Redis caching for read-heavy data (teams, tags)
+- CDN for static assets
+- Database query optimization (EXPLAIN ANALYZE)
+- Response compression (gzip/brotli)</p>
+<h2 id="security-architecture">Security Architecture<a class="headerlink" href="#security-architecture" title="Anchor link to this section">&para;</a></h2>
+<h3 id="defense-in-depth">Defense in Depth<a class="headerlink" href="#defense-in-depth" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Layer 1: Network</strong>
+- HTTPS-only in production (HSTS header)
+- CORS restrictions
+- Rate limiting (per-tenant + per-IP)</p>
+<p><strong>Layer 2: Application</strong>
+- Session-based authentication
+- CSRF token validation
+- Input validation (Zod schemas)
+- Output encoding (React XSS protection)</p>
+<p><strong>Layer 3: Authorization</strong>
+- Role-based access control
+- Team-scoped permissions for moderators
+- Tenant isolation (automatic Prisma middleware)</p>
+<p><strong>Layer 4: Data</strong>
+- Parameterized queries (Prisma ORM)
+- Audit logging (immutable records)
+- Database encryption at rest (hosting-dependent)</p>
+<h3 id="threat-model">Threat Model<a class="headerlink" href="#threat-model" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Mitigated Threats:</strong>
+- ✅ SQL Injection (Prisma ORM)
+- ✅ XSS (React escaping + CSP headers)
+- ✅ CSRF (Double-submit cookie pattern)
+- ✅ Clickjacking (X-Frame-Options: DENY)
+- ✅ MIME sniffing (X-Content-Type-Options: nosniff)
+- ✅ Privilege escalation (RBAC enforcement)
+- ✅ Data leakage (tenant isolation)
+- ✅ Brute force (rate limiting)</p>
+<p><strong>Out of Scope:</strong>
+- DDoS protection (use CDN/load balancer)
+- Physical security (hosting provider responsibility)
+- Insider threats (organizational policies)</p>
+<h2 id="deployment-architecture">Deployment Architecture<a class="headerlink" href="#deployment-architecture" title="Anchor link to this section">&para;</a></h2>
+<h3 id="development">Development<a class="headerlink" href="#development" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Docker Compose (docker-compose.override.yaml):
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  - PostgreSQL (local)
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  - Redis (local)
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  - API (local build, hot reload)
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  - Web (local build, hot reload)
+</span></code></pre></div>
+<h3 id="production">Production<a class="headerlink" href="#production" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Docker Compose (docker-compose.yaml):
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  - PostgreSQL (persistent volume)
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  - Redis (persistent volume)
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  - API (ghcr.io/seanmdalton/pulsestage-api:latest)
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  - Web (ghcr.io/seanmdalton/pulsestage-web:latest)
+</span></code></pre></div>
+<p><strong>Container Images:</strong>
+- Published to GitHub Container Registry
+- Multi-stage builds for minimal image size
+- Security scanning in CI (Trivy)
+- SBOM generation (SPDX + CycloneDX)</p>
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Required:</strong>
+- <code>DATABASE_URL</code> - PostgreSQL connection string
+- <code>REDIS_URL</code> - Redis connection string
+- <code>SESSION_SECRET</code> - Session encryption key
+- <code>ADMIN_KEY</code> - Admin authentication key
+- <code>CORS_ORIGIN</code> - Frontend URL</p>
+<p><strong>Optional:</strong>
+- <code>NODE_ENV</code> - Environment (development/production)
+- <code>PORT</code> - API server port (default: 3000)
+- <code>SSE_HEARTBEAT_INTERVAL</code> - SSE heartbeat interval (ms)</p>
+<h2 id="monitoring-observability">Monitoring &amp; Observability<a class="headerlink" href="#monitoring-observability" title="Anchor link to this section">&para;</a></h2>
+<h3 id="current-capabilities">Current Capabilities<a class="headerlink" href="#current-capabilities" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Health Checks:</strong>
+- <code>/health</code> - Basic liveness probe
+- Future: <code>/admin/health</code> - Detailed metrics</p>
+<p><strong>Logging:</strong>
+- Console logging (structured)
+- Audit logs in database
+- Future: OpenTelemetry tracing</p>
+<p><strong>Metrics:</strong>
+- SSE connection counts
+- Rate limit hits
+- Database query performance
+- Future: Prometheus metrics</p>
+<h2 id="future-architecture-enhancements">Future Architecture Enhancements<a class="headerlink" href="#future-architecture-enhancements" title="Anchor link to this section">&para;</a></h2>
+<h3 id="short-term-1-3-months">Short-Term (1-3 months)<a class="headerlink" href="#short-term-1-3-months" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Redis Pub/Sub for SSE</strong> - Multi-instance SSE support</li>
+<li><strong>Database Read Replicas</strong> - Scale read-heavy workloads</li>
+<li><strong>Caching Layer</strong> - Redis cache for teams, tags, user data</li>
+<li><strong>Health Dashboard</strong> - Real-time system metrics UI</li>
+</ol>
+<h3 id="medium-term-3-6-months">Medium-Term (3-6 months)<a class="headerlink" href="#medium-term-3-6-months" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>OpenTelemetry Tracing</strong> - Distributed tracing and metrics</li>
+<li><strong>Webhook System</strong> - Event-driven integrations</li>
+<li><strong>Background Job Queue</strong> - Email, notifications, exports</li>
+<li><strong>CDN Integration</strong> - Static asset distribution</li>
+</ol>
+<h3 id="long-term-6-12-months">Long-Term (6-12 months)<a class="headerlink" href="#long-term-6-12-months" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Microservices Split</strong> - Separate auth, notifications, exports</li>
+<li><strong>Multi-Region Deployment</strong> - Global edge presence</li>
+<li><strong>GraphQL API</strong> - Flexible querying for integrations</li>
+<li><strong>Event Sourcing</strong> - Complete audit trail with replay</li>
+</ol>
+<h2 id="technology-choices-rationale">Technology Choices &amp; Rationale<a class="headerlink" href="#technology-choices-rationale" title="Anchor link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Why We Chose It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TypeScript</strong></td>
+<td>Type safety, better DX, catch bugs at compile time</td>
+</tr>
+<tr>
+<td><strong>React 19</strong></td>
+<td>Component model, hooks, large ecosystem</td>
+</tr>
+<tr>
+<td><strong>Node.js 24 LTS</strong></td>
+<td>JavaScript everywhere, non-blocking I/O, active LTS</td>
+</tr>
+<tr>
+<td><strong>Express</strong></td>
+<td>Mature, flexible, large middleware ecosystem</td>
+</tr>
+<tr>
+<td><strong>Prisma</strong></td>
+<td>Type-safe ORM, migrations, great DX</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL 16</strong></td>
+<td>Robust, full-text search, JSON support, mature</td>
+</tr>
+<tr>
+<td><strong>Redis</strong></td>
+<td>Fast in-memory cache, pub/sub, session storage</td>
+</tr>
+<tr>
+<td><strong>Tailwind CSS</strong></td>
+<td>Utility-first, fast development, consistent design</td>
+</tr>
+<tr>
+<td><strong>Vite</strong></td>
+<td>Fast HMR, modern build tool, great DX</td>
+</tr>
+<tr>
+<td><strong>Docker Compose</strong></td>
+<td>Simple orchestration, reproducible environments</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><a href="../multi-tenancy/">Multi-Tenancy Architecture</a> - Detailed multi-tenant implementation</li>
+<li><a href="../database-schema/">Database Schema</a> - ERD and schema details</li>
+<li><a href="../real-time/">Real-Time Architecture</a> - SSE implementation details</li>
+<li><a href="../../security/overview/">Security Overview</a> - Comprehensive security guide</li>
+<li><a href="../../api/overview/">API Reference</a> - REST API documentation</li>
+</ul>
+<h2 id="questions">Questions?<a class="headerlink" href="#questions" title="Anchor link to this section">&para;</a></h2>
+<p>For technical questions or suggestions, please:
+- Open a <a href="https://github.com/seanmdalton/pulsestage/issues">GitHub Issue</a>
+- Start a <a href="https://github.com/seanmdalton/pulsestage/discussions">Discussion</a>
+- Check our <a href="../../development/setup/">Development Guide</a></p>
 
 
 
@@ -2529,7 +3348,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 19:43:35 UTC"><span class="timeago" datetime="2025-10-04T19:43:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 19:43:35 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 8, 2025 02:17:16 UTC"><span class="timeago" datetime="2025-10-08T02:17:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 8, 2025 02:17:16 UTC">2025-10-08</span>
   </span>
 
     
