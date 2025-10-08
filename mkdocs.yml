@@ -115,6 +115,7 @@ nav:
       - getting-started/installation.md
       - getting-started/configuration.md
       - getting-started/first-steps.md
+      - getting-started/troubleshooting.md
   - User Guide:
       - user-guide/overview.md
       - Basic Features:
@@ -164,13 +165,16 @@ nav:
           - development/setup.md
           - development/running-locally.md
           - development/testing.md
+          - development/email-testing.md
           - development/migrations.md
           - development/code-style.md
+          - development/code-review.md
           - development/contributing.md
   - Deployment:
       - deployment/docker-compose.md
       - deployment/production.md
       - deployment/environment.md
+      - deployment/email-configuration.md
       - deployment/monitoring.md
   - About:
       - about/license.md

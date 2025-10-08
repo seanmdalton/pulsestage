@@ -353,7 +353,7 @@ If you run into issues:
 
 1. Check the logs: `make logs`
 2. Try a clean restart: `make clean && make dev`
-3. Check `TROUBLESHOOTING.md` for common issues
+3. Check the [Troubleshooting Guide](../../getting-started/troubleshooting.md) for common issues
 4. Ask in the team channel
 
 Happy coding! 🚀

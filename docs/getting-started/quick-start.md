@@ -196,7 +196,7 @@ All services should show "Up" status.
 
 - Check the [Installation Guide](installation.md) for detailed troubleshooting
 - Visit our [GitHub Issues](https://github.com/seanmdalton/pulsestage/issues)
-- See [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md)
+- See [Troubleshooting Guide](./troubleshooting.md)
 
 ## What's Next?
 
