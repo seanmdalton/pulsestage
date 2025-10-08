@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { Request } from 'express';
 import { getTenantContext } from '../middleware/tenantContext.js';
 
@@ -72,6 +72,7 @@ export class AuditService {
       // Create audit log entry asynchronously (don't block the request)
       setImmediate(async () => {
         try {
+          const cleanedMetadata = cleanMetadata(entry.metadata);
           await this.prisma.auditLog.create({
             data: {
               tenantId: tenantContext.tenantId,
@@ -83,7 +84,7 @@ export class AuditService {
               after: entry.after || null,
               ipAddress,
               userAgent,
-              metadata: cleanMetadata(entry.metadata),
+              metadata: cleanedMetadata === null ? Prisma.DbNull : cleanedMetadata,
             },
           });
 
