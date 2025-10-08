@@ -28,6 +28,30 @@ export interface AuditLogEntry {
 }
 
 /**
+ * Clean metadata by removing null and undefined values
+ * Returns null if the result would be an empty object
+ */
+export function cleanMetadata(
+  metadata: Record<string, any> | null | undefined
+): Record<string, any> | null {
+  if (!metadata || typeof metadata !== 'object') {
+    return null;
+  }
+
+  const cleaned: Record<string, any> = {};
+  let hasValue = false;
+
+  for (const [key, value] of Object.entries(metadata)) {
+    if (value !== null && value !== undefined) {
+      cleaned[key] = value;
+      hasValue = true;
+    }
+  }
+
+  return hasValue ? cleaned : null;
+}
+
+/**
  * Audit Service for logging all administrative and security-relevant actions
  */
 export class AuditService {
@@ -59,7 +83,7 @@ export class AuditService {
               after: entry.after || null,
               ipAddress,
               userAgent,
-              metadata: entry.metadata || null,
+              metadata: cleanMetadata(entry.metadata),
             },
           });
 

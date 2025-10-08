@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { apiClient, type TenantSettingsType } from '../lib/api'
 import type { Question } from '../lib/api'
 import { useDebounce } from '../hooks/useDebounce'
@@ -22,6 +22,7 @@ export function SubmitPage() {
   const [settings, setSettings] = useState<TenantSettingsType | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
+  const questionAtSubmit = useRef<string>('')
 
   const { currentTeam } = useTeamFromUrl()
   const debouncedQuestion = useDebounce(question, 300) // 300ms delay
@@ -152,7 +153,7 @@ export function SubmitPage() {
 
   // Clear validation error when user starts typing after a failed submit
   useEffect(() => {
-    if (hasAttemptedSubmit && question) {
+    if (hasAttemptedSubmit && question !== questionAtSubmit.current) {
       setValidationError(null)
       setHasAttemptedSubmit(false)
     }
@@ -167,12 +168,14 @@ export function SubmitPage() {
     // Validate before submitting
     const trimmedLength = question.trim().length
     if (trimmedLength < settings.questions.minLength) {
+      questionAtSubmit.current = question
       setValidationError(
         `Question must be at least ${settings.questions.minLength} characters (currently ${trimmedLength})`
       )
       return
     }
     if (trimmedLength > settings.questions.maxLength) {
+      questionAtSubmit.current = question
       setValidationError(
         `Question must not exceed ${settings.questions.maxLength} characters (currently ${trimmedLength})`
       )
@@ -191,6 +194,7 @@ export function SubmitPage() {
       setQuestion('')
       setValidationError(null)
       setHasAttemptedSubmit(false)
+      questionAtSubmit.current = ''
       setMessage({
         type: 'success',
         text: `Question submitted successfully to ${currentTeam.name}!`,

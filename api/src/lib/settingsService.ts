@@ -25,19 +25,15 @@ export const DEFAULT_SETTINGS = {
     },
   },
   branding: {
-    logo: null,
-    logoUrl: null,
     primaryColor: '#3B82F6',
     accentColor: '#10B981',
-    welcomeMessage: '',
-    showWelcomeMessage: false,
+    logoUrl: null as string | null,
+    faviconUrl: null as string | null,
   },
   features: {
-    tagging: true,
-    search: true,
-    presentationMode: true,
-    exports: true,
-    auditLogs: true,
+    allowAnonymousQuestions: true,
+    requireQuestionApproval: false,
+    enableEmailNotifications: false,
   },
 };
 

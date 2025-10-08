@@ -297,7 +297,23 @@ class ApiClient {
         if (errorData.message) {
           errorMessage = errorData.message
         } else if (errorData.error) {
-          errorMessage = errorData.error
+          // Handle different error formats
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error
+          } else if (errorData.error?.message) {
+            // Nested error object with message
+            errorMessage = errorData.error.message
+          } else if (errorData.error?.formErrors?.[0]) {
+            // Zod flattened error with form errors
+            errorMessage = errorData.error.formErrors[0]
+          } else if (errorData.error?.fieldErrors) {
+            // Zod flattened error with field errors - extract first error
+            const firstField = Object.keys(errorData.error.fieldErrors)[0]
+            const fieldErrors = errorData.error.fieldErrors[firstField]
+            if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+              errorMessage = `${firstField}: ${fieldErrors[0]}`
+            }
+          }
         }
       } catch {
         // If parsing fails, use default error message
@@ -306,7 +322,17 @@ class ApiClient {
     }
 
     const data = await response.json()
-    return schema.parse(data)
+
+    // Validate response with schema
+    try {
+      return schema.parse(data)
+    } catch (zodError: unknown) {
+      // If schema validation fails, throw a more user-friendly error
+      console.error('API response validation failed:', zodError)
+      throw new Error(
+        'Received invalid data from server. Please try again or contact support.'
+      )
+    }
   }
 
   async getHealth(): Promise<HealthResponse> {

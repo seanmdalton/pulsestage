@@ -60,19 +60,15 @@ describe('Settings Service', () => {
           },
         },
         branding: {
-          logo: null,
-          logoUrl: null,
           primaryColor: '#3B82F6',
           accentColor: '#10B981',
-          welcomeMessage: '',
-          showWelcomeMessage: false,
+          logoUrl: null,
+          faviconUrl: null,
         },
         features: {
-          tagging: true,
-          search: true,
-          presentationMode: true,
-          exports: true,
-          auditLogs: true,
+          allowAnonymousQuestions: true,
+          requireQuestionApproval: false,
+          enableEmailNotifications: false,
         },
       });
     });
@@ -240,10 +236,8 @@ describe('Settings Service', () => {
         branding: {
           primaryColor: '#FF5733',
           accentColor: '#33FF57',
-          logo: null,
           logoUrl: null,
-          welcomeMessage: '',
-          showWelcomeMessage: false,
+          faviconUrl: null,
         },
       });
 
@@ -257,10 +251,8 @@ describe('Settings Service', () => {
           branding: {
             primaryColor: 'invalid-color',
             accentColor: '#33FF57',
-            logo: null,
             logoUrl: null,
-            welcomeMessage: '',
-            showWelcomeMessage: false,
+            faviconUrl: null,
           },
         })
       ).rejects.toThrow();
@@ -271,17 +263,15 @@ describe('Settings Service', () => {
     it('should toggle feature flags', async () => {
       const settings = await updateTenantSettings(prisma, testTenant.id, {
         features: {
-          tagging: false,
-          search: true,
-          presentationMode: true,
-          exports: false,
-          auditLogs: true,
+          allowAnonymousQuestions: false,
+          requireQuestionApproval: true,
+          enableEmailNotifications: true,
         },
       });
 
-      expect(settings.features.tagging).toBe(false);
-      expect(settings.features.exports).toBe(false);
-      expect(settings.features.search).toBe(true);
+      expect(settings.features.allowAnonymousQuestions).toBe(false);
+      expect(settings.features.requireQuestionApproval).toBe(true);
+      expect(settings.features.enableEmailNotifications).toBe(true);
     });
   });
 });
