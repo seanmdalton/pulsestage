@@ -1250,24 +1250,6 @@ class ApiClient {
     )
   }
 
-  async removeTeamMember(
-    teamId: string,
-    userId: string
-  ): Promise<{ success: boolean }> {
-    const RemoveMemberResponseSchema = z.object({
-      success: z.boolean(),
-    })
-
-    return this.request(
-      `/teams/${teamId}/members/${userId}`,
-      {
-        method: 'DELETE',
-        credentials: 'include',
-      },
-      RemoveMemberResponseSchema
-    )
-  }
-
   // Setup wizard methods
   async getSetupStatus(): Promise<{
     needsSetup: boolean
@@ -1637,6 +1619,94 @@ class ApiClient {
       },
       RemoveMemberResponseSchema
     )
+  }
+
+  async getHealthMetrics(): Promise<{
+    status: string
+    timestamp: string
+    uptime: {
+      seconds: number
+      formatted: string
+    }
+    database: {
+      status: string
+      responseTimeMs: number | null
+      provider: string
+    }
+    redis: {
+      rateLimit: {
+        connected: boolean
+        ready: boolean
+        enabled: boolean
+      }
+      sessions: {
+        connected: boolean
+        ready: boolean
+      }
+    }
+    sse: {
+      totalConnections: number
+      tenantCount: number
+      tenantConnections: Record<string, number>
+    }
+    memory: {
+      rss: string
+      heapTotal: string
+      heapUsed: string
+      external: string
+    }
+    data: {
+      tenants: number
+      questions: number
+      users: number
+    }
+    environment: string
+    nodeVersion: string
+  }> {
+    const HealthMetricsSchema = z.object({
+      status: z.string(),
+      timestamp: z.string(),
+      uptime: z.object({
+        seconds: z.number(),
+        formatted: z.string(),
+      }),
+      database: z.object({
+        status: z.string(),
+        responseTimeMs: z.number().nullable(),
+        provider: z.string(),
+      }),
+      redis: z.object({
+        rateLimit: z.object({
+          connected: z.boolean(),
+          ready: z.boolean(),
+          enabled: z.boolean(),
+        }),
+        sessions: z.object({
+          connected: z.boolean(),
+          ready: z.boolean(),
+        }),
+      }),
+      sse: z.object({
+        totalConnections: z.number(),
+        tenantCount: z.number(),
+        tenantConnections: z.record(z.string(), z.number()),
+      }),
+      memory: z.object({
+        rss: z.string(),
+        heapTotal: z.string(),
+        heapUsed: z.string(),
+        external: z.string(),
+      }),
+      data: z.object({
+        tenants: z.number(),
+        questions: z.number(),
+        users: z.number(),
+      }),
+      environment: z.string(),
+      nodeVersion: z.string(),
+    })
+
+    return this.request('/admin/health', {}, HealthMetricsSchema)
   }
 }
 

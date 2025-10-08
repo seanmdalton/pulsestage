@@ -23,6 +23,7 @@ import { AdminLoginPage } from './pages/AdminLoginPage'
 import { AuditPage } from './pages/AuditPage'
 import { PresentationPage } from './pages/PresentationPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { HealthDashboardPage } from './pages/HealthDashboardPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
@@ -130,6 +131,10 @@ function App() {
                           element={<AdminLoginPage />}
                         />
                         <Route path="/admin/audit" element={<AuditPage />} />
+                        <Route
+                          path="/admin/health"
+                          element={<HealthDashboardPage />}
+                        />
 
                         {/* Profile routes (not team-scoped) */}
                         <Route path="/profile" element={<ProfilePage />} />

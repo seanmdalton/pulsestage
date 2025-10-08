@@ -5,6 +5,14 @@ import { RATE_LIMITS, HTTP_STATUS, NETWORK } from '../constants.js';
 
 let redisClient: RedisClientType | null = null;
 
+// Get Redis connection status (for health checks)
+export function getRedisStatus() {
+  return {
+    connected: redisClient?.isOpen || false,
+    ready: redisClient?.isReady || false,
+  };
+}
+
 // Initialize Redis client
 export async function initRedis() {
   // Skip Redis initialization in development

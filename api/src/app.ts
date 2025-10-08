@@ -75,6 +75,22 @@ import cookieParser from 'cookie-parser';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Helper function to format uptime in human-readable format
+function formatUptime(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+  return parts.join(' ');
+}
+
 export function createApp(prisma: PrismaClient) {
   const app = express();
 
@@ -160,6 +176,103 @@ export function createApp(prisma: PrismaClient) {
 
   app.get('/health', (_req, res) => {
     res.json({ ok: true, service: 'ama-api' });
+  });
+
+  // Health dashboard - detailed system metrics (admin only)
+  app.get('/admin/health', requirePermission('admin.access'), async (_req, res) => {
+    try {
+      // Get SSE metrics
+      const sseMetrics = eventBus.getMetrics();
+
+      // Get database metrics (Prisma connection pool)
+      // Note: Prisma doesn't expose detailed pool metrics, but we can check connectivity
+      let dbStatus = 'connected';
+      let dbConnectionTime: number | null = null;
+      try {
+        const startTime = Date.now();
+        await prisma.$queryRaw`SELECT 1 as health_check`;
+        dbConnectionTime = Date.now() - startTime;
+      } catch (_error) {
+        dbStatus = 'disconnected';
+      }
+
+      // Get Redis status (from rate limiting and session store)
+      const { getRedisStatus } = await import('./middleware/rateLimit.js');
+      const { getSessionRedisStatus } = await import('./middleware/session.js');
+      const rateLimitRedis = getRedisStatus();
+      const sessionRedis = getSessionRedisStatus();
+
+      // Get uptime
+      const uptimeSeconds = process.uptime();
+      const uptimeFormatted = formatUptime(uptimeSeconds);
+
+      // Get memory usage
+      const memoryUsage = process.memoryUsage();
+      const memoryMB = {
+        rss: Math.round(memoryUsage.rss / 1024 / 1024),
+        heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+        heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+        external: Math.round(memoryUsage.external / 1024 / 1024),
+      };
+
+      // Get tenant count
+      const tenantCount = await prisma.tenant.count();
+
+      // Get question count (global)
+      const questionCount = await prisma.question.count();
+
+      // Get user count (global)
+      const userCount = await prisma.user.count();
+
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: {
+          seconds: Math.round(uptimeSeconds),
+          formatted: uptimeFormatted,
+        },
+        database: {
+          status: dbStatus,
+          responseTimeMs: dbConnectionTime,
+          provider: 'PostgreSQL',
+        },
+        redis: {
+          rateLimit: {
+            connected: rateLimitRedis.connected,
+            ready: rateLimitRedis.ready,
+            enabled: process.env.NODE_ENV !== 'development',
+          },
+          sessions: {
+            connected: sessionRedis.connected,
+            ready: sessionRedis.ready,
+          },
+        },
+        sse: {
+          totalConnections: sseMetrics.totalConnections,
+          tenantCount: sseMetrics.tenantCount,
+          tenantConnections: sseMetrics.tenantConnections,
+        },
+        memory: {
+          rss: `${memoryMB.rss} MB`,
+          heapTotal: `${memoryMB.heapTotal} MB`,
+          heapUsed: `${memoryMB.heapUsed} MB`,
+          external: `${memoryMB.external} MB`,
+        },
+        data: {
+          tenants: tenantCount,
+          questions: questionCount,
+          users: userCount,
+        },
+        environment: process.env.NODE_ENV || 'development',
+        nodeVersion: process.version,
+      });
+    } catch (error) {
+      console.error('Health check error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        status: 'unhealthy',
+        error: 'Failed to gather health metrics',
+      });
+    }
   });
 
   // CSRF token endpoint - frontend can call this to get a token

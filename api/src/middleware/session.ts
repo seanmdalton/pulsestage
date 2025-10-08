@@ -6,6 +6,14 @@ import { env } from '../env.js';
 // Create Redis client for sessions
 let redisClient: ReturnType<typeof createClient> | null = null;
 
+// Get session store Redis status (for health checks)
+export function getSessionRedisStatus() {
+  return {
+    connected: redisClient?.isOpen || false,
+    ready: redisClient?.isReady || false,
+  };
+}
+
 export async function initSessionStore() {
   try {
     redisClient = createClient({
