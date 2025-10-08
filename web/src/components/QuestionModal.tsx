@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Modal } from './Modal'
 import type { Question } from '../lib/api'
 
@@ -20,11 +20,24 @@ export function QuestionModal({
   upvotedQuestions: _upvotedQuestions,
   upvoteStatus = new Map(),
 }: QuestionModalProps) {
+  const [copied, setCopied] = useState(false)
+
   if (!question) return null
 
   const handleUpvote = (e: React.MouseEvent) => {
     e.stopPropagation()
     onUpvote(question.id)
+  }
+
+  const handleCopyLink = async () => {
+    const questionUrl = `${window.location.origin}/questions/${question.id}`
+    try {
+      await navigator.clipboard.writeText(questionUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+    }
   }
 
   return (
@@ -108,45 +121,93 @@ export function QuestionModal({
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          {(() => {
-            const status = upvoteStatus.get(question.id)
-            const hasUpvoted = status?.hasUpvoted || false
-            const canUpvote = status?.canUpvote ?? true
+          <div className="flex gap-3">
+            {(() => {
+              const status = upvoteStatus.get(question.id)
+              const hasUpvoted = status?.hasUpvoted || false
+              const canUpvote = status?.canUpvote ?? true
 
-            return (
-              <button
-                onClick={handleUpvote}
-                disabled={hasUpvoted || !canUpvote}
-                className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
-                  hasUpvoted || !canUpvote
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                    : 'bg-orange-100 dark:bg-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-600'
-                }`}
-                title={
-                  !canUpvote
-                    ? 'Cannot upvote your own question'
-                    : hasUpvoted
-                      ? 'Already upvoted'
-                      : 'Upvote this question'
-                }
-              >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              return (
+                <button
+                  onClick={handleUpvote}
+                  disabled={hasUpvoted || !canUpvote}
+                  className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
+                    hasUpvoted || !canUpvote
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-orange-100 dark:bg-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-600'
+                  }`}
+                  title={
+                    !canUpvote
+                      ? 'Cannot upvote your own question'
+                      : hasUpvoted
+                        ? 'Already upvoted'
+                        : 'Upvote this question'
+                  }
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 15l7-7 7 7"
-                  />
-                </svg>
-                {hasUpvoted ? 'Upvoted' : 'Upvote Question'}
-              </button>
-            )
-          })()}
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
+                  </svg>
+                  {hasUpvoted ? 'Upvoted' : 'Upvote Question'}
+                </button>
+              )
+            })()}
+
+            <button
+              onClick={handleCopyLink}
+              className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
+                copied
+                  ? 'bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-300'
+                  : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
+              }`}
+              title="Copy link to this question"
+            >
+              {copied ? (
+                <>
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  Copy Link
+                </>
+              )}
+            </button>
+          </div>
 
           <button
             onClick={onClose}
