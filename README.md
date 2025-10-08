@@ -124,6 +124,19 @@ We welcome contributions! Please see our [Contributing Guide](https://seanmdalto
 Thank you to all the amazing people who have contributed to PulseStage! 🎉
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/seanmdalton">
+                    <img src="https://avatars.githubusercontent.com/u/16750029?v=4" width="100;" alt="seanmdalton"/>
+                    <br />
+                    <sub><b>seanmdalton</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
 
 ## License
