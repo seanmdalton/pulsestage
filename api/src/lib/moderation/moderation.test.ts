@@ -120,27 +120,31 @@ describe('OpenAI Filter Moderation', () => {
   });
 
   describe('With API Key (Integration)', () => {
-    it('should work with OpenAI when real API key is provided (skipped if not)', async () => {
-      // This test only runs if OPENAI_API_KEY is actually configured
-      const hasValidKey =
-        process.env.OPENAI_API_KEY &&
-        !process.env.OPENAI_API_KEY.includes('invalid') &&
-        process.env.OPENAI_API_KEY.startsWith('sk-');
+    it(
+      'should work with OpenAI when real API key is provided (skipped if not)',
+      async () => {
+        // This test only runs if OPENAI_API_KEY is actually configured
+        const hasValidKey =
+          process.env.OPENAI_API_KEY &&
+          !process.env.OPENAI_API_KEY.includes('invalid') &&
+          process.env.OPENAI_API_KEY.startsWith('sk-');
 
-      if (!hasValidKey) {
-        console.log('⏭️  Skipping OpenAI integration test (no valid API key)');
-        // Test passes - we're just documenting that it would work with a key
-        // Verify the function returns null when no key is set
-        const result = await moderateWithOpenAI('test');
-        expect(result).toBeNull();
-        return;
-      }
+        if (!hasValidKey) {
+          console.log('⏭️  Skipping OpenAI integration test (no valid API key)');
+          // Test passes - we're just documenting that it would work with a key
+          // Verify the function returns null when no key is set
+          const result = await moderateWithOpenAI('test');
+          expect(result).toBeNull();
+          return;
+        }
 
-      // If we have a valid key, test the actual API
-      const result = await moderateWithOpenAI('This is a normal, appropriate question.');
-      expect(result).not.toBeNull();
-      expect(result?.flagged).toBe(false);
-    });
+        // If we have a valid key, test the actual API
+        const result = await moderateWithOpenAI('This is a normal, appropriate question.');
+        expect(result).not.toBeNull();
+        expect(result?.flagged).toBe(false);
+      },
+      { timeout: 10000 }
+    ); // Increase timeout for actual API calls
   });
 
   describe('Error Handling', () => {
