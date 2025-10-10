@@ -28,9 +28,11 @@ import { QuestionDetailPage } from './pages/QuestionDetailPage'
 import { ModeratorDashboardPage } from './pages/ModeratorDashboardPage'
 import { ModerationQueuePage } from './pages/ModerationQueuePage'
 import { ExportPage } from './pages/ExportPage'
+import { LoginPage } from './pages/LoginPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
+import { DemoModeBanner } from './components/DemoModeBanner'
 import { AdminProvider } from './contexts/AdminContext'
 import { TeamProvider } from './contexts/TeamContext'
 import { UserProvider } from './contexts/UserContext'
@@ -101,8 +103,12 @@ function App() {
                 element={
                   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
                     <Navbar />
+                    <DemoModeBanner />
                     <main className="container mx-auto px-4 py-8">
                       <Routes>
+                        {/* Auth routes */}
+                        <Route path="/login" element={<LoginPage />} />
+
                         {/* Default routes - smart redirect to user's default team or /all */}
                         <Route
                           path="/"
