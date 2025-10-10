@@ -77,7 +77,7 @@ export class OAuthStrategy {
   /**
    * Handle GitHub OAuth callback
    */
-  async handleGitHubCallback(req: Request, res: Response): Promise<AuthUser | null> {
+  async handleGitHubCallback(req: Request, _res: Response): Promise<AuthUser | null> {
     if (!this.config.github) {
       throw new Error('GitHub OAuth not configured');
     }
@@ -183,7 +183,7 @@ export class OAuthStrategy {
   /**
    * Handle Google OAuth callback
    */
-  async handleGoogleCallback(req: Request, res: Response): Promise<AuthUser | null> {
+  async handleGoogleCallback(req: Request, _res: Response): Promise<AuthUser | null> {
     if (!this.config.google) {
       throw new Error('Google OAuth not configured');
     }

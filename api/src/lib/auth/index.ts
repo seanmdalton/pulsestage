@@ -103,7 +103,7 @@ export class AuthManager {
   /**
    * Log out user
    */
-  async logout(req: Request, res: Response): Promise<void> {
+  async logout(req: Request, _res: Response): Promise<void> {
     return new Promise((resolve, reject) => {
       req.session.destroy(err => {
         if (err) {

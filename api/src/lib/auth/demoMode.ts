@@ -40,7 +40,7 @@ export class DemoAuthStrategy {
    * Authenticate a demo user
    * Creates user if doesn't exist, auto-assigns roles
    */
-  async authenticate(req: Request, res: Response): Promise<AuthUser | null> {
+  async authenticate(req: Request, _res: Response): Promise<AuthUser | null> {
     if (!this.config.enabled) {
       return null;
     }
