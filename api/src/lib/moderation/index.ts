@@ -1,6 +1,5 @@
 import { moderateWithLocalFilter } from './localFilter.js';
 import { moderateWithOpenAI } from './openaiFilter.js';
-import type { ModerationResult } from './localFilter.js';
 
 export interface CombinedModerationResult {
   flagged: boolean;

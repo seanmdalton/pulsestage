@@ -13,7 +13,7 @@ const profanityFilter = new Filter();
 // Spam patterns (regex-based detection)
 const spamPatterns = [
   /(.)\1{10,}/i, // Repeated characters (10+ times)
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi, // Multiple URLs
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi, // Multiple URLs
   /\b(buy|cheap|discount|free|click here|limited time|act now|sale|order now)\b/gi, // Spam keywords
   /\b\d{10,}\b/g, // Long numbers (phone numbers, etc.)
 ];
