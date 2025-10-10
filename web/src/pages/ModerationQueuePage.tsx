@@ -296,7 +296,7 @@ export function ModerationQueuePage() {
       setReviewActionLoading(questionId)
       setError(null)
 
-      const approvedQuestion = await apiClient.approveQuestion(questionId)
+      await apiClient.approveQuestion(questionId)
 
       // Remove from list (it's no longer under review)
       setQuestions((prev) => prev.filter((q) => q.id !== questionId))

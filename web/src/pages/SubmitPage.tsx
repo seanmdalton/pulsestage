@@ -198,7 +198,10 @@ export function SubmitPage() {
       questionAtSubmit.current = ''
 
       // Check if question is under review
-      if ((response as any).message?.includes('under review')) {
+      const responseWithMessage = response as typeof response & {
+        message?: string
+      }
+      if (responseWithMessage.message?.includes('under review')) {
         setMessage({
           type: 'success',
           text: `Your question has been submitted and is under moderator review. You'll be notified once it's published.`,
