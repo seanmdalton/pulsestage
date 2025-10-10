@@ -67,7 +67,7 @@ Five roles (viewer, member, moderator, admin, owner) with team-scoped permission
 Beautiful responsive design with dark mode, real-time updates via SSE, and presentation mode optimized for large displays.
 
 ### 🔒 Security & Compliance
-Comprehensive audit logging, tenant isolation, session-based auth, CSRF protection, security headers (Helmet), and rate limiting on all endpoints.
+Comprehensive audit logging, tenant isolation, session-based auth, CSRF protection, security headers (Helmet), rate limiting, and **content moderation** (local + optional OpenAI) to protect against spam, profanity, and hate speech.
 
 ### 🔍 Advanced Search & Filtering
 Full-text search with PostgreSQL GIN indexes, prefix matching for substrings, filter by tags, date ranges, and team. Works on both open and answered questions.

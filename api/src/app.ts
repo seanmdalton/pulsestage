@@ -322,6 +322,259 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
+  // ============================================================================
+  // MODERATION REVIEW ENDPOINTS (Phase 3)
+  // ============================================================================
+
+  // Get all questions under review
+  app.get(
+    '/admin/moderation/review-queue',
+    requirePermission('question.answer'),
+    async (req, res) => {
+      try {
+        const { teamId, confidence } = req.query;
+
+        const where: any = {
+          status: 'UNDER_REVIEW',
+        };
+
+        // Filter by team if specified
+        if (teamId && typeof teamId === 'string') {
+          where.teamId = teamId;
+        }
+
+        // Filter by confidence level if specified
+        if (confidence && typeof confidence === 'string') {
+          where.moderationConfidence = confidence;
+        }
+
+        const questions = await prisma.question.findMany({
+          where,
+          include: {
+            team: true,
+            author: true,
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'asc', // Oldest first (FIFO)
+          },
+        });
+
+        res.json(questions);
+      } catch (error) {
+        console.error('Failed to fetch review queue:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to fetch review queue',
+        });
+      }
+    }
+  );
+
+  // Approve a question under review
+  app.post(
+    '/admin/moderation/approve/:id',
+    requirePermission('question.answer'),
+    async (req, res) => {
+      try {
+        const { id } = req.params;
+
+        // Find the question
+        const question = await prisma.question.findUnique({
+          where: { id },
+        });
+
+        if (!question) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Question not found' });
+        }
+
+        if (question.status !== 'UNDER_REVIEW') {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Question is not under review',
+          });
+        }
+
+        // Approve: change status to OPEN
+        const updatedQuestion = await prisma.question.update({
+          where: { id },
+          data: {
+            status: 'OPEN',
+            reviewedBy: req.user?.id || null,
+            reviewedAt: new Date(),
+          },
+          include: {
+            team: true,
+            author: true,
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+        });
+
+        // Audit log the approval
+        await auditService.log(req, {
+          action: 'question.moderation.approved',
+          entityType: 'question',
+          entityId: id,
+          metadata: {
+            questionId: id,
+            teamId: question.teamId,
+            originalReasons: question.moderationReasons,
+            confidence: question.moderationConfidence,
+          },
+        });
+
+        // Publish SSE event for question creation (now that it's approved)
+        eventBus.publish({
+          type: 'question:created',
+          tenantId: req.tenant!.tenantId,
+          data: updatedQuestion,
+          timestamp: Date.now(),
+        });
+
+        // Send email notification to question author
+        if (updatedQuestion.author?.email) {
+          try {
+            const { emailQueue } = await import('./lib/queue/emailQueue.js');
+            const { renderQuestionApprovedEmail } = await import('./lib/email/templates.js');
+
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const questionUrl = `${frontendUrl}/questions/${updatedQuestion.id}`;
+            const unsubscribeUrl = `${frontendUrl}/profile`;
+
+            const html = await renderQuestionApprovedEmail({
+              userName: updatedQuestion.author.name || 'User',
+              questionBody: updatedQuestion.body,
+              questionUrl,
+              unsubscribeUrl,
+            });
+
+            await emailQueue.add('send-email', {
+              type: 'direct',
+              emailOptions: {
+                to: {
+                  email: updatedQuestion.author.email,
+                  name: updatedQuestion.author.name || 'User',
+                },
+                subject: '✓ Your question has been approved',
+                html,
+              },
+            });
+          } catch (emailError) {
+            console.error('Failed to send approval email:', emailError);
+            // Don't fail the request if email fails
+          }
+        }
+
+        res.json({
+          ...updatedQuestion,
+          message: 'Question approved and published',
+        });
+      } catch (error) {
+        console.error('Failed to approve question:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to approve question',
+        });
+      }
+    }
+  );
+
+  // Reject a question under review
+  app.post(
+    '/admin/moderation/reject/:id',
+    requirePermission('question.answer'),
+    async (req, res) => {
+      try {
+        const { id } = req.params;
+        const { reason } = req.body;
+
+        // Find the question
+        const question = await prisma.question.findUnique({
+          where: { id },
+          include: { author: true },
+        });
+
+        if (!question) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Question not found' });
+        }
+
+        if (question.status !== 'UNDER_REVIEW') {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Question is not under review',
+          });
+        }
+
+        // Audit log the rejection before deleting
+        await auditService.log(req, {
+          action: 'question.moderation.rejected',
+          entityType: 'question',
+          entityId: id,
+          metadata: {
+            questionId: id,
+            questionBody: question.body.substring(0, 200),
+            teamId: question.teamId,
+            authorId: question.authorId,
+            originalReasons: question.moderationReasons,
+            confidence: question.moderationConfidence,
+            rejectionReason: reason || 'No reason provided',
+          },
+        });
+
+        // Send email notification to question author
+        if (question.author?.email) {
+          try {
+            const { emailQueue } = await import('./lib/queue/emailQueue.js');
+            const { renderQuestionRejectedEmail } = await import('./lib/email/templates.js');
+
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const guidelinesUrl = `${frontendUrl}/guidelines`;
+            const unsubscribeUrl = `${frontendUrl}/profile`;
+
+            const html = await renderQuestionRejectedEmail({
+              userName: question.author.name || 'User',
+              questionBody: question.body,
+              rejectionReason: reason || 'Content did not meet community guidelines',
+              guidelinesUrl,
+              unsubscribeUrl,
+            });
+
+            await emailQueue.add('send-email', {
+              type: 'direct',
+              emailOptions: {
+                to: { email: question.author.email, name: question.author.name || 'User' },
+                subject: 'Your question was not approved',
+                html,
+              },
+            });
+          } catch (emailError) {
+            console.error('Failed to send rejection email:', emailError);
+            // Don't fail the request if email fails
+          }
+        }
+
+        // Delete the question (rejected content is not kept)
+        await prisma.question.delete({
+          where: { id },
+        });
+
+        res.json({
+          message: 'Question rejected and removed',
+          questionId: id,
+        });
+      } catch (error) {
+        console.error('Failed to reject question:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to reject question',
+        });
+      }
+    }
+  );
+
   // CSRF token endpoint - frontend can call this to get a token
   app.get('/csrf-token', provideCsrfToken(), csrfTokenEndpoint());
 
@@ -873,6 +1126,109 @@ export function createApp(prisma: PrismaClient) {
         }
       }
 
+      // Moderate content before creating question
+      const { moderateContent } = await import('./lib/moderation/index.js');
+      const moderation = await moderateContent(parse.data.body);
+
+      // Phase 1: Always audit log when content is flagged
+      if (moderation.flagged) {
+        const moderationId = `mod_${Date.now()}`;
+
+        await auditService.log(req, {
+          action: 'question.moderation.flagged',
+          entityType: 'question',
+          entityId: undefined, // Not created yet
+          metadata: {
+            questionPreview: parse.data.body.substring(0, 200),
+            teamId: parse.data.teamId,
+            reasons: moderation.reasons,
+            confidence: moderation.confidence,
+            providers: moderation.providers,
+            moderationId,
+          },
+        });
+
+        // Phase 2: Tiered moderation based on confidence
+        if (moderation.confidence === 'high') {
+          // High confidence = auto-reject (clear violations)
+          console.warn('Question auto-rejected (high confidence):', {
+            userId: req.user?.id,
+            providers: moderation.providers,
+            reasons: moderation.reasons,
+            moderationId,
+          });
+
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Content does not meet community guidelines',
+            reasons: moderation.reasons,
+            moderationId,
+          });
+        }
+
+        // Medium/low confidence = send to review queue
+        console.log('Question sent to review queue:', {
+          userId: req.user?.id,
+          confidence: moderation.confidence,
+          reasons: moderation.reasons,
+          moderationId,
+        });
+
+        const questionData = {
+          body: parse.data.body,
+          status: 'UNDER_REVIEW' as const,
+          teamId: parse.data.teamId || null,
+          authorId: req.user?.id || null,
+          upvotes: req.user?.id ? 1 : 0,
+          tenantId: req.tenant!.tenantId,
+          moderationReasons: moderation.reasons,
+          moderationConfidence: moderation.confidence,
+          moderationProviders: moderation.providers,
+        };
+
+        const q = await prisma.question.create({
+          data: questionData,
+          include: {
+            team: true,
+            author: true,
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+        });
+
+        // Create upvote record if authenticated
+        if (req.user?.id) {
+          await prisma.upvote.create({
+            data: {
+              questionId: q.id,
+              userId: req.user.id,
+            },
+          });
+        }
+
+        // Audit log the review queue submission
+        await auditService.log(req, {
+          action: 'question.moderation.under_review',
+          entityType: 'question',
+          entityId: q.id,
+          metadata: {
+            questionId: q.id,
+            teamId: q.teamId,
+            reasons: moderation.reasons,
+            confidence: moderation.confidence,
+            moderationId,
+          },
+        });
+
+        return res.status(HTTP_STATUS.CREATED).json({
+          ...q,
+          message: 'Your question is under review and will be published after moderator approval.',
+        });
+      }
+
+      // Content is clean - proceed normally
       const questionData = {
         body: parse.data.body,
         teamId: parse.data.teamId || null,

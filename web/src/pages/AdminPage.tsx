@@ -8,10 +8,7 @@ import { TagManagement } from '../components/TagManagement'
 import { Settings } from '../components/Settings'
 import { UserManagement } from '../components/UserManagement'
 import { useTheme } from '../contexts/ThemeContext'
-import { ExportPage } from './ExportPage'
 import { AuditPage } from './AuditPage'
-import { ModerationQueuePage } from './ModerationQueuePage'
-import { ModerationStatsPage } from './ModerationStatsPage'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 
 export function AdminPage() {
@@ -20,15 +17,8 @@ export function AdminPage() {
   const { theme } = useTheme()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<
-    | 'moderation'
-    | 'stats'
-    | 'teams'
-    | 'tags'
-    | 'users'
-    | 'export'
-    | 'audit'
-    | 'settings'
-  >('moderation')
+    'teams' | 'tags' | 'users' | 'audit' | 'settings'
+  >('teams')
   const [healthStatus, setHealthStatus] = useState<
     'checking' | 'healthy' | 'unhealthy'
   >('checking')
@@ -127,7 +117,7 @@ export function AdminPage() {
                 Admin Panel
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Manage questions and teams
+                System administration and configuration
               </p>
             </div>
           </div>
@@ -170,26 +160,6 @@ export function AdminPage() {
         <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
           <nav className="-mb-px flex space-x-8">
             <button
-              onClick={() => setActiveTab('moderation')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'moderation'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              Moderation Queue
-            </button>
-            <button
-              onClick={() => setActiveTab('stats')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'stats'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              Stats
-            </button>
-            <button
               onClick={() => setActiveTab('teams')}
               className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'teams'
@@ -209,7 +179,7 @@ export function AdminPage() {
             >
               Tags
             </button>
-            {/* Users, Export, Audit, and Settings tabs - admin/owner only */}
+            {/* Users, Audit, and Settings tabs - admin/owner only */}
             {hasFullAdminRole && (
               <>
                 <button
@@ -221,16 +191,6 @@ export function AdminPage() {
                   }`}
                 >
                   Users
-                </button>
-                <button
-                  onClick={() => setActiveTab('export')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'export'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  Export
                 </button>
                 <button
                   onClick={() => setActiveTab('audit')}
@@ -258,18 +218,12 @@ export function AdminPage() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'moderation' && <ModerationQueuePage />}
-
-        {activeTab === 'stats' && <ModerationStatsPage />}
-
         {activeTab === 'teams' && <TeamManagement />}
 
         {activeTab === 'tags' && <TagManagement />}
 
-        {/* Users, Export, Audit, and Settings content - admin/owner only */}
+        {/* Users, Audit, and Settings content - admin/owner only */}
         {hasFullAdminRole && activeTab === 'users' && <UserManagement />}
-
-        {hasFullAdminRole && activeTab === 'export' && <ExportPage />}
 
         {hasFullAdminRole && activeTab === 'audit' && (
           <div className="mt-[-2rem]">

@@ -11,6 +11,7 @@ datasource db {
 enum QuestionStatus {
   OPEN
   ANSWERED
+  UNDER_REVIEW
 }
 
 // Multi-tenancy: Tenant model
@@ -92,6 +93,11 @@ model Question {
   reviewedBy   String?        // Last moderator who reviewed this question
   reviewedAt   DateTime?
   
+  // Content moderation fields
+  moderationReasons     String[]   @default([]) // Reasons why content was flagged
+  moderationConfidence  String?                 // high, medium, low
+  moderationProviders   String[]   @default([]) // Which providers flagged it (local, openai)
+  
   // Note: search_vector column exists in database (tsvector type)
   // but is not included in Prisma schema as it's entirely managed by PostgreSQL triggers
   
@@ -105,6 +111,8 @@ model Question {
   @@index([tenantId, teamId])
   @@index([isPinned])
   @@index([reviewedBy])
+  @@index([status]) // For filtering UNDER_REVIEW questions
+  @@index([moderationConfidence]) // For filtering by confidence level
 }
 
 model Tag {

@@ -148,6 +148,7 @@ nav:
       - Security:
           - security/overview.md
           - security/rbac.md
+          - security/content-moderation.md
           - security/audit-logging.md
           - security/security-headers.md
           - security/sessions.md

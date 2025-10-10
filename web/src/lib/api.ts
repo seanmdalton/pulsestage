@@ -220,7 +220,7 @@ const QuestionSchema = z.object({
   id: z.string(),
   body: z.string(),
   upvotes: z.number(),
-  status: z.enum(['OPEN', 'ANSWERED']),
+  status: z.enum(['OPEN', 'ANSWERED', 'UNDER_REVIEW']),
   responseText: z.string().nullable(),
   respondedAt: z.string().nullable(),
   createdAt: z.string(),
@@ -237,7 +237,13 @@ const QuestionSchema = z.object({
   frozenAt: z.string().nullable().optional(),
   reviewedBy: z.string().nullable().optional(),
   reviewedAt: z.string().nullable().optional(),
+  moderationReasons: z.array(z.string()).optional(),
+  moderationConfidence: z.enum(['high', 'medium', 'low']).nullable().optional(),
+  moderationProviders: z.array(z.enum(['local', 'openai'])).optional(),
 })
+
+// Export the full Question type with moderation fields for use in components
+export type QuestionWithModeration = z.infer<typeof QuestionSchema>
 
 // Validation schemas removed as they're not currently used
 
@@ -294,7 +300,15 @@ class ApiClient {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`
       try {
         const errorData = await response.json()
-        if (errorData.message) {
+
+        // Handle moderation errors with reasons
+        if (errorData.reasons && Array.isArray(errorData.reasons)) {
+          errorMessage = errorData.error || 'Content flagged by moderation'
+          errorMessage += '\n\nReasons:\n• ' + errorData.reasons.join('\n• ')
+          if (errorData.moderationId) {
+            errorMessage += `\n\n(Reference: ${errorData.moderationId})`
+          }
+        } else if (errorData.message) {
           errorMessage = errorData.message
         } else if (errorData.error) {
           // Handle different error formats
@@ -396,6 +410,49 @@ class ApiClient {
       z.object({
         hasUpvoted: z.boolean(),
         canUpvote: z.boolean(),
+      })
+    )
+  }
+
+  // Moderation Review Queue endpoints
+  async getReviewQueue(filters?: {
+    teamId?: string
+    confidence?: string
+  }): Promise<Question[]> {
+    const params = new URLSearchParams()
+    if (filters?.teamId) params.append('teamId', filters.teamId)
+    if (filters?.confidence) params.append('confidence', filters.confidence)
+    const queryString = params.toString() ? `?${params.toString()}` : ''
+    return this.request(
+      `/admin/moderation/review-queue${queryString}`,
+      {},
+      z.array(QuestionSchema)
+    )
+  }
+
+  async approveQuestion(id: string): Promise<Question & { message?: string }> {
+    return this.request(
+      `/admin/moderation/approve/${id}`,
+      {
+        method: 'POST',
+      },
+      QuestionSchema.extend({ message: z.string().optional() })
+    )
+  }
+
+  async rejectQuestion(
+    id: string,
+    reason?: string
+  ): Promise<{ message: string; questionId: string }> {
+    return this.request(
+      `/admin/moderation/reject/${id}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      },
+      z.object({
+        message: z.string(),
+        questionId: z.string(),
       })
     )
   }
@@ -1106,7 +1163,7 @@ class ApiClient {
       id: z.string(),
       body: z.string(),
       upvotes: z.number(),
-      status: z.enum(['OPEN', 'ANSWERED']),
+      status: z.enum(['OPEN', 'ANSWERED', 'UNDER_REVIEW']),
       responseText: z.string().nullable().optional(),
       respondedAt: z.string().nullable().optional(),
       createdAt: z.string(),

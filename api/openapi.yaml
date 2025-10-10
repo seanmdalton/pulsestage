@@ -76,7 +76,7 @@ components:
           description: Number of upvotes
         status:
           type: string
-          enum: [OPEN, ANSWERED]
+          enum: [OPEN, ANSWERED, UNDER_REVIEW]
           description: Question status
         responseText:
           type: string
@@ -195,6 +195,25 @@ components:
           format: date-time
           nullable: true
           description: Timestamp of last review
+        moderationReasons:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Reasons why content was flagged by moderation
+          example: ['Contains profanity', 'Spam detected']
+        moderationConfidence:
+          type: string
+          enum: [high, medium, low]
+          nullable: true
+          description: Confidence level of moderation flags
+        moderationProviders:
+          type: array
+          items:
+            type: string
+            enum: [local, openai]
+          default: []
+          description: Which moderation providers flagged the content
 
     Team:
       type: object
@@ -558,6 +577,36 @@ components:
       example:
         error: 'Validation failed'
 
+    ModerationError:
+      type: object
+      required:
+        - error
+        - reasons
+        - moderationId
+      properties:
+        error:
+          type: string
+          description: Error message indicating content moderation failure
+          example: 'Content does not meet community guidelines'
+        reasons:
+          type: array
+          items:
+            type: string
+          description: List of specific reasons why content was flagged
+          example:
+            - 'Contains profanity'
+            - 'Spam detected (excessive URLs, numbers, or repeated characters)'
+        moderationId:
+          type: string
+          description: Unique identifier for this moderation event (for support/appeal purposes)
+          example: 'mod_1760054757000'
+      example:
+        error: 'Content does not meet community guidelines'
+        reasons:
+          - 'Contains profanity'
+          - 'Aggressive or confrontational tone'
+        moderationId: 'mod_1760054757000'
+
 paths:
   /health:
     get:
@@ -650,7 +699,14 @@ paths:
       tags:
         - Questions
       summary: Submit a question
-      description: Create a new anonymous question (rate limited to 10 per minute per IP)
+      description: |
+        Create a new anonymous question (rate limited to 10 per minute per IP).
+
+        Content Moderation:
+        - All questions are automatically checked for inappropriate content
+        - Local filtering is always active (profanity, spam, hate speech)
+        - If OPENAI_API_KEY is configured, enhanced AI moderation is applied
+        - Flagged content is rejected with detailed reasons
       operationId: createQuestion
       requestBody:
         required: true
@@ -666,11 +722,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
         '400':
-          description: Invalid request body
+          description: Invalid request body or content flagged by moderation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ModerationError'
+              examples:
+                validation_error:
+                  summary: Validation error
+                  value:
+                    error: 'Validation failed'
+                    details:
+                      body: ['Question must be at least 10 characters']
+                moderation_error:
+                  summary: Content moderation failure
+                  value:
+                    error: 'Content does not meet community guidelines'
+                    reasons:
+                      - 'Contains profanity'
+                      - 'Aggressive or confrontational tone'
+                    moderationId: 'mod_1760054757000'
         '429':
           description: Rate limit exceeded
           content:
@@ -2071,6 +2144,139 @@ paths:
                     description: Whether the queue is paused
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/moderation/review-queue:
+    get:
+      tags:
+        - Admin
+      summary: Get moderation review queue
+      description: Retrieve all questions pending moderator review (medium/low confidence flags)
+      security:
+        - MockSSO: []
+      parameters:
+        - name: teamId
+          in: query
+          description: Filter by team ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: confidence
+          in: query
+          description: Filter by confidence level
+          required: false
+          schema:
+            type: string
+            enum: [high, medium, low]
+      responses:
+        '200':
+          description: List of questions under review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/moderation/approve/{id}:
+    post:
+      tags:
+        - Admin
+      summary: Approve a question under review
+      description: Approve a flagged question and publish it as OPEN
+      security:
+        - MockSSO: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question approved and published
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Question'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Question approved and published'
+        '400':
+          description: Question is not under review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/moderation/reject/{id}:
+    post:
+      tags:
+        - Admin
+      summary: Reject a question under review
+      description: Reject a flagged question and delete it
+      security:
+        - MockSSO: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Question ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for rejection
+                  example: 'Inappropriate content'
+      responses:
+        '200':
+          description: Question rejected and removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Question rejected and removed'
+                  questionId:
+                    type: string
+                    format: uuid
+        '400':
+          description: Question is not under review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 

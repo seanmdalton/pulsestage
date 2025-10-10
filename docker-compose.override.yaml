@@ -26,6 +26,8 @@ services:
       FRONTEND_URL: http://localhost:5173
       REDIS_HOST: redis
       REDIS_PORT: "6379"
+      # Content Moderation (optional)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   
   web:
     build: ./web

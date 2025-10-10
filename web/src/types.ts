@@ -5,7 +5,7 @@ const QuestionSchema = z.object({
   id: z.string(),
   body: z.string(),
   upvotes: z.number(),
-  status: z.enum(['OPEN', 'ANSWERED']),
+  status: z.enum(['OPEN', 'ANSWERED', 'UNDER_REVIEW']),
   responseText: z.string().nullable(),
   respondedAt: z.string().nullable(),
   createdAt: z.string(),

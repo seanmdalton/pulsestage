@@ -9,6 +9,12 @@ import { createElement } from 'react';
 import QuestionAnsweredEmail, {
   type QuestionAnsweredEmailProps,
 } from '../../emails/QuestionAnsweredEmail.js';
+import QuestionApprovedEmail, {
+  type QuestionApprovedEmailProps,
+} from '../../emails/QuestionApprovedEmail.js';
+import QuestionRejectedEmail, {
+  type QuestionRejectedEmailProps,
+} from '../../emails/QuestionRejectedEmail.js';
 
 /**
  * Render QuestionAnsweredEmail template to HTML
@@ -17,6 +23,26 @@ export async function renderQuestionAnsweredEmail(
   props: QuestionAnsweredEmailProps
 ): Promise<string> {
   const result = await render(createElement(QuestionAnsweredEmail, props));
+  return result;
+}
+
+/**
+ * Render QuestionApprovedEmail template to HTML
+ */
+export async function renderQuestionApprovedEmail(
+  props: QuestionApprovedEmailProps
+): Promise<string> {
+  const result = await render(createElement(QuestionApprovedEmail, props));
+  return result;
+}
+
+/**
+ * Render QuestionRejectedEmail template to HTML
+ */
+export async function renderQuestionRejectedEmail(
+  props: QuestionRejectedEmailProps
+): Promise<string> {
+  const result = await render(createElement(QuestionRejectedEmail, props));
   return result;
 }
 

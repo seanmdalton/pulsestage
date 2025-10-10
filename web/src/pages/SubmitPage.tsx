@@ -187,18 +187,28 @@ export function SubmitPage() {
     setValidationError(null)
 
     try {
-      await apiClient.createQuestion({
+      const response = await apiClient.createQuestion({
         body: question.trim(),
         teamId: currentTeam.id,
       })
+
       setQuestion('')
       setValidationError(null)
       setHasAttemptedSubmit(false)
       questionAtSubmit.current = ''
-      setMessage({
-        type: 'success',
-        text: `Question submitted successfully to ${currentTeam.name}!`,
-      })
+
+      // Check if question is under review
+      if ((response as any).message?.includes('under review')) {
+        setMessage({
+          type: 'success',
+          text: `Your question has been submitted and is under moderator review. You'll be notified once it's published.`,
+        })
+      } else {
+        setMessage({
+          type: 'success',
+          text: `Question submitted successfully to ${currentTeam.name}!`,
+        })
+      }
     } catch (error) {
       setMessage({
         type: 'error',
@@ -313,7 +323,7 @@ export function SubmitPage() {
                 : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'
             }`}
           >
-            {message.text}
+            <div className="whitespace-pre-line">{message.text}</div>
           </div>
         )}
 

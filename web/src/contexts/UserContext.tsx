@@ -1,9 +1,9 @@
-import React, {
+import {
   createContext,
   useState,
   useEffect,
   useContext,
-  ReactNode,
+  type ReactNode,
 } from 'react'
 import {
   apiClient,
@@ -35,7 +35,9 @@ interface UserContextType {
   setDefaultTeam: (teamId: string) => Promise<void>
 
   // Utility functions
-  getUserRoleInTeam: (teamId: string) => 'member' | 'admin' | 'owner' | null
+  getUserRoleInTeam: (
+    teamId: string
+  ) => 'member' | 'moderator' | 'admin' | 'owner' | null
   isTeamFavorite: (teamId: string) => boolean
   canUserAccessTeam: (teamId: string) => boolean
 }
@@ -280,7 +282,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Utility functions
   const getUserRoleInTeam = (
     teamId: string
-  ): 'member' | 'admin' | 'owner' | null => {
+  ): 'member' | 'moderator' | 'admin' | 'owner' | null => {
     const team = userTeams.find((t) => t.id === teamId)
     return team?.userRole || null
   }

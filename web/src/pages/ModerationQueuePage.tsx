@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { apiClient } from '../lib/api'
-import type { Question, Tag } from '../lib/api'
+import type { QuestionWithModeration, Tag } from '../lib/api'
 import { useTeam } from '../contexts/TeamContext'
 import { useUser } from '../contexts/UserContext'
 import { ResponseModal } from '../components/ResponseModal'
@@ -8,23 +9,35 @@ import { useSSE } from '../hooks/useSSE'
 import type { SSEEvent } from '../hooks/useSSE'
 
 export function ModerationQueuePage() {
-  const [questions, setQuestions] = useState<Question[]>([])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [questions, setQuestions] = useState<QuestionWithModeration[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
     new Set()
   )
   const [allTags, setAllTags] = useState<Tag[]>([])
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-    null
-  )
+  const [selectedQuestion, setSelectedQuestion] =
+    useState<QuestionWithModeration | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  const [reviewActionLoading, setReviewActionLoading] = useState<string | null>(
+    null
+  ) // Store question ID being processed
+
+  // Read initial status from URL params, default to 'open'
+  const initialStatus =
+    (searchParams.get('status') as
+      | 'open'
+      | 'answered'
+      | 'under_review'
+      | 'all'
+      | null) || 'open'
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<'open' | 'answered' | 'all'>(
-    'open'
-  )
+  const [statusFilter, setStatusFilter] = useState<
+    'open' | 'answered' | 'under_review' | 'all'
+  >(initialStatus)
   const [teamFilter, setTeamFilter] = useState<string>('')
   const [pinnedFilter, setPinnedFilter] = useState<
     'all' | 'pinned' | 'unpinned'
@@ -38,6 +51,28 @@ export function ModerationQueuePage() {
   const { teams } = useTeam()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { getUserRoleInTeam: _getUserRoleInTeam } = useUser()
+
+  // Sync URL params when status filter changes
+  useEffect(() => {
+    if (statusFilter !== initialStatus) {
+      setSearchParams({ status: statusFilter })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter])
+
+  // Update status filter when URL params change
+  useEffect(() => {
+    const urlStatus = searchParams.get('status') as
+      | 'open'
+      | 'answered'
+      | 'under_review'
+      | 'all'
+      | null
+    if (urlStatus && urlStatus !== statusFilter) {
+      setStatusFilter(urlStatus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   // Handle SSE events
   const handleSSEEvent = (event: SSEEvent) => {
@@ -84,40 +119,52 @@ export function ModerationQueuePage() {
         setAllTags(tagsData)
 
         // Load questions with filters
+        let data
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const filters: any = {}
+        if (statusFilter === 'under_review') {
+          // Load questions in review queue
+          const reviewFilters: { teamId?: string; confidence?: string } = {}
+          if (teamFilter) {
+            reviewFilters.teamId = teamFilter
+          }
+          data = await apiClient.getReviewQueue(reviewFilters)
+          setQuestions(data)
+        } else {
+          // Load regular moderation queue
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const filters: any = {}
 
-        if (statusFilter !== 'all') {
-          filters.status = statusFilter
+          if (statusFilter !== 'all') {
+            filters.status = statusFilter
+          }
+
+          if (teamFilter) {
+            filters.teamId = teamFilter
+          }
+
+          if (pinnedFilter === 'pinned') {
+            filters.isPinned = true
+          } else if (pinnedFilter === 'unpinned') {
+            filters.isPinned = false
+          }
+
+          if (frozenFilter === 'frozen') {
+            filters.isFrozen = true
+          } else if (frozenFilter === 'unfrozen') {
+            filters.isFrozen = false
+          }
+
+          if (needsReviewFilter) {
+            filters.needsReview = true
+          }
+
+          if (reviewedByFilter) {
+            filters.reviewedBy = reviewedByFilter
+          }
+
+          const queueData = await apiClient.getModerationQueue(filters)
+          setQuestions(queueData.questions)
         }
-
-        if (teamFilter) {
-          filters.teamId = teamFilter
-        }
-
-        if (pinnedFilter === 'pinned') {
-          filters.isPinned = true
-        } else if (pinnedFilter === 'unpinned') {
-          filters.isPinned = false
-        }
-
-        if (frozenFilter === 'frozen') {
-          filters.isFrozen = true
-        } else if (frozenFilter === 'unfrozen') {
-          filters.isFrozen = false
-        }
-
-        if (needsReviewFilter) {
-          filters.needsReview = true
-        }
-
-        if (reviewedByFilter) {
-          filters.reviewedBy = reviewedByFilter
-        }
-
-        const data = await apiClient.getModerationQueue(filters)
-        setQuestions(data.questions)
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Failed to load moderation queue'
@@ -244,6 +291,55 @@ export function ModerationQueuePage() {
     }
   }
 
+  const handleApprove = async (questionId: string) => {
+    try {
+      setReviewActionLoading(questionId)
+      setError(null)
+
+      const approvedQuestion = await apiClient.approveQuestion(questionId)
+
+      // Remove from list (it's no longer under review)
+      setQuestions((prev) => prev.filter((q) => q.id !== questionId))
+
+      // Show success message temporarily
+      setError(null)
+      const successMessage = `✓ Question approved and published`
+      setError(successMessage)
+      setTimeout(() => setError(null), 3000)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to approve question'
+      )
+    } finally {
+      setReviewActionLoading(null)
+    }
+  }
+
+  const handleReject = async (questionId: string) => {
+    if (!confirm('Are you sure you want to reject and delete this question?')) {
+      return
+    }
+
+    try {
+      setReviewActionLoading(questionId)
+      setError(null)
+
+      await apiClient.rejectQuestion(questionId, 'Rejected by moderator')
+
+      // Remove from list (it's been deleted)
+      setQuestions((prev) => prev.filter((q) => q.id !== questionId))
+
+      // Show success message temporarily
+      const successMessage = `✓ Question rejected and removed`
+      setError(successMessage)
+      setTimeout(() => setError(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reject question')
+    } finally {
+      setReviewActionLoading(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
@@ -296,6 +392,7 @@ export function ModerationQueuePage() {
                 <option value="all">All</option>
                 <option value="open">Open</option>
                 <option value="answered">Answered</option>
+                <option value="under_review">Under Review</option>
               </select>
             </div>
 
@@ -560,7 +657,9 @@ export function ModerationQueuePage() {
                           className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             question.status === 'ANSWERED'
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                              : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                              : question.status === 'UNDER_REVIEW'
+                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
                           }`}
                         >
                           {question.status}
@@ -589,35 +688,66 @@ export function ModerationQueuePage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() =>
-                              handleQuickAction(question.id, 'pin')
-                            }
-                            className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
-                            title={question.isPinned ? 'Unpin' : 'Pin'}
-                          >
-                            📌
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleQuickAction(question.id, 'freeze')
-                            }
-                            className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isFrozen ? 'text-blue-400' : 'text-gray-400'}`}
-                            title={question.isFrozen ? 'Unfreeze' : 'Freeze'}
-                          >
-                            ❄️
-                          </button>
-                          {question.status === 'OPEN' && (
-                            <button
-                              onClick={() => {
-                                setSelectedQuestion(question)
-                                setIsModalOpen(true)
-                              }}
-                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-green-600 dark:text-green-400"
-                              title="Answer"
-                            >
-                              💬
-                            </button>
+                          {question.status === 'UNDER_REVIEW' ? (
+                            // Review actions for questions under moderation review
+                            <>
+                              <button
+                                onClick={() => handleApprove(question.id)}
+                                disabled={reviewActionLoading === question.id}
+                                className="px-3 py-1 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-md transition-colors"
+                                title="Approve and publish"
+                              >
+                                {reviewActionLoading === question.id
+                                  ? '...'
+                                  : '✓ Approve'}
+                              </button>
+                              <button
+                                onClick={() => handleReject(question.id)}
+                                disabled={reviewActionLoading === question.id}
+                                className="px-3 py-1 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 rounded-md transition-colors"
+                                title="Reject and delete"
+                              >
+                                {reviewActionLoading === question.id
+                                  ? '...'
+                                  : '✗ Reject'}
+                              </button>
+                            </>
+                          ) : (
+                            // Standard actions for open/answered questions
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleQuickAction(question.id, 'pin')
+                                }
+                                className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
+                                title={question.isPinned ? 'Unpin' : 'Pin'}
+                              >
+                                📌
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleQuickAction(question.id, 'freeze')
+                                }
+                                className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${question.isFrozen ? 'text-blue-400' : 'text-gray-400'}`}
+                                title={
+                                  question.isFrozen ? 'Unfreeze' : 'Freeze'
+                                }
+                              >
+                                ❄️
+                              </button>
+                              {question.status === 'OPEN' && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedQuestion(question)
+                                    setIsModalOpen(true)
+                                  }}
+                                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-green-600 dark:text-green-400"
+                                  title="Answer"
+                                >
+                                  💬
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>

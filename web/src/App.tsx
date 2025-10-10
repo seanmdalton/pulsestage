@@ -25,6 +25,9 @@ import { PresentationPage } from './pages/PresentationPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { HealthDashboardPage } from './pages/HealthDashboardPage'
 import { QuestionDetailPage } from './pages/QuestionDetailPage'
+import { ModeratorDashboardPage } from './pages/ModeratorDashboardPage'
+import { ModerationQueuePage } from './pages/ModerationQueuePage'
+import { ExportPage } from './pages/ExportPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
@@ -126,6 +129,21 @@ function App() {
                         />
 
                         {/* Admin routes (not team-scoped) */}
+                        {/* Moderator routes - must come before /:teamSlug */}
+                        <Route
+                          path="/moderator"
+                          element={<ModeratorDashboardPage />}
+                        />
+                        <Route
+                          path="/moderator/queue"
+                          element={<ModerationQueuePage />}
+                        />
+                        <Route
+                          path="/moderator/export"
+                          element={<ExportPage />}
+                        />
+
+                        {/* Admin routes */}
                         <Route path="/admin" element={<AdminPage />} />
                         <Route
                           path="/admin/login"
