@@ -48,6 +48,7 @@ import {
   setDefaultTeam, // eslint-disable-line @typescript-eslint/no-unused-vars
   setUserPreferences,
 } from './middleware/mockAuth.js';
+import { AuthManager, getDemoModeConfig } from './lib/auth/index.js';
 import { createTenantResolverMiddleware } from './middleware/tenantResolver.js';
 import { applyTenantMiddleware } from './middleware/prismaMiddleware.js';
 import { eventBus } from './lib/eventBus.js';
@@ -577,6 +578,182 @@ export function createApp(prisma: PrismaClient) {
 
   // CSRF token endpoint - frontend can call this to get a token
   app.get('/csrf-token', provideCsrfToken(), csrfTokenEndpoint());
+
+  // ============================================================================
+  // AUTHENTICATION ENDPOINTS
+  // ============================================================================
+  // Multi-mode authentication: demo, GitHub OAuth, Google OAuth
+
+  const authManager = new AuthManager(prisma);
+
+  // Get available authentication modes
+  app.get('/auth/modes', (req, res) => {
+    const modes = authManager.getEnabledModes();
+    const demoConfig = authManager.isModeEnabled('demo') ? getDemoModeConfig() : null;
+
+    res.json({
+      modes,
+      demo:
+        demoConfig && demoConfig.enabled
+          ? {
+              enabled: true,
+              users: demoConfig.users,
+            }
+          : { enabled: false },
+      oauth: {
+        github: authManager.isModeEnabled('oauth') && !!process.env.GITHUB_CLIENT_ID,
+        google: authManager.isModeEnabled('oauth') && !!process.env.GOOGLE_CLIENT_ID,
+      },
+    });
+  });
+
+  // Demo mode authentication
+  app.get('/auth/demo', async (req, res) => {
+    try {
+      if (!authManager.isModeEnabled('demo')) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Demo mode is not enabled',
+        });
+      }
+
+      const user = await authManager.authenticateDemo(req, res);
+
+      if (!user) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Invalid demo user',
+          message: 'Please provide a valid username (?user=alice)',
+        });
+      }
+
+      // Store user in session
+      req.session.user = user;
+      req.session.tenantSlug = (req.query.tenant as string) || 'demo';
+
+      // Redirect to frontend
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}?demo=true`);
+    } catch (error) {
+      console.error('Demo auth error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Authentication failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  // GitHub OAuth - initiate
+  app.get('/auth/github', async (req, res) => {
+    try {
+      if (!authManager.isModeEnabled('oauth')) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'OAuth is not enabled',
+        });
+      }
+
+      await authManager.initiateGitHub(req, res);
+    } catch (error) {
+      console.error('GitHub OAuth initiation error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to initiate GitHub authentication',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  // GitHub OAuth - callback
+  app.get('/auth/github/callback', async (req, res) => {
+    try {
+      if (!authManager.isModeEnabled('oauth')) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'OAuth is not enabled',
+        });
+      }
+
+      const user = await authManager.handleGitHubCallback(req, res);
+
+      if (!user) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          error: 'Authentication failed',
+        });
+      }
+
+      // Store user in session
+      req.session.user = user;
+
+      // Redirect to frontend
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(frontendUrl);
+    } catch (error) {
+      console.error('GitHub OAuth callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(errorMessage)}`);
+    }
+  });
+
+  // Google OAuth - initiate
+  app.get('/auth/google', async (req, res) => {
+    try {
+      if (!authManager.isModeEnabled('oauth')) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'OAuth is not enabled',
+        });
+      }
+
+      await authManager.initiateGoogle(req, res);
+    } catch (error) {
+      console.error('Google OAuth initiation error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to initiate Google authentication',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  // Google OAuth - callback
+  app.get('/auth/google/callback', async (req, res) => {
+    try {
+      if (!authManager.isModeEnabled('oauth')) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'OAuth is not enabled',
+        });
+      }
+
+      const user = await authManager.handleGoogleCallback(req, res);
+
+      if (!user) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          error: 'Authentication failed',
+        });
+      }
+
+      // Store user in session
+      req.session.user = user;
+
+      // Redirect to frontend
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(frontendUrl);
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(errorMessage)}`);
+    }
+  });
+
+  // Logout
+  app.post('/auth/logout', async (req, res) => {
+    try {
+      await authManager.logout(req, res);
+      res.json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Logout failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
   // ============================================================================
   // MOCK SSO ENDPOINTS (Development Only)
