@@ -12,20 +12,20 @@
         <meta name="author" content="Sean Dalton">
       
       
-        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/security/security-headers/">
+        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/security/content-moderation/">
       
       
-        <link rel="prev" href="../audit-logging/">
+        <link rel="prev" href="../rbac/">
       
       
-        <link rel="next" href="../sessions/">
+        <link rel="next" href="../audit-logging/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
     
     
-  <title>Security Headers - PulseStage Documentation</title>
+  <title>Content Moderation - PulseStage Documentation</title>
 
     
       <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#security-headers" class="md-skip">
+        <a href="#content-moderation" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Security Headers
+              Content Moderation
             
           </span>
         </div>
@@ -1653,10 +1653,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../content-moderation/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Content Moderation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1667,6 +1689,575 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How It Works
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tiered-moderation-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tiered Moderation System
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#question-submission-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Question Submission Flow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-gets-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Gets Checked
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-only-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local-Only (Default)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-openai-enhancement" class="md-nav__link">
+    <span class="md-ellipsis">
+      With OpenAI Enhancement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protecting-your-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Protecting Your API Key
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cost Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cost Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Filtering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-moderation-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI Moderation API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Costs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Response
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful-submission" class="md-nav__link">
+    <span class="md-ellipsis">
+      Successful Submission
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#moderation-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moderation Failure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-moderation-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Moderation ID
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#moderator-review-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moderator Review Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Moderator Review Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#review-queue-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Review Queue Access
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#moderator-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moderator Actions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Moderator Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#approve-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Approve Question
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reject-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reject Question
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-questions-under-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      List Questions Under Review
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Experience
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-question-is-under-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      When Question Is Under Review
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-approval" class="md-nav__link">
+    <span class="md-ellipsis">
+      After Approval
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      After Rejection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Audit Logging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logged-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logged Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#querying-audit-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Querying Audit Logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-moderation-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Moderation Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-to-track" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics to Track
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adjusting-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adjusting Sensitivity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-custom-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Custom Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whitelisting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Whitelisting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternatives
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perspective-api-google" class="md-nav__link">
+    <span class="md-ellipsis">
+      Perspective API (Google)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-ml-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom ML Models
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-flagged-but-seems-appropriate" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Content flagged" but seems appropriate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-api-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI API errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-api-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      High API costs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Further Reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1699,32 +2290,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Security Headers
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../security-headers/" class="md-nav__link">
         
   
   
@@ -1735,284 +2304,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implemented-headers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implemented Headers
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implemented Headers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#content-security-policy-csp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Content-Security-Policy (CSP)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#x-frame-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      X-Frame-Options
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#x-content-type-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      X-Content-Type-Options
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#referrer-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Referrer-Policy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#strict-transport-security-hsts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Strict-Transport-Security (HSTS)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cross-origin-opener-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Cross-Origin-Opener-Policy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cross-origin-resource-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Cross-Origin-Resource-Policy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#permissions-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Permissions-Policy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#additional-headers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Additional Headers
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-vs-production" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development vs Production
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Development vs Production">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#production-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Production Mode
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Mode
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-security-headers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Testing Security Headers
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing Security Headers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-testing-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Automated Testing (Recommended)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#local-testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Local Testing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mozilla-http-observatory-manual" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mozilla HTTP Observatory (Manual)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#securityheaderscom" class="md-nav__link">
-    <span class="md-ellipsis">
-      SecurityHeaders.com
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Testing
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#unit-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Unit Tests
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#observatory-integration-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Observatory Integration Tests
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#run-all-security-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run All Security Tests
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Best Practices
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related Documentation
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2920,184 +3211,460 @@
   
 
 
-<h1 id="security-headers">Security Headers<a class="headerlink" href="#security-headers" title="Anchor link to this section">&para;</a></h1>
-<p>PulseStage implements comprehensive HTTP security headers using Helmet middleware to protect against common web vulnerabilities.</p>
+<h1 id="content-moderation">Content Moderation<a class="headerlink" href="#content-moderation" title="Anchor link to this section">&para;</a></h1>
+<p>PulseStage includes built-in content moderation to protect your community from inappropriate content, spam, and abuse.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
-<p>All API responses include strict security headers following Mozilla Observatory best practices to achieve an A grade or higher.</p>
-<h2 id="implemented-headers">Implemented Headers<a class="headerlink" href="#implemented-headers" title="Anchor link to this section">&para;</a></h2>
-<h3 id="content-security-policy-csp">Content-Security-Policy (CSP)<a class="headerlink" href="#content-security-policy-csp" title="Anchor link to this section">&para;</a></h3>
-<p>Strict Content Security Policy to prevent XSS attacks:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>default-src &#39;self&#39;;
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>script-src &#39;self&#39;;
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>style-src &#39;self&#39; &#39;unsafe-inline&#39;;
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>object-src &#39;none&#39;;
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>base-uri &#39;self&#39;;
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>form-action &#39;self&#39;;
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>frame-ancestors &#39;none&#39;;
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>upgrade-insecure-requests;
-</span></code></pre></div>
-<p><strong>Features:</strong>
-- No inline scripts allowed (prevents XSS)
-- Only load resources from same origin
-- Prevents framing (clickjacking protection)
-- Automatically upgrades HTTP to HTTPS requests</p>
-<h3 id="x-frame-options">X-Frame-Options<a class="headerlink" href="#x-frame-options" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>X-Frame-Options: DENY
-</span></code></pre></div>
-<p>Prevents the site from being embedded in iframes, protecting against clickjacking attacks.</p>
-<h3 id="x-content-type-options">X-Content-Type-Options<a class="headerlink" href="#x-content-type-options" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>X-Content-Type-Options: nosniff
-</span></code></pre></div>
-<p>Prevents browsers from MIME-type sniffing, reducing exposure to drive-by download attacks.</p>
-<h3 id="referrer-policy">Referrer-Policy<a class="headerlink" href="#referrer-policy" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Referrer-Policy: strict-origin-when-cross-origin
-</span></code></pre></div>
-<p>Only sends the origin (not full URL) in the Referer header for cross-origin requests, protecting user privacy.</p>
-<h3 id="strict-transport-security-hsts">Strict-Transport-Security (HSTS)<a class="headerlink" href="#strict-transport-security-hsts" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-</span></code></pre></div>
-<p>Forces browsers to only use HTTPS connections for 1 year. <strong>Only enabled in production behind HTTPS.</strong></p>
-<h3 id="cross-origin-opener-policy">Cross-Origin-Opener-Policy<a class="headerlink" href="#cross-origin-opener-policy" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Cross-Origin-Opener-Policy: same-origin
-</span></code></pre></div>
-<p>Ensures that top-level documents do not share a browsing context group with cross-origin documents.</p>
-<h3 id="cross-origin-resource-policy">Cross-Origin-Resource-Policy<a class="headerlink" href="#cross-origin-resource-policy" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Cross-Origin-Resource-Policy: same-origin
-</span></code></pre></div>
-<p>Prevents other origins from reading the resource.</p>
-<h3 id="permissions-policy">Permissions-Policy<a class="headerlink" href="#permissions-policy" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()
-</span></code></pre></div>
-<p>Disables access to sensitive browser APIs and device features.</p>
-<h3 id="additional-headers">Additional Headers<a class="headerlink" href="#additional-headers" title="Anchor link to this section">&para;</a></h3>
+<p>The moderation system uses a <strong>cascading filter approach</strong>:</p>
+<ol>
+<li><strong>Local Filter</strong> (Always Active)</li>
+<li>Profanity detection</li>
+<li>Spam pattern recognition</li>
+<li>Hate speech detection</li>
+<li>Excessive capitalization</li>
+<li>No configuration required</li>
+<li>Zero API costs</li>
+<li>
+<p>Instant processing</p>
+</li>
+<li>
+<p><strong>OpenAI Moderation</strong> (Optional)</p>
+</li>
+<li>Context-aware AI analysis</li>
+<li>Advanced toxicity detection</li>
+<li>Hate speech, harassment, self-harm detection</li>
+<li>Requires API key</li>
+<li>Very low cost (~$0.002 per 1K tokens)</li>
+<li>Only runs if <code>OPENAI_API_KEY</code> is configured</li>
+</ol>
+<p>Content is <strong>flagged if either filter flags it</strong>, providing comprehensive protection.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Anchor link to this section">&para;</a></h2>
+<h3 id="tiered-moderation-system">Tiered Moderation System<a class="headerlink" href="#tiered-moderation-system" title="Anchor link to this section">&para;</a></h3>
+<p>PulseStage uses a <strong>3-tier moderation system</strong> to balance protection with user experience:</p>
+<ol>
+<li><strong>High Confidence Violations</strong> → Auto-Reject</li>
+<li>Clear profanity, hate speech, spam</li>
+<li>User receives immediate feedback with reasons</li>
+<li>
+<p>Question is NOT created</p>
+</li>
+<li>
+<p><strong>Medium/Low Confidence Flags</strong> → Under Review</p>
+</li>
+<li>Borderline content, false positive risk</li>
+<li>Question created with <code>UNDER_REVIEW</code> status</li>
+<li>Sent to moderator queue</li>
+<li>
+<p>User notified of pending review</p>
+</li>
+<li>
+<p><strong>Clean Content</strong> → Published</p>
+</li>
+<li>No flags from any provider</li>
+<li>Immediately published as <code>OPEN</code></li>
+<li>Visible to all users</li>
+</ol>
+<h3 id="question-submission-flow">Question Submission Flow<a class="headerlink" href="#question-submission-flow" title="Anchor link to this section">&para;</a></h3>
+<pre class="mermaid"><code>graph TD
+    A[User Submits Question] --&gt; B[Validation]
+    B --&gt; C{Local Filter}
+    C --&gt;|High Confidence| D[Auto-Reject]
+    C --&gt;|Medium/Low| E[Under Review]
+    C --&gt;|Clean| F{OpenAI Available?}
+    F --&gt;|No| G[Publish as OPEN]
+    F --&gt;|Yes| H[OpenAI Check]
+    H --&gt;|High Confidence| D
+    H --&gt;|Medium/Low| E
+    H --&gt;|Clean| G
+    D --&gt; I[400 Response]
+    E --&gt; J[201 Response + Review Notice]
+    G --&gt; K[201 Response + Success]</code></pre>
+<h3 id="what-gets-checked">What Gets Checked<a class="headerlink" href="#what-gets-checked" title="Anchor link to this section">&para;</a></h3>
 <ul>
-<li><code>Origin-Agent-Cluster: ?1</code> - Provides origin-keyed agent cluster isolation</li>
-<li><code>X-DNS-Prefetch-Control: off</code> - Disables DNS prefetching</li>
-<li><code>X-Download-Options: noopen</code> - Prevents IE from executing downloads</li>
-<li><code>X-Powered-By: (removed)</code> - Hides server technology</li>
+<li><strong>Profanity</strong>: Common profane language</li>
+<li><strong>Spam</strong>: Repeated characters, excessive URLs, spam keywords</li>
+<li><strong>Hate Speech</strong>: Slurs, derogatory language, harmful content</li>
+<li><strong>Toxicity</strong>: Aggressive, harassing, or threatening tone</li>
+<li><strong>Self-Harm</strong>: Content promoting self-harm</li>
+<li><strong>Harassment</strong>: Personal attacks, bullying</li>
 </ul>
-<h2 id="development-vs-production">Development vs Production<a class="headerlink" href="#development-vs-production" title="Anchor link to this section">&para;</a></h2>
-<h3 id="production-mode">Production Mode<a class="headerlink" href="#production-mode" title="Anchor link to this section">&para;</a></h3>
-<p>Strict security headers with:
-- No eval() in JavaScript
-- HSTS enabled
-- Strict CSP
-- All security headers enforced</p>
-<h3 id="development-mode">Development Mode<a class="headerlink" href="#development-mode" title="Anchor link to this section">&para;</a></h3>
-<p>Relaxed headers for local development with Vite:
-- Allows <code>'unsafe-eval'</code> for Vite HMR
-- Allows WebSocket connections (ws:, wss:)
-- HSTS disabled (no HTTPS required)
-- All other security headers remain strict</p>
-<h2 id="testing-security-headers">Testing Security Headers<a class="headerlink" href="#testing-security-headers" title="Anchor link to this section">&para;</a></h2>
-<h3 id="automated-testing-recommended">Automated Testing (Recommended)<a class="headerlink" href="#automated-testing-recommended" title="Anchor link to this section">&para;</a></h3>
-<p>We integrate <a href="https://github.com/mdn/mdn-http-observatory/">MDN HTTP Observatory</a> directly into our test suite:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>observatory.test.ts
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Anchor link to this section">&para;</a></h2>
+<h3 id="local-only-default">Local-Only (Default)<a class="headerlink" href="#local-only-default" title="Anchor link to this section">&para;</a></h3>
+<p>No configuration needed. Works out of the box:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># env.example - no moderation configuration required</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># Local filtering is automatically active</span>
 </span></code></pre></div>
-<p>This runs 6 automated security tests including:
-- Overall security grade and score
-- Content-Security-Policy validation
-- X-Content-Type-Options check
-- X-Frame-Options check
-- Referrer-Policy check
-- Detailed test result logging</p>
-<p><strong>Development Mode Results:</strong>
-- Expected Grade: C (relaxed CSP for Vite HMR)
-- Expected Score: 50/100
-- Acceptable: 7/10 tests passing</p>
-<p><strong>Production Mode Expectations:</strong>
-- Target Grade: A or better
-- Target Score: 70+/100
-- All critical security tests passing</p>
-<h3 id="local-testing">Local Testing<a class="headerlink" href="#local-testing" title="Anchor link to this section">&para;</a></h3>
-<p>Check headers locally:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://localhost:5001/health
+<h3 id="with-openai-enhancement">With OpenAI Enhancement<a class="headerlink" href="#with-openai-enhancement" title="Anchor link to this section">&para;</a></h3>
+<p>Add your OpenAI API key for enhanced moderation:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Optional: Enhanced AI moderation</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>sk-...
 </span></code></pre></div>
-<h3 id="mozilla-http-observatory-manual">Mozilla HTTP Observatory (Manual)<a class="headerlink" href="#mozilla-http-observatory-manual" title="Anchor link to this section">&para;</a></h3>
-<p>Test your deployed site manually:</p>
+<p><strong>Get an API key</strong>: <a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a></p>
+<h3 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Anchor link to this section">&para;</a></h3>
+<h4 id="protecting-your-api-key">Protecting Your API Key<a class="headerlink" href="#protecting-your-api-key" title="Anchor link to this section">&para;</a></h4>
 <ol>
-<li>Visit: https://developer.mozilla.org/en-US/observatory/</li>
-<li>Enter your site URL</li>
-<li>Run the scan</li>
-<li>Target score: <strong>A grade or higher</strong></li>
+<li><strong>Server-Side Only</strong>: Never expose <code>OPENAI_API_KEY</code> to frontend</li>
+<li><strong>Separate Keys</strong>: Use different keys for dev/demo/production</li>
+<li><strong>Rate Limiting</strong>: Already implemented (10 questions/min per IP)</li>
+<li><strong>Usage Monitoring</strong>: Set spending limits in OpenAI dashboard</li>
+<li><strong>Environment Variables</strong>: Never commit keys to git (.gitignore configured)</li>
 </ol>
-<h3 id="securityheaderscom">SecurityHeaders.com<a class="headerlink" href="#securityheaderscom" title="Anchor link to this section">&para;</a></h3>
-<p>Alternative testing tool:</p>
-<ol>
-<li>Visit: https://securityheaders.com/</li>
-<li>Enter your site URL</li>
-<li>Check for all security headers</li>
-</ol>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Anchor link to this section">&para;</a></h2>
-<p>The security headers are implemented in <code>api/src/middleware/securityHeaders.ts</code> using Helmet:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">import</span><span class="w"> </span><span class="nx">helmet</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;helmet&#39;</span><span class="p">;</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">securityHeadersMiddleware</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">RequestHandler</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">helmet</span><span class="p">({</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nx">contentSecurityPolicy</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">      </span><span class="nx">directives</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="nx">defaultSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="nx">scriptSrc</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&#39;self&#39;&quot;</span><span class="p">],</span>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">        </span><span class="c1">// ... more directives</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">      </span><span class="p">},</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span><span class="c1">// ... more options</span>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">  </span><span class="p">});</span>
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="p">}</span>
+<h4 id="recommended-setup">Recommended Setup<a class="headerlink" href="#recommended-setup" title="Anchor link to this section">&para;</a></h4>
+<p><strong>Demo/Development</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Use local-only filtering</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># No API key needed</span>
+</span></code></pre></div></p>
+<p><strong>Production</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Add OpenAI for enhanced protection</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>sk-...
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Set spending limit: $10/month (very generous for most use cases)</span>
+</span></code></pre></div></p>
+<h2 id="cost-analysis">Cost Analysis<a class="headerlink" href="#cost-analysis" title="Anchor link to this section">&para;</a></h2>
+<h3 id="local-filtering">Local Filtering<a class="headerlink" href="#local-filtering" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li><strong>Cost</strong>: $0 (100% free)</li>
+<li><strong>Speed</strong>: &lt;1ms per question</li>
+<li><strong>Accuracy</strong>: ~85-90% for obvious violations</li>
+</ul>
+<h3 id="openai-moderation-api">OpenAI Moderation API<a class="headerlink" href="#openai-moderation-api" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li><strong>Cost</strong>: ~$0.002 per 1,000 tokens</li>
+<li><strong>Speed</strong>: ~200ms per question</li>
+<li><strong>Accuracy</strong>: ~95-98% with context awareness</li>
+</ul>
+<h3 id="example-costs">Example Costs<a class="headerlink" href="#example-costs" title="Anchor link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Questions/Month</th>
+<th>Local Only</th>
+<th>Local + OpenAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1,000</td>
+<td>$0.00</td>
+<td>$0.40</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>$0.00</td>
+<td>$4.00</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>$0.00</td>
+<td>$40.00</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Caching</strong>: Results are cached to avoid duplicate API calls for identical content.</p>
+<h2 id="api-response">API Response<a class="headerlink" href="#api-response" title="Anchor link to this section">&para;</a></h2>
+<h3 id="successful-submission">Successful Submission<a class="headerlink" href="#successful-submission" title="Anchor link to this section">&para;</a></h3>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">POST /questions</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">Content-Type: application/json</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="err">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="err">  &quot;body&quot;: &quot;What is our remote work policy?&quot;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="err">}</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="err">→ 201 Created</span>
 </span></code></pre></div>
-<p>Applied in <code>api/src/app.ts</code>:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// Production</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">securityHeadersMiddleware</span><span class="p">());</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1">// Development</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">developmentSecurityHeaders</span><span class="p">());</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">apiSecurityHeaders</span><span class="p">());</span>
+<h3 id="moderation-failure">Moderation Failure<a class="headerlink" href="#moderation-failure" title="Anchor link to this section">&para;</a></h3>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">POST /questions</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="err">Content-Type: application/json</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="err">{</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="err">  &quot;body&quot;: &quot;This is some fucking bullshit&quot;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="err">}</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="err">→ 400 Bad Request</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="err">{</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="err">  &quot;error&quot;: &quot;Content does not meet community guidelines&quot;,</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="err">  &quot;reasons&quot;: [</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="err">    &quot;Contains profanity&quot;</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="err">  ],</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="err">  &quot;moderationId&quot;: &quot;mod_1760054757000&quot;</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="err">}</span>
+</span></code></pre></div>
+<h3 id="using-the-moderation-id">Using the Moderation ID<a class="headerlink" href="#using-the-moderation-id" title="Anchor link to this section">&para;</a></h3>
+<p>The <code>moderationId</code> can be used for:
+- <strong>Support Requests</strong>: Users can appeal moderation decisions
+- <strong>Audit Logging</strong>: Track moderation patterns
+- <strong>False Positive Reports</strong>: Improve filter accuracy</p>
+<h2 id="moderator-review-workflow">Moderator Review Workflow<a class="headerlink" href="#moderator-review-workflow" title="Anchor link to this section">&para;</a></h2>
+<p>Questions flagged with <strong>medium or low confidence</strong> are sent to a review queue for human moderation.</p>
+<h3 id="review-queue-access">Review Queue Access<a class="headerlink" href="#review-queue-access" title="Anchor link to this section">&para;</a></h3>
+<p>Moderators (users with <code>question.answer</code> permission) can access the review queue:</p>
+<ol>
+<li><strong>Admin Panel</strong> → Navigate to Moderation Queue</li>
+<li><strong>Status Filter</strong> → Select "Under Review"</li>
+<li>View all pending questions with:</li>
+<li>Original question text</li>
+<li>Moderation reasons</li>
+<li>Confidence level</li>
+<li>Flagging providers (local, openai)</li>
+<li>Team assignment</li>
+<li>Submission timestamp</li>
+</ol>
+<h3 id="moderator-actions">Moderator Actions<a class="headerlink" href="#moderator-actions" title="Anchor link to this section">&para;</a></h3>
+<h4 id="approve-question">Approve Question<a class="headerlink" href="#approve-question" title="Anchor link to this section">&para;</a></h4>
+<p>Publishes the question and makes it visible to all users:</p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">POST /admin/moderation/approve/{questionId}</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="err">Authorization: Bearer {session}</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="err">→ 200 OK</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="err">{</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="err">  &quot;status&quot;: &quot;OPEN&quot;,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="err">  &quot;message&quot;: &quot;Question approved and published&quot;</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="err">}</span>
+</span></code></pre></div>
+<p><strong>What happens:</strong>
+- Question status changes from <code>UNDER_REVIEW</code> → <code>OPEN</code>
+- Question appears in public browse page
+- Real-time SSE event (<code>question:created</code>) notifies connected clients
+- Audit log records approval action
+- <code>reviewedBy</code> and <code>reviewedAt</code> fields are set</p>
+<h4 id="reject-question">Reject Question<a class="headerlink" href="#reject-question" title="Anchor link to this section">&para;</a></h4>
+<p>Removes the question permanently:</p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="err">POST /admin/moderation/reject/{questionId}</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="err">Authorization: Bearer {session}</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="err">Content-Type: application/json</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="err">{</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="err">  &quot;reason&quot;: &quot;Inappropriate content&quot;</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="err">}</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="err">→ 200 OK</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="err">{</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="err">  &quot;message&quot;: &quot;Question rejected and removed&quot;,</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="err">  &quot;questionId&quot;: &quot;...&quot;</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="err">}</span>
+</span></code></pre></div>
+<p><strong>What happens:</strong>
+- Question is permanently deleted from database
+- Audit log captures rejection with:
+  - Original question text
+  - Moderation reasons
+  - Moderator's rejection reason
+  - Moderator user ID
+  - Timestamp
+- No notification to other clients (question never existed publicly)</p>
+<h3 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Anchor link to this section">&para;</a></h3>
+<h4 id="list-questions-under-review">List Questions Under Review<a class="headerlink" href="#list-questions-under-review" title="Anchor link to this section">&para;</a></h4>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="err">GET /admin/moderation/review-queue</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="err">Authorization: Bearer {session}</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="err">Query Parameters:</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="err">  - teamId (optional): Filter by team</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="err">  - confidence (optional): Filter by confidence level (high, medium, low)</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="err">→ 200 OK</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="err">[</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="err">  {</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="err">    &quot;id&quot;: &quot;...&quot;,</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="err">    &quot;body&quot;: &quot;Question text&quot;,</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="err">    &quot;status&quot;: &quot;UNDER_REVIEW&quot;,</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="err">    &quot;moderationReasons&quot;: [&quot;Borderline toxic language&quot;],</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="err">    &quot;moderationConfidence&quot;: &quot;medium&quot;,</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="err">    &quot;moderationProviders&quot;: [&quot;local&quot;],</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="err">    &quot;teamId&quot;: &quot;...&quot;,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="err">    &quot;createdAt&quot;: &quot;2025-01-10T10:30:00Z&quot;</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="err">  }</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="err">]</span>
+</span></code></pre></div>
+<h3 id="user-experience">User Experience<a class="headerlink" href="#user-experience" title="Anchor link to this section">&para;</a></h3>
+<h4 id="when-question-is-under-review">When Question Is Under Review<a class="headerlink" href="#when-question-is-under-review" title="Anchor link to this section">&para;</a></h4>
+<p>User sees:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>✓ Your question has been submitted and is under moderator review.
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  You&#39;ll be notified once it&#39;s published.
+</span></code></pre></div></p>
+<p>The question:
+- ✅ Is saved to database
+- ✅ Has <code>UNDER_REVIEW</code> status
+- ❌ Does NOT appear in public browse page
+- ❌ Does NOT appear in search results
+- ❌ Is NOT visible to other users</p>
+<h4 id="after-approval">After Approval<a class="headerlink" href="#after-approval" title="Anchor link to this section">&para;</a></h4>
+<ul>
+<li>Question appears immediately in public browse page</li>
+<li>Real-time updates via SSE</li>
+<li>No additional notification to author (they see it published)</li>
+</ul>
+<h4 id="after-rejection">After Rejection<a class="headerlink" href="#after-rejection" title="Anchor link to this section">&para;</a></h4>
+<ul>
+<li>Question is deleted</li>
+<li>No public record</li>
+<li>Author does not receive automatic notification</li>
+<li>(Future enhancement: email notification with appeal option)</li>
+</ul>
+<h3 id="audit-logging">Audit Logging<a class="headerlink" href="#audit-logging" title="Anchor link to this section">&para;</a></h3>
+<p>All moderation actions are logged for transparency and compliance:</p>
+<h4 id="logged-events">Logged Events<a class="headerlink" href="#logged-events" title="Anchor link to this section">&para;</a></h4>
+<ol>
+<li><strong><code>question.moderation.flagged</code></strong></li>
+<li>Triggered when content is initially flagged</li>
+<li>
+<p>Metadata: reasons, confidence, providers, question preview</p>
+</li>
+<li>
+<p><strong><code>question.moderation.under_review</code></strong></p>
+</li>
+<li>Triggered when question is sent to review queue</li>
+<li>
+<p>Metadata: questionId, teamId, reasons, confidence</p>
+</li>
+<li>
+<p><strong><code>question.moderation.approved</code></strong></p>
+</li>
+<li>Triggered when moderator approves a question</li>
+<li>
+<p>Metadata: questionId, reviewerId, timestamp</p>
+</li>
+<li>
+<p><strong><code>question.moderation.rejected</code></strong></p>
+</li>
+<li>Triggered when moderator rejects a question</li>
+<li>Metadata: questionId, reviewerId, rejectionReason, originalQuestionText</li>
+</ol>
+<h4 id="querying-audit-logs">Querying Audit Logs<a class="headerlink" href="#querying-audit-logs" title="Anchor link to this section">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">-- View all moderation events</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">action</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;entityType&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;createdAt&quot;</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;AuditLog&quot;</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%moderation%&#39;</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="ss">&quot;createdAt&quot;</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1">-- Count flagged questions by provider</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;providers&#39;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">providers</span><span class="p">,</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">  </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;AuditLog&quot;</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;question.moderation.flagged&#39;</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;providers&#39;</span><span class="p">;</span>
 </span></code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Anchor link to this section">&para;</a></h2>
-<h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Anchor link to this section">&para;</a></h3>
-<p>Comprehensive test suite in <code>api/src/middleware/securityHeaders.test.ts</code>:</p>
-<ul>
-<li>17 security header tests</li>
-<li>Verifies all headers are present</li>
-<li>Checks header values match expectations</li>
-<li>Tests CSP directives</li>
-<li>Validates Mozilla Observatory requirements</li>
-</ul>
+<h3 id="running-moderation-tests">Running Moderation Tests<a class="headerlink" href="#running-moderation-tests" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Local filter tests</strong> (no database required):
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>--config<span class="o">=</span>vitest.moderation.config.ts
+</span></code></pre></div></p>
+<p><strong>Full workflow tests</strong> (includes database):
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>securityHeaders.test.ts
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/lib/moderation/moderationWorkflow.test.ts
+</span></code></pre></div></p>
+<p>Tests include:
+- ✅ Profanity detection
+- ✅ Spam pattern recognition
+- ✅ Hate speech detection
+- ✅ Excessive capitalization
+- ✅ OpenAI integration (when key is available)
+- ✅ Error handling and graceful degradation
+- ✅ Tiered moderation (auto-reject vs under review)
+- ✅ Review queue operations (list, approve, reject)
+- ✅ Audit logging for all moderation actions</p>
+<h3 id="manual-testing">Manual Testing<a class="headerlink" href="#manual-testing" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Test with local filter</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Profanity</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:3000/questions<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;body&quot;: &quot;Why is this shit so broken?&quot;}&#39;</span>
+</span></code></pre></div></p>
+<p><strong>Test with clean content</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:3000/questions<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;body&quot;: &quot;How do I submit a PTO request?&quot;}&#39;</span>
+</span></code></pre></div></p>
+<h2 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Anchor link to this section">&para;</a></h2>
+<h3 id="logs">Logs<a class="headerlink" href="#logs" title="Anchor link to this section">&para;</a></h3>
+<p>Moderation events are logged with details:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Content flagged by moderation: {
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  providers: [&#39;local&#39;, &#39;openai&#39;],
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  reasons: [&#39;Contains profanity&#39;, &#39;Hate speech detected&#39;],
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>  confidence: &#39;high&#39;,
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>  preview: &#39;This is some fucking...&#39;
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>}
 </span></code></pre></div>
-<h3 id="observatory-integration-tests">Observatory Integration Tests<a class="headerlink" href="#observatory-integration-tests" title="Anchor link to this section">&para;</a></h3>
-<p>Automated MDN HTTP Observatory scanning in <code>api/src/middleware/observatory.test.ts</code>:</p>
+<h3 id="metrics-to-track">Metrics to Track<a class="headerlink" href="#metrics-to-track" title="Anchor link to this section">&para;</a></h3>
 <ul>
-<li>6 automated Observatory tests</li>
-<li>Runs actual security scanner against local server</li>
-<li>Validates grade and score</li>
-<li>Tests specific security headers</li>
-<li>Provides detailed results</li>
+<li><strong>Flagged Rate</strong>: % of questions flagged</li>
+<li><strong>False Positives</strong>: User reports of incorrect flags</li>
+<li><strong>Provider Distribution</strong>: Local vs OpenAI catches</li>
+<li><strong>Cost</strong>: OpenAI API usage (if enabled)</li>
 </ul>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>observatory.test.ts
+<h2 id="customization">Customization<a class="headerlink" href="#customization" title="Anchor link to this section">&para;</a></h2>
+<h3 id="adjusting-sensitivity">Adjusting Sensitivity<a class="headerlink" href="#adjusting-sensitivity" title="Anchor link to this section">&para;</a></h3>
+<p>Edit <code>api/src/lib/moderation/localFilter.ts</code>:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">// More lenient: Require higher caps ratio</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">capsRatio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">text</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/[A-Z]/g</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">[]).</span><span class="nx">length</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\s/g</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">length</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">capsRatio</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.7</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">text</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">20</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// Was 0.6</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="nx">reasons</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;Excessive capitalization&#39;</span><span class="p">)</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="run-all-security-tests">Run All Security Tests<a class="headerlink" href="#run-all-security-tests" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;security|observatory&quot;</span>
+<h3 id="adding-custom-patterns">Adding Custom Patterns<a class="headerlink" href="#adding-custom-patterns" title="Anchor link to this section">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">// api/src/lib/moderation/localFilter.ts</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">customPatterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="sr">/\b(custom|banned|phrase)\b/gi</span><span class="p">,</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="p">]</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">pattern</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">customPatterns</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">pattern</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">text</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="nx">reasons</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;Custom policy violation&#39;</span><span class="p">)</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">    </span><span class="k">break</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="p">}</span>
 </span></code></pre></div>
-<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Anchor link to this section">&para;</a></h2>
-<ol>
-<li><strong>Never disable security headers</strong> in production</li>
-<li><strong>Always test after deployment</strong> with Observatory</li>
-<li><strong>Monitor CSP violations</strong> in production logs</li>
-<li><strong>Keep Helmet up to date</strong> for latest security patches</li>
-<li><strong>Review headers quarterly</strong> as security best practices evolve</li>
-</ol>
-<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Anchor link to this section">&para;</a></h2>
+<h3 id="whitelisting">Whitelisting<a class="headerlink" href="#whitelisting" title="Anchor link to this section">&para;</a></h3>
+<p>For trusted users or specific contexts:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// In app.ts, before moderation check</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">user</span><span class="o">?</span><span class="p">.</span><span class="nx">role</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;admin&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">user</span><span class="o">?</span><span class="p">.</span><span class="nx">role</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;moderator&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="c1">// Skip moderation for trusted roles</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="alternatives">Alternatives<a class="headerlink" href="#alternatives" title="Anchor link to this section">&para;</a></h2>
+<h3 id="perspective-api-google">Perspective API (Google)<a class="headerlink" href="#perspective-api-google" title="Anchor link to this section">&para;</a></h3>
+<p>Free alternative to OpenAI:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// api/src/lib/moderation/perspectiveFilter.ts</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">google</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;googleapis&#39;</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">perspective</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">google</span><span class="p">.</span><span class="nx">perspective</span><span class="p">(</span><span class="s1">&#39;v1alpha1&#39;</span><span class="p">)</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// Implement Perspective API integration</span>
+</span></code></pre></div>
+<p><strong>Pros</strong>: Free (1 QPS), similar quality
+<strong>Cons</strong>: Requires Google Cloud setup</p>
+<h3 id="custom-ml-models">Custom ML Models<a class="headerlink" href="#custom-ml-models" title="Anchor link to this section">&para;</a></h3>
+<p>For enterprise deployments:</p>
 <ul>
-<li><a href="../overview/">Security Overview</a></li>
-<li><a href="https://observatory.mozilla.org/">Mozilla Observatory</a></li>
-<li><a href="https://helmetjs.github.io/">Helmet Documentation</a></li>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">CSP Reference</a></li>
+<li>Train on your specific domain</li>
+<li>Host locally for zero API costs</li>
+<li>Full control over accuracy/sensitivity</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="content-flagged-but-seems-appropriate">"Content flagged" but seems appropriate<a class="headerlink" href="#content-flagged-but-seems-appropriate" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: False positive from local filter
+<strong>Solution</strong>: 
+1. Add OpenAI key for better context awareness
+2. Adjust local filter sensitivity
+3. Implement appeal process</p>
+<h3 id="openai-api-errors">OpenAI API errors<a class="headerlink" href="#openai-api-errors" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Symptoms</strong>: 
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>OpenAI moderation API error: AuthenticationError: 401
+</span></code></pre></div></p>
+<p><strong>Solutions</strong>:
+1. Verify <code>OPENAI_API_KEY</code> is set correctly
+2. Check key hasn't expired
+3. Confirm spending limits not exceeded
+4. System gracefully falls back to local-only</p>
+<h3 id="high-api-costs">High API costs<a class="headerlink" href="#high-api-costs" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Solutions</strong>:
+1. Implement caching (already included)
+2. Use local filter first, OpenAI only for edge cases
+3. Adjust rate limiting to reduce volume
+4. Set OpenAI usage limits</p>
+<h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><a href="https://platform.openai.com/docs/guides/moderation">OpenAI Moderation API Documentation</a></li>
+<li><a href="../overview/">Content Policy Best Practices</a></li>
+<li><a href="../rate-limiting/">Rate Limiting</a></li>
+<li><a href="../audit-logging/">Audit Logging</a></li>
 </ul>
 
 
@@ -3121,7 +3688,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 20:14:46 UTC"><span class="timeago" datetime="2025-10-04T20:14:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 20:14:46 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 10, 2025 02:57:00 UTC"><span class="timeago" datetime="2025-10-10T02:57:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 10, 2025 02:57:00 UTC">2025-10-10</span>
   </span>
 
     
@@ -3131,7 +3698,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 20:07:48 UTC"><span class="timeago" datetime="2025-10-04T20:07:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 20:07:48 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 10, 2025 02:57:00 UTC"><span class="timeago" datetime="2025-10-10T02:57:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 10, 2025 02:57:00 UTC">2025-10-10</span>
   </span>
 
     
@@ -3168,7 +3735,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../audit-logging/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Audit Logging">
+          <a href="../rbac/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Role-Based Access Control (RBAC)">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3178,20 +3745,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Audit Logging
+                Role-Based Access Control (RBAC)
               </div>
             </div>
           </a>
         
         
           
-          <a href="../sessions/" class="md-footer__link md-footer__link--next" aria-label="Next: Sessions">
+          <a href="../audit-logging/" class="md-footer__link md-footer__link--next" aria-label="Next: Audit Logging">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Sessions
+                Audit Logging
               </div>
             </div>
             <div class="md-footer__button md-icon">
