@@ -166,10 +166,156 @@ async function seedDemoData() {
       }
     }
 
-    console.log('\n✨ Demo data ready! Login at: http://localhost:5173/login');
+    // Create sample questions for demo
+    console.log('❓ Creating sample questions...');
+    const userMap = Object.fromEntries(
+      await Promise.all(
+        demoUsers.map(async u => {
+          const user = await prisma.user.findFirst({
+            where: { email: u.email, tenantId: tenant.id },
+          });
+          return [u.ssoId, user];
+        })
+      )
+    );
+
+    const sampleQuestions = [
+      {
+        body: 'What is our remote work policy for 2025?',
+        teamSlug: 'people',
+        authorId: userMap.alice?.id,
+        upvotes: 12,
+        answered: true,
+        response:
+          "Our 2025 remote work policy offers full flexibility: work from home, hybrid, or in-office based on your preference and team needs. We've expanded our home office stipend to $1500/year and added quarterly team offsites for remote employees.",
+      },
+      {
+        body: 'How do I get started with our new CI/CD pipeline?',
+        teamSlug: 'engineering',
+        authorId: userMap.bob?.id,
+        upvotes: 8,
+        answered: true,
+        response:
+          'Great question! Check out the new CI/CD docs at docs.internal/cicd. The key steps are: 1) Add a .github/workflows/deploy.yml to your repo, 2) Configure environment secrets, 3) Push to main. The pipeline automatically runs tests, builds, and deploys to staging. Reach out in #dev-ops if you need help!',
+      },
+      {
+        body: 'What are the key product priorities for Q1?',
+        teamSlug: 'product',
+        authorId: userMap.alice?.id,
+        upvotes: 15,
+        answered: true,
+        response:
+          'Our Q1 priorities are: 1) Mobile app redesign (40% of resources), 2) Performance optimization - targeting 50% faster load times, 3) Enterprise SSO integration for our biggest customers. Check out the full roadmap in the #product-updates channel!',
+      },
+      {
+        body: 'Can we get standing desks in the new office?',
+        teamSlug: 'general',
+        authorId: userMap.bob?.id,
+        upvotes: 23,
+        answered: false,
+      },
+      {
+        body: 'When will the new benefits package be announced?',
+        teamSlug: 'people',
+        authorId: userMap.alice?.id,
+        upvotes: 18,
+        answered: false,
+      },
+      {
+        body: 'How do we handle security vulnerabilities in dependencies?',
+        teamSlug: 'engineering',
+        authorId: userMap.moderator?.id,
+        upvotes: 6,
+        answered: true,
+        response:
+          'We use Dependabot for automated dependency updates and Snyk for vulnerability scanning. All high/critical vulnerabilities must be patched within 48 hours. For production systems, create a hotfix branch and fast-track through review. See our security runbook for details.',
+      },
+      {
+        body: 'What is our approach to AI and machine learning in our products?',
+        teamSlug: 'product',
+        authorId: userMap.bob?.id,
+        upvotes: 20,
+        answered: false,
+      },
+      {
+        body: 'How can I submit expenses for the team offsite?',
+        teamSlug: 'general',
+        authorId: userMap.alice?.id,
+        upvotes: 5,
+        answered: true,
+        response:
+          'Use Expensify to submit expenses within 30 days. Tag them with "Team Offsite Q1" and include receipts. Approved items: transportation, accommodation, team meals. Manager approval required for expenses over $500.',
+      },
+    ];
+
+    // Get all tags for categorization
+    const allTags = await prisma.tag.findMany({
+      where: { tenantId: tenant.id },
+    });
+
+    const tagMap: Record<string, any> = {};
+    for (const tag of allTags) {
+      tagMap[tag.name.toLowerCase()] = tag;
+    }
+
+    let questionCount = 0;
+    for (const q of sampleQuestions) {
+      const team = teams.find(t => t.slug === q.teamSlug);
+      if (!team) continue;
+
+      const question = await prisma.question.create({
+        data: {
+          body: q.body,
+          teamId: team.id,
+          authorId: q.authorId || null,
+          upvotes: q.upvotes,
+          status: q.answered ? 'ANSWERED' : 'OPEN',
+          responseText: q.response || null,
+          respondedAt: q.answered ? new Date() : null,
+          tenantId: tenant.id,
+        },
+      });
+
+      // Auto-tag questions based on content
+      if (q.body.toLowerCase().includes('remote') && tagMap.remote) {
+        await prisma.questionTag.create({
+          data: { questionId: question.id, tagId: tagMap.remote.id },
+        });
+      }
+      if (
+        (q.body.toLowerCase().includes('benefit') || q.body.toLowerCase().includes('office')) &&
+        tagMap.benefits
+      ) {
+        await prisma.questionTag.create({
+          data: { questionId: question.id, tagId: tagMap.benefits.id },
+        });
+      }
+      if (q.body.toLowerCase().includes('product') && tagMap.product) {
+        await prisma.questionTag.create({
+          data: { questionId: question.id, tagId: tagMap.product.id },
+        });
+      }
+      if (
+        (q.body.toLowerCase().includes('engineering') ||
+          q.body.toLowerCase().includes('ci/cd') ||
+          q.body.toLowerCase().includes('security')) &&
+        tagMap.engineering
+      ) {
+        await prisma.questionTag.create({
+          data: { questionId: question.id, tagId: tagMap.engineering.id },
+        });
+      }
+
+      questionCount++;
+    }
+
+    console.log(`  ✅ Created ${questionCount} sample questions\n`);
+
+    console.log('✨ Demo data ready! Login at: http://localhost:5173/login');
     console.log('   👤 Demo users: alice, bob, moderator, admin');
-    console.log('   🏢 Teams: Use existing teams from seed-teams.ts');
-    console.log('   🏷️  Tags: Use existing tags from seed-tags.ts\n');
+    console.log('   🏢 Teams: General, Engineering, Product, People');
+    console.log('   🏷️  Tags: Multiple tags for organization');
+    console.log(`   ❓ Questions: ${questionCount} sample questions (mix of open and answered)\n`);
   } catch (error) {
     console.warn('⚠️  Demo data seeding failed:', error);
     console.warn('   This is non-blocking - continuing startup...');

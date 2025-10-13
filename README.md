@@ -88,9 +88,14 @@ For local development with live code changes:
 ```bash
 make setup      # Initialize environment
 make install    # Install dependencies
-make dev        # Start with local builds (hot reload)
-make db-seed    # Load demo data (development only)
+make dev        # Start with local builds (hot reload) - demo data auto-seeds!
 ```
+
+**Demo data automatically seeds on startup** in development mode:
+- 👤 Users: `alice`, `bob`, `moderator`, `admin`
+- 🏢 Teams: General, Engineering, Product, People
+- 🏷️ Tags: Multiple tags for organization
+- ❓ Questions: 8 sample questions (mix of open/answered)
 
 See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow guide.
 

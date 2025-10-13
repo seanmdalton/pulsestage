@@ -29,8 +29,8 @@ help:
 	@echo "  make format       - Format code (Prettier)"
 	@echo ""
 	@echo "Database:"
-	@echo "  make db-seed      - Seed database with demo data"
-	@echo "  make db-reset     - Reset and reseed database"
+	@echo "  make db-seed      - Seed multi-tenant test data (dev mode auto-seeds on startup)"
+	@echo "  make db-reset     - Reset database (wipe volumes and restart)"
 	@echo ""
 
 # Setup - Initialize environment
@@ -147,21 +147,21 @@ validate-ci:
 logs:
 	@docker compose logs -f
 
-# Seed database
+# Seed database with multi-tenant test data
+# Note: Development mode auto-seeds demo data on startup
 db-seed:
-	@echo "🌱 Seeding database..."
+	@echo "🌱 Seeding multi-tenant test data (for testing/CI)..."
+	@echo "ℹ️  Note: Development mode auto-seeds demo data on startup"
 	@docker compose exec api npm run db:seed:full
-	@echo "✅ Database seeded! Restart API to reload users: docker compose restart api"
+	@echo "✅ Multi-tenant test data seeded! Restart API: docker compose restart api"
 
-# Reset and reseed database
+# Reset database (wipe volumes and restart)
+# Development mode will auto-seed demo data on restart
 db-reset:
-	@echo "🔄 Resetting database..."
-	@docker compose down db
-	@docker compose up -d db
-	@sleep 5
-	@docker compose restart api
+	@echo "🔄 Resetting database (wiping volumes)..."
+	@docker compose down -v
+	@docker compose up -d
+	@echo "⏳ Waiting for services to start..."
 	@sleep 10
-	@docker compose exec api npm run db:seed:full
-	@docker compose restart api
-	@echo "✅ Database reset and seeded!"
+	@echo "✅ Database reset! Demo data auto-seeded in development mode."
 
