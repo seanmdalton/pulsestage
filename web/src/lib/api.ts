@@ -262,9 +262,42 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 class ApiClient {
   private baseUrl: string
+  private csrfToken: string | null = null
 
   constructor(baseUrl: string = API_URL) {
     this.baseUrl = baseUrl
+  }
+
+  /**
+   * Fetch CSRF token from the server
+   * Token is cached and reused until it expires (30 minutes)
+   */
+  private async fetchCsrfToken(): Promise<string> {
+    if (this.csrfToken) {
+      return this.csrfToken
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/csrf-token`, {
+        method: 'GET',
+        credentials: 'include', // Important for session-based CSRF
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch CSRF token')
+      }
+
+      const data = await response.json()
+      const token = data.csrfToken
+      if (typeof token !== 'string') {
+        throw new Error('Invalid CSRF token received from server')
+      }
+      this.csrfToken = token
+      return this.csrfToken
+    } catch (error) {
+      console.error('Failed to fetch CSRF token:', error)
+      throw error
+    }
   }
 
   private async request<T>(
@@ -273,6 +306,7 @@ class ApiClient {
     schema: z.ZodSchema<T>
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
+    const method = options.method || 'GET'
 
     // Add mock SSO and tenant headers for local development
     const mockSSOUser = localStorage.getItem('mock-sso-user')
@@ -289,9 +323,21 @@ class ApiClient {
     // Add tenant header - defaults to 'default' if not set
     headers['x-tenant-id'] = mockTenant || 'default'
 
+    // For state-changing methods, include CSRF token
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase())) {
+      try {
+        const csrfToken = await this.fetchCsrfToken()
+        headers['x-csrf-token'] = csrfToken
+      } catch (error) {
+        console.error('Failed to get CSRF token, request may fail:', error)
+        // Continue anyway - the request will fail with 403 if CSRF is required
+      }
+    }
+
     const response = await fetch(url, {
       headers,
       credentials: 'include', // Always include credentials for session cookies
+      method,
       ...options,
     })
 
@@ -300,6 +346,20 @@ class ApiClient {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`
       try {
         const errorData = await response.json()
+
+        // Handle CSRF token errors - clear cached token and retry once
+        if (
+          response.status === 403 &&
+          (errorData.message?.includes('CSRF') ||
+            errorData.error?.includes('CSRF'))
+        ) {
+          // Clear cached token so it will be refetched on retry
+          this.csrfToken = null
+          errorMessage =
+            errorData.message ||
+            errorData.error ||
+            'Invalid or missing CSRF token'
+        }
 
         // Handle moderation errors with reasons
         if (errorData.reasons && Array.isArray(errorData.reasons)) {
