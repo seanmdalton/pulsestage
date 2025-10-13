@@ -12,6 +12,10 @@ servers:
 tags:
   - name: Health
     description: Health check endpoints
+  - name: Authentication
+    description: User authentication endpoints (demo mode, OAuth)
+  - name: Setup
+    description: Initial setup and configuration endpoints
   - name: SSE
     description: Server-Sent Events for real-time updates
   - name: Questions
@@ -622,6 +626,293 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /auth/modes:
+    get:
+      tags:
+        - Authentication
+      summary: Get available authentication modes
+      description: |
+        Returns available authentication modes based on environment configuration.
+        Development mode (NODE_ENV=development) enables demo mode.
+        Production mode requires OAuth configuration.
+      operationId: getAuthModes
+      responses:
+        '200':
+          description: Authentication modes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modes:
+                    type: array
+                    items:
+                      type: string
+                      enum: [demo, oauth]
+                    description: List of enabled authentication modes
+                  demo:
+                    type: object
+                    nullable: true
+                    description: Demo mode configuration (only if enabled)
+                    properties:
+                      enabled:
+                        type: boolean
+                      users:
+                        type: array
+                        items:
+                          type: string
+                        description: Available demo user identifiers
+                        example: ['alice', 'bob', 'moderator', 'admin']
+                  oauth:
+                    type: object
+                    nullable: true
+                    description: OAuth configuration (only if enabled)
+                    properties:
+                      github:
+                        type: boolean
+                        description: GitHub OAuth enabled
+                      google:
+                        type: boolean
+                        description: Google OAuth enabled
+              example:
+                modes: ['demo', 'oauth']
+                demo:
+                  enabled: true
+                  users: ['alice', 'bob', 'moderator', 'admin']
+                oauth:
+                  github: true
+                  google: false
+
+  /auth/demo:
+    get:
+      tags:
+        - Authentication
+      summary: Demo mode authentication
+      description: |
+        Authenticate with a demo user (development mode only).
+        Creates a session and redirects to the frontend.
+      operationId: authDemo
+      parameters:
+        - name: user
+          in: query
+          required: true
+          description: Demo user identifier
+          schema:
+            type: string
+            enum: [alice, bob, moderator, admin]
+        - name: tenant
+          in: query
+          required: false
+          description: Tenant slug (defaults to 'demo')
+          schema:
+            type: string
+            default: demo
+      responses:
+        '302':
+          description: Redirects to frontend with session cookie
+        '400':
+          description: Demo mode not available or invalid user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                mode_disabled:
+                  summary: Demo mode disabled
+                  value:
+                    error: 'Demo mode not available'
+                invalid_user:
+                  summary: Invalid demo user
+                  value:
+                    error: 'Invalid demo user'
+
+  /auth/github:
+    get:
+      tags:
+        - Authentication
+      summary: GitHub OAuth initiation
+      description: |
+        Initiates GitHub OAuth flow.
+        Redirects to GitHub authorization page.
+      operationId: authGitHub
+      responses:
+        '302':
+          description: Redirects to GitHub authorization page
+        '400':
+          description: GitHub OAuth not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/github/callback:
+    get:
+      tags:
+        - Authentication
+      summary: GitHub OAuth callback
+      description: |
+        Handles GitHub OAuth callback.
+        Creates or updates user and establishes session.
+      operationId: authGitHubCallback
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from GitHub
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: State parameter for CSRF protection
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to frontend with session cookie
+        '400':
+          description: OAuth error (missing code, state mismatch, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/google:
+    get:
+      tags:
+        - Authentication
+      summary: Google OAuth initiation
+      description: |
+        Initiates Google OAuth flow.
+        Redirects to Google authorization page.
+      operationId: authGoogle
+      responses:
+        '302':
+          description: Redirects to Google authorization page
+        '400':
+          description: Google OAuth not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/google/callback:
+    get:
+      tags:
+        - Authentication
+      summary: Google OAuth callback
+      description: |
+        Handles Google OAuth callback.
+        Creates or updates user and establishes session.
+      operationId: authGoogleCallback
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from Google
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: State parameter for CSRF protection
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to frontend with session cookie
+        '400':
+          description: OAuth error (missing code, state mismatch, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout
+      description: |
+        Destroys the current session and logs out the user.
+      operationId: logout
+      security:
+        - AdminSession: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /setup/status:
+    get:
+      tags:
+        - Setup
+      summary: Get setup status
+      description: |
+        Check if initial setup is required.
+        In development mode, setup is skipped (demo users auto-seeded).
+        In production mode, setup wizard is shown if no users exist.
+      operationId: getSetupStatus
+      responses:
+        '200':
+          description: Setup status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  needsSetup:
+                    type: boolean
+                    description: Whether setup wizard should be shown
+                  teamCount:
+                    type: integer
+                    description: Number of existing teams
+                  userCount:
+                    type: integer
+                    description: Number of existing users
+                  tenantId:
+                    type: string
+                    description: Current tenant ID
+                  tenantSlug:
+                    type: string
+                    description: Current tenant slug
+                  mode:
+                    type: string
+                    enum: [development, production]
+                    description: Current environment mode
+              examples:
+                development:
+                  summary: Development mode (setup skipped)
+                  value:
+                    needsSetup: false
+                    teamCount: 0
+                    userCount: 4
+                    tenantId: '550e8400-e29b-41d4-a716-446655440000'
+                    tenantSlug: 'demo'
+                    mode: 'development'
+                production_needs_setup:
+                  summary: Production mode (setup required)
+                  value:
+                    needsSetup: true
+                    teamCount: 0
+                    userCount: 0
+                    tenantId: '550e8400-e29b-41d4-a716-446655440000'
+                    tenantSlug: 'default'
+                    mode: 'production'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /events:
     get:
