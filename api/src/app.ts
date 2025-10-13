@@ -919,8 +919,18 @@ export function createApp(prisma: PrismaClient) {
         where: { tenantId },
       });
 
+      // Setup is needed if either teams OR users are missing
+      // Both are required for a functional system
+      const needsSetup = teamCount === 0 || userCount === 0;
+
+      if (needsSetup) {
+        console.warn(
+          `⚠️  Setup needed for tenant ${tenantId}: teams=${teamCount}, users=${userCount}`
+        );
+      }
+
       res.json({
-        needsSetup: teamCount === 0,
+        needsSetup,
         teamCount,
         userCount,
         tenantId,
