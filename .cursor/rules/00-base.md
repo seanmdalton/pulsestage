@@ -5,6 +5,19 @@
 - Never change infra/auth/CSRF/CSP/rate-limits without explicit confirmation.
 - Use provided scripts: `make setup|dev|lint-fix|validate-ci|db-seed`.
 
+## Local Development Workflow
+- **ALWAYS use `make up` or `make dev`** - never manually call `docker compose`
+- After ANY code change that needs UI verification:
+  - Interactive mode: Stop current process, run `make dev` (foreground logs)
+  - Background mode: Run `make up` (detached, use `make logs` to view)
+- Both commands use `docker-compose.override.yaml` for local builds (not GitHub images)
+- Changes to `/web` or `/api` require rebuild - Docker doesn't support hot reload
+- Verification checklist after rebuild:
+  1. Wait 10-15 seconds for services to start
+  2. Check `docker compose ps` - all services should show "Up"
+  3. Test the specific functionality that was changed
+  4. Check `make logs` for any startup errors
+
 ## Tech stack
 - Web: React 19 + TypeScript + Vite + Tailwind.
 - API: Node 24 + Express + TypeScript + Prisma + Zod.
