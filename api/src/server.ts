@@ -246,6 +246,47 @@ async function seedDemoData() {
         response:
           'Use Expensify to submit expenses within 30 days. Tag them with "Team Offsite Q1" and include receipts. Approved items: transportation, accommodation, team meals. Manager approval required for expenses over $500.',
       },
+      // Questions under review (flagged by moderation)
+      {
+        body: 'Why do we keep having these STUPID meetings that accomplish NOTHING???',
+        teamSlug: 'general',
+        authorId: userMap.bob?.id,
+        upvotes: 3,
+        underReview: true,
+        moderationReasons: ['Excessive capitalization'],
+        moderationConfidence: 'medium',
+        moderationProviders: ['local'],
+      },
+      {
+        body: 'Can someone explain the new PTO policy? I heard conflicting info from HR.',
+        teamSlug: 'people',
+        authorId: userMap.alice?.id,
+        upvotes: 7,
+        underReview: true,
+        moderationReasons: ['Contains profanity'],
+        moderationConfidence: 'low',
+        moderationProviders: ['local'],
+      },
+      {
+        body: 'What is the roadmap for our API deprecation? Need to plan migrations.',
+        teamSlug: 'engineering',
+        authorId: userMap.moderator?.id,
+        upvotes: 4,
+        underReview: true,
+        moderationReasons: ['Spam detected (excessive URLs, numbers, or repeated characters)'],
+        moderationConfidence: 'medium',
+        moderationProviders: ['local'],
+      },
+      {
+        body: 'How are we measuring customer satisfaction and NPS for our new features?',
+        teamSlug: 'product',
+        authorId: userMap.bob?.id,
+        upvotes: 9,
+        underReview: true,
+        moderationReasons: ['Contains profanity'],
+        moderationConfidence: 'low',
+        moderationProviders: ['local'],
+      },
     ];
 
     // Get all tags for categorization
@@ -259,6 +300,7 @@ async function seedDemoData() {
     }
 
     let questionCount = 0;
+    let underReviewCount = 0;
     for (const q of sampleQuestions) {
       const team = teams.find(t => t.slug === q.teamSlug);
       if (!team) continue;
@@ -266,15 +308,23 @@ async function seedDemoData() {
       const question = await prisma.question.create({
         data: {
           body: q.body,
-          teamId: team.id,
-          authorId: q.authorId || null,
+          team: { connect: { id: team.id } },
+          author: q.authorId ? { connect: { id: q.authorId } } : undefined,
           upvotes: q.upvotes,
-          status: q.answered ? 'ANSWERED' : 'OPEN',
+          status: (q as any).underReview ? 'UNDER_REVIEW' : q.answered ? 'ANSWERED' : 'OPEN',
           responseText: q.response || null,
           respondedAt: q.answered ? new Date() : null,
-          tenantId: tenant.id,
+          tenant: { connect: { id: tenant.id } },
+          // Moderation metadata for under-review questions
+          moderationReasons: (q as any).moderationReasons || [],
+          moderationConfidence: (q as any).moderationConfidence || null,
+          moderationProviders: (q as any).moderationProviders || [],
         },
       });
+
+      if ((q as any).underReview) {
+        underReviewCount++;
+      }
 
       // Auto-tag questions based on content
       if (q.body.toLowerCase().includes('remote') && tagMap.remote) {
@@ -309,13 +359,17 @@ async function seedDemoData() {
       questionCount++;
     }
 
-    console.log(`  ✅ Created ${questionCount} sample questions\n`);
+    console.log(
+      `  ✅ Created ${questionCount} sample questions (${underReviewCount} under review)\n`
+    );
 
     console.log('✨ Demo data ready! Login at: http://localhost:5173/login');
     console.log('   👤 Demo users: alice, bob, moderator, admin');
     console.log('   🏢 Teams: General, Engineering, Product, People');
     console.log('   🏷️  Tags: Multiple tags for organization');
-    console.log(`   ❓ Questions: ${questionCount} sample questions (mix of open and answered)\n`);
+    console.log(
+      `   ❓ Questions: ${questionCount} total (${underReviewCount} awaiting moderation)\n`
+    );
   } catch (error) {
     console.warn('⚠️  Demo data seeding failed:', error);
     console.warn('   This is non-blocking - continuing startup...');
