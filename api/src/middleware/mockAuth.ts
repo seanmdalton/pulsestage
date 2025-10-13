@@ -140,7 +140,39 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
     // Load mock data if not already loaded
     await loadMockData();
 
-    // Check for mock SSO header (simulating SSO provider)
+    // Priority 1: Check for session user (from demo auth or OAuth)
+    if (req.session?.user) {
+      const sessionUser = req.session.user;
+
+      // Find full user details from mock data
+      const user = mockUsers.find(u => u.id === sessionUser.id || u.email === sessionUser.email);
+
+      if (user) {
+        // Validate that user belongs to the current tenant
+        const currentTenant = (req as any).tenant;
+
+        if (currentTenant && user.tenantId !== currentTenant.tenantId) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `❌ Session Auth: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
+            );
+          }
+          // User belongs to different tenant - don't authenticate
+          req.user = undefined;
+        } else {
+          req.user = user;
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `🔐 Session Auth: Authenticated user ${user.name} (${user.email}) in tenant ${user.tenantId}`
+            );
+          }
+        }
+      }
+
+      return next();
+    }
+
+    // Priority 2: Check for mock SSO header (simulating SSO provider)
     const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
 
     if (mockSSOHeader) {

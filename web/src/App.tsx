@@ -90,7 +90,8 @@ function App() {
         <AdminProvider>
           <TeamProvider>
             <Routes>
-              {/* Presentation routes (no navbar) */}
+              {/* Standalone routes (no navbar) */}
+              <Route path="/login" element={<LoginPage />} />
               <Route
                 path="/:teamSlug/open/present"
                 element={<PresentationPage />}
@@ -106,9 +107,6 @@ function App() {
                     <DemoModeBanner />
                     <main className="container mx-auto px-4 py-8">
                       <Routes>
-                        {/* Auth routes */}
-                        <Route path="/login" element={<LoginPage />} />
-
                         {/* Default routes - smart redirect to user's default team or /all */}
                         <Route
                           path="/"

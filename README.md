@@ -69,6 +69,9 @@ Beautiful responsive design with dark mode, real-time updates via SSE, and prese
 ### 🔒 Security & Compliance
 Comprehensive audit logging, tenant isolation, session-based auth, CSRF protection, security headers (Helmet), rate limiting, and **content moderation** (local + optional OpenAI) to protect against spam, profanity, and hate speech.
 
+### 🔐 Flexible Authentication
+**Development mode** with demo users for instant testing, **OAuth integration** (GitHub, Google) for production deployments. Environment-based configuration (`NODE_ENV`) automatically enables appropriate authentication methods.
+
 ### 🔍 Advanced Search & Filtering
 Full-text search with PostgreSQL GIN indexes, prefix matching for substrings, filter by tags, date ranges, and team. Works on both open and answered questions.
 

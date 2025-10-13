@@ -37,14 +37,14 @@ export function createSessionMiddleware() {
   const isProduction = process.env.NODE_ENV === 'production';
 
   const sessionConfig: session.SessionOptions = {
-    name: 'ama-admin-session',
-    secret: env.ADMIN_KEY || 'fallback-session-secret-change-me',
+    name: 'connect.sid', // Standard session cookie name for user sessions
+    secret: env.SESSION_SECRET || env.ADMIN_KEY || 'fallback-session-secret-change-me',
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: isProduction, // HTTPS-only in production, HTTP allowed in dev
       httpOnly: true, // Prevent XSS by blocking JavaScript access
-      maxAge: 30 * 60 * 1000, // 30 minutes
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours for user sessions
       sameSite: 'lax', // CSRF protection - allow cross-site GET but not POST
       domain: undefined, // Let browser decide
     },

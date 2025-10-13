@@ -69,76 +69,40 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       setError(null)
 
-      // Check if we have a mock SSO user set
-      const mockSSOUser = localStorage.getItem('mock-sso-user')
+      // Try to get current user from session (works for demo mode, OAuth, and legacy mock SSO)
+      try {
+        const userData = await apiClient.getCurrentUser()
+        setUser(userData)
 
-      if (mockSSOUser) {
-        // We have a mock SSO user, try to authenticate
-        try {
-          const userData = await apiClient.getCurrentUser()
-          setUser(userData)
+        // Load user teams and preferences
+        const teamsResponse = await apiClient.getUserTeams()
+        setUserTeams(teamsResponse.teams)
+        setFavorites(teamsResponse.favorites)
+        setDefaultTeam(teamsResponse.defaultTeam || null)
 
-          // Load user teams and preferences
-          const teamsResponse = await apiClient.getUserTeams()
-          setUserTeams(teamsResponse.teams)
-          setFavorites(teamsResponse.favorites)
-          setDefaultTeam(teamsResponse.defaultTeam || null)
+        // Load user questions
+        const questions = await apiClient.getUserQuestions()
+        setUserQuestions(questions)
 
-          // Load user questions
-          const questions = await apiClient.getUserQuestions()
-          setUserQuestions(questions)
+        // Store user data in localStorage for caching
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData))
+        localStorage.setItem(
+          FAVORITES_STORAGE_KEY,
+          JSON.stringify(teamsResponse.favorites)
+        )
+      } catch {
+        // User not authenticated or API not available
+        // This is expected in anonymous mode
+        setUser(null)
+        setUserTeams([])
+        setFavorites([])
+        setDefaultTeam(null)
+        setUserQuestions([])
 
-          // Store user data in localStorage for persistence
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData))
-          localStorage.setItem(
-            FAVORITES_STORAGE_KEY,
-            JSON.stringify(teamsResponse.favorites)
-          )
-        } catch (userError) {
-          console.error('Mock SSO authentication failed:', userError)
-          // Clear mock SSO user if authentication fails
-          localStorage.removeItem('mock-sso-user')
-          setUser(null)
-          setUserTeams([])
-          setFavorites([])
-          setDefaultTeam(null)
-          localStorage.removeItem(USER_STORAGE_KEY)
-          localStorage.removeItem(FAVORITES_STORAGE_KEY)
-        }
-      } else {
-        // No mock SSO user, try regular authentication
-        try {
-          const userData = await apiClient.getCurrentUser()
-          setUser(userData)
-
-          // Load user teams and preferences
-          const teamsResponse = await apiClient.getUserTeams()
-          setUserTeams(teamsResponse.teams)
-          setFavorites(teamsResponse.favorites)
-          setDefaultTeam(teamsResponse.defaultTeam || null)
-
-          // Load user questions
-          const questions = await apiClient.getUserQuestions()
-          setUserQuestions(questions)
-
-          // Store user data in localStorage for persistence
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData))
-          localStorage.setItem(
-            FAVORITES_STORAGE_KEY,
-            JSON.stringify(teamsResponse.favorites)
-          )
-        } catch {
-          // User not authenticated or API not available
-          // This is expected in anonymous mode
-          setUser(null)
-          setUserTeams([])
-          setFavorites([])
-          setDefaultTeam(null)
-
-          // Clear any stale localStorage data when not authenticated
-          localStorage.removeItem(USER_STORAGE_KEY)
-          localStorage.removeItem(FAVORITES_STORAGE_KEY)
-        }
+        // Clear any stale localStorage data when not authenticated
+        localStorage.removeItem(USER_STORAGE_KEY)
+        localStorage.removeItem(FAVORITES_STORAGE_KEY)
+        localStorage.removeItem('mock-sso-user') // Legacy cleanup
       }
     } catch (err) {
       console.error('Failed to load user data:', err)

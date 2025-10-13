@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth, useUser } from '../contexts/UserContext'
 import { useTeam } from '../contexts/TeamContext'
 
@@ -65,13 +65,25 @@ export function UserProfile() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
-  const handleLogout = () => {
-    // Clear mock SSO user from localStorage
-    localStorage.removeItem('mock-sso-user')
-    // Dispatch custom event to notify UserContext of the change
-    window.dispatchEvent(new CustomEvent('mock-sso-changed'))
-    // Navigate to home page to reset user context
-    window.location.href = '/'
+  const handleLogout = async () => {
+    try {
+      // Call logout API to destroy session
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+      await fetch(`${apiUrl}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      // Clear any local storage (for legacy mock SSO)
+      localStorage.removeItem('mock-sso-user')
+
+      // Redirect to login page
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Even if API call fails, redirect to login
+      window.location.href = '/login'
+    }
   }
 
   const handleProfileClick = () => {
@@ -82,8 +94,8 @@ export function UserProfile() {
   // Show Login button if not authenticated
   if (!isAuthenticated || !user) {
     return (
-      <a
-        href="/sso-test.html"
+      <Link
+        to="/login"
         className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         <svg
@@ -100,7 +112,7 @@ export function UserProfile() {
           />
         </svg>
         Login
-      </a>
+      </Link>
     )
   }
 

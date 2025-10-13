@@ -202,7 +202,7 @@ const TeamSchema = z.object({
 const TagSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().nullable().optional(),
+  description: z.string().nullable(),
   color: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -1201,7 +1201,7 @@ class ApiClient {
             tag: z.object({
               id: z.string(),
               name: z.string(),
-              description: z.string().optional(),
+              description: z.string().nullable(),
               color: z.string(),
               createdAt: z.string(),
               updatedAt: z.string(),
