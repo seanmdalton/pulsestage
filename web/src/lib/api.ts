@@ -613,7 +613,13 @@ class ApiClient {
 
   // Tag management methods
   async getTags(): Promise<Tag[]> {
-    return this.request('/tags', {}, z.array(TagSchema))
+    return this.request(
+      '/tags',
+      {
+        credentials: 'include', // Send session cookie for authentication
+      },
+      z.array(TagSchema)
+    )
   }
 
   async createTag(data: CreateTagRequest): Promise<Tag> {
