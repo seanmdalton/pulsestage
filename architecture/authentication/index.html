@@ -1618,9 +1618,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#demo-mode-always-enabled-by-default" class="md-nav__link">
+  <a href="#node_env-controls-auth-mode" class="md-nav__link">
     <span class="md-ellipsis">
-      Demo Mode (Always Enabled by Default)
+      NODE_ENV (Controls Auth Mode)
     </span>
   </a>
   
@@ -3133,13 +3133,14 @@
 <h1 id="authentication-system">Authentication System<a class="headerlink" href="#authentication-system" title="Anchor link to this section">&para;</a></h1>
 <p>PulseStage implements a flexible, multi-mode authentication system designed to support different deployment scenarios: demo environments, self-hosted installations, and production deployments.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
-<p>The authentication system supports multiple auth modes that can be enabled simultaneously:</p>
-<ol>
-<li><strong>Demo Mode</strong>: Instant access with pre-configured demo users (no password required)</li>
-<li><strong>GitHub OAuth</strong>: Social authentication for self-hosted and cloud deployments  </li>
-<li><strong>Google OAuth</strong>: Social authentication for enterprise environments</li>
-<li><strong>Mock SSO</strong> (Development): Simulates enterprise SSO for local development</li>
-</ol>
+<p>The authentication system automatically adapts based on <code>NODE_ENV</code>:</p>
+<p><strong>Development Mode (<code>NODE_ENV=development</code>)</strong>:
+- <strong>Demo Mode</strong>: Auto-enabled with pre-seeded users (<code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code>)
+- <strong>OAuth</strong> (Optional): Can be configured for testing OAuth flows locally</p>
+<p><strong>Production Mode (<code>NODE_ENV=production</code>)</strong>:
+- <strong>Demo Mode</strong>: Disabled
+- <strong>OAuth</strong>: GitHub and/or Google OAuth required
+- <strong>Setup Wizard</strong>: First-time configuration for organization settings</p>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Anchor link to this section">&para;</a></h2>
 <h3 id="backend-components">Backend Components<a class="headerlink" href="#backend-components" title="Anchor link to this section">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>api/src/lib/auth/
@@ -3191,17 +3192,23 @@
 - Dismissible per session</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Anchor link to this section">&para;</a></h2>
 <h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Anchor link to this section">&para;</a></h3>
-<h4 id="demo-mode-always-enabled-by-default">Demo Mode (Always Enabled by Default)<a class="headerlink" href="#demo-mode-always-enabled-by-default" title="Anchor link to this section">&para;</a></h4>
-<p>No configuration needed. To disable:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># .env</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span><span class="w">  </span><span class="c1"># Disabled</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Or omit variable (defaults to true)</span>
+<h4 id="node_env-controls-auth-mode">NODE_ENV (Controls Auth Mode)<a class="headerlink" href="#node_env-controls-auth-mode" title="Anchor link to this section">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Development mode - Enables demo users with auto-seeding</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Production mode - Requires OAuth configuration</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
 </span></code></pre></div>
-<p>Demo users are pre-configured in <code>seed-test-users.ts</code>:
-- <code>alice@demo.pulsestage.dev</code> (Admin)
-- <code>bob@demo.pulsestage.dev</code> (Moderator)
-- <code>moderator@demo.pulsestage.dev</code> (Moderator)
-- <code>admin@demo.pulsestage.dev</code> (Admin)</p>
+<p><strong>Development Mode</strong> automatically:
+- Seeds demo users on startup (<code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code> @ <code>demo.pulsestage.dev</code>)
+- Seeds default teams (General, Engineering, Product, People)
+- Seeds default tags
+- Enables <code>/auth/demo</code> endpoint for instant login
+- Disables OAuth requirement (but can be configured for testing)</p>
+<p><strong>Production Mode</strong> requires:
+- OAuth configuration (GitHub and/or Google)
+- Setup wizard for first-time configuration
+- No demo users or auto-seeding</p>
 <h4 id="github-oauth">GitHub OAuth<a class="headerlink" href="#github-oauth" title="Anchor link to this section">&para;</a></h4>
 <p><strong>Setup Steps:</strong></p>
 <ol>
@@ -3367,15 +3374,20 @@
 </span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="demo-mode-security">Demo Mode Security<a class="headerlink" href="#demo-mode-security" title="Anchor link to this section">&para;</a></h3>
-<p><strong>⚠️ Demo mode should NEVER be enabled in production!</strong></p>
-<p>Demo mode bypasses all authentication checks. Only use for:
-- Local development
-- Public demos (read-only or ephemeral data)
-- CI/CD testing</p>
-<p>To disable demo mode:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># .env</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span>
+<p><strong>⚠️ Demo mode is automatically disabled in production!</strong></p>
+<p>When <code>NODE_ENV=production</code>, demo mode is disabled and OAuth is required. Demo mode only activates in development environments:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Development - demo mode enabled</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Production - demo mode disabled, OAuth required</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
 </span></code></pre></div>
+<p>Demo mode is safe for:
+- Local development (<code>NODE_ENV=development</code>)
+- CI/CD testing environments
+- Public-facing demos (with ephemeral data)</p>
 <h2 id="user-experience">User Experience<a class="headerlink" href="#user-experience" title="Anchor link to this section">&para;</a></h2>
 <h3 id="first-time-login-flow">First-Time Login Flow<a class="headerlink" href="#first-time-login-flow" title="Anchor link to this section">&para;</a></h3>
 <ol>
@@ -3626,7 +3638,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 10, 2025 03:51:22 UTC"><span class="timeago" datetime="2025-10-10T03:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 10, 2025 03:51:22 UTC">2025-10-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 13, 2025 20:28:45 UTC"><span class="timeago" datetime="2025-10-13T20:28:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 13, 2025 20:28:45 UTC">2025-10-13</span>
   </span>
 
     
