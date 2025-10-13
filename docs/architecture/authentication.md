@@ -4,12 +4,16 @@ PulseStage implements a flexible, multi-mode authentication system designed to s
 
 ## Overview
 
-The authentication system supports multiple auth modes that can be enabled simultaneously:
+The authentication system automatically adapts based on `NODE_ENV`:
 
-1. **Demo Mode**: Instant access with pre-configured demo users (no password required)
-2. **GitHub OAuth**: Social authentication for self-hosted and cloud deployments  
-3. **Google OAuth**: Social authentication for enterprise environments
-4. **Mock SSO** (Development): Simulates enterprise SSO for local development
+**Development Mode (`NODE_ENV=development`)**:
+- **Demo Mode**: Auto-enabled with pre-seeded users (`alice`, `bob`, `moderator`, `admin`)
+- **OAuth** (Optional): Can be configured for testing OAuth flows locally
+
+**Production Mode (`NODE_ENV=production`)**:
+- **Demo Mode**: Disabled
+- **OAuth**: GitHub and/or Google OAuth required
+- **Setup Wizard**: First-time configuration for organization settings
 
 ## Architecture
 
@@ -79,21 +83,27 @@ Persistent banner that:
 
 ### Environment Variables
 
-#### Demo Mode (Always Enabled by Default)
-
-No configuration needed. To disable:
+#### NODE_ENV (Controls Auth Mode)
 
 ```bash
-# .env
-AUTH_MODE_DEMO=false  # Disabled
-# Or omit variable (defaults to true)
+# Development mode - Enables demo users with auto-seeding
+NODE_ENV=development
+
+# Production mode - Requires OAuth configuration
+NODE_ENV=production
 ```
 
-Demo users are pre-configured in `seed-test-users.ts`:
-- `alice@demo.pulsestage.dev` (Admin)
-- `bob@demo.pulsestage.dev` (Moderator)
-- `moderator@demo.pulsestage.dev` (Moderator)
-- `admin@demo.pulsestage.dev` (Admin)
+**Development Mode** automatically:
+- Seeds demo users on startup (`alice`, `bob`, `moderator`, `admin` @ `demo.pulsestage.dev`)
+- Seeds default teams (General, Engineering, Product, People)
+- Seeds default tags
+- Enables `/auth/demo` endpoint for instant login
+- Disables OAuth requirement (but can be configured for testing)
+
+**Production Mode** requires:
+- OAuth configuration (GitHub and/or Google)
+- Setup wizard for first-time configuration
+- No demo users or auto-seeding
 
 #### GitHub OAuth
 
@@ -308,19 +318,24 @@ Sessions are configured with secure defaults:
 
 ### Demo Mode Security
 
-**⚠️ Demo mode should NEVER be enabled in production!**
+**⚠️ Demo mode is automatically disabled in production!**
 
-Demo mode bypasses all authentication checks. Only use for:
-- Local development
-- Public demos (read-only or ephemeral data)
-- CI/CD testing
-
-To disable demo mode:
+When `NODE_ENV=production`, demo mode is disabled and OAuth is required. Demo mode only activates in development environments:
 
 ```bash
-# .env
-AUTH_MODE_DEMO=false
+# Development - demo mode enabled
+NODE_ENV=development
+
+# Production - demo mode disabled, OAuth required
+NODE_ENV=production
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
 ```
+
+Demo mode is safe for:
+- Local development (`NODE_ENV=development`)
+- CI/CD testing environments
+- Public-facing demos (with ephemeral data)
 
 ## User Experience
 

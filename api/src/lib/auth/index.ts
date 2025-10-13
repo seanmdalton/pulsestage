@@ -20,20 +20,28 @@ export class AuthManager {
   private enabledModes: Set<AuthMode>;
 
   constructor(private prisma: PrismaClient) {
-    // Parse AUTH_MODE from environment
-    const authModeStr = process.env.AUTH_MODE || 'demo';
-    this.enabledModes = new Set(authModeStr.split(',').map(m => m.trim() as AuthMode));
+    this.enabledModes = new Set<AuthMode>();
 
-    // Initialize strategies based on enabled modes
-    if (this.enabledModes.has('demo')) {
+    // Demo mode is always enabled in development
+    if (process.env.NODE_ENV === 'development') {
       const demoConfig = getDemoModeConfig();
       this.demoStrategy = new DemoAuthStrategy(prisma, demoConfig);
+      this.enabledModes.add('demo');
     }
 
-    if (this.enabledModes.has('oauth')) {
+    // OAuth is enabled if credentials are provided
+    // Optional in development, required in production
+    const hasGitHub = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
+    const hasGoogle = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+    if (hasGitHub || hasGoogle) {
       const oauthConfig = getOAuthConfig();
       this.oauthStrategy = new OAuthStrategy(prisma, oauthConfig);
+      this.enabledModes.add('oauth');
     }
+
+    // Log enabled auth modes
+    console.log(`🔐 Auth modes enabled: ${Array.from(this.enabledModes).join(', ') || 'none'}`);
   }
 
   /**

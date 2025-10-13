@@ -1,389 +1,360 @@
 # Authentication Testing Guide
 
-This guide will walk you through testing all three authentication modes locally.
+This guide explains how to test the authentication system in different environments.
 
-## Prerequisites
+## Overview
 
-1. **Development environment running**:
+PulseStage uses a simplified two-mode authentication system based on `NODE_ENV`:
+
+- **Development Mode** (`NODE_ENV=development`): Demo users + optional OAuth
+- **Production Mode** (`NODE_ENV=production`): OAuth only + setup wizard
+
+## Development Mode
+
+### Prerequisites
+
+```bash
+# Ensure NODE_ENV is set to development (default in docker-compose.override.yaml)
+NODE_ENV=development
+```
+
+### What's Included
+
+- **Auto-seeded demo users**: alice, bob, moderator, admin
+- **No setup wizard**: Database is automatically populated
+- **Demo mode login**: Quick-access buttons for instant login
+- **Optional OAuth**: GitHub and Google OAuth work if credentials are provided
+
+### Testing Demo Mode
+
+1. **Start the development environment**:
    ```bash
    make dev
    ```
 
-2. **Services should be available**:
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3000
-   - PostgreSQL: localhost:5432
-   - Redis: localhost:6379
-
-## Test 1: Demo Mode Authentication (No Setup Required) ✨
-
-Demo mode is enabled by default and requires zero configuration!
-
-### Steps:
-
-1. **Visit the login page**:
+2. **Verify demo users are seeded**:
+   Look for this in the API logs:
    ```
-   http://localhost:5173/login
+   🌱 Development mode: Seeding demo users...
+     ✅ Alice (Demo User)
+     ✅ Bob (Demo User)
+     ✅ Moderator (Demo)
+     ✅ Admin (Demo)
+   ✅ Demo users ready! Login at: http://localhost:5173/login
    ```
 
-2. **You should see**:
-   - A blue "Try Demo" section with a dropdown
-   - Demo users: Alice, Bob, Moderator, Admin
-   - (Optionally) GitHub and Google OAuth buttons if configured
-
-3. **Test demo login**:
-   - Select "Alice (Demo)" from the dropdown
-   - Click "Continue as alice"
-   - You should be redirected to the home page
-   - A blue banner should appear at the top: "You're in demo mode. Data resets daily."
-
-4. **Verify demo user**:
-   - Click on your profile icon (top right)
-   - You should see "Alice (Demo)" and email ending in `@demo.pulsestage.dev`
-   - Navigate around the app - submit questions, upvote, etc.
-
-5. **Test other demo users**:
-   - Log out (if there's a logout option) or clear cookies
-   - Repeat with "Bob", "Moderator", and "Admin"
-   - Each should have different permissions based on their role
-
-### Expected Behavior:
-
-- ✅ Instant access without password
-- ✅ Demo banner visible on all pages
-- ✅ User info shows `@demo.pulsestage.dev` email
-- ✅ Banner has "Sign up to save your work" button
-- ✅ Banner is dismissible (X button)
-
-## Test 2: Check Available Auth Modes (API)
-
-You can see what auth modes are enabled by calling the API directly:
-
-```bash
-curl http://localhost:3000/auth/modes
-```
-
-**Expected Response**:
-```json
-{
-  "modes": ["demo", "oauth"],
-  "demo": {
-    "enabled": true,
-    "users": ["alice", "bob", "moderator", "admin"]
-  },
-  "oauth": {
-    "github": false,
-    "google": false
-  }
-}
-```
-
-If you've configured GitHub/Google OAuth, those will show as `true`.
-
-## Test 3: GitHub OAuth (Optional - Requires Setup)
-
-### Setup GitHub OAuth App:
-
-1. **Create OAuth App**:
-   - Go to https://github.com/settings/developers
-   - Click "New OAuth App"
-   - Fill in:
-     - **Application name**: PulseStage Local Dev
-     - **Homepage URL**: `http://localhost:5173`
-     - **Authorization callback URL**: `http://localhost:3000/auth/github/callback`
-   - Click "Register application"
-   - Copy the **Client ID**
-
-2. **Generate Client Secret**:
-   - Click "Generate a new client secret"
-   - Copy the **Client Secret** immediately (you won't see it again)
-
-3. **Configure Environment**:
-   Edit your `.env` file (or create one from `env.example`):
+3. **Open the login page**:
    ```bash
-   # GitHub OAuth
-   GITHUB_CLIENT_ID=your_client_id_here
-   GITHUB_CLIENT_SECRET=your_client_secret_here
+   open http://localhost:5173/login
+   ```
+
+4. **Test demo login**:
+   - Select a user from the dropdown (alice, bob, moderator, admin)
+   - Click "Continue as [user]"
+   - Should be redirected to `/all` with authentication
+
+5. **Verify authentication**:
+   ```bash
+   # Test API with demo user session
+   curl -i -H "Cookie: connect.sid=YOUR_SESSION_COOKIE" \
+     http://localhost:3000/profile
+   ```
+
+### Testing OAuth in Development (Optional)
+
+OAuth credentials are **optional** in development. To test OAuth:
+
+1. **Set up GitHub OAuth**:
+   ```bash
+   # Get credentials from https://github.com/settings/developers
+   # Add to your .env file:
+   GITHUB_CLIENT_ID=your_client_id
+   GITHUB_CLIENT_SECRET=your_client_secret
    GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
-   
-   # Frontend URL
-   FRONTEND_URL=http://localhost:5173
    ```
 
-4. **Restart development environment**:
+2. **Set up Google OAuth**:
    ```bash
-   make dev
-   ```
-
-### Test GitHub OAuth:
-
-1. **Visit login page**: http://localhost:5173/login
-
-2. **You should now see**:
-   - "Sign in with GitHub" button (in addition to demo mode)
-
-3. **Click "Sign in with GitHub"**:
-   - You'll be redirected to GitHub
-   - GitHub will ask you to authorize the app
-   - Click "Authorize"
-   - You should be redirected back to http://localhost:5173
-   - You should be logged in with your GitHub account
-
-4. **Verify OAuth user**:
-   - Check profile - should show your GitHub name and email
-   - No demo banner should appear (you're a real user!)
-
-5. **Test logout and re-login**:
-   - OAuth should remember your previous authorization
-   - Subsequent logins should be seamless
-
-### Expected Behavior:
-
-- ✅ GitHub OAuth button appears on login page
-- ✅ Redirects to GitHub for authorization
-- ✅ Successfully redirects back after authorization
-- ✅ User is logged in with GitHub name/email
-- ✅ No demo mode banner
-- ✅ Session persists across page refreshes
-
-## Test 4: Google OAuth (Optional - Requires Setup)
-
-### Setup Google OAuth:
-
-1. **Create Google OAuth credentials**:
-   - Go to https://console.cloud.google.com/
-   - Create a new project or select existing
-   - Navigate to **APIs & Services** → **Credentials**
-   - Click **Create Credentials** → **OAuth client ID**
-   - Application type: **Web application**
-   - Add authorized redirect URI: `http://localhost:3000/auth/google/callback`
-   - Copy **Client ID** and **Client Secret**
-
-2. **Configure Environment**:
-   Edit your `.env` file:
-   ```bash
-   # Google OAuth
-   GOOGLE_CLIENT_ID=your_client_id_here.apps.googleusercontent.com
-   GOOGLE_CLIENT_SECRET=your_client_secret_here
+   # Get credentials from https://console.cloud.google.com/apis/credentials
+   # Add to your .env file:
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
    GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
-   
-   # Frontend URL
-   FRONTEND_URL=http://localhost:5173
    ```
 
-3. **Restart development environment**:
+3. **Restart the containers**:
    ```bash
+   docker compose down
    make dev
    ```
 
-### Test Google OAuth:
+4. **Verify OAuth is enabled**:
+   Look for this in the API logs:
+   ```
+   🔐 Auth modes enabled: demo, oauth
+   ```
 
-Similar to GitHub OAuth:
-1. Visit http://localhost:5173/login
-2. Click "Sign in with Google"
-3. Authorize with Google
-4. Should be redirected back and logged in
+5. **Test OAuth login**:
+   - Go to http://localhost:5173/login
+   - Click "Sign in with GitHub" or "Sign in with Google"
+   - Complete the OAuth flow
+   - Should be redirected back to the app with authentication
 
-## Test 5: Multi-Mode Coexistence
+## Production Mode
 
-If you've configured both GitHub and Google OAuth:
-
-1. **Visit login page**: http://localhost:5173/login
-
-2. **You should see all three options**:
-   - Demo mode with dropdown (top)
-   - "Or sign in with" divider
-   - GitHub OAuth button
-   - Google OAuth button
-
-3. **Test switching between modes**:
-   - Log in with demo mode
-   - Log out
-   - Log in with GitHub
-   - Log out
-   - Log in with Google
-
-4. **All should work independently**
-
-## Test 6: Demo Mode Banner Behavior
-
-1. **Log in with demo mode** (alice, bob, etc.)
-
-2. **The banner should**:
-   - Appear on ALL pages (not just login)
-   - Show "You're in demo mode. Data resets daily."
-   - Have a "Sign up to save your work" button
-   - Be dismissible with X button
-
-3. **Test banner dismissal**:
-   - Click the X button
-   - Banner should disappear
-   - Navigate to other pages - banner should stay hidden
-   - Refresh the page - banner should reappear (dismissal is per session)
-
-4. **Test banner CTA**:
-   - Click "Sign up to save your work"
-   - Should redirect to GitHub OAuth (if configured)
-   - Or show OAuth options
-
-## Test 7: Session Persistence
-
-1. **Log in with any mode**
-
-2. **Test session persistence**:
-   - Refresh the page → should stay logged in
-   - Navigate to different pages → should stay logged in
-   - Close browser tab, reopen → should stay logged in (for 30 days)
-
-3. **Test session isolation**:
-   - Open a private/incognito window
-   - Should NOT be logged in
-   - Can log in with a different user
-
-## Test 8: Error Handling
-
-### Test 1: Invalid Demo User
-
-Try to access demo mode with an invalid user:
-```bash
-curl "http://localhost:3000/auth/demo?user=hacker&tenant=demo"
-```
-
-**Expected**: Should return error or redirect to login with error
-
-### Test 2: OAuth Callback Errors
-
-If you've configured OAuth, try accessing the callback URL directly:
-```bash
-# Without code parameter
-curl http://localhost:3000/auth/github/callback
-
-# Should redirect to frontend with error
-```
-
-## Test 9: API Integration
-
-Test that authenticated API calls work:
+### Prerequisites
 
 ```bash
-# 1. Log in with demo mode in browser
-# 2. Get session cookie from browser dev tools
-# 3. Test API call with cookie
+# Ensure NODE_ENV is set to production
+NODE_ENV=production
 
-curl -H "Cookie: connect.sid=YOUR_SESSION_COOKIE" \
-     -H "x-tenant-slug: demo" \
-     http://localhost:3000/questions
+# OAuth credentials are REQUIRED in production
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+GITHUB_CALLBACK_URL=https://your-domain.com/auth/github/callback
+
+# And/or
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_CALLBACK_URL=https://your-domain.com/auth/google/callback
 ```
 
-**Expected**: Should return questions (authenticated)
+### What's Included
 
-Without cookie:
+- **No demo users**: Database starts empty
+- **Setup wizard**: First launch shows tenant setup wizard
+- **OAuth only**: Only GitHub/Google OAuth buttons appear on login
+- **Production security**: Rate limiting, secure cookies, CSRF protection
+
+### Testing Production Mode Locally
+
+1. **Update docker-compose.override.yaml**:
+   ```yaml
+   services:
+     api:
+       environment:
+         NODE_ENV: production  # Change from development
+         # Add OAuth credentials
+         GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+         GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+         # ... other production settings ...
+   ```
+
+2. **Start with a fresh database**:
+   ```bash
+   docker compose down -v
+   make dev
+   ```
+
+3. **First launch - Setup Wizard**:
+   - Navigate to http://localhost:5173/
+   - Should see the setup wizard
+   - Complete tenant setup
+   - Create first admin user
+
+4. **Test OAuth login**:
+   - After setup, go to http://localhost:5173/login
+   - Should only see OAuth buttons (no demo mode)
+   - Click "Sign in with GitHub" or "Sign in with Google"
+   - Complete OAuth flow
+
+5. **Verify no demo users exist**:
+   ```bash
+   # Should return empty or only OAuth-created users
+   docker exec -it ama-app-api-1 npx prisma studio
+   # Navigate to User model and verify no demo users
+   ```
+
+## Common Testing Scenarios
+
+### Scenario 1: Clean Start in Development
+
 ```bash
-curl -H "x-tenant-slug: demo" \
-     http://localhost:3000/questions
+# Reset everything
+docker compose down -v
+rm -rf api/dist web/dist
+
+# Start fresh
+make dev
+
+# Verify demo users are auto-seeded
+docker compose logs api | grep "Demo users ready"
+
+# Test login
+open http://localhost:5173/login
 ```
 
-**Expected**: Should still work (questions are public, but some features require auth)
+### Scenario 2: Switch from Development to Production
+
+```bash
+# Stop development mode
+docker compose down
+
+# Update NODE_ENV in docker-compose.override.yaml
+sed -i 's/NODE_ENV: development/NODE_ENV: production/g' docker-compose.override.yaml
+
+# Clear database and restart
+docker compose down -v
+make dev
+
+# Should see setup wizard
+open http://localhost:5173/
+```
+
+### Scenario 3: Test OAuth Error Handling
+
+```bash
+# Start in development mode
+make dev
+
+# Set invalid OAuth credentials
+export GITHUB_CLIENT_ID=invalid
+export GITHUB_CLIENT_SECRET=invalid
+
+# Restart
+docker compose restart api
+
+# Try GitHub login - should redirect back with error
+open http://localhost:5173/login
+# Click "Sign in with GitHub"
+# Should redirect to /login?error=...
+```
 
 ## Troubleshooting
 
-### Issue: "Demo mode not available"
+### Demo users not appearing
 
-**Solution**: Check `env.example` - demo mode is enabled by default. If you set `AUTH_MODE_DEMO=false`, change it to `true` or remove the line.
+**Problem**: Login page doesn't show demo user dropdown.
 
-### Issue: "GitHub/Google OAuth button not showing"
+**Solution**:
+1. Check NODE_ENV is set to `development`:
+   ```bash
+   docker compose logs api | grep "Auth modes enabled"
+   # Should show: 🔐 Auth modes enabled: demo
+   ```
 
-**Possible causes**:
-1. Environment variables not set correctly
-2. Frontend not fetching modes correctly
-3. API not returning OAuth modes
+2. Check demo user seeding succeeded:
+   ```bash
+   docker compose logs api | grep "Demo users ready"
+   ```
 
-**Debug steps**:
+3. Verify frontend can fetch auth modes:
+   ```bash
+   curl http://localhost:3000/auth/modes
+   # Should return: {"modes":["demo"],"demo":{"enabled":true,"users":["alice","bob","moderator","admin"]},...}
+   ```
+
+### OAuth buttons not showing
+
+**Problem**: OAuth buttons don't appear even with credentials set.
+
+**Solution**:
+1. Verify credentials are set:
+   ```bash
+   docker compose logs api | grep "Auth modes enabled"
+   # Should include "oauth" if credentials are valid
+   ```
+
+2. Check environment variables are passed to container:
+   ```bash
+   docker exec ama-app-api-1 env | grep GITHUB
+   docker exec ama-app-api-1 env | grep GOOGLE
+   ```
+
+3. Restart after setting credentials:
+   ```bash
+   docker compose restart api
+   ```
+
+### Session not persisting
+
+**Problem**: User gets logged out immediately or on refresh.
+
+**Solution**:
+1. Check Redis is running:
+   ```bash
+   docker compose ps redis
+   ```
+
+2. Verify session secret is set:
+   ```bash
+   grep SESSION_SECRET env.example
+   # Ensure it's not the default value
+   ```
+
+3. Check browser cookies are enabled and not blocked
+
+### Setup wizard appears in development
+
+**Problem**: Setup wizard shows up even in development mode.
+
+**Solution**:
+This shouldn't happen. If it does:
+1. Verify NODE_ENV:
+   ```bash
+   docker exec ama-app-api-1 env | grep NODE_ENV
+   # Should return: NODE_ENV=development
+   ```
+
+2. Check if demo users were seeded:
+   ```bash
+   docker compose logs api | grep "Demo users"
+   ```
+
+3. If still having issues, check the tenant exists:
+   ```bash
+   curl http://localhost:3000/health
+   # Check "tenants" count
+   ```
+
+## API Endpoints for Testing
+
+### Check authentication modes
 ```bash
-# Check API response
 curl http://localhost:3000/auth/modes
-
-# Should show oauth.github or oauth.google as true
 ```
 
-### Issue: "OAuth callback error: state mismatch"
+### Check current session
+```bash
+curl -H "Cookie: connect.sid=YOUR_SESSION" http://localhost:3000/profile
+```
 
-**Solution**: This is a CSRF protection. Make sure:
-1. You're not opening OAuth flow in different browser/session
-2. Cookies are enabled
-3. `SESSION_SECRET` is set in `.env`
+### Health check (includes tenant count)
+```bash
+curl http://localhost:3000/health
+```
 
-### Issue: "Demo banner not showing"
+### Demo login (development only)
+```bash
+curl -i http://localhost:3000/auth/demo?user=alice&tenant=demo
+```
 
-**Solution**: 
-1. Check that you're logged in with a demo user (@demo.pulsestage.dev)
-2. Check browser console for errors
-3. Try clearing browser cache/cookies
+## Environment Variables Reference
 
-### Issue: "Cannot log in with OAuth"
+| Variable | Development | Production | Description |
+|----------|-------------|------------|-------------|
+| `NODE_ENV` | `development` | `production` | Determines auth mode |
+| `GITHUB_CLIENT_ID` | Optional | **Required*** | GitHub OAuth client ID |
+| `GITHUB_CLIENT_SECRET` | Optional | **Required*** | GitHub OAuth client secret |
+| `GOOGLE_CLIENT_ID` | Optional | **Required*** | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Optional | **Required*** | Google OAuth client secret |
+| `SESSION_SECRET` | Required | Required | Session encryption key |
+| `FRONTEND_URL` | `http://localhost:5173` | Your domain | OAuth redirect URL |
 
-**Debug steps**:
-1. Check browser console for errors
-2. Check API logs: `docker logs pulsestage-api`
-3. Verify OAuth credentials in `.env`
-4. Verify callback URLs match exactly (http vs https, trailing slash, etc.)
+\* At least one OAuth provider (GitHub or Google) is required in production.
 
-## Quick Test Checklist
+## Next Steps
 
-- [ ] Demo mode: Login with alice
-- [ ] Demo mode: Banner appears and is dismissible
-- [ ] Demo mode: Can submit questions
-- [ ] API: `/auth/modes` returns correct config
-- [ ] GitHub OAuth: Button appears (if configured)
-- [ ] GitHub OAuth: Can log in (if configured)
-- [ ] Google OAuth: Button appears (if configured)
-- [ ] Google OAuth: Can log in (if configured)
-- [ ] Session: Persists across page refreshes
-- [ ] UI: Login page is responsive (mobile/desktop)
-- [ ] UI: Dark mode works on login page
+After testing authentication:
+1. Configure OAuth for your production deployment
+2. Set strong session secrets
+3. Enable HTTPS for production
+4. Configure rate limiting
+5. Review audit logs for authentication events
 
-## Expected Screenshots
+## Additional Resources
 
-### 1. Login Page (Demo Mode Only)
-- Blue "Try Demo" card at top
-- Dropdown with 4 demo users
-- "Continue as..." button
-
-### 2. Login Page (All Modes)
-- Demo mode card at top
-- "Or sign in with" divider
-- GitHub button
-- Google button
-
-### 3. Demo Mode Banner
-- Blue gradient banner across top
-- Info icon + warning text
-- "Sign up" button
-- X dismiss button
-
-### 4. Profile Menu
-- Shows user name and email
-- Demo users have "(Demo)" suffix
-- OAuth users show real name/email
-
-## Next Steps After Testing
-
-If everything works:
-1. ✅ Authentication system is ready!
-2. Consider enabling only the auth modes you need for production
-3. Set up proper OAuth apps for your production domain
-4. Disable demo mode in production (`AUTH_MODE_DEMO=false`)
-
-If you find issues:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Check the comprehensive guide: `docs/architecture/authentication.md`
-3. Open an issue with steps to reproduce
-
-## Performance Notes
-
-- Demo mode: ~10ms (database lookup)
-- OAuth flows: ~500ms (includes external API calls to GitHub/Google)
-- Session validation: ~1ms (cached in Redis)
-
-Happy testing! 🎉
-
+- [GitHub OAuth Apps](https://github.com/settings/developers)
+- [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+- [Session Configuration](./docs/security/sessions.md)
+- [Deployment Guide](./docs/deployment/production.md)

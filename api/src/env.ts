@@ -4,6 +4,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   PORT: z.string().default('3000').transform(Number),
   ADMIN_KEY: z.string().optional(),
+  SESSION_SECRET: z.string().optional(),
   CORS_ORIGIN: z.string().default('*'),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 

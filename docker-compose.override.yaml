@@ -14,6 +14,8 @@ services:
   api:
     build: ./api
     environment:
+      # Development mode - enables demo users and relaxed security
+      NODE_ENV: development
       # Email configuration for testing with Mailpit
       EMAIL_PROVIDER: smtp
       EMAIL_FROM: noreply@pulsestage.local

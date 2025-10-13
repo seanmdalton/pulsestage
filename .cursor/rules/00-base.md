@@ -1,0 +1,39 @@
+# PulseStage Base Rules
+
+## Priorities
+- Correctness > clarity > speed. Small diffs. Always show preview before apply.
+- Never change infra/auth/CSRF/CSP/rate-limits without explicit confirmation.
+- Use provided scripts: `make setup|dev|lint-fix|validate-ci|db-seed`.
+
+## Tech stack
+- Web: React 19 + TypeScript + Vite + Tailwind.
+- API: Node 24 + Express + TypeScript + Prisma + Zod.
+- Data: PostgreSQL 16. Cache/queues: Redis 7.
+- Tests: Vitest unit/integration; Playwright E2E for critical flows.
+- Docs: MkDocs. Update docs when user flows or routes change.
+
+## Boundaries
+- `/web` never accesses DB. All I/O via typed API client.
+- API layers: router → handler → service → repository (Prisma). No handler→repo shortcuts.
+- Pass `tenantId` explicitly at repository boundary. Deny by default if missing.
+
+## Naming
+- Files/dirs: kebab-case. Prefer named exports. Default export only for route components.
+- Functions `verbNoun`. Booleans `is/has/can`.
+
+## Errors and logging
+- Use `DomainError { code, message, details? }`. Centralize HTTP mapping. No prod stack traces.
+- Single JSON logger. Never log secrets or PII.
+
+## Security musts
+- Enforce RBAC (viewer/member/moderator/admin/owner) on the server.
+- Keep CSRF, Helmet, rate-limits, and CSP intact.
+- Secrets only from env. Validate env at boot with Zod.
+
+## Tests
+- New code includes unit tests. For routes: test 200 + validation 4xx + 403/404 + cross-tenant checks.
+- CI gate: block merge on failing tests or lint.
+
+## Git/PR
+- Conventional Commits with scope `(web|api|docs|ops)`.
+- PR template: Summary, Screenshots, Tests, Risk, Rollback, Docs.

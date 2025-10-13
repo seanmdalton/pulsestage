@@ -629,9 +629,19 @@ export function createApp(prisma: PrismaClient) {
       req.session.user = user;
       req.session.tenantSlug = (req.query.tenant as string) || 'demo';
 
-      // Redirect to frontend
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      res.redirect(`${frontendUrl}?demo=true`);
+      // Save session before redirect (important!)
+      req.session.save(err => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+            error: 'Failed to create session',
+          });
+        }
+
+        // Redirect to frontend
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}?demo=true`);
+      });
     } catch (error) {
       console.error('Demo auth error:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
@@ -884,12 +894,27 @@ export function createApp(prisma: PrismaClient) {
         });
       }
 
-      // Check if any teams exist in this tenant
+      // In development mode, skip setup wizard (demo users are auto-seeded)
+      if (process.env.NODE_ENV === 'development') {
+        const userCount = await prisma.user.count({
+          where: { tenantId },
+        });
+
+        return res.json({
+          needsSetup: false,
+          teamCount: 0, // Teams can be created via UI
+          userCount,
+          tenantId,
+          tenantSlug: req.tenant?.tenantSlug,
+          mode: 'development',
+        });
+      }
+
+      // Production mode: check if teams exist
       const teamCount = await prisma.team.count({
         where: { tenantId },
       });
 
-      // Check if any users exist in this tenant
       const userCount = await prisma.user.count({
         where: { tenantId },
       });
@@ -900,6 +925,7 @@ export function createApp(prisma: PrismaClient) {
         userCount,
         tenantId,
         tenantSlug: req.tenant?.tenantSlug,
+        mode: 'production',
       });
     } catch (error) {
       console.error('Error checking setup status:', error);
