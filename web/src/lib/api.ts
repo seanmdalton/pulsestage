@@ -291,16 +291,11 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
 
-    // Add mock SSO and tenant headers for local development
-    const mockSSOUser = localStorage.getItem('mock-sso-user')
+    // Add tenant header for multi-tenancy support
     const mockTenant = localStorage.getItem('mock-tenant')
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
-    }
-
-    if (mockSSOUser) {
-      headers['x-mock-sso-user'] = mockSSOUser
     }
 
     // Add tenant header - defaults to 'default' if not set
@@ -922,8 +917,7 @@ class ApiClient {
 
     queryParams.append('format', format)
 
-    // Get the mock SSO user and tenant headers from localStorage
-    const mockSSOUser = localStorage.getItem('mock-sso-user')
+    // Get the tenant header from localStorage
     const mockTenant = localStorage.getItem('mock-tenant')
 
     const response = await fetch(
@@ -932,7 +926,6 @@ class ApiClient {
         method: 'GET',
         credentials: 'include',
         headers: {
-          ...(mockSSOUser && { 'x-mock-sso-user': mockSSOUser }),
           'x-tenant-id': mockTenant || 'default',
         },
       }

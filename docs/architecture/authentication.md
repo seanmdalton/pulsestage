@@ -515,60 +515,72 @@ For local development, OAuth providers typically allow `http://localhost` callba
 3. Ensure user is created in database after OAuth
 4. Check for errors in OAuth callback handler
 
+## Testing
+
+### Mock SSO (Test-Only)
+
+Mock SSO is a **test-only** authentication mechanism used by automated tests. It is **not intended for user-facing development**.
+
+**For Testing (via `x-mock-sso-user` header):**
+```typescript
+// In API tests
+const response = await request(app)
+  .post('/questions')
+  .set('x-mock-sso-user', 'alice@demo.pulsestage.dev')
+  .send({ body: 'Test question' })
+```
+
+**Security Safeguards:**
+- ✅ Only enabled in `development` and `test` environments
+- ✅ Explicitly rejected in production with 403 error
+- ✅ Requires `x-mock-sso-user` header (not user-facing)
+
+**For Local Development:**
+Use **Demo Mode** (`/auth/demo`) instead of Mock SSO. It provides a user-friendly login page with pre-seeded users.
+
 ## Migration Guide
-
-### From Mock SSO to OAuth
-
-If you're currently using mock SSO for development:
-
-1. Keep mock SSO for local development:
-   ```bash
-   # .env.local
-   AUTH_MODE=mock
-   ```
-
-2. Add OAuth for deployed environments:
-   ```bash
-   # .env.production
-   AUTH_MODE=oauth
-   GITHUB_CLIENT_ID=...
-   GITHUB_CLIENT_SECRET=...
-   ```
-
-3. Update deployment scripts to use correct `.env` file
 
 ### From Demo Mode to Production OAuth
 
 When moving from demo to production:
 
-1. Disable demo mode:
+1. Set environment to production (disables demo mode automatically):
    ```bash
    # .env
-   AUTH_MODE_DEMO=false
+   NODE_ENV=production
    ```
 
-2. Enable OAuth:
+2. Configure OAuth (required in production):
    ```bash
-   GITHUB_CLIENT_ID=...
-   GITHUB_CLIENT_SECRET=...
-   # and/or
-   GOOGLE_CLIENT_ID=...
-   GOOGLE_CLIENT_SECRET=...
+   # GitHub OAuth
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
+   
+   # and/or Google OAuth
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
    ```
 
-3. Update documentation for users
-4. Communicate migration timeline if existing demo users need to create real accounts
+3. Generate secure secrets:
+   ```bash
+   cd api && npm run generate-secrets
+   ```
+
+4. Update documentation for users
+5. Communicate migration timeline if existing demo users need to create real accounts
 
 ## Best Practices
 
-1. **Use OAuth for production**: More secure than password-based auth
-2. **Disable demo mode in production**: Prevents unauthorized access
-3. **Rotate session secrets**: Change `SESSION_SECRET` periodically
-4. **Monitor auth failures**: Log OAuth errors for debugging
-5. **Test callback URLs**: Verify exact match with OAuth provider settings
-6. **Use HTTPS**: Required for OAuth, improves security overall
-7. **Implement rate limiting**: Protect against brute force on auth endpoints
-8. **Add MFA (future)**: Consider multi-factor authentication for sensitive deployments
+1. **Use OAuth for production**: More secure than password-based auth (automatically enforced via `NODE_ENV`)
+2. **Demo mode auto-disabled in production**: Setting `NODE_ENV=production` automatically disables demo mode
+3. **Generate strong secrets**: Run `npm run generate-secrets` for production deployments
+4. **Rotate session secrets**: Change `SESSION_SECRET` periodically
+5. **Monitor auth failures**: Log OAuth errors for debugging
+6. **Mock SSO is test-only**: Never use `x-mock-sso-user` header outside of automated tests
+7. **Test callback URLs**: Verify exact match with OAuth provider settings
+8. **Use HTTPS**: Required for OAuth, improves security overall
+9. **Implement rate limiting**: Protect against brute force on auth endpoints (already implemented)
+10. **Add MFA (future)**: Consider multi-factor authentication for sensitive deployments
 
 ## Future Enhancements
 

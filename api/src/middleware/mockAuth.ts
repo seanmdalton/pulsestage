@@ -1,8 +1,13 @@
 /*
- * Mock Authentication Middleware
+ * Mock Authentication Middleware (TEST-ONLY)
  *
- * This simulates SSO authentication for local development.
- * In production, this would be replaced with real SSO integration.
+ * This middleware is ONLY for automated testing via the x-mock-sso-user header.
+ * It allows tests to authenticate as any user without going through OAuth.
+ *
+ * For local development, use Demo Mode authentication (/auth/demo).
+ * For production, use OAuth (GitHub/Google).
+ *
+ * Security: Only enabled in development/test environments.
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -137,6 +142,20 @@ declare module 'express-serve-static-core' {
 // Mock authentication middleware
 export async function mockAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
+    // Security: Only allow Mock SSO header in development/test environments
+    const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (mockSSOHeader && isProduction) {
+      console.error(
+        '🚨 SECURITY: Mock SSO authentication attempted in production! Rejecting request.'
+      );
+      return res.status(403).json({
+        error: 'Mock SSO not available',
+        message: 'Mock SSO authentication is only available in development/test environments.',
+      });
+    }
+
     // Load mock data if not already loaded
     await loadMockData();
 

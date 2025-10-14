@@ -102,7 +102,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         // Clear any stale localStorage data when not authenticated
         localStorage.removeItem(USER_STORAGE_KEY)
         localStorage.removeItem(FAVORITES_STORAGE_KEY)
-        localStorage.removeItem('mock-sso-user') // Legacy cleanup
       }
     } catch (err) {
       console.error('Failed to load user data:', err)
@@ -262,31 +261,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Load user data on mount
   useEffect(() => {
     loadUserData()
-  }, [])
-
-  // Listen for localStorage changes (mock SSO user changes)
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'mock-sso-user') {
-        // Mock SSO user changed, reload user data
-        loadUserData()
-      }
-    }
-
-    // Listen for storage events from other tabs
-    window.addEventListener('storage', handleStorageChange)
-
-    // Also listen for changes within the same tab (custom event)
-    const handleMockSSOChange = () => {
-      loadUserData()
-    }
-
-    window.addEventListener('mock-sso-changed', handleMockSSOChange)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('mock-sso-changed', handleMockSSOChange)
-    }
   }, [])
 
   const value: UserContextType = {

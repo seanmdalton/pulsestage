@@ -74,9 +74,6 @@ export function UserProfile() {
         credentials: 'include',
       })
 
-      // Clear any local storage (for legacy mock SSO)
-      localStorage.removeItem('mock-sso-user')
-
       // Redirect to login page
       window.location.href = '/login'
     } catch (error) {
