@@ -131,9 +131,13 @@ export function createApp(prisma: PrismaClient) {
     })
   );
 
-  // Trust proxy in production for correct secure cookies
+  // Trust proxy configuration (production only)
+  // Prefer explicit hop count via TRUST_PROXY_HOPS, default to 1 when unset.
   if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1);
+    const hops = process.env.TRUST_PROXY_HOPS ? Number(process.env.TRUST_PROXY_HOPS) : 1;
+    if (Number.isFinite(hops) && hops >= 0) {
+      app.set('trust proxy', hops);
+    }
   }
 
   // Security headers (Helmet)
@@ -404,6 +408,7 @@ export function createApp(prisma: PrismaClient) {
   // Approve a question under review
   app.post(
     '/admin/moderation/approve/:id',
+    rateLimit('admin-moderation-approve', RATE_LIMITS.ADMIN_OPERATIONS, 60_000),
     requirePermission('question.answer'),
     async (req, res) => {
       try {
@@ -514,6 +519,7 @@ export function createApp(prisma: PrismaClient) {
   // Reject a question under review
   app.post(
     '/admin/moderation/reject/:id',
+    rateLimit('admin-moderation-reject', RATE_LIMITS.ADMIN_OPERATIONS, 60_000),
     requirePermission('question.answer'),
     async (req, res) => {
       try {
@@ -1778,7 +1784,7 @@ export function createApp(prisma: PrismaClient) {
 
   app.post(
     '/admin/login',
-    rateLimit('admin-login', 10, 60_000),
+    rateLimit('admin-login', 5, 60_000),
     validateCsrfToken(),
     async (req, res) => {
       if (process.env.NODE_ENV === 'development') {
@@ -2274,6 +2280,7 @@ export function createApp(prisma: PrismaClient) {
   // Team-scoped: moderators can only answer questions from their teams
   app.post(
     '/questions/:id/respond',
+    rateLimit('respond', 30, 60_000),
     validateCsrfToken(),
     extractQuestionTeam(),
     requirePermission('question.answer', { teamIdParam: 'teamId' }),
@@ -2477,35 +2484,7 @@ export function createApp(prisma: PrismaClient) {
     }
   );
 
-  // Legacy endpoint - disabled in production, available for dev/testing with admin key
-  app.post(
-    '/questions/:id/respond-legacy',
-    (req, res, next) => {
-      if (process.env.NODE_ENV === 'production') {
-        return res.status(404).json({ error: 'Not found' });
-      }
-      return requireAdminKey(req, res, next);
-    },
-    async (req, res) => {
-      const { id } = req.params;
-      const parse = respondSchema.safeParse(req.body);
-      if (!parse.success)
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: parse.error.flatten() });
-      try {
-        const q = await prisma.question.update({
-          where: { id },
-          data: {
-            status: 'ANSWERED',
-            responseText: parse.data.response,
-            respondedAt: new Date(),
-          },
-        });
-        res.json(q);
-      } catch {
-        res.status(404).json({ error: 'Not found' });
-      }
-    }
-  );
+  // Legacy admin-key endpoint removed for security hardening
 
   // Search questions endpoint with improved fuzzy matching
   app.get('/questions/search', async (req, res) => {
@@ -2713,7 +2692,11 @@ export function createApp(prisma: PrismaClient) {
   // Export endpoints (admin only)
 
   // Get export preview
-  app.get('/admin/export/preview', requirePermission('data.export'), async (req, res) => {
+  app.get(
+    '/admin/export/preview',
+    rateLimit('admin-export-preview', 10, 60_000),
+    requirePermission('data.export'),
+    async (req, res) => {
     try {
       const filters = req.query;
 
@@ -2798,7 +2781,11 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Download export
-  app.get('/admin/export/download', requirePermission('data.export'), async (req, res) => {
+  app.get(
+    '/admin/export/download',
+    rateLimit('admin-export-download', 2, 60_000),
+    requirePermission('data.export'),
+    async (req, res) => {
     try {
       const filters = req.query;
       const format = (filters.format as string) || 'csv';
@@ -3421,6 +3408,7 @@ export function createApp(prisma: PrismaClient) {
   // Bulk tag operation
   app.post(
     '/admin/bulk-tag',
+    rateLimit('admin-bulk-tag', RATE_LIMITS.ADMIN_OPERATIONS, 60_000),
     validateCsrfToken(),
     requirePermission('question.tag'),
     async (req, res) => {
@@ -3540,6 +3528,7 @@ export function createApp(prisma: PrismaClient) {
   // Bulk action operation (pin, freeze, delete)
   app.post(
     '/admin/bulk-action',
+    rateLimit('admin-bulk-action', RATE_LIMITS.ADMIN_OPERATIONS, 60_000),
     validateCsrfToken(),
     requirePermission('admin.access'),
     async (req, res) => {

@@ -1,28 +1,33 @@
 import { Request, Response, NextFunction } from 'express';
 
 export function requireAdminSession(req: Request, res: Response, next: NextFunction) {
-  console.log('🔒 Admin session check:', {
-    hasSession: !!req.session,
-    sessionId: req.sessionID,
-    isAdmin: req.session?.isAdmin,
-    loginTime: req.session?.loginTime,
-    path: req.path,
-    method: req.method,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    // Debug logging only in development
+    console.log('🔒 Admin session check:', {
+      hasSession: !!req.session,
+      isAdmin: req.session?.isAdmin,
+      loginTime: req.session?.loginTime,
+      path: req.path,
+      method: req.method,
+    });
+  }
 
   if (!req.session?.isAdmin) {
-    console.log('❌ Admin session rejected: no admin session');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('❌ Admin session rejected: no admin session');
+    }
     return res.status(401).json({
       error: 'Admin authentication required',
       loginRequired: true,
     });
   }
 
-  // Check session age (optional additional security)
+  // Check session age (8 hours max)
   const loginTime = req.session.loginTime;
   if (loginTime && Date.now() - loginTime > 8 * 60 * 60 * 1000) {
-    // 8 hours max
-    console.log('❌ Admin session expired');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('❌ Admin session expired');
+    }
     req.session.destroy(err => {
       if (err) console.error('Session destroy error:', err);
     });
@@ -32,6 +37,8 @@ export function requireAdminSession(req: Request, res: Response, next: NextFunct
     });
   }
 
-  console.log('✅ Admin session valid');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('✅ Admin session valid');
+  }
   next();
 }

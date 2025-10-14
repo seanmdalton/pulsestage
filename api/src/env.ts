@@ -71,6 +71,17 @@ if (isProduction) {
       'CORS_ORIGINS must be set to a comma-separated allowlist in production (no wildcard).'
     );
   }
+
+  // Minimum secret length requirements (defense-in-depth)
+  const tooShort: string[] = [];
+  if (parsed.SESSION_SECRET && parsed.SESSION_SECRET.length < 32) tooShort.push('SESSION_SECRET');
+  if (parsed.CSRF_SECRET && parsed.CSRF_SECRET.length < 32) tooShort.push('CSRF_SECRET');
+  if (parsed.ADMIN_KEY && parsed.ADMIN_KEY.length < 32) tooShort.push('ADMIN_KEY');
+  if (tooShort.length > 0) {
+    throw new Error(
+      `The following secrets are too short (min 32 chars): ${tooShort.join(', ')}`
+    );
+  }
 }
 
 export const env = parsed;

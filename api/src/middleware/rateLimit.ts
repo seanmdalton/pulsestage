@@ -5,6 +5,30 @@ import { RATE_LIMITS, HTTP_STATUS, NETWORK } from '../constants.js';
 
 let redisClient: RedisClientType | null = null;
 
+// ----------------------------------------------------------------------------
+// In-memory fallback rate limiter (used only when Redis is unavailable)
+// ----------------------------------------------------------------------------
+type Bucket = { count: number; resetAt: number };
+const fallbackBuckets: Map<string, Bucket> = new Map();
+let lastFallbackLogAt = 0;
+
+function takeFromFallbackBucket(key: string, maxRequests: number, windowMs: number): boolean {
+  const now = Date.now();
+  const existing = fallbackBuckets.get(key);
+  if (!existing || existing.resetAt <= now) {
+    // New window
+    fallbackBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (existing.count < maxRequests) {
+    existing.count += 1;
+    return true;
+  }
+
+  return false;
+}
+
 // Get Redis connection status (for health checks)
 export function getRedisStatus() {
   return {
@@ -32,7 +56,7 @@ export async function initRedis() {
     console.log('🔒 Redis connected for rate limiting (production mode)');
   } catch (error) {
     console.error('Failed to connect to Redis:', error);
-    // Continue without rate limiting if Redis is unavailable
+    // Continue with in-memory fallback rate limiting
   }
 }
 
@@ -47,17 +71,30 @@ export function rateLimit(
       return next();
     }
 
-    // Skip rate limiting if Redis is not available
-    if (!redisClient) {
-      return next();
-    }
-
+    // When Redis is unavailable, use a conservative in-memory fallback limiter
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
-
-    // Include tenantId in rate limit key for per-tenant rate limiting
     const tenantContext = tryGetTenantContext();
     const tenantPart = tenantContext ? tenantContext.tenantId : 'no-tenant';
     const key = `rate:${route}:${tenantPart}:${ip}`;
+
+    if (!redisClient) {
+      const allowed = takeFromFallbackBucket(key, Math.min(maxRequests, 5), Math.min(windowMs, 60_000));
+      if (!allowed) {
+        // Log a periodic warning (at most once per 60s) to avoid log spam
+        const now = Date.now();
+        if (now - lastFallbackLogAt > 60_000) {
+          lastFallbackLogAt = now;
+          console.warn('⚠️  Rate limit fallback active (Redis unavailable) — applying conservative limits');
+        }
+
+        return res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({
+          error: 'Too many requests',
+          message: `Rate limit exceeded. Please retry later.`,
+          degradedProtection: true,
+        });
+      }
+      return next();
+    }
 
     try {
       const current = await redisClient.get(key);
