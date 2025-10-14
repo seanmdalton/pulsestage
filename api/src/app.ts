@@ -2697,7 +2697,7 @@ export function createApp(prisma: PrismaClient) {
     rateLimit('admin-export-preview', 10, 60_000),
     requirePermission('data.export'),
     async (req, res) => {
-    try {
+      try {
       const filters = req.query;
 
       // Build where clause based on filters
