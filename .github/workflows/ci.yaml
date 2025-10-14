@@ -361,8 +361,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
+            type=ref,event=pr,prefix=pr-
+            type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build Docker image (PR - no push)
