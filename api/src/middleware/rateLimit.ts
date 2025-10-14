@@ -39,9 +39,9 @@ export function getRedisStatus() {
 
 // Initialize Redis client
 export async function initRedis() {
-  // Skip Redis initialization in non-production environments
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('🚫 Rate limiting disabled outside production environment');
+  // Skip Redis initialization in development, but allow in test to enable mocking
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🚫 Rate limiting disabled in development environment');
     return;
   }
 
@@ -66,8 +66,8 @@ export function rateLimit(
   windowMs: number = RATE_LIMITS.DEFAULT_WINDOW_MS
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    // Skip rate limiting outside production (development/test)
-    if (process.env.NODE_ENV !== 'production') {
+    // Skip rate limiting in development (enabled in test/prod)
+    if (process.env.NODE_ENV === 'development') {
       return next();
     }
 
