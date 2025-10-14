@@ -16,6 +16,7 @@
     "lint:fix": "eslint . --ext ts,js --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "generate-secrets": "node --loader ts-node/esm scripts/generate-secrets.ts",
     "email:dev": "email dev --dir src/emails",
     "db:push": "prisma db push",
     "db:seed": "node dist/seed-multi-tenant-data.js",

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { PrismaClient } from '@prisma/client';
 import { env } from './env.js';
 import { initRedis } from './middleware/rateLimit.js';
 import { initSessionStore } from './middleware/session.js';
 import { createApp } from './app.js';
 import { startEmailWorker } from './lib/queue/emailQueue.js';
+import {
+  createPrismaClient,
+  validateDatabaseConnection,
+  shutdownDatabase,
+} from './lib/database.js';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 // Auto-bootstrap: Create default tenant if database is empty
 async function autoBootstrap() {
@@ -376,50 +380,95 @@ async function seedDemoData() {
   }
 }
 
-// Initialize Redis and start server
+// Initialize services and start server
 async function start() {
-  // Initialize Redis for rate limiting (non-blocking)
   try {
+    // 1. Validate database connection and pool settings
+    console.log('🔌 Connecting to database...');
+    await validateDatabaseConnection(prisma);
+
+    // 2. Initialize Redis for rate limiting
+    console.log('🔒 Initializing rate limiting...');
     await initRedis();
-  } catch (error) {
-    console.warn('Redis initialization failed, continuing without rate limiting:', error);
-  }
 
-  // Initialize Redis for sessions (non-blocking)
-  try {
+    // 3. Initialize Redis for session storage
+    console.log('🍪 Initializing session storage...');
     await initSessionStore();
-  } catch (error) {
-    console.warn('Session store initialization failed, using memory store:', error);
-  }
 
-  // Start email worker (non-blocking)
-  try {
+    // 4. Start email worker
+    console.log('📧 Starting email worker...');
     startEmailWorker();
+
+    // 5. Create Express app
+    const app = createApp(prisma);
+
+    // 6. Start HTTP server
+    const server = app.listen(env.PORT, async () => {
+      try {
+        // Auto-bootstrap if needed
+        await autoBootstrap();
+
+        // Seed demo data in development mode
+        await seedDemoData();
+
+        console.log('');
+        console.log('🚀 Server ready!');
+        console.log(`   Port: ${env.PORT}`);
+        console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`   CORS origin: ${env.CORS_ORIGIN}`);
+        console.log(`   Admin key: ${env.ADMIN_KEY ? '✓ configured' : '✗ not configured'}`);
+        console.log('');
+      } catch (error) {
+        console.error('Startup tasks failed:', error);
+      }
+    });
+
+    // 7. Setup graceful shutdown handlers
+    const gracefulShutdown = async (signal: string) => {
+      console.log('');
+      console.log(`\n🛑 ${signal} received, shutting down gracefully...`);
+
+      // Stop accepting new connections
+      server.close(async () => {
+        console.log('✅ HTTP server closed');
+
+        try {
+          // Disconnect from database
+          await shutdownDatabase(prisma);
+
+          // Exit successfully
+          process.exit(0);
+        } catch (error) {
+          console.error('Error during shutdown:', error);
+          process.exit(1);
+        }
+      });
+
+      // Force shutdown after 30 seconds
+      setTimeout(() => {
+        console.error('⚠️  Forced shutdown after timeout');
+        process.exit(1);
+      }, 30000);
+    };
+
+    // Listen for termination signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    // Handle uncaught errors
+    process.on('uncaughtException', error => {
+      console.error('❌ Uncaught exception:', error);
+      gracefulShutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
+      gracefulShutdown('unhandledRejection');
+    });
   } catch (error) {
-    console.warn('Email worker initialization failed, emails will not be sent:', error);
+    console.error('❌ Fatal error during startup:', error);
+    process.exit(1);
   }
-
-  const app = createApp(prisma);
-
-  app.listen(env.PORT, async () => {
-    // Ensure schema is present when running outside CI/container
-    try {
-      await prisma.$executeRawUnsafe('SELECT 1');
-      console.log('Database connection verified');
-
-      // Auto-bootstrap if needed
-      await autoBootstrap();
-
-      // Seed demo data in development mode
-      await seedDemoData();
-    } catch (error) {
-      console.warn('Database connection check failed:', error);
-    }
-    console.log(`ama-api listening on :${env.PORT}`);
-    console.log(`CORS origin: ${env.CORS_ORIGIN}`);
-    console.log(`Admin key: ${env.ADMIN_KEY ? 'configured' : 'not configured'}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
 }
 
-start().catch(console.error);
+start();

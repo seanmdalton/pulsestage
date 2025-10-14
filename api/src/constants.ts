@@ -24,13 +24,51 @@
 // ============================================================================
 
 export const RATE_LIMITS = {
-  /** Default requests per minute for general endpoints */
+  /** Default time windows */
+  WINDOW_1_MINUTE: 60 * 1000,
+  WINDOW_5_MINUTES: 5 * 60 * 1000,
+  WINDOW_15_MINUTES: 15 * 60 * 1000,
+  WINDOW_1_HOUR: 60 * 60 * 1000,
+
+  /** Read operations (generous limits) */
+  READ_OPERATIONS: {
+    REQUESTS_PER_MINUTE: 100,
+    WINDOW_MS: 60 * 1000,
+  },
+
+  /** Write operations (moderate limits) */
+  WRITE_OPERATIONS: {
+    CREATE_QUESTION: 10, // 10 questions per minute
+    CREATE_COMMENT: 20, // 20 comments per minute
+    UPVOTE: 30, // 30 upvotes per minute
+    UPDATE: 20, // 20 updates per minute
+    DELETE: 10, // 10 deletes per minute
+    WINDOW_MS: 60 * 1000,
+  },
+
+  /** Sensitive operations (strict limits) */
+  SENSITIVE_OPERATIONS: {
+    AUTH_ATTEMPT: 5, // 5 login attempts per 5 minutes
+    PASSWORD_RESET: 3, // 3 password resets per hour
+    EMAIL_SEND: 10, // 10 emails per hour
+    ADMIN_ACTION: 50, // 50 admin actions per 15 minutes
+    WINDOW_AUTH_MS: 5 * 60 * 1000,
+    WINDOW_PASSWORD_MS: 60 * 60 * 1000,
+    WINDOW_EMAIL_MS: 60 * 60 * 1000,
+    WINDOW_ADMIN_MS: 15 * 60 * 1000,
+  },
+
+  /** Search & Export (moderate limits) */
+  SEARCH_OPERATIONS: {
+    SEARCH: 60, // 60 searches per minute
+    EXPORT: 5, // 5 exports per 15 minutes
+    WINDOW_SEARCH_MS: 60 * 1000,
+    WINDOW_EXPORT_MS: 15 * 60 * 1000,
+  },
+
+  /** Legacy values for backward compatibility */
   DEFAULT_REQUESTS_PER_MINUTE: 10,
-
-  /** Default time window in milliseconds (1 minute) */
   DEFAULT_WINDOW_MS: 60 * 1000,
-
-  /** Specific rate limits for different endpoint types */
   CREATE_QUESTION: 10,
   UPVOTE: 10,
   SEARCH: 100,

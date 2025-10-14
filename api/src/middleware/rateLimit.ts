@@ -15,8 +15,10 @@ export function getRedisStatus() {
 
 // Initialize Redis client
 export async function initRedis() {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   // Skip Redis initialization in development
-  if (process.env.NODE_ENV === 'development') {
+  if (!isProduction) {
     console.log('🚫 Rate limiting disabled in development environment');
     return;
   }
@@ -31,8 +33,17 @@ export async function initRedis() {
     await redisClient.connect();
     console.log('🔒 Redis connected for rate limiting (production mode)');
   } catch (error) {
-    console.error('Failed to connect to Redis:', error);
-    // Continue without rate limiting if Redis is unavailable
+    console.error('❌ Failed to connect to Redis for rate limiting:', error);
+
+    // In production, Redis is REQUIRED for rate limiting (security critical)
+    if (isProduction) {
+      console.error('');
+      console.error('🚨 CRITICAL: Redis connection failed in production!');
+      console.error('   Rate limiting is a security requirement for production deployments.');
+      console.error('   Please configure REDIS_URL and ensure Redis is accessible.');
+      console.error('');
+      throw new Error('Redis connection required for production rate limiting');
+    }
   }
 }
 
