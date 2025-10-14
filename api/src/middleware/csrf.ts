@@ -70,12 +70,17 @@ export function provideCsrfToken() {
  */
 export function validateCsrfToken() {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Skip CSRF for mock auth (development/testing)
+    // Skip CSRF in development mode (for demo mode and local testing)
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+
+    // Skip CSRF for mock auth (testing)
     if (req.headers['x-mock-sso-user']) {
       return next();
     }
 
-    // Apply CSRF protection
+    // Apply CSRF protection in production
     doubleCsrfProtection(req, res, error => {
       if (error) {
         if (error === invalidCsrfTokenError) {
