@@ -61,28 +61,26 @@ LABEL org.opencontainers.image.description="PulseStage API - Ask Me Anything (AM
 LABEL org.opencontainers.image.vendor="Sean M. Dalton"
 LABEL org.opencontainers.image.source="https://github.com/seanmdalton/pulsestage"
 
+# Switch to non-root user BEFORE installing dependencies
+# This ensures all installed files are owned by nodejs user
+USER nodejs
+
 # Install only production dependencies
-COPY package*.json ./
+COPY --chown=nodejs:nodejs package*.json ./
 RUN npm ci --omit=dev --prefer-offline --no-audit && \
     npm cache clean --force
 
 # Copy Prisma schema and generate client
-COPY --from=builder /app/prisma prisma
+COPY --chown=nodejs:nodejs --from=builder /app/prisma prisma
 RUN npx prisma generate
 
 # Copy built application
-COPY --from=builder /app/dist dist
-COPY --from=builder /app/openapi.yaml openapi.yaml
-COPY --from=builder /app/scripts/start.sh scripts/start.sh
+COPY --chown=nodejs:nodejs --from=builder /app/dist dist
+COPY --chown=nodejs:nodejs --from=builder /app/openapi.yaml openapi.yaml
+COPY --chown=nodejs:nodejs --from=builder /app/scripts/start.sh scripts/start.sh
 
 # Make startup script executable
 RUN chmod +x scripts/start.sh
-
-# Change ownership to non-root user
-RUN chown -R nodejs:nodejs /app
-
-# Switch to non-root user
-USER nodejs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
