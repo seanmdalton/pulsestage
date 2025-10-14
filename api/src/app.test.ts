@@ -93,7 +93,23 @@ describe('API Tests', () => {
   });
 
   describe('GET /questions', () => {
+    let testUser: any;
+
     beforeEach(async () => {
+      // Create test user for authentication
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
+      testUser = await testPrisma.user.create({
+        data: {
+          tenantId: tenant!.id,
+          email: 'test@example.com',
+          name: 'Test User',
+          ssoId: 'test-123',
+        },
+      });
+
       // Create test questions
       await testPrisma.question.create({
         data: {

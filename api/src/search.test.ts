@@ -49,6 +49,15 @@ describe('Enhanced Search & Filtering', () => {
       },
     });
 
+    // Add test user to the team
+    await testPrisma.teamMembership.create({
+      data: {
+        userId: testUser.id,
+        teamId: team.id,
+        role: 'member',
+      },
+    });
+
     // Create tags
     tag1 = await testPrisma.tag.create({
       data: {
