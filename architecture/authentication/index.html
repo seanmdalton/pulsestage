@@ -1925,6 +1925,30 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#testing_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mock-sso-test-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mock SSO (Test-Only)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#migration-guide" class="md-nav__link">
     <span class="md-ellipsis">
       Migration Guide
@@ -1933,15 +1957,6 @@
   
     <nav class="md-nav" aria-label="Migration Guide">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#from-mock-sso-to-oauth" class="md-nav__link">
-    <span class="md-ellipsis">
-      From Mock SSO to OAuth
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#from-demo-mode-to-production-oauth" class="md-nav__link">
@@ -3543,44 +3558,46 @@
 2. Check session middleware is configured
 3. Ensure user is created in database after OAuth
 4. Check for errors in OAuth callback handler</p>
+<h2 id="testing_1">Testing<a class="headerlink" href="#testing_1" title="Anchor link to this section">&para;</a></h2>
+<h3 id="mock-sso-test-only">Mock SSO (Test-Only)<a class="headerlink" href="#mock-sso-test-only" title="Anchor link to this section">&para;</a></h3>
+<p>Mock SSO is a <strong>test-only</strong> authentication mechanism used by automated tests. It is <strong>not intended for user-facing development</strong>.</p>
+<p><strong>For Testing (via <code>x-mock-sso-user</code> header):</strong>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1">// In API tests</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/questions&#39;</span><span class="p">)</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;x-mock-sso-user&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alice@demo.pulsestage.dev&#39;</span><span class="p">)</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Test question&#39;</span><span class="w"> </span><span class="p">})</span>
+</span></code></pre></div></p>
+<p><strong>Security Safeguards:</strong>
+- ✅ Only enabled in <code>development</code> and <code>test</code> environments
+- ✅ Explicitly rejected in production with 403 error
+- ✅ Requires <code>x-mock-sso-user</code> header (not user-facing)</p>
+<p><strong>For Local Development:</strong>
+Use <strong>Demo Mode</strong> (<code>/auth/demo</code>) instead of Mock SSO. It provides a user-friendly login page with pre-seeded users.</p>
 <h2 id="migration-guide">Migration Guide<a class="headerlink" href="#migration-guide" title="Anchor link to this section">&para;</a></h2>
-<h3 id="from-mock-sso-to-oauth">From Mock SSO to OAuth<a class="headerlink" href="#from-mock-sso-to-oauth" title="Anchor link to this section">&para;</a></h3>
-<p>If you're currently using mock SSO for development:</p>
-<ol>
-<li>
-<p>Keep mock SSO for local development:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># .env.local</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nv">AUTH_MODE</span><span class="o">=</span>mock
-</span></code></pre></div></p>
-</li>
-<li>
-<p>Add OAuth for deployed environments:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># .env.production</span>
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nv">AUTH_MODE</span><span class="o">=</span>oauth
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
-</span></code></pre></div></p>
-</li>
-<li>
-<p>Update deployment scripts to use correct <code>.env</code> file</p>
-</li>
-</ol>
 <h3 id="from-demo-mode-to-production-oauth">From Demo Mode to Production OAuth<a class="headerlink" href="#from-demo-mode-to-production-oauth" title="Anchor link to this section">&para;</a></h3>
 <p>When moving from demo to production:</p>
 <ol>
 <li>
-<p>Disable demo mode:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># .env</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span>
+<p>Set environment to production (disables demo mode automatically):
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># .env</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
 </span></code></pre></div></p>
 </li>
 <li>
-<p>Enable OAuth:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="c1"># and/or</span>
-</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
+<p>Configure OAuth (required in production):
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># GitHub OAuth</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_github_client_id
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_github_client_secret
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="c1"># and/or Google OAuth</span>
+</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_google_client_id
+</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_google_client_secret
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Generate secure secrets:
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nb">cd</span><span class="w"> </span>api<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>generate-secrets
 </span></code></pre></div></p>
 </li>
 <li>
@@ -3590,13 +3607,15 @@
 </ol>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Anchor link to this section">&para;</a></h2>
 <ol>
-<li><strong>Use OAuth for production</strong>: More secure than password-based auth</li>
-<li><strong>Disable demo mode in production</strong>: Prevents unauthorized access</li>
+<li><strong>Use OAuth for production</strong>: More secure than password-based auth (automatically enforced via <code>NODE_ENV</code>)</li>
+<li><strong>Demo mode auto-disabled in production</strong>: Setting <code>NODE_ENV=production</code> automatically disables demo mode</li>
+<li><strong>Generate strong secrets</strong>: Run <code>npm run generate-secrets</code> for production deployments</li>
 <li><strong>Rotate session secrets</strong>: Change <code>SESSION_SECRET</code> periodically</li>
 <li><strong>Monitor auth failures</strong>: Log OAuth errors for debugging</li>
+<li><strong>Mock SSO is test-only</strong>: Never use <code>x-mock-sso-user</code> header outside of automated tests</li>
 <li><strong>Test callback URLs</strong>: Verify exact match with OAuth provider settings</li>
 <li><strong>Use HTTPS</strong>: Required for OAuth, improves security overall</li>
-<li><strong>Implement rate limiting</strong>: Protect against brute force on auth endpoints</li>
+<li><strong>Implement rate limiting</strong>: Protect against brute force on auth endpoints (already implemented)</li>
 <li><strong>Add MFA (future)</strong>: Consider multi-factor authentication for sensitive deployments</li>
 </ol>
 <h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Anchor link to this section">&para;</a></h2>
@@ -3638,7 +3657,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 13, 2025 20:28:45 UTC"><span class="timeago" datetime="2025-10-13T20:28:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 13, 2025 20:28:45 UTC">2025-10-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 14, 2025 19:45:37 UTC"><span class="timeago" datetime="2025-10-14T19:45:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 14, 2025 19:45:37 UTC">2025-10-14</span>
   </span>
 
     
