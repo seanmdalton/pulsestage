@@ -28,7 +28,8 @@ export function securityHeadersMiddleware(): RequestHandler {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
+        // API returns JSON; no need for inline styles in production
+        styleSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
         fontSrc: ["'self'", 'data:'],
         connectSrc: ["'self'"],

@@ -334,8 +334,9 @@ export class OAuthStrategy {
    * Generate random state for CSRF protection
    */
   private generateState(): string {
-    return (
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    );
+    // Use cryptographically strong randomness
+    // dynamic import is async; for a sync method use createRequire or top-level import
+    const nodeCrypto = require('node:crypto') as typeof import('crypto');
+    return nodeCrypto.randomBytes(32).toString('hex');
   }
 }

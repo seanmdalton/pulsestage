@@ -38,13 +38,16 @@ export function createSessionMiddleware() {
 
   const sessionConfig: session.SessionOptions = {
     name: 'connect.sid', // Standard session cookie name for user sessions
-    secret: env.SESSION_SECRET || env.ADMIN_KEY || 'fallback-session-secret-change-me',
+    // Require SESSION_SECRET in production (enforced in env.ts). Allow fallback paths only in dev.
+    secret: env.SESSION_SECRET || env.ADMIN_KEY || 'dev-only-fallback-session-secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: isProduction, // HTTPS-only in production, HTTP allowed in dev
       httpOnly: true, // Prevent XSS by blocking JavaScript access
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours for user sessions
+      // Align cookie lifetime with configured policy (default 8h for admin; general user can be longer)
+      // For now keep 24h for user sessions; admin routes enforce TTL separately
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax', // CSRF protection - allow cross-site GET but not POST
       domain: undefined, // Let browser decide
     },
