@@ -94,6 +94,7 @@ describe('API Tests', () => {
 
   describe('GET /questions', () => {
     let testUser: any;
+    let testTeam: any;
 
     beforeEach(async () => {
       // Create test user for authentication
@@ -110,12 +111,31 @@ describe('API Tests', () => {
         },
       });
 
+      // Create test team
+      testTeam = await testPrisma.team.create({
+        data: {
+          name: 'Test Team',
+          slug: 'test-team',
+          tenantId: 'default-tenant-id',
+        },
+      });
+
+      // Add user to team
+      await testPrisma.teamMembership.create({
+        data: {
+          userId: testUser.id,
+          teamId: testTeam.id,
+          role: 'member',
+        },
+      });
+
       // Create test questions
       await testPrisma.question.create({
         data: {
           body: 'Open question 1',
           upvotes: 5,
           status: 'OPEN',
+          teamId: testTeam.id,
           tenantId: 'default-tenant-id',
         },
       });
@@ -124,6 +144,7 @@ describe('API Tests', () => {
           body: 'Open question 2',
           upvotes: 10,
           status: 'OPEN',
+          teamId: testTeam.id,
           tenantId: 'default-tenant-id',
         },
       });
@@ -133,6 +154,7 @@ describe('API Tests', () => {
           status: 'ANSWERED',
           responseText: 'The answer',
           respondedAt: new Date(),
+          teamId: testTeam.id,
           tenantId: 'default-tenant-id',
         },
       });
