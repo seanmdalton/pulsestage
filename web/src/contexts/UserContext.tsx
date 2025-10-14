@@ -91,8 +91,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           JSON.stringify(teamsResponse.favorites)
         )
       } catch {
-        // User not authenticated or API not available
-        // This is expected in anonymous mode
+        // User not authenticated - AuthGuard will redirect to /login
+        // This catch block handles API failures gracefully
         setUser(null)
         setUserTeams([])
         setFavorites([])

@@ -58,6 +58,7 @@ import {
   requirePermission,
   requireRole, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from './middleware/requirePermission.js';
+import { requireAuth } from './middleware/requireAuth.js';
 import {
   initTeamScopingMiddleware,
   extractQuestionTeam,
@@ -1336,7 +1337,8 @@ export function createApp(prisma: PrismaClient) {
 
   // SSE endpoint for real-time updates
   // Note: EventSource doesn't support custom headers, so we also check query param
-  app.get('/events', async (req, res) => {
+  // Server-Sent Events endpoint - requires authentication
+  app.get('/events', requireAuth, async (req, res) => {
     // SSE connections can't send custom headers, so prioritize query parameter
     let tenantId: string | undefined;
     let tenantSlug: string | undefined;
@@ -1574,7 +1576,8 @@ export function createApp(prisma: PrismaClient) {
     }
   );
 
-  app.get('/questions', async (req, res) => {
+  // Get all questions - requires authentication
+  app.get('/questions', requireAuth, async (req, res) => {
     const status = (req.query.status as string)?.toUpperCase();
     const teamId = req.query.teamId as string;
     const search = req.query.search as string;
@@ -1680,7 +1683,8 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Get a single question by ID
-  app.get('/questions/:id', async (req, res) => {
+  // Get question by ID - requires authentication
+  app.get('/questions/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -2571,7 +2575,8 @@ export function createApp(prisma: PrismaClient) {
   );
 
   // Search questions endpoint with improved fuzzy matching
-  app.get('/questions/search', async (req, res) => {
+  // Search questions - requires authentication
+  app.get('/questions/search', requireAuth, async (req, res) => {
     const { q: query, teamId } = req.query;
 
     if (!query || typeof query !== 'string' || query.trim().length < 2) {

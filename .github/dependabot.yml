@@ -7,6 +7,12 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "api"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       development-dependencies:
         dependency-type: "development"
@@ -26,6 +32,12 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "web"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       development-dependencies:
         dependency-type: "development"
@@ -45,6 +57,13 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+      - "api"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(docker)"
     # Only minor and patch updates for Docker base images
     ignore:
       - dependency-name: "*"
@@ -56,6 +75,13 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+      - "web"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(docker)"
     # Only minor and patch updates for Docker base images
     ignore:
       - dependency-name: "*"
@@ -68,6 +94,12 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(ci)"
     # Only minor and patch updates for GitHub Actions
     ignore:
       - dependency-name: "*"

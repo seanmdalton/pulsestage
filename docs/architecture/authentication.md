@@ -4,16 +4,17 @@ PulseStage implements a flexible, multi-mode authentication system designed to s
 
 ## Overview
 
-The authentication system automatically adapts based on `NODE_ENV`:
+**Authentication is required for all users.** The authentication system automatically adapts based on `NODE_ENV`:
 
 **Development Mode (`NODE_ENV=development`)**:
 - **Demo Mode**: Auto-enabled with pre-seeded users (`alice`, `bob`, `moderator`, `admin`)
+- Users must login via `/login` to select a demo user
 - **OAuth** (Optional): Can be configured for testing OAuth flows locally
 
 **Production Mode (`NODE_ENV=production`)**:
 - **Demo Mode**: Disabled
-- **OAuth**: GitHub and/or Google OAuth required
-- **Setup Wizard**: First-time configuration for organization settings
+- **OAuth**: GitHub and/or Google OAuth required (users must authenticate to access any page)
+- **Setup Wizard**: First-time configuration for organization settings (accessible without auth for initial setup only)
 
 ## Architecture
 

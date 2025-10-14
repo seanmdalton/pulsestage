@@ -1,23 +1,20 @@
-import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useUser } from '../contexts/UserContext'
-import { useAuth } from '../contexts/UserContext'
 
 interface SmartRedirectProps {
   fallbackTo: string
 }
 
+/**
+ * SmartRedirect - Redirects authenticated users to their default team or a fallback
+ * Note: This component is only rendered inside AuthGuard, so user is always authenticated
+ */
 export function SmartRedirect({ fallbackTo }: SmartRedirectProps) {
   const location = useLocation()
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const { defaultTeam, isLoading: userLoading } = useUser()
+  const { defaultTeam, isLoading } = useUser()
 
-  // Determine if we should redirect based on current state
-  const shouldRedirect =
-    isAuthenticated && !authLoading && !userLoading && defaultTeam
-
-  // Show loading state while we're determining where to redirect
-  if (authLoading || userLoading) {
+  // Show loading state while fetching user data
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -25,8 +22,8 @@ export function SmartRedirect({ fallbackTo }: SmartRedirectProps) {
     )
   }
 
-  // If user is authenticated and has a default team, redirect to it
-  if (isAuthenticated && defaultTeam && shouldRedirect) {
+  // If user has a default team, redirect to it
+  if (defaultTeam) {
     const currentPath = location.pathname
     const defaultTeamPath =
       currentPath === '/'
