@@ -7,6 +7,7 @@
 import type { Request, Response } from 'express';
 import type { AuthUser, OAuthProfile } from './types.js';
 import { PrismaClient } from '@prisma/client';
+import { randomBytes } from 'node:crypto';
 
 export interface OAuthConfig {
   github?: {
@@ -335,8 +336,6 @@ export class OAuthStrategy {
    */
   private generateState(): string {
     // Use cryptographically strong randomness
-    // dynamic import is async; for a sync method use createRequire or top-level import
-    const nodeCrypto = require('node:crypto') as typeof import('crypto');
-    return nodeCrypto.randomBytes(32).toString('hex');
+    return randomBytes(32).toString('hex');
   }
 }
