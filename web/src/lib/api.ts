@@ -267,6 +267,21 @@ class ApiClient {
     this.baseUrl = baseUrl
   }
 
+  private csrfToken: string | null = null
+
+  private async ensureCsrfToken(): Promise<void> {
+    if (this.csrfToken || import.meta.env.DEV) return
+    try {
+      const resp = await fetch(`${this.baseUrl}/csrf-token`, { credentials: 'include' })
+      if (resp.ok) {
+        const data = await resp.json()
+        this.csrfToken = data.csrfToken
+      }
+    } catch {
+      // Non-fatal: server may not require CSRF for some routes
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -282,12 +297,24 @@ class ApiClient {
       ...(options.headers as Record<string, string>),
     }
 
-    if (mockSSOUser) {
+    if (import.meta.env.DEV && mockSSOUser) {
       headers['x-mock-sso-user'] = mockSSOUser
     }
 
-    // Add tenant header - defaults to 'default' if not set
-    headers['x-tenant-id'] = mockTenant || 'default'
+    // Add tenant header only in development; production uses subdomain or server logic
+    if (import.meta.env.DEV) {
+      headers['x-tenant-id'] = mockTenant || 'default'
+    }
+
+    // For state-changing requests in production, include CSRF token
+    const method = (options.method || 'GET').toUpperCase()
+    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+    if (!import.meta.env.DEV && isStateChanging) {
+      await this.ensureCsrfToken()
+      if (this.csrfToken) {
+        headers['x-csrf-token'] = this.csrfToken
+      }
+    }
 
     const response = await fetch(url, {
       headers,

@@ -29,7 +29,7 @@ const {
   generateCsrfToken, // Token generation for GET requests
   doubleCsrfProtection, // Protection middleware for state-changing requests
 } = doubleCsrf({
-  getSecret: () => env.ADMIN_KEY || 'fallback-csrf-secret-change-me', // Secret for signing tokens
+  getSecret: () => env.CSRF_SECRET || 'invalid-missing-csrf-secret', // Must be set in prod
   cookieName: 'x-csrf-token', // Cookie name
   cookieOptions: {
     httpOnly: true, // Prevent JavaScript access

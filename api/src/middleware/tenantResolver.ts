@@ -31,9 +31,10 @@ declare module 'express-serve-static-core' {
  * Priority: Header > Subdomain > Default
  */
 function resolveTenantSlug(req: Request): string {
-  // 1. Check for tenant header (useful for dev/test)
+  // 1. Check for tenant header (dev/test only by default, or when explicitly allowed)
   const headerTenant = req.headers[env.TENANT_HEADER.toLowerCase()] as string;
-  if (headerTenant) {
+  const allowHeader = process.env.NODE_ENV !== 'production' || env.ALLOW_TENANT_HEADER;
+  if (allowHeader && headerTenant) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔍 Tenant resolved from header: ${headerTenant}`);
     }

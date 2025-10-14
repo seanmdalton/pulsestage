@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient, RedisClientType } from 'redis';
+import { env } from '../env.js';
 import { tryGetTenantContext } from './tenantContext.js';
 import { RATE_LIMITS, HTTP_STATUS, NETWORK } from '../constants.js';
 
@@ -32,7 +33,10 @@ export async function initRedis() {
     console.log('🔒 Redis connected for rate limiting (production mode)');
   } catch (error) {
     console.error('Failed to connect to Redis:', error);
-    // Continue without rate limiting if Redis is unavailable
+    // Fail fast in production if required, or continue without rate limiting
+    if (env.REQUIRE_REDIS) {
+      throw error;
+    }
   }
 }
 
@@ -47,10 +51,9 @@ export function rateLimit(
       return next();
     }
 
-    // Skip rate limiting if Redis is not available
-    if (!redisClient) {
-      return next();
-    }
+    // Optional in-memory fallback (per-process, best-effort)
+    // Enabled only when explicitly configured
+    const useInMemoryFallback = env.ENABLE_INMEMORY_RATE_LIMIT_FALLBACK && !redisClient;
 
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
 
@@ -60,7 +63,29 @@ export function rateLimit(
     const key = `rate:${route}:${tenantPart}:${ip}`;
 
     try {
-      const current = await redisClient.get(key);
+      if (useInMemoryFallback) {
+        const now = Date.now();
+        // simple static map scoped to module
+        // @ts-ignore
+        global.__rate_mem ||= new Map<string, { count: number; resetAt: number }>();
+        // @ts-ignore
+        const store: Map<string, { count: number; resetAt: number }> = global.__rate_mem;
+        const entry = store.get(key);
+        if (!entry || now > entry.resetAt) {
+          store.set(key, { count: 1, resetAt: now + windowMs });
+          return next();
+        }
+        if (entry.count >= maxRequests) {
+          return res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({
+            error: 'Too many requests',
+            message: `Rate limit exceeded. Maximum ${maxRequests} requests per minute.`,
+          });
+        }
+        entry.count += 1;
+        return next();
+      }
+
+      const current = await redisClient!.get(key);
       const count = current ? parseInt(current, 10) : 0;
 
       if (count >= maxRequests) {
@@ -75,12 +100,12 @@ export function rateLimit(
 
       if (count === 0) {
         // First request - set with expiration
-        await redisClient.set(key, newCount.toString(), {
+        await redisClient!.set(key, newCount.toString(), {
           EX: Math.ceil(windowMs / RATE_LIMITS.MS_PER_SECOND),
         });
       } else {
         // Subsequent request - just increment
-        await redisClient.set(key, newCount.toString(), {
+        await redisClient!.set(key, newCount.toString(), {
           KEEPTTL: true,
         });
       }

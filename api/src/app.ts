@@ -110,10 +110,31 @@ export function createApp(prisma: PrismaClient) {
   // CORS configuration
   app.use(
     cors({
-      origin: env.CORS_ORIGIN,
+      origin: (origin, callback) => {
+        // In development, allow any origin for convenience
+        if (process.env.NODE_ENV !== 'production') {
+          return callback(null, true);
+        }
+
+        // In production, require explicit allowlist via CORS_ORIGINS
+        const allowed = env.CORS_ORIGINS || [];
+        if (!origin) {
+          // Non-browser or same-origin requests
+          return callback(null, true);
+        }
+        if (allowed.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('CORS origin not allowed'));
+      },
       credentials: true,
     })
   );
+
+  // Trust proxy in production for correct secure cookies
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
 
   // Security headers (Helmet)
   // Use relaxed CSP in development for Vite HMR, strict in production
@@ -138,9 +159,11 @@ export function createApp(prisma: PrismaClient) {
   // MUST come before mockAuthMiddleware to validate user's tenant
   app.use(createTenantResolverMiddleware(prisma));
 
-  // Mock authentication middleware (for local development)
+  // Mock authentication middleware (for local development only)
   // Validates user belongs to current tenant
-  app.use(mockAuthMiddleware);
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(mockAuthMiddleware);
+  }
 
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
@@ -174,6 +197,9 @@ export function createApp(prisma: PrismaClient) {
       status: 'healthy',
     });
   });
+
+  // CSRF token endpoint for clients
+  app.get('/csrf-token', csrfTokenEndpoint());
 
   app.get('/health', (_req, res) => {
     res.json({ ok: true, service: 'ama-api' });
@@ -1740,7 +1766,7 @@ export function createApp(prisma: PrismaClient) {
     adminKey: z.string().min(1),
   });
 
-  app.post('/admin/login', validateCsrfToken(), async (req, res) => {
+  app.post('/admin/login', rateLimit('admin-login', 10, 60_000), validateCsrfToken(), async (req, res) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔐 Admin login attempt:', {
         hasSession: !!req.session,
@@ -2436,8 +2462,13 @@ export function createApp(prisma: PrismaClient) {
     }
   );
 
-  // Legacy endpoint - still protected by admin key for backward compatibility
-  app.post('/questions/:id/respond-legacy', requireAdminKey, async (req, res) => {
+  // Legacy endpoint - disabled in production, available for dev/testing with admin key
+  app.post('/questions/:id/respond-legacy', (req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    return requireAdminKey(req, res, next);
+  }, async (req, res) => {
     const { id } = req.params;
     const parse = respondSchema.safeParse(req.body);
     if (!parse.success)

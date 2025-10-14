@@ -38,4 +38,11 @@ COPY --from=builder /app/scripts/start.sh scripts/start.sh
 RUN chmod +x scripts/start.sh
 
 EXPOSE 3000
+# Add a simple healthcheck (expects 200 from /health)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/health || exit 1
+
+# Drop privileges
+USER node
+
 CMD ["./scripts/start.sh"]
