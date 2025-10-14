@@ -61,11 +61,13 @@ LABEL org.opencontainers.image.description="PulseStage API - Ask Me Anything (AM
 LABEL org.opencontainers.image.vendor="Sean M. Dalton"
 LABEL org.opencontainers.image.source="https://github.com/seanmdalton/pulsestage"
 
-# Switch to non-root user BEFORE installing dependencies
-# This ensures all installed files are owned by nodejs user
+# Change ownership of /app directory to nodejs user before switching
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user before installing dependencies
 USER nodejs
 
-# Install only production dependencies
+# Install only production dependencies  
 COPY --chown=nodejs:nodejs package*.json ./
 RUN npm ci --omit=dev --prefer-offline --no-audit && \
     npm cache clean --force
