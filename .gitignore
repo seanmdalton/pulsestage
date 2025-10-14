@@ -4,3 +4,8 @@ dist
 .DS_Store
 .vscode
 coverage
+
+# Deployment files with actual secrets (keep local only)
+RENDER_DEPLOYMENT.md
+DEPLOYMENT_CHECKLIST.md
+DEMO_MODE_DEPLOYMENT.md

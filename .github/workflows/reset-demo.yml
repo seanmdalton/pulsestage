@@ -1,0 +1,58 @@
+name: Reset Demo Instance
+
+on:
+  schedule:
+    # Run daily at 3 AM UTC (11 PM EST / 8 PM PST)
+    - cron: '0 3 * * *'
+  
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  reset-demo:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Reset demo instance
+        run: |
+          echo "🔄 Resetting demo instance..."
+          
+          response=$(curl -s -X POST https://api-demo.pulsestage.app/admin/reset-demo \
+            -H "x-admin-key: ${{ secrets.ADMIN_KEY }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "Response: $body"
+          echo "HTTP Status: $http_code"
+          
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Demo reset failed with status $http_code"
+            exit 1
+          fi
+          
+          echo "✅ Demo reset successful!"
+      
+      - name: Verify demo is healthy
+        run: |
+          echo "🏥 Checking demo health..."
+          
+          health_response=$(curl -s https://api-demo.pulsestage.app/health/ready)
+          echo "Health check: $health_response"
+          
+          if echo "$health_response" | grep -q '"status":"healthy"'; then
+            echo "✅ Demo instance is healthy"
+          else
+            echo "⚠️  Demo instance may not be fully healthy"
+            exit 1
+          fi
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Demo reset or health check failed!"
+          echo "Check the logs above for details."
+          echo "Manual intervention may be required."
+

@@ -414,6 +414,151 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // ============================================================================
+  // DEMO RESET ENDPOINT
+  // ============================================================================
+
+  /**
+   * POST /admin/reset-demo
+   * Resets demo instance to clean state with fresh sample data
+   * Requires: x-admin-key header
+   * Only works when AUTH_MODE_DEMO=true
+   */
+  app.post('/admin/reset-demo', async (req, res) => {
+    try {
+      // 1. Check if demo mode is enabled
+      if (!authManager.isModeEnabled('demo')) {
+        return res.status(HTTP_STATUS.FORBIDDEN).json({
+          error: 'Demo mode is not enabled',
+          message: 'This endpoint only works when AUTH_MODE_DEMO=true',
+        });
+      }
+
+      // 2. Verify admin key
+      const adminKey = req.headers['x-admin-key'] as string;
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        await auditService.log(req, {
+          action: 'demo.reset.unauthorized',
+          entityType: 'demo',
+          metadata: {
+            error: 'Invalid or missing admin key',
+          },
+        });
+
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          error: 'Unauthorized',
+          message: 'Invalid or missing admin key',
+        });
+      }
+
+      // 3. Get tenant ID
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Tenant not resolved',
+        });
+      }
+
+      console.log('🔄 Starting demo reset for tenant:', tenantId);
+
+      // 4. Delete user-generated data (in transaction)
+      const deleteCounts = await prisma.$transaction(async tx => {
+        // Count items before deletion
+        const questionCount = await tx.question.count({ where: { tenantId } });
+        const upvoteCount = await tx.upvote.count({
+          where: {
+            question: { tenantId },
+          },
+        });
+        const auditLogCount = await tx.auditLog.count({ where: { tenantId } });
+
+        // Delete question tags (foreign key constraint)
+        await tx.questionTag.deleteMany({
+          where: {
+            question: { tenantId },
+          },
+        });
+
+        // Delete upvotes
+        await tx.upvote.deleteMany({
+          where: {
+            question: { tenantId },
+          },
+        });
+
+        // Delete questions
+        await tx.question.deleteMany({
+          where: { tenantId },
+        });
+
+        // Delete audit logs (optional - keeps history clean)
+        await tx.auditLog.deleteMany({
+          where: { tenantId },
+        });
+
+        console.log('✅ Cleared existing data:', {
+          questions: questionCount,
+          upvotes: upvoteCount,
+          auditLogs: auditLogCount,
+        });
+
+        return {
+          questions: questionCount,
+          upvotes: upvoteCount,
+          auditLogs: auditLogCount,
+        };
+      });
+
+      // 5. Re-seed demo data
+      const { seedDemoData } = await import('./seed-demo-data.js');
+      await seedDemoData(prisma, tenantId);
+
+      console.log('✅ Re-seeded demo data');
+
+      // 6. Log successful reset
+      await auditService.log(req, {
+        action: 'demo.reset.success',
+        entityType: 'demo',
+        metadata: {
+          deletedCounts: deleteCounts,
+        },
+      });
+
+      // 7. Return success
+      res.json({
+        success: true,
+        message: 'Demo instance reset successfully',
+        timestamp: new Date().toISOString(),
+        resetItems: {
+          questionsCleared: deleteCounts.questions,
+          upvotesCleared: deleteCounts.upvotes,
+          auditLogsCleared: deleteCounts.auditLogs,
+          demoDataReseeded: true,
+        },
+      });
+
+      console.log('🎉 Demo reset complete');
+    } catch (error) {
+      console.error('❌ Demo reset failed:', error);
+
+      // Log failed reset attempt
+      if (req.tenant?.tenantId) {
+        await auditService.log(req, {
+          action: 'demo.reset.failed',
+          entityType: 'demo',
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
+
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to reset demo instance',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  // ============================================================================
   // MODERATION REVIEW ENDPOINTS (Phase 3)
   // ============================================================================
 
