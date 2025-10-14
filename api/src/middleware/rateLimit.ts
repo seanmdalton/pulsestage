@@ -78,13 +78,19 @@ export function rateLimit(
     const key = `rate:${route}:${tenantPart}:${ip}`;
 
     if (!redisClient) {
-      const allowed = takeFromFallbackBucket(key, Math.min(maxRequests, 5), Math.min(windowMs, 60_000));
+      const allowed = takeFromFallbackBucket(
+        key,
+        Math.min(maxRequests, 5),
+        Math.min(windowMs, 60_000)
+      );
       if (!allowed) {
         // Log a periodic warning (at most once per 60s) to avoid log spam
         const now = Date.now();
         if (now - lastFallbackLogAt > 60_000) {
           lastFallbackLogAt = now;
-          console.warn('⚠️  Rate limit fallback active (Redis unavailable) — applying conservative limits');
+          console.warn(
+            '⚠️  Rate limit fallback active (Redis unavailable) — applying conservative limits'
+          );
         }
 
         return res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({

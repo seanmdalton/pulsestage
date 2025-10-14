@@ -24,7 +24,7 @@ import { parse as parseYaml } from 'yaml';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { env } from './env.js';
-import { requireAdminKey } from './middleware/adminAuth.js';
+// import removed: requireAdminKey (legacy path removed)
 import { rateLimit } from './middleware/rateLimit.js';
 import {
   RATE_LIMITS,
@@ -2698,87 +2698,88 @@ export function createApp(prisma: PrismaClient) {
     requirePermission('data.export'),
     async (req, res) => {
       try {
-      const filters = req.query;
+        const filters = req.query;
 
-      // Build where clause based on filters
-      const where: any = {};
+        // Build where clause based on filters
+        const where: any = {};
 
-      // Team filter
-      if (filters.teamId && filters.teamId !== 'all') {
-        where.teamId = filters.teamId;
-      }
-
-      // Status filter
-      if (filters.status && filters.status !== 'both' && typeof filters.status === 'string') {
-        where.status = filters.status.toUpperCase();
-      }
-
-      // Date range filter
-      if (filters.startDate || filters.endDate) {
-        where.createdAt = {};
-        if (filters.startDate) {
-          where.createdAt.gte = new Date(filters.startDate as string);
+        // Team filter
+        if (filters.teamId && filters.teamId !== 'all') {
+          where.teamId = filters.teamId;
         }
-        if (filters.endDate) {
-          where.createdAt.lte = new Date(filters.endDate as string);
-        }
-      }
 
-      // Upvote range filter
-      if (filters.minUpvotes || filters.maxUpvotes) {
-        where.upvotes = {};
-        if (filters.minUpvotes) {
-          where.upvotes.gte = parseInt(filters.minUpvotes as string);
+        // Status filter
+        if (filters.status && filters.status !== 'both' && typeof filters.status === 'string') {
+          where.status = filters.status.toUpperCase();
         }
-        if (filters.maxUpvotes) {
-          where.upvotes.lte = parseInt(filters.maxUpvotes as string);
-        }
-      }
 
-      // Tag filter (if specified)
-      if (filters.tagIds) {
-        const tagIds = Array.isArray(filters.tagIds) ? filters.tagIds : [filters.tagIds];
-        where.tags = {
-          some: {
-            tagId: {
-              in: tagIds,
+        // Date range filter
+        if (filters.startDate || filters.endDate) {
+          where.createdAt = {};
+          if (filters.startDate) {
+            where.createdAt.gte = new Date(filters.startDate as string);
+          }
+          if (filters.endDate) {
+            where.createdAt.lte = new Date(filters.endDate as string);
+          }
+        }
+
+        // Upvote range filter
+        if (filters.minUpvotes || filters.maxUpvotes) {
+          where.upvotes = {};
+          if (filters.minUpvotes) {
+            where.upvotes.gte = parseInt(filters.minUpvotes as string);
+          }
+          if (filters.maxUpvotes) {
+            where.upvotes.lte = parseInt(filters.maxUpvotes as string);
+          }
+        }
+
+        // Tag filter (if specified)
+        if (filters.tagIds) {
+          const tagIds = Array.isArray(filters.tagIds) ? filters.tagIds : [filters.tagIds];
+          where.tags = {
+            some: {
+              tagId: {
+                in: tagIds,
+              },
+            },
+          };
+        }
+
+        // Response filter
+        if (filters.hasResponse === 'true') {
+          where.responseText = { not: null };
+        } else if (filters.hasResponse === 'false') {
+          where.responseText = null;
+        }
+
+        // Get questions with all related data
+        const questions = await prisma.question.findMany({
+          where,
+          include: {
+            team: true,
+            tags: {
+              include: {
+                tag: true,
+              },
             },
           },
-        };
+          orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
+          take: filters.limit ? parseInt(filters.limit as string) : DATABASE_LIMITS.EXPORT_PREVIEW, // Limit preview to 100
+        });
+
+        res.json({
+          count: questions.length,
+          preview: questions,
+          filters: filters,
+        });
+      } catch (error) {
+        console.error('Error fetching export preview:', error);
+        res.status(500).json({ error: 'Failed to fetch export preview' });
       }
-
-      // Response filter
-      if (filters.hasResponse === 'true') {
-        where.responseText = { not: null };
-      } else if (filters.hasResponse === 'false') {
-        where.responseText = null;
-      }
-
-      // Get questions with all related data
-      const questions = await prisma.question.findMany({
-        where,
-        include: {
-          team: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-        orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
-        take: filters.limit ? parseInt(filters.limit as string) : DATABASE_LIMITS.EXPORT_PREVIEW, // Limit preview to 100
-      });
-
-      res.json({
-        count: questions.length,
-        preview: questions,
-        filters: filters,
-      });
-    } catch (error) {
-      console.error('Error fetching export preview:', error);
-      res.status(500).json({ error: 'Failed to fetch export preview' });
     }
-  });
+  );
 
   // Download export
   app.get(
@@ -2786,159 +2787,160 @@ export function createApp(prisma: PrismaClient) {
     rateLimit('admin-export-download', 2, 60_000),
     requirePermission('data.export'),
     async (req, res) => {
-    try {
-      const filters = req.query;
-      const format = (filters.format as string) || 'csv';
+      try {
+        const filters = req.query;
+        const format = (filters.format as string) || 'csv';
 
-      // Build where clause (same as preview)
-      const where: any = {};
+        // Build where clause (same as preview)
+        const where: any = {};
 
-      if (filters.teamId && filters.teamId !== 'all') {
-        where.teamId = filters.teamId;
-      }
-
-      if (filters.status && filters.status !== 'both' && typeof filters.status === 'string') {
-        where.status = filters.status.toUpperCase();
-      }
-
-      if (filters.startDate || filters.endDate) {
-        where.createdAt = {};
-        if (filters.startDate) {
-          where.createdAt.gte = new Date(filters.startDate as string);
+        if (filters.teamId && filters.teamId !== 'all') {
+          where.teamId = filters.teamId;
         }
-        if (filters.endDate) {
-          where.createdAt.lte = new Date(filters.endDate as string);
-        }
-      }
 
-      if (filters.minUpvotes || filters.maxUpvotes) {
-        where.upvotes = {};
-        if (filters.minUpvotes) {
-          where.upvotes.gte = parseInt(filters.minUpvotes as string);
+        if (filters.status && filters.status !== 'both' && typeof filters.status === 'string') {
+          where.status = filters.status.toUpperCase();
         }
-        if (filters.maxUpvotes) {
-          where.upvotes.lte = parseInt(filters.maxUpvotes as string);
-        }
-      }
 
-      if (filters.tagIds) {
-        const tagIds = Array.isArray(filters.tagIds) ? filters.tagIds : [filters.tagIds];
-        where.tags = {
-          some: {
-            tagId: {
-              in: tagIds,
+        if (filters.startDate || filters.endDate) {
+          where.createdAt = {};
+          if (filters.startDate) {
+            where.createdAt.gte = new Date(filters.startDate as string);
+          }
+          if (filters.endDate) {
+            where.createdAt.lte = new Date(filters.endDate as string);
+          }
+        }
+
+        if (filters.minUpvotes || filters.maxUpvotes) {
+          where.upvotes = {};
+          if (filters.minUpvotes) {
+            where.upvotes.gte = parseInt(filters.minUpvotes as string);
+          }
+          if (filters.maxUpvotes) {
+            where.upvotes.lte = parseInt(filters.maxUpvotes as string);
+          }
+        }
+
+        if (filters.tagIds) {
+          const tagIds = Array.isArray(filters.tagIds) ? filters.tagIds : [filters.tagIds];
+          where.tags = {
+            some: {
+              tagId: {
+                in: tagIds,
+              },
+            },
+          };
+        }
+
+        if (filters.hasResponse === 'true') {
+          where.responseText = { not: null };
+        } else if (filters.hasResponse === 'false') {
+          where.responseText = null;
+        }
+
+        // Get all questions matching filters
+        const questions = await prisma.question.findMany({
+          where,
+          include: {
+            team: true,
+            tags: {
+              include: {
+                tag: true,
+              },
             },
           },
-        };
-      }
-
-      if (filters.hasResponse === 'true') {
-        where.responseText = { not: null };
-      } else if (filters.hasResponse === 'false') {
-        where.responseText = null;
-      }
-
-      // Get all questions matching filters
-      const questions = await prisma.question.findMany({
-        where,
-        include: {
-          team: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-        orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
-      });
-
-      if (format === 'csv') {
-        // Generate CSV
-        const csvHeaders = [
-          'id',
-          'body',
-          'upvotes',
-          'status',
-          'responseText',
-          'respondedAt',
-          'createdAt',
-          'updatedAt',
-          'teamId',
-          'teamName',
-          'teamSlug',
-          'tags',
-        ];
-
-        const csvRows = questions.map(q => {
-          const tags = q.tags.map(qt => `${qt.tag.name}(${qt.tag.id})`).join(';');
-          return [
-            q.id,
-            `"${q.body.replace(/"/g, '""')}"`, // Escape quotes in CSV
-            q.upvotes,
-            q.status,
-            q.responseText ? `"${q.responseText.replace(/"/g, '""')}"` : '',
-            q.respondedAt?.toISOString() || '',
-            q.createdAt.toISOString(),
-            q.updatedAt.toISOString(),
-            q.teamId || '',
-            q.team?.name || '',
-            q.team?.slug || '',
-            `"${tags}"`,
-          ].join(',');
+          orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
         });
 
-        const csvContent = [csvHeaders.join(','), ...csvRows].join('\n');
+        if (format === 'csv') {
+          // Generate CSV
+          const csvHeaders = [
+            'id',
+            'body',
+            'upvotes',
+            'status',
+            'responseText',
+            'respondedAt',
+            'createdAt',
+            'updatedAt',
+            'teamId',
+            'teamName',
+            'teamSlug',
+            'tags',
+          ];
 
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="ama-export-${new Date().toISOString().split('T')[0]}.csv"`
-        );
-        res.send(csvContent);
-      } else if (format === 'json') {
-        // Generate JSON
-        const exportData = {
-          exportedAt: new Date().toISOString(),
-          filters: filters,
-          totalCount: questions.length,
-          questions: questions.map(q => ({
-            ...q,
-            createdAt: q.createdAt.toISOString(),
-            updatedAt: q.updatedAt.toISOString(),
-            respondedAt: q.respondedAt?.toISOString() || null,
-            team: q.team
-              ? {
-                  ...q.team,
-                  createdAt: q.team.createdAt.toISOString(),
-                  updatedAt: q.team.updatedAt.toISOString(),
-                }
-              : null,
-            tags: q.tags.map(qt => ({
-              ...qt,
-              createdAt: qt.createdAt.toISOString(),
-              tag: {
-                ...qt.tag,
-                createdAt: qt.tag.createdAt.toISOString(),
-                updatedAt: qt.tag.updatedAt.toISOString(),
-              },
+          const csvRows = questions.map(q => {
+            const tags = q.tags.map(qt => `${qt.tag.name}(${qt.tag.id})`).join(';');
+            return [
+              q.id,
+              `"${q.body.replace(/"/g, '""')}"`, // Escape quotes in CSV
+              q.upvotes,
+              q.status,
+              q.responseText ? `"${q.responseText.replace(/"/g, '""')}"` : '',
+              q.respondedAt?.toISOString() || '',
+              q.createdAt.toISOString(),
+              q.updatedAt.toISOString(),
+              q.teamId || '',
+              q.team?.name || '',
+              q.team?.slug || '',
+              `"${tags}"`,
+            ].join(',');
+          });
+
+          const csvContent = [csvHeaders.join(','), ...csvRows].join('\n');
+
+          res.setHeader('Content-Type', 'text/csv');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="ama-export-${new Date().toISOString().split('T')[0]}.csv"`
+          );
+          res.send(csvContent);
+        } else if (format === 'json') {
+          // Generate JSON
+          const exportData = {
+            exportedAt: new Date().toISOString(),
+            filters: filters,
+            totalCount: questions.length,
+            questions: questions.map(q => ({
+              ...q,
+              createdAt: q.createdAt.toISOString(),
+              updatedAt: q.updatedAt.toISOString(),
+              respondedAt: q.respondedAt?.toISOString() || null,
+              team: q.team
+                ? {
+                    ...q.team,
+                    createdAt: q.team.createdAt.toISOString(),
+                    updatedAt: q.team.updatedAt.toISOString(),
+                  }
+                : null,
+              tags: q.tags.map(qt => ({
+                ...qt,
+                createdAt: qt.createdAt.toISOString(),
+                tag: {
+                  ...qt.tag,
+                  createdAt: qt.tag.createdAt.toISOString(),
+                  updatedAt: qt.tag.updatedAt.toISOString(),
+                },
+              })),
             })),
-          })),
-        };
+          };
 
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="ama-export-${new Date().toISOString().split('T')[0]}.json"`
-        );
-        res.json(exportData);
-      } else {
-        res.status(400).json({ error: 'Invalid format. Use csv or json.' });
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="ama-export-${new Date().toISOString().split('T')[0]}.json"`
+          );
+          res.json(exportData);
+        } else {
+          res.status(400).json({ error: 'Invalid format. Use csv or json.' });
+        }
+      } catch (error) {
+        console.error('Error generating export:', error);
+        res.status(500).json({ error: 'Failed to generate export' });
       }
-    } catch (error) {
-      console.error('Error generating export:', error);
-      res.status(500).json({ error: 'Failed to generate export' });
     }
-  });
+  );
 
   // Tag endpoints (admin only)
 

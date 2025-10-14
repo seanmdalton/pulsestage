@@ -78,9 +78,7 @@ if (isProduction) {
   if (parsed.CSRF_SECRET && parsed.CSRF_SECRET.length < 32) tooShort.push('CSRF_SECRET');
   if (parsed.ADMIN_KEY && parsed.ADMIN_KEY.length < 32) tooShort.push('ADMIN_KEY');
   if (tooShort.length > 0) {
-    throw new Error(
-      `The following secrets are too short (min 32 chars): ${tooShort.join(', ')}`
-    );
+    throw new Error(`The following secrets are too short (min 32 chars): ${tooShort.join(', ')}`);
   }
 }
 
