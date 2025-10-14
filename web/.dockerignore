@@ -77,11 +77,9 @@ storybook-static/
 # Miscellaneous
 .prettierrc*
 .eslintrc*
-tsconfig.json
-vite.config.ts
 vitest.config.ts
-postcss.config.js
-tailwind.config.js
+# Note: tsconfig.json, vite.config.ts, postcss.config.js, and tailwind.config.js 
+# are required for build, so NOT excluded
 
 # Public assets (needed for build)
 # public/

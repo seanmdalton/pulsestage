@@ -73,6 +73,6 @@ scripts/test-*.sh
 # Miscellaneous
 .prettierrc*
 .eslintrc*
-tsconfig.json
 vitest.config.ts
+# Note: tsconfig.json is required for build, so NOT excluded
 
