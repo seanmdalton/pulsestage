@@ -124,6 +124,10 @@ describe('rateLimit middleware', () => {
 
 describe('initRedis', () => {
   it('should handle successful Redis connection', async () => {
+    // Set production mode (Redis is only initialized in production)
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
     const mockClient = {
       connect: vi.fn().mockResolvedValue(undefined),
       on: vi.fn(),
@@ -135,9 +139,16 @@ describe('initRedis', () => {
 
     expect(mockClient.connect).toHaveBeenCalled();
     expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
+
+    // Restore original NODE_ENV
+    process.env.NODE_ENV = originalEnv;
   });
 
   it('should handle Redis connection failure', async () => {
+    // Set production mode for this test
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
     const mockClient = {
       connect: vi.fn().mockRejectedValue(new Error('Connection failed')),
       on: vi.fn(),
@@ -145,11 +156,20 @@ describe('initRedis', () => {
 
     vi.mocked(createClient).mockReturnValue(mockClient as any);
 
-    // Should not throw
-    await expect(initRedis()).resolves.toBeUndefined();
+    // Should throw in production mode
+    await expect(initRedis()).rejects.toThrow(
+      'Redis connection required for production rate limiting'
+    );
+
+    // Restore original NODE_ENV
+    process.env.NODE_ENV = originalEnv;
   });
 
   it('should use REDIS_URL from environment', async () => {
+    // Set production mode for this test
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
     const originalRedisUrl = process.env.REDIS_URL;
     process.env.REDIS_URL = 'redis://custom:6379';
 
@@ -167,5 +187,6 @@ describe('initRedis', () => {
     });
 
     process.env.REDIS_URL = originalRedisUrl;
+    process.env.NODE_ENV = originalEnv;
   });
 });

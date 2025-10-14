@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+*.test.ts
+*.test.tsx
+*.test.js
+*.test.jsx
+*.spec.ts
+*.spec.tsx
+*.spec.js
+*.spec.jsx
+test/
+tests/
+__tests__/
+__mocks__/
+
+# Build artifacts (keep for production stage)
+# dist/ is needed for production build
+# build/
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.test
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+*.md
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker files (already in context)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Development files
+.storybook/
+storybook-static/
+
+# Miscellaneous
+.prettierrc*
+.eslintrc*
+tsconfig.json
+vite.config.ts
+vitest.config.ts
+postcss.config.js
+tailwind.config.js
+
+# Public assets (needed for build)
+# public/
+

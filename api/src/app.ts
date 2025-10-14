@@ -69,6 +69,7 @@ import {
   developmentSecurityHeaders,
 } from './middleware/securityHeaders.js';
 import { provideCsrfToken, validateCsrfToken, csrfTokenEndpoint } from './middleware/csrf.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Package doesn't have TypeScript types
 import cookieParser from 'cookie-parser';
@@ -201,8 +202,66 @@ export function createApp(prisma: PrismaClient) {
   // CSRF token endpoint for clients
   app.get('/csrf-token', csrfTokenEndpoint());
 
+  // Basic health check - simple liveness probe
   app.get('/health', (_req, res) => {
-    res.json({ ok: true, service: 'ama-api' });
+    res.json({ ok: true, service: 'ama-api', timestamp: new Date().toISOString() });
+  });
+
+  // Liveness probe - checks if application is running
+  // Returns 200 if app is alive (even if dependencies are down)
+  app.get('/health/live', (_req, res) => {
+    res.json({
+      status: 'alive',
+      service: 'ama-api',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Readiness probe - checks if application is ready to serve traffic
+  // Returns 200 only if all critical dependencies are healthy
+  app.get('/health/ready', async (_req, res) => {
+    const checks = {
+      database: false,
+      redis: false,
+    };
+
+    let isReady = true;
+
+    // Check database connection
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      checks.database = true;
+    } catch (error) {
+      console.error('Readiness check: Database unhealthy', error);
+      isReady = false;
+    }
+
+    // Check Redis (if required in production)
+    if (process.env.NODE_ENV === 'production') {
+      const { getRedisStatus } = await import('./middleware/rateLimit.js');
+      const { getSessionRedisStatus } = await import('./middleware/session.js');
+      const rateLimitRedis = getRedisStatus();
+      const sessionRedis = getSessionRedisStatus();
+
+      // Redis is required in production - check both connected and ready
+      if (!rateLimitRedis.ready || !sessionRedis.ready) {
+        isReady = false;
+        checks.redis = false;
+      } else {
+        checks.redis = true;
+      }
+    } else {
+      // Redis not required in development
+      checks.redis = true;
+    }
+
+    const status = isReady ? 200 : 503;
+    res.status(status).json({
+      status: isReady ? 'ready' : 'not_ready',
+      checks,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // Health dashboard - detailed system metrics (admin only)
@@ -4479,6 +4538,16 @@ export function createApp(prisma: PrismaClient) {
       }
     }
   );
+
+  // ============================================================================
+  // ERROR HANDLERS (must be last)
+  // ============================================================================
+
+  // 404 handler for undefined routes
+  app.use(notFoundHandler);
+
+  // Global error handler - catches all errors
+  app.use(errorHandler);
 
   return app;
 }

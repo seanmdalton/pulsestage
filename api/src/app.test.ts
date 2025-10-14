@@ -10,7 +10,9 @@ describe('API Tests', () => {
     it('should return health status', async () => {
       const response = await request(app).get('/health');
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ok: true, service: 'ama-api' });
+      expect(response.body).toHaveProperty('ok', true);
+      expect(response.body).toHaveProperty('service', 'ama-api');
+      expect(response.body).toHaveProperty('timestamp');
     });
   });
 

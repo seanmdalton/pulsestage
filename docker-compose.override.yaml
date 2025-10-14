@@ -32,5 +32,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   
   web:
-    build: ./web
+    build:
+      context: ./web
+      target: development
 

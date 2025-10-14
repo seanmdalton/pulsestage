@@ -32,8 +32,7 @@ export function createPrismaClient(): PrismaClient {
 
   // Log slow queries in production (> 1 second)
   if (isProduction) {
-    // @ts-expect-error - Prisma event types not fully typed
-    client.$on('query', e => {
+    client.$on('query', (e: any) => {
       if (e.duration > 1000) {
         console.warn(`⚠️  Slow query detected (${e.duration}ms):`, {
           query: e.query,
@@ -43,8 +42,7 @@ export function createPrismaClient(): PrismaClient {
       }
     });
 
-    // @ts-expect-error - Prisma event types not fully typed
-    client.$on('error', e => {
+    client.$on('error', (e: any) => {
       console.error('❌ Database error:', e);
     });
   }

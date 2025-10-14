@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-process-exit */
 /**
  * Generate secure random secrets for production deployment
  *

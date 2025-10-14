@@ -437,9 +437,11 @@ async function start() {
           await shutdownDatabase(prisma);
 
           // Exit successfully
+          // eslint-disable-next-line no-process-exit
           process.exit(0);
         } catch (error) {
           console.error('Error during shutdown:', error);
+          // eslint-disable-next-line no-process-exit
           process.exit(1);
         }
       });
@@ -447,6 +449,7 @@ async function start() {
       // Force shutdown after 30 seconds
       setTimeout(() => {
         console.error('⚠️  Forced shutdown after timeout');
+        // eslint-disable-next-line no-process-exit
         process.exit(1);
       }, 30000);
     };
@@ -467,6 +470,7 @@ async function start() {
     });
   } catch (error) {
     console.error('❌ Fatal error during startup:', error);
+    // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
 }
