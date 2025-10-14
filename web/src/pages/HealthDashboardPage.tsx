@@ -114,6 +114,21 @@ export function HealthDashboardPage() {
     }
   }
 
+  const getRateLimitBadge = (
+    connected: boolean,
+    ready: boolean,
+    enabled: boolean
+  ) => {
+    if (!enabled) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+          Disabled (Dev Mode)
+        </span>
+      )
+    }
+    return getStatusBadge(connected, ready)
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -258,9 +273,10 @@ export function HealthDashboardPage() {
                 Status
               </div>
               <div className="mt-1">
-                {getStatusBadge(
+                {getRateLimitBadge(
                   health.redis.rateLimit.connected,
-                  health.redis.rateLimit.ready
+                  health.redis.rateLimit.ready,
+                  health.redis.rateLimit.enabled
                 )}
               </div>
             </div>

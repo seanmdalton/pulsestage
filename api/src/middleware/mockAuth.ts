@@ -192,8 +192,7 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
     }
 
     // Priority 2: Check for mock SSO header (simulating SSO provider)
-    const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
-
+    // (mockSSOHeader already declared at top of function)
     if (mockSSOHeader) {
       // Find user by email or SSO ID
       const user = mockUsers.find(u => u.email === mockSSOHeader || u.ssoId === mockSSOHeader);

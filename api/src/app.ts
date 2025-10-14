@@ -288,6 +288,10 @@ export function createApp(prisma: PrismaClient) {
       const rateLimitRedis = getRedisStatus();
       const sessionRedis = getSessionRedisStatus();
 
+      // Debug logging for Redis status
+      console.log('Health check - Rate limit Redis:', rateLimitRedis);
+      console.log('Health check - Session Redis:', sessionRedis);
+
       // Get uptime
       const uptimeSeconds = process.uptime();
       const uptimeFormatted = formatUptime(uptimeSeconds);
