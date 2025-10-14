@@ -32,9 +32,6 @@ RUN npx prisma generate
 # Build application
 RUN npm run build
 
-# Remove development dependencies
-RUN npm prune --production
-
 # ==============================================================================
 # STAGE 3: Production Runtime
 # ==============================================================================
