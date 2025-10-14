@@ -351,12 +351,11 @@ describe('RBAC & Team Scoping Tests', () => {
       expect(response.body[0].teamId).toBe(peopleTeam.id);
     });
 
-    it('should return all questions for unauthenticated users', async () => {
+    it('should require authentication for unauthenticated users', async () => {
       const response = await request(app).get('/questions').set('x-tenant-id', 'default');
 
-      expect(response.status).toBe(200);
-      // Unauthenticated users see all questions
-      expect(response.body.length).toBe(3);
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Unauthorized');
     });
 
     it('should respect teamId filter parameter', async () => {

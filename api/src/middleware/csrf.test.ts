@@ -225,7 +225,10 @@ describe('CSRF Protection', () => {
 
   describe('Safe Methods (No CSRF Required)', () => {
     it('GET /questions should not require CSRF', async () => {
-      const response = await request(app).get('/questions').set('x-tenant-id', 'default');
+      const response = await request(app)
+        .get('/questions')
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
     });

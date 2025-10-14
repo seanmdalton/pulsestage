@@ -28,8 +28,18 @@ describe('Enhanced Search & Filtering', () => {
   let question1: any;
   let question2: any;
   let question3: any;
+  let testUser: any;
 
   beforeEach(async () => {
+    // Create test user for authentication
+    testUser = await testPrisma.user.create({
+      data: {
+        email: 'test@example.com',
+        name: 'Test User',
+        tenantId: 'default-tenant-id',
+      },
+    });
+
     // Create team
     team = await testPrisma.team.create({
       data: {
@@ -120,7 +130,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should search questions by keyword', async () => {
       const response = await request(app)
         .get('/questions?search=remote')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1); // Only question1 is OPEN with "remote"
@@ -135,7 +146,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should search in both question body and response', async () => {
       const response = await request(app)
         .get('/questions?search=flexibility&status=ANSWERED')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -145,7 +157,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should handle multi-word search', async () => {
       const response = await request(app)
         .get('/questions?search=company policy')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBeGreaterThan(0);
@@ -155,7 +168,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should return empty array for no matches', async () => {
       const response = await request(app)
         .get('/questions?search=nonexistentword12345')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(0);
@@ -165,7 +179,8 @@ describe('Enhanced Search & Filtering', () => {
       // Search for "polic" should match "policy"
       const response = await request(app)
         .get('/questions?search=polic')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBeGreaterThanOrEqual(1);
@@ -179,7 +194,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should filter questions by tag', async () => {
       const response = await request(app)
         .get(`/questions?tagId=${tag1.id}`)
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -189,7 +205,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should return empty for non-existent tag', async () => {
       const response = await request(app)
         .get('/questions?tagId=00000000-0000-0000-0000-000000000000')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(0);
@@ -200,7 +217,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should filter questions after dateFrom', async () => {
       const response = await request(app)
         .get('/questions?dateFrom=2025-01-10')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       // Should include question2 (created Jan 15, OPEN status)
@@ -213,7 +231,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should filter questions before dateTo', async () => {
       const response = await request(app)
         .get('/questions?dateTo=2025-01-20')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       // Should include question1 and question2 (created before Jan 20)
@@ -226,7 +245,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should filter questions in date range', async () => {
       const response = await request(app)
         .get('/questions?dateFrom=2025-01-10&dateTo=2025-01-20')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -238,7 +258,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should combine search with team filter', async () => {
       const response = await request(app)
         .get(`/questions?search=remote&teamId=${team.id}`)
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1); // Only question1 is OPEN with "remote"
@@ -247,7 +268,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should combine search with tag filter', async () => {
       const response = await request(app)
         .get(`/questions?search=policy&tagId=${tag1.id}`)
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -257,7 +279,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should combine search with date range', async () => {
       const response = await request(app)
         .get('/questions?search=remote&status=ANSWERED&dateFrom=2025-01-15')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -267,7 +290,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should combine all filters', async () => {
       const response = await request(app)
         .get(`/questions?search=remote&teamId=${team.id}&dateFrom=2024-12-01&dateTo=2025-01-31`)
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       // Should find questions with "remote" in the date range for the team
@@ -279,7 +303,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should search only OPEN questions', async () => {
       const response = await request(app)
         .get('/questions?search=remote&status=OPEN')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);
@@ -290,7 +315,8 @@ describe('Enhanced Search & Filtering', () => {
     it('should search only ANSWERED questions', async () => {
       const response = await request(app)
         .get('/questions?search=remote&status=ANSWERED')
-        .set('x-tenant-id', 'default');
+        .set('x-tenant-id', 'default')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(1);

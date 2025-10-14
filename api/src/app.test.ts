@@ -123,7 +123,7 @@ describe('API Tests', () => {
     });
 
     it('should return open questions by default', async () => {
-      const response = await request(app).get('/questions');
+      const response = await request(app).get('/questions').set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
@@ -132,7 +132,9 @@ describe('API Tests', () => {
     });
 
     it('should return open questions when status=open', async () => {
-      const response = await request(app).get('/questions?status=open');
+      const response = await request(app)
+        .get('/questions?status=open')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
@@ -140,7 +142,9 @@ describe('API Tests', () => {
     });
 
     it('should return answered questions when status=answered', async () => {
-      const response = await request(app).get('/questions?status=answered');
+      const response = await request(app)
+        .get('/questions?status=answered')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(1);
@@ -149,7 +153,9 @@ describe('API Tests', () => {
     });
 
     it('should return questions sorted by upvotes desc', async () => {
-      const response = await request(app).get('/questions?status=open');
+      const response = await request(app)
+        .get('/questions?status=open')
+        .set('x-mock-sso-user', testUser.email);
 
       expect(response.status).toBe(200);
       expect(response.body[0].upvotes).toBe(10);
