@@ -143,6 +143,17 @@ declare module 'express-serve-static-core' {
 // Session authentication middleware
 export async function sessionAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
+    // Debug logging for search endpoint
+    if (req.path === '/questions/search') {
+      console.log('🔍 Search endpoint auth check:', {
+        path: req.path,
+        hasSession: !!req.session,
+        hasSessionUser: !!req.session?.user,
+        sessionUser: req.session?.user,
+        cookies: req.headers.cookie ? 'present' : 'missing',
+      });
+    }
+
     // Security: Only allow Mock SSO header in development/test environments
     const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
     const isProduction = process.env.NODE_ENV === 'production';
