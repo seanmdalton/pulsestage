@@ -109,28 +109,3 @@ EXPOSE 5173
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
-# ==============================================================================
-# STAGE 4: Development Runtime
-# ==============================================================================
-FROM node:24-alpine AS development
-
-WORKDIR /app
-
-# Add image metadata
-LABEL org.opencontainers.image.title="PulseStage Web (Development)"
-LABEL org.opencontainers.image.description="PulseStage Web App - Development Mode"
-LABEL org.opencontainers.image.vendor="Sean M. Dalton"
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Expose port
-EXPOSE 5173
-
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
