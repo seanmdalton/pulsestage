@@ -202,9 +202,10 @@ export function Settings() {
     } catch (err) {
       console.error('Failed to save settings:', err)
       // Try to extract the error message from the API response
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (err as any)?.response?.data?.message ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (err as any)?.message ||
         'Failed to save settings. Please try again.'
       setError(errorMessage)
