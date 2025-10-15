@@ -18,10 +18,10 @@ type SetupStep =
   | 'loading'
   | 'complete'
 
-export function SetupWizard({ onComplete: _onComplete }: SetupWizardProps) {
+export function SetupWizard({
+  onComplete: _onComplete, // eslint-disable-line @typescript-eslint/no-unused-vars
+}: SetupWizardProps) {
   // Note: onComplete prop available for future use, currently we reload the page instead
-  // @ts-expect-error - onComplete is preserved for future use
-  void _onComplete
   const [currentStep, setCurrentStep] = useState<SetupStep>('welcome')
   const [orgName, setOrgName] = useState('')
   const [teamName, setTeamName] = useState('')
