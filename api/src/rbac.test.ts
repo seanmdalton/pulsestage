@@ -31,13 +31,17 @@ describe('RBAC & Team Scoping Tests', () => {
   let peopleQuestion: any;
 
   beforeEach(async () => {
+    const tenant = await testPrisma.tenant.findUnique({
+      where: { slug: 'default' },
+    });
+
     // Create teams
     engineeringTeam = await testPrisma.team.create({
       data: {
         name: 'Engineering',
         slug: 'engineering',
         description: 'Engineering team',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -46,7 +50,7 @@ describe('RBAC & Team Scoping Tests', () => {
         name: 'People',
         slug: 'people',
         description: 'People team',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -56,7 +60,7 @@ describe('RBAC & Team Scoping Tests', () => {
         email: 'admin@example.com',
         name: 'Admin User',
         ssoId: 'admin-sso',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -65,7 +69,7 @@ describe('RBAC & Team Scoping Tests', () => {
         email: 'moderator@example.com',
         name: 'Moderator User',
         ssoId: 'moderator-sso',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -74,7 +78,7 @@ describe('RBAC & Team Scoping Tests', () => {
         email: 'member@example.com',
         name: 'Member User',
         ssoId: 'member-sso',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -121,7 +125,7 @@ describe('RBAC & Team Scoping Tests', () => {
         status: 'OPEN',
         upvotes: 5,
         teamId: engineeringTeam.id,
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -131,7 +135,7 @@ describe('RBAC & Team Scoping Tests', () => {
         status: 'OPEN',
         upvotes: 3,
         teamId: peopleTeam.id,
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
   });
@@ -196,10 +200,14 @@ describe('RBAC & Team Scoping Tests', () => {
     let tag: any;
 
     beforeEach(async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       tag = await testPrisma.tag.create({
         data: {
           name: 'important',
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
     });
@@ -251,10 +259,14 @@ describe('RBAC & Team Scoping Tests', () => {
     let _questionTag: any;
 
     beforeEach(async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       tag = await testPrisma.tag.create({
         data: {
           name: 'remove-test',
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
 
@@ -306,13 +318,17 @@ describe('RBAC & Team Scoping Tests', () => {
     let _generalQuestion: any;
 
     beforeEach(async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       // Create a question without a team
       _generalQuestion = await testPrisma.question.create({
         data: {
           body: 'General question',
           status: 'OPEN',
           upvotes: 1,
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
     });

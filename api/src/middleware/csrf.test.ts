@@ -28,13 +28,17 @@ describe('CSRF Protection', () => {
   let csrfCookie: string;
 
   beforeEach(async () => {
+    const tenant = await testPrisma.tenant.findUnique({
+      where: { slug: 'default' },
+    });
+
     // Create test user and team
     testUser = await testPrisma.user.create({
       data: {
         email: 'csrf-test@example.com',
         name: 'CSRF Test User',
         ssoId: 'csrf-test-sso',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -43,7 +47,7 @@ describe('CSRF Protection', () => {
         name: 'CSRF Test Team',
         slug: 'csrf-test',
         description: 'Test team for CSRF',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -165,13 +169,17 @@ describe('CSRF Protection', () => {
     let question: any;
 
     beforeEach(async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       question = await testPrisma.question.create({
         data: {
           body: 'CSRF test question',
           status: 'OPEN',
           upvotes: 1,
           teamId: testTeam.id,
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
     });

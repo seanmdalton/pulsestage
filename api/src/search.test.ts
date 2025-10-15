@@ -31,12 +31,16 @@ describe('Enhanced Search & Filtering', () => {
   let testUser: any;
 
   beforeEach(async () => {
+    const tenant = await testPrisma.tenant.findUnique({
+      where: { slug: 'default' },
+    });
+
     // Create test user for authentication
     testUser = await testPrisma.user.create({
       data: {
         email: 'test@example.com',
         name: 'Test User',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -45,7 +49,7 @@ describe('Enhanced Search & Filtering', () => {
       data: {
         name: 'Search Test Team',
         slug: 'search-test',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -63,7 +67,7 @@ describe('Enhanced Search & Filtering', () => {
       data: {
         name: 'urgent',
         color: '#FF0000',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -71,7 +75,7 @@ describe('Enhanced Search & Filtering', () => {
       data: {
         name: 'follow-up',
         color: '#00FF00',
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
       },
     });
 
@@ -82,7 +86,7 @@ describe('Enhanced Search & Filtering', () => {
         status: 'OPEN',
         upvotes: 10,
         teamId: team.id,
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
         createdAt: new Date('2025-01-01'),
       },
     });
@@ -93,7 +97,7 @@ describe('Enhanced Search & Filtering', () => {
         status: 'OPEN',
         upvotes: 5,
         teamId: team.id,
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
         createdAt: new Date('2025-01-15'),
       },
     });
@@ -105,7 +109,7 @@ describe('Enhanced Search & Filtering', () => {
         responseText: 'Remote work offers flexibility and work-life balance.',
         upvotes: 3,
         teamId: team.id,
-        tenantId: 'default-tenant-id',
+        tenantId: tenant!.id,
         createdAt: new Date('2025-02-01'),
       },
     });

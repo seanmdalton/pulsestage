@@ -116,7 +116,7 @@ describe('API Tests', () => {
         data: {
           name: 'Test Team',
           slug: 'test-team',
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
 
@@ -136,7 +136,7 @@ describe('API Tests', () => {
           upvotes: 5,
           status: 'OPEN',
           teamId: testTeam.id,
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
       await testPrisma.question.create({
@@ -145,7 +145,7 @@ describe('API Tests', () => {
           upvotes: 10,
           status: 'OPEN',
           teamId: testTeam.id,
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
       await testPrisma.question.create({
@@ -155,7 +155,7 @@ describe('API Tests', () => {
           responseText: 'The answer',
           respondedAt: new Date(),
           teamId: testTeam.id,
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
     });
@@ -203,8 +203,12 @@ describe('API Tests', () => {
 
   describe('POST /questions/:id/upvote', () => {
     it('should increment upvotes for existing question', async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       const question = await testPrisma.question.create({
-        data: { body: 'Test question', upvotes: 0, tenantId: 'default-tenant-id' },
+        data: { body: 'Test question', upvotes: 0, tenantId: tenant!.id },
       });
 
       const response = await request(app).post(`/questions/${question.id}/upvote`);
@@ -227,12 +231,16 @@ describe('API Tests', () => {
     let testTeam: any;
 
     beforeEach(async () => {
+      const tenant = await testPrisma.tenant.findUnique({
+        where: { slug: 'default' },
+      });
+
       // Create a test team
       testTeam = await testPrisma.team.create({
         data: {
           name: 'Test Team',
           slug: 'test-team',
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
 
@@ -242,7 +250,7 @@ describe('API Tests', () => {
           email: 'admin@test.com',
           name: 'Admin User',
           ssoId: 'admin@test.com',
-          tenantId: 'default-tenant-id',
+          tenantId: tenant!.id,
         },
       });
 
@@ -256,7 +264,7 @@ describe('API Tests', () => {
       });
 
       question = await testPrisma.question.create({
-        data: { body: 'Test question', tenantId: 'default-tenant-id' },
+        data: { body: 'Test question', tenantId: tenant!.id },
       });
     });
 
