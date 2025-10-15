@@ -21,9 +21,11 @@
     "email:dev": "email dev --dir src/emails",
     "db:push": "prisma db push",
     "db:seed": "node dist/seed-multi-tenant-data.js",
+    "db:seed:teams": "node dist/seed-teams.js",
     "db:seed:tags": "node dist/seed-tags.js",
     "db:seed:demo": "node dist/seed-demo-data.js",
     "db:seed:full": "node dist/seed-multi-tenant-data.js && node dist/seed-tags.js",
+    "db:seed:all": "node dist/seed-teams.js && node dist/seed-tags.js && node dist/seed-demo-data.js",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
