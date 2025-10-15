@@ -221,7 +221,7 @@ Add this **ONE**:
 
 ```bash
 # API URL (from Step 3.6)
-VITE_API_URL=https://pulsestage-demo-api.onrender.com
+VITE_API_URL=https://api-demo.pulsestage.app
 ```
 
 ### 5.5 Click "Create Web Service"

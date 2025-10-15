@@ -24,7 +24,7 @@ services:
       - key: FRONTEND_URL
         value: https://demo.pulsestage.app
       - key: CORS_ORIGINS
-        value: https://demo.pulsestage.app,http://localhost:5173
+        value: https://demo.pulsestage.app,https://api-demo.pulsestage.app,http://localhost:5173
       - key: PORT
         value: 3000
 
@@ -37,6 +37,6 @@ services:
     plan: free
     envVars:
       - key: VITE_API_URL
-        value: https://pulsestage-demo-api.onrender.com
+        value: https://api-demo.pulsestage.app
     # Note: Render automatically passes envVars to Docker build as build args
 

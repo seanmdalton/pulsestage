@@ -54,6 +54,14 @@ export async function initSessionStore() {
 export function createSessionMiddleware() {
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Determine cookie domain for cross-subdomain sharing
+  // In production with custom domain, share cookie across *.pulsestage.app
+  // In development, let browser decide (undefined = current domain only)
+  const cookieDomain =
+    isProduction && process.env.FRONTEND_URL?.includes('pulsestage.app')
+      ? '.pulsestage.app' // Leading dot shares across all subdomains
+      : undefined;
+
   const sessionConfig: session.SessionOptions = {
     name: 'connect.sid', // Standard session cookie name for user sessions
     // Require SESSION_SECRET in production (enforced in env.ts). Allow fallback paths only in dev.
@@ -67,12 +75,12 @@ export function createSessionMiddleware() {
       // For now keep 24h for user sessions; admin routes enforce TTL separately
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax', // CSRF protection - allow cross-site GET but not POST
-      domain: undefined, // Let browser decide
+      domain: cookieDomain, // Share across subdomains in production
     },
   };
 
   console.log(
-    `🍪 Session config: secure=${sessionConfig.cookie?.secure}, sameSite=${sessionConfig.cookie?.sameSite}, httpOnly=${sessionConfig.cookie?.httpOnly}`
+    `🍪 Session config: secure=${sessionConfig.cookie?.secure}, sameSite=${sessionConfig.cookie?.sameSite}, httpOnly=${sessionConfig.cookie?.httpOnly}, domain=${sessionConfig.cookie?.domain || 'undefined'}`
   );
 
   // Use Redis store if available, otherwise fall back to memory store (dev only)
