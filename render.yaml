@@ -29,6 +29,12 @@ services:
         value: 3000
       - key: OPENAI_API_KEY
         sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CALLBACK_URL
+        value: https://api-demo.pulsestage.app/auth/github/callback
 
   # Web Service
   - type: web
