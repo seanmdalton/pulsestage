@@ -22,11 +22,17 @@ export class AuthManager {
   constructor(private prisma: PrismaClient) {
     this.enabledModes = new Set<AuthMode>();
 
-    // Demo mode is always enabled in development
-    if (process.env.NODE_ENV === 'development') {
+    // Demo mode can be enabled explicitly via AUTH_MODE_DEMO=true
+    // Or automatically in development mode
+    const isDemoEnabled =
+      process.env.AUTH_MODE_DEMO === 'true' || process.env.NODE_ENV === 'development';
+
+    if (isDemoEnabled) {
       const demoConfig = getDemoModeConfig();
-      this.demoStrategy = new DemoAuthStrategy(prisma, demoConfig);
-      this.enabledModes.add('demo');
+      if (demoConfig.enabled) {
+        this.demoStrategy = new DemoAuthStrategy(prisma, demoConfig);
+        this.enabledModes.add('demo');
+      }
     }
 
     // OAuth is enabled if credentials are provided
