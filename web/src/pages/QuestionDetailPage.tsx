@@ -83,7 +83,7 @@ export function QuestionDetailPage() {
     }
   }
 
-  useSSE(handleSSEEvent)
+  useSSE({ onEvent: handleSSEEvent })
 
   // Handle upvote
   const handleUpvote = async () => {

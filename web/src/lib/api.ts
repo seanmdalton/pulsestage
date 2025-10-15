@@ -1,8 +1,17 @@
 import { z } from 'zod'
 import type { components } from './api-types'
 
-// Re-export OpenAPI-generated types
-export type Question = components['schemas']['Question']
+// Re-export OpenAPI-generated types with extensions
+// The OpenAPI spec doesn't include team/tags/UNDER_REVIEW status in Question schema yet, so we extend it
+export type Question = Omit<components['schemas']['Question'], 'status'> & {
+  status: 'OPEN' | 'ANSWERED' | 'UNDER_REVIEW'
+  team?: Team | null
+  tags?: QuestionTag[]
+  teamId?: string | null
+  isPinned?: boolean
+  isFrozen?: boolean
+}
+
 // Override CreateQuestionRequest to include teamId (OpenAPI spec has it but types are out of sync)
 export interface CreateQuestionRequest {
   body: string

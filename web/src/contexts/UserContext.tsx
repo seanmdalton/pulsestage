@@ -32,7 +32,7 @@ interface UserContextType {
   refreshUserQuestions: () => Promise<void>
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<void>
   toggleTeamFavorite: (teamId: string) => Promise<void>
-  setDefaultTeam: (teamId: string) => Promise<void>
+  setDefaultTeam: (teamId: string | null) => Promise<void>
 
   // Utility functions
   getUserRoleInTeam: (
