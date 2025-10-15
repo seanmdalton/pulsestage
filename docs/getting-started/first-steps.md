@@ -291,7 +291,7 @@ Perfect for live town halls and all-hands meetings. Available to Moderator+ role
 
 ### For Developers
 
-- **[Development Guide](../../DEVELOPMENT.md)** - Contribute to PulseStage
+- **[Development Guide](../development/setup.md)** - Contribute to PulseStage
 - **[API Documentation](../api/overview.md)** - REST API reference
 - **[Architecture](../architecture/system-design.md)** - System design
 

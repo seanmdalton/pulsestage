@@ -210,4 +210,4 @@ All services should show "Up" status.
 - [Installation Guide](installation.md) - Detailed setup instructions
 - [Configuration](configuration.md) - Environment variables and settings
 - [First Steps](first-steps.md) - Guided tour of PulseStage features
-- [Development Guide](../../DEVELOPMENT.md) - For contributors
+- [Development Guide](../development/setup.md) - For contributors
