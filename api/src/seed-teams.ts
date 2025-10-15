@@ -4,25 +4,21 @@ const prisma = new PrismaClient();
 
 const defaultTeams = [
   {
-    id: 'general',
     name: 'General',
     slug: 'general',
     description: 'General organizational questions',
   },
   {
-    id: 'engineering',
     name: 'Engineering',
     slug: 'engineering',
     description: 'Technical and development questions',
   },
   {
-    id: 'product',
     name: 'Product',
     slug: 'product',
     description: 'Product strategy and feature questions',
   },
   {
-    id: 'people',
     name: 'People',
     slug: 'people',
     description: 'HR, culture, and people-related questions',
@@ -37,9 +33,8 @@ async function seedTeams() {
     where: { slug: 'default' },
     update: {},
     create: {
-      id: 'default-tenant-id',
       slug: 'default',
-      name: 'Default Tenant',
+      name: 'Default Organization',
     },
   });
   console.log(`✅ Default tenant: ${tenant.name}`);

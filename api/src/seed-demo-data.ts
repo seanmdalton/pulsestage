@@ -326,9 +326,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         where: { slug: 'default' },
         update: {},
         create: {
-          id: 'default-tenant-id',
           slug: 'default',
-          name: 'Default Tenant',
+          name: 'Default Organization',
         },
       });
 

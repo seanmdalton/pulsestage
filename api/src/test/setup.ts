@@ -65,7 +65,6 @@ beforeAll(async () => {
     where: { slug: 'default' },
     update: {},
     create: {
-      id: 'default-tenant-id',
       slug: 'default',
       name: 'Default Tenant',
     },

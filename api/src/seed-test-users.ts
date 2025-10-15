@@ -26,9 +26,8 @@ export async function seedTestUsers() {
     where: { slug: 'default' },
     update: {},
     create: {
-      id: 'default-tenant-id',
       slug: 'default',
-      name: 'Default Tenant',
+      name: 'Default Organization',
     },
   });
   console.log(`✅ Default tenant: ${tenant.name}`);
