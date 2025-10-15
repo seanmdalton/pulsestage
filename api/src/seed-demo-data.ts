@@ -33,24 +33,91 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
     throw new Error('No teams found. Run seed-teams.ts first.');
   }
 
-  // Get demo users
-  const demoUsers = ['alice', 'bob', 'moderator', 'admin'];
-  const userMap = Object.fromEntries(
-    await Promise.all(
-      demoUsers.map(async ssoId => {
-        const user = await prisma.user.findFirst({
-          where: {
-            ssoId,
-            tenantId,
-          },
-        });
-        return [ssoId, user];
-      })
-    )
-  );
+  // Create or get demo users
+  console.log('👥 Creating demo users...');
+  const demoUsersConfig = [
+    {
+      email: 'alice@demo.pulsestage.dev',
+      name: 'Alice (Demo User)',
+      ssoId: 'alice',
+      defaultRole: 'member',
+    },
+    {
+      email: 'bob@demo.pulsestage.dev',
+      name: 'Bob (Demo User)',
+      ssoId: 'bob',
+      defaultRole: 'member',
+    },
+    {
+      email: 'moderator@demo.pulsestage.dev',
+      name: 'Moderator (Demo)',
+      ssoId: 'moderator',
+      defaultRole: 'moderator',
+    },
+    {
+      email: 'admin@demo.pulsestage.dev',
+      name: 'Admin (Demo)',
+      ssoId: 'admin',
+      defaultRole: 'admin',
+    },
+  ];
 
-  if (!userMap.alice || !userMap.bob) {
-    throw new Error('Demo users not found. Ensure users are seeded first.');
+  const userMap: Record<string, any> = {};
+
+  for (const userData of demoUsersConfig) {
+    const user = await prisma.user.upsert({
+      where: {
+        tenantId_email: {
+          tenantId: tenantId,
+          email: userData.email,
+        },
+      },
+      update: {
+        name: userData.name,
+        ssoId: userData.ssoId,
+      },
+      create: {
+        email: userData.email,
+        name: userData.name,
+        ssoId: userData.ssoId,
+        tenantId: tenantId,
+      },
+    });
+
+    console.log(`  ✅ ${userData.name}`);
+    userMap[userData.ssoId] = user;
+
+    // Create user preferences if they don't exist
+    await prisma.userPreferences.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        tenantId: tenantId,
+        favoriteTeams: [],
+        emailNotifications: false, // Disable for demo
+      },
+    });
+
+    // Add user to all teams with appropriate role
+    for (const team of teams) {
+      await prisma.teamMembership.upsert({
+        where: {
+          userId_teamId: {
+            userId: user.id,
+            teamId: team.id,
+          },
+        },
+        update: {
+          role: userData.defaultRole,
+        },
+        create: {
+          userId: user.id,
+          teamId: team.id,
+          role: userData.defaultRole,
+        },
+      });
+    }
   }
 
   // Sample questions matching server.ts
