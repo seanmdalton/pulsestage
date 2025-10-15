@@ -164,7 +164,31 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
       const sessionUser = req.session.user;
 
       // Find full user details from mock data
-      const user = mockUsers.find(u => u.id === sessionUser.id || u.email === sessionUser.email);
+      let user = mockUsers.find(u => u.id === sessionUser.id || u.email === sessionUser.email);
+
+      // If not found in mock data, fetch from database (handles newly created users)
+      if (!user && sessionUser.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: sessionUser.id },
+          include: {
+            teamMemberships: true,
+          },
+        });
+
+        if (dbUser) {
+          const userMembership = dbUser.teamMemberships[0];
+          user = {
+            id: dbUser.id,
+            tenantId: dbUser.tenantId,
+            email: dbUser.email,
+            name: dbUser.name || dbUser.email,
+            ssoId: dbUser.ssoId || dbUser.email,
+            role: userMembership?.role || 'member',
+          };
+          // Add to mock users cache for next time
+          mockUsers.push(user);
+        }
+      }
 
       if (user) {
         // Validate that user belongs to the current tenant
