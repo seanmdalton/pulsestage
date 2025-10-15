@@ -32,6 +32,7 @@ services:
     runtime: docker
     dockerfilePath: ./web/Dockerfile
     dockerContext: ./web
+    dockerCommand: --target production
     plan: free
     envVars:
       - key: VITE_API_URL
