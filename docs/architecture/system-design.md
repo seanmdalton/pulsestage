@@ -355,8 +355,8 @@ const validatedData = QuestionSchema.parse(req.body);
 Docker Compose (docker-compose.override.yaml):
   - PostgreSQL (local)
   - Redis (local)
-  - API (local build, hot reload)
-  - Web (local build, hot reload)
+  - API (local build, restart required for changes)
+  - Web (local build with volume mounting, instant hot reload via Vite)
 ```
 
 ### Production

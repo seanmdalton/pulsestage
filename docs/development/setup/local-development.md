@@ -1,6 +1,6 @@
 # 🛠️ PulseStage Development Guide
 
-This guide covers the streamlined local development workflow for PulseStage.
+This guide covers the streamlined local development workflow for PulseStage with **hot reload** for instant feedback.
 
 ## 📋 Table of Contents
 
@@ -58,7 +58,9 @@ make install      # Install all dependencies (API + Web)
 ### Development
 
 ```bash
-make dev          # Start local development (builds from source)
+make dev          # Start local development (foreground, with logs)
+                  # Web: Hot reload enabled, changes appear instantly
+                  # API: Restart with 'docker compose restart api' after changes
 make up           # Start services in background
 make down         # Stop all services
 make logs         # Follow logs from all services
@@ -210,17 +212,24 @@ git push origin your-branch
 
 ### Testing UI Changes
 
+The web frontend supports **hot reload** - your changes appear instantly!
+
 ```bash
-# 1. Start with local builds
+# 1. Start development environment (once)
 make dev
 
-# 2. Make your changes to web/src/...
+# 2. Edit files in web/src/...
+# Changes automatically reload in the browser!
 
-# 3. Vite will hot-reload automatically
-
-# 4. For API changes, restart the service
+# 3. For API changes, restart the service
 docker compose restart api
 ```
+
+**How it works:**
+- The web service uses volume mounting (`./web:/app`)
+- Vite's dev server watches for file changes
+- Changes to components, pages, styles reflect immediately
+- No rebuild needed!
 
 ### Database Changes
 
@@ -339,11 +348,12 @@ make dev
 
 ## 🎯 Key Principles
 
-1. **Local-First Development**: Use `make dev` to build from local source
-2. **Test Before Push**: Use `make validate-ci` to catch issues early
-3. **Automated Validation**: Pre-push hooks ensure code quality
-4. **Docker for Consistency**: All services run in Docker for consistency
-5. **Simple Commands**: Use `make` for common tasks
+1. **Local-First Development**: Use `make dev` for local builds with hot reload (web) or restart (API)
+2. **Fast Iteration**: Web changes appear instantly via Vite hot reload and volume mounting
+3. **Test Before Push**: Use `make validate-ci` to catch issues early
+4. **Automated Validation**: Pre-push hooks ensure code quality
+5. **Docker for Consistency**: All services run in Docker for consistency
+6. **Simple Commands**: Use `make` for common tasks
 
 ---
 

@@ -38,12 +38,13 @@ npm run dev              # Hot reload with Vite HMR
 
 ---
 
-## Option 2: Docker with Local Builds (Recommended Before Pushing)
+## Option 2: Docker with Local Builds (Recommended for Most Development)
 
-Test the actual containerized environment before pushing changes.
+Test the actual containerized environment with **hot reload** for web frontend.
 
 ### Advantages
 - 🐳 Tests real Docker environment
+- ⚡ **Hot reload** for web - instant feedback on UI changes
 - 🔒 Run security scans locally
 - ✅ Catch Docker-specific issues
 - 📦 Validate complete build process
@@ -51,25 +52,28 @@ Test the actual containerized environment before pushing changes.
 ### Setup
 
 ```bash
-# Build and run locally
-docker compose up --build -d
+# Build and run locally with hot reload
+make dev              # Foreground with logs
+# or
+make up               # Background mode
 
 # Run validation
 ./run-tests.sh                    # Tests + Trivy scans
 ./test-security.sh                # Security headers
 
 # Load demo data
-docker compose exec api npm run db:seed:full
+make db-seed
 
 # View logs
-docker compose logs -f api
+make logs
 ```
 
 **How it works:**
 - `docker-compose.yaml`: Published images (for end users)
-- `docker-compose.override.yaml`: Local builds (for developers)
+- `docker-compose.override.yaml`: Local builds with volume mounting (for developers)
 - Docker Compose automatically merges both files
-- `up --build` rebuilds images from local source
+- **Web**: Volume mounted at `./web:/app` with Vite dev server = hot reload
+- **API**: Built in container, restart with `docker compose restart api` after changes
 
 ---
 
@@ -96,8 +100,8 @@ mv docker-compose.override.yaml.bak docker-compose.override.yaml
 
 ## Recommended Workflow
 
-1. **Daily development**: Use Option 1 (pure local, fastest)
-2. **Before committing**: Use Option 2 (Docker builds, run security scans)
+1. **Most development**: Use Option 2 (`make dev` - Docker with hot reload for web)
+2. **API-heavy work or debugging**: Use Option 1 (pure local, fastest for API changes with breakpoints)
 3. **Testing UX**: Use Option 3 (published images, validate end-user experience)
 
 ## Database Management

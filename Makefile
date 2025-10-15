@@ -10,8 +10,8 @@ help:
 	@echo "  make install      - Install all dependencies (API + Web)"
 	@echo ""
 	@echo "Development:"
-	@echo "  make dev          - Start local development (Docker Compose with local builds)"
-	@echo "  make up           - Start services in background"
+	@echo "  make dev          - Start local development (foreground, hot reload for web)"
+	@echo "  make up           - Start services in background (hot reload for web)"
 	@echo "  make down         - Stop all services"
 	@echo "  make logs         - Follow logs from all services"
 	@echo "  make clean        - Clean up containers, volumes, and build artifacts"
@@ -49,19 +49,19 @@ install:
 	@cd web && npm install
 	@echo "✅ All dependencies installed!"
 
-# Development - Start with local builds
+# Development - Start with local builds and hot reload
 dev:
 	@echo "🚀 Starting local development environment..."
-	@echo "Building and starting services with docker-compose.override.yaml..."
+	@echo "Building and starting services with hot reload for web frontend..."
 	@docker compose -f docker-compose.yaml -f docker-compose.override.yaml up --build
 
 # Start services in background
 up:
 	@echo "🚀 Starting services in background..."
 	@docker compose -f docker-compose.yaml -f docker-compose.override.yaml up -d --build
-	@echo "✅ Services started!"
+	@echo "✅ Services started with hot reload for web!"
 	@echo "   API: http://localhost:3000"
-	@echo "   Web: http://localhost:5173"
+	@echo "   Web: http://localhost:5173 (hot reload enabled)"
 	@echo "   View logs: make logs"
 
 # Stop services

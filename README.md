@@ -83,13 +83,19 @@ Automatic email notifications when questions are answered with customizable user
 
 ## Development
 
-For local development with live code changes:
+For local development with **instant hot reload** for web changes:
 
 ```bash
 make setup      # Initialize environment
 make install    # Install dependencies
-make dev        # Start with local builds (hot reload) - demo data auto-seeds!
+make dev        # Start with local builds + hot reload - demo data auto-seeds!
 ```
+
+**Hot Reload Benefits:**
+- ⚡ Edit React components in `web/src/` - see changes instantly in browser
+- 🔄 Vite dev server + volume mounting = no rebuilds needed for frontend
+- 🚀 Fast iteration cycle for UI development
+- 🔧 API changes: `docker compose restart api` to apply
 
 **Demo data automatically seeds on startup** in development mode:
 - 👤 **Demo users**: `alice`, `bob`, `moderator`, `admin` (login via `/login` page)

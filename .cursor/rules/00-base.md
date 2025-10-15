@@ -7,12 +7,11 @@
 
 ## Local Development Workflow
 - **ALWAYS use `make up` or `make dev`** - never manually call `docker compose`
-- After ANY code change that needs UI verification:
-  - Interactive mode: Stop current process, run `make dev` (foreground logs)
-  - Background mode: Run `make up` (detached, use `make logs` to view)
 - Both commands use `docker-compose.override.yaml` for local builds (not GitHub images)
-- Changes to `/web` or `/api` require rebuild - Docker doesn't support hot reload
-- Verification checklist after rebuild:
+- **Web (React/Vite)**: Hot reload enabled via volume mount - changes reflect immediately
+- **API (Node/Express)**: Requires restart after code changes: `docker compose restart api`
+- Initial startup: Run `make dev` (foreground logs) or `make up` (background)
+- Verification checklist after startup:
   1. Wait 10-15 seconds for services to start
   2. Check `docker compose ps` - all services should show "Up"
   3. Test the specific functionality that was changed

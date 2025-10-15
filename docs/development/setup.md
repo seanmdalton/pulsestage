@@ -133,14 +133,21 @@ npx prisma studio
 
 ### Working with Docker Compose
 
-PulseStage uses `docker-compose.override.yaml` for local development builds.
+PulseStage uses `docker-compose.override.yaml` for local development builds with **hot reload**.
 
-**Build and test locally:**
+**Build and test locally (Recommended):**
 ```bash
-docker compose up --build -d       # Builds from local source
+make dev                           # Foreground with hot reload for web
+# or
+make up                            # Background mode
 ./run-tests.sh                     # Run tests + security scans
 ./test-security.sh                 # Test security headers
 ```
+
+**Hot Reload Benefits:**
+- **Web**: Changes to `web/src/` appear instantly in browser via Vite HMR
+- **API**: Restart with `docker compose restart api` after code changes
+- Volume mounting enables fast iteration without rebuilds
 
 **Use published images (like end users):**
 ```bash
@@ -154,8 +161,9 @@ mv docker-compose.override.yaml.bak docker-compose.override.yaml
 
 **How it works:**
 - `docker-compose.yaml` uses published images from [GitHub Container Registry](https://github.com/seanmdalton/pulsestage/packages)
-- `docker-compose.override.yaml` overrides with `build:` directives for local development
+- `docker-compose.override.yaml` overrides with `build:` directives and volume mounting for local development
 - Docker Compose automatically merges both files
+- Web service uses the `deps` stage + `npm run dev` for hot reload
 
 **Auto-bootstrap**: The API automatically creates a default tenant on first startup if the database is empty.
 

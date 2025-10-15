@@ -142,7 +142,12 @@ npm install
 make dev
 ```
 
-This starts all services with local builds and hot reload enabled.
+This starts all services with local builds and **hot reload** enabled for the web frontend.
+
+**What you get:**
+- **Web Frontend**: Instant hot reload - edit React files and see changes immediately
+- **API Backend**: Local build - restart with `docker compose restart api` after changes
+- **Volume Mounting**: Web source code is mounted, enabling Vite's hot module replacement
 
 **Manual start:**
 ```bash
@@ -166,13 +171,25 @@ docker compose restart api  # Reload mock SSO users
 
 ### 4. Access Development Environment
 
-- **Web UI**: http://localhost:5173 (Vite dev server with HMR)
+- **Web UI**: http://localhost:5173 (Vite dev server with hot reload)
 - **API**: http://localhost:3000
 - **API Docs**: http://localhost:3000/api-docs
 
 ### Development Workflow
 
-See **[DEVELOPMENT.md](../../DEVELOPMENT.md)** for the complete development guide, including:
+**Making Changes:**
+```bash
+# Web changes (hot reload - automatic)
+# Edit files in web/src/...
+# Browser refreshes automatically!
+
+# API changes (manual restart)
+# Edit files in api/src/...
+docker compose restart api
+```
+
+See **[Development Guide](../development/setup/local-development.md)** for the complete development guide, including:
+- Hot reload workflow details
 - Testing workflow
 - Pre-push validation
 - Common tasks

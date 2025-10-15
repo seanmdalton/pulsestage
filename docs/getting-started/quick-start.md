@@ -139,21 +139,28 @@ http://localhost:5173/sso-test.html
 
 ## Development Mode
 
-For local development with live code changes:
+For local development with instant feedback via hot reload:
 
 ```bash
 # Initialize and install dependencies
 make setup
 make install
 
-# Start with local builds (hot reload)
+# Start development environment
 make dev
+# Web frontend: Changes reload instantly (hot reload via Vite)
+# API backend: Restart with 'docker compose restart api' after changes
 
 # In another terminal, seed demo data
 make db-seed
 ```
 
-See **[DEVELOPMENT.md](../../DEVELOPMENT.md)** for the complete development workflow.
+**Hot Reload Benefits:**
+- Edit React components in `web/src/` - see changes immediately
+- No rebuild needed for frontend changes
+- Fast iteration cycle for UI development
+
+See **[Development Guide](../development/setup/local-development.md)** for the complete workflow.
 
 ## Troubleshooting
 

@@ -67,13 +67,28 @@ This script will:
 
 ### 3. Start Development Environment
 
-```bash
-# Start the full stack with Docker
-docker compose up -d
+**Option 1: Docker with Hot Reload (Recommended)**
 
-# Or start services individually for development
+```bash
+# Start all services with hot reload for web frontend
+make dev          # Foreground with logs
+# or
+make up           # Background mode
+
+# Web changes reload instantly!
+# API changes: docker compose restart api
+```
+
+**Option 2: Local Development (for API debugging)**
+
+```bash
+# Start only infrastructure
 docker compose up -d db redis
-cd api && npm run dev &
+
+# Terminal 1: API with hot reload
+cd api && npm run dev
+
+# Terminal 2: Web with hot reload
 cd web && npm run dev
 ```
 
