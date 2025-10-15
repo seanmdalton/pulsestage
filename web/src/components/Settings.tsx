@@ -186,6 +186,7 @@ export function Settings() {
         tenantSettings &&
         JSON.stringify(tenantSettings) !== JSON.stringify(originalSettings)
       ) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await apiClient.updateTenantSettings(tenantSettings as any)
         setOriginalSettings(JSON.parse(JSON.stringify(tenantSettings)))
         hasChanges = true
@@ -201,6 +202,7 @@ export function Settings() {
     } catch (err) {
       console.error('Failed to save settings:', err)
       // Try to extract the error message from the API response
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage =
         (err as any)?.response?.data?.message ||
         (err as any)?.message ||

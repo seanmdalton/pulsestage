@@ -209,14 +209,17 @@ export function TeamSelector() {
 
               {/* Question count */}
               <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {(team as any)._count?.questions || 0} questions
               </span>
             </div>
           </div>
 
           {/* Team description */}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(team as any).description && (
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {(team as any).description}
             </div>
           )}
