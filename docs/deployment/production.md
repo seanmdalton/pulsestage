@@ -86,6 +86,24 @@ ADMIN_SESSION_SECRET=<64-char-random>
 - Secret management service (AWS Secrets Manager, HashiCorp Vault)
 - Encrypted configuration files
 
+### 1a. Security Headers
+
+**Implement Content Security Policy (CSP)** for the frontend:
+
+- ✅ **Meta tag** - Already included in `web/index.html`
+- ✅ **Nginx headers** - Add to your web server config
+
+```nginx
+# See docs/deployment/nginx-csp.conf for full configuration
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; ..." always;
+```
+
+**Test your CSP:**
+- Mozilla Observatory: https://observatory.mozilla.org/
+- Target: A grade or higher
+
+**[Complete CSP Documentation →](../security/security-headers.md)**
+
 ### 2. Network Security
 
 - ✅ Use HTTPS only (`secure: true` cookies)

@@ -4,18 +4,25 @@ PulseStage implements comprehensive HTTP security headers using Helmet middlewar
 
 ## Overview
 
-All API responses include strict security headers following Mozilla Observatory best practices to achieve an A grade or higher.
+PulseStage implements security headers at two levels:
+
+1. **API (Backend)**: Helmet middleware applies headers to all API responses
+2. **Web (Frontend)**: CSP meta tag and Nginx headers protect the SPA
+
+Both implementations follow Mozilla Observatory best practices to achieve an A grade or higher.
 
 ## Implemented Headers
 
 ### Content-Security-Policy (CSP)
 
-Strict Content Security Policy to prevent XSS attacks:
+#### API CSP (Backend)
+
+Strict Content Security Policy for API responses:
 
 ```
 default-src 'self';
 script-src 'self';
-style-src 'self' 'unsafe-inline';
+style-src 'self';
 object-src 'none';
 base-uri 'self';
 form-action 'self';
@@ -23,11 +30,60 @@ frame-ancestors 'none';
 upgrade-insecure-requests;
 ```
 
-**Features:**
-- No inline scripts allowed (prevents XSS)
-- Only load resources from same origin
-- Prevents framing (clickjacking protection)
-- Automatically upgrades HTTP to HTTPS requests
+#### Frontend CSP (Web SPA)
+
+The web frontend includes CSP via meta tag in `web/index.html`:
+
+```html
+<meta http-equiv="Content-Security-Policy" 
+  content="default-src 'self'; 
+           script-src 'self'; 
+           style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+           font-src 'self' https://fonts.gstatic.com; 
+           img-src 'self' data: https:; 
+           connect-src 'self' https://*.pulsestage.app http://localhost:3000; 
+           frame-ancestors 'none'; 
+           base-uri 'self'; 
+           form-action 'self'; 
+           object-src 'none'; 
+           upgrade-insecure-requests" />
+```
+
+**Why `'unsafe-inline'` for styles?**
+- React components use dynamic inline styles for tag colors (`style={{ backgroundColor: tag.color }}`)
+- Future enhancement: migrate to CSS custom properties to eliminate `'unsafe-inline'`
+- This is the only relaxation from strict CSP and is acceptable for modern SPAs
+
+**CSP Directives Explained:**
+- `default-src 'self'`: Only load resources from same origin by default
+- `script-src 'self'`: No inline scripts, only bundled JavaScript
+- `style-src`: Self + Google Fonts + inline styles (for React dynamic styles)
+- `font-src`: Self + Google Fonts CDN
+- `img-src`: Self + data URIs + HTTPS images
+- `connect-src`: API calls to configured domains + localhost (dev)
+- `frame-ancestors 'none'`: Prevent clickjacking
+- `upgrade-insecure-requests`: Auto-upgrade HTTP → HTTPS
+
+#### Nginx CSP Headers (Production)
+
+For production deployments with Nginx, add headers to your server block:
+
+```nginx
+# See docs/deployment/nginx-csp.conf for complete configuration
+add_header Content-Security-Policy "..." always;
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+```
+
+**Benefits of Nginx headers over meta tags:**
+- Can use `frame-ancestors`, `report-uri`, and `sandbox` directives
+- More control over CSP policies
+- Can differ by environment
+
+**Both work together:**
+- Meta tag provides baseline CSP (works in all environments)
+- Nginx headers enhance CSP for production (when available)
 
 ### X-Frame-Options
 
