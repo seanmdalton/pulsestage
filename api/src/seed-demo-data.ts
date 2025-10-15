@@ -248,31 +248,21 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
     const team = teams.find(t => t.slug === q.teamSlug);
     if (!team) continue;
 
-    const questionData: any = {
-      body: q.body,
-      team: { connect: { id: team.id } },
-      upvotes: q.upvotes,
-      status: (q as any).underReview ? 'UNDER_REVIEW' : q.answered ? 'ANSWERED' : 'OPEN',
-      tenant: { connect: { id: tenantId } },
-      // Moderation metadata for under-review questions
-      moderationReasons: (q as any).moderationReasons || [],
-      moderationConfidence: (q as any).moderationConfidence || null,
-      moderationProviders: (q as any).moderationProviders || [],
-    };
-
-    // Only add optional fields if they have values
-    if (q.authorId) {
-      questionData.author = { connect: { id: q.authorId } };
-    }
-    if (q.response) {
-      questionData.responseText = q.response;
-    }
-    if (q.answered) {
-      questionData.respondedAt = new Date();
-    }
-
+    // Build create data with explicit fields only
     const question = await prisma.question.create({
-      data: questionData,
+      data: {
+        body: q.body,
+        teamId: team.id,
+        tenantId: tenantId,
+        authorId: q.authorId || null,
+        upvotes: q.upvotes,
+        status: (q as any).underReview ? 'UNDER_REVIEW' : q.answered ? 'ANSWERED' : 'OPEN',
+        responseText: q.response || null,
+        respondedAt: q.answered ? new Date() : null,
+        moderationReasons: (q as any).moderationReasons || [],
+        moderationConfidence: (q as any).moderationConfidence || null,
+        moderationProviders: (q as any).moderationProviders || [],
+      },
     });
 
     if ((q as any).underReview) {
