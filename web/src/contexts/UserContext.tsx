@@ -259,8 +259,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   // Load user data on mount
+  // Skip if we're on the login page to avoid unnecessary 401 errors
   useEffect(() => {
-    loadUserData()
+    // Only attempt to load user data if we're not on the login page
+    const isLoginPage = window.location.pathname === '/login'
+    if (!isLoginPage) {
+      loadUserData()
+    }
   }, [])
 
   const value: UserContextType = {

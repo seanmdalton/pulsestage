@@ -129,8 +129,11 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   }
 
   // Connect to SSE for real-time team count updates
+  // Only connect if we're not on the login page to avoid 401 errors
+  const isLoginPage = window.location.pathname === '/login'
   useSSE({
     onEvent: handleSSEEvent,
+    enabled: !isLoginPage,
   })
 
   const value: TeamContextType = {

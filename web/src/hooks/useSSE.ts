@@ -37,6 +37,7 @@ export type SSEOptions = {
   onDisconnected?: () => void
   onError?: (error: Event) => void
   reconnectInterval?: number
+  enabled?: boolean // If false, don't connect to SSE
 }
 
 /**
@@ -50,6 +51,7 @@ export function useSSE(options: SSEOptions = {}) {
     onDisconnected,
     onError,
     reconnectInterval = 3000,
+    enabled = true, // Default to enabled for backwards compatibility
   } = options
 
   const [isConnected, setIsConnected] = useState(false)
@@ -59,6 +61,11 @@ export function useSSE(options: SSEOptions = {}) {
   const shouldConnectRef = useRef(true)
 
   useEffect(() => {
+    // Don't connect if explicitly disabled
+    if (!enabled) {
+      return
+    }
+
     shouldConnectRef.current = true
 
     const connect = async () => {
@@ -194,7 +201,7 @@ export function useSSE(options: SSEOptions = {}) {
       setIsConnected(false)
       onDisconnected?.()
     }
-  }, []) // Empty deps - only connect once per mount
+  }, [enabled]) // Reconnect when enabled changes
 
   return {
     isConnected,
