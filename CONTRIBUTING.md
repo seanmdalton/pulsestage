@@ -1,374 +1,151 @@
 # Contributing to PulseStage
 
-Thank you for your interest in contributing to PulseStage! This document provides guidelines and instructions for contributing to our open-source Q&A platform.
+Thank you for your interest in contributing! PulseStage is an open-source project, and we welcome contributions of all kinds.
 
-## Table of Contents
+## Quick Start
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Making Changes](#making-changes)
-- [Testing](#testing)
-- [Pull Request Process](#pull-request-process)
-- [Coding Standards](#coding-standards)
-- [Documentation](#documentation)
-- [Reporting Issues](#reporting-issues)
-- [Community](#community)
+```bash
+# Fork the repository on GitHub, then:
+git clone https://github.com/YOUR_USERNAME/pulsestage.git
+cd pulsestage
+make setup
+make dev
+```
+
+Visit [http://localhost:5173](http://localhost:5173) and log in as a demo user to start testing.
+
+## How to Contribute
+
+### 🐛 Report Bugs
+Found a bug? **[Open an issue](https://github.com/seanmdalton/pulsestage/issues/new)** with:
+- Clear description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details (OS, Node version, etc.)
+
+### 💡 Suggest Features
+Have an idea? **[Start a discussion](https://github.com/seanmdalton/pulsestage/discussions/new)** or open a feature request issue.
+
+### 🔧 Submit Code
+1. **Fork** the repository
+2. **Create a branch**: `git checkout -b feature/your-feature`
+3. **Make changes** with tests
+4. **Run checks**: `make test && make lint`
+5. **Commit**: Use clear, descriptive messages
+6. **Push**: `git push origin feature/your-feature`
+7. **Open a pull request** with description of changes
+
+## Development Guidelines
+
+### Code Style
+- **TypeScript** for all new code
+- **ESLint** and **Prettier** for formatting (`make lint-fix`)
+- Follow existing patterns in the codebase
+
+### Testing
+- Write tests for new features
+- Ensure existing tests pass: `make test`
+- 310+ tests must remain passing
+
+### Commits
+Use conventional commit format:
+```
+feat: add email notification preferences
+fix: resolve session timeout issue
+docs: update deployment guide
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+### Pull Requests
+- **One feature per PR** - keep changes focused
+- **Update documentation** if needed
+- **Add tests** for new functionality
+- **Describe changes** clearly in PR description
+- **Link related issues** using `Closes #123`
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [seanmdalton@pm.me](mailto:seanmdalton@pm.me).
+This project follows our **[Code of Conduct](CODE_OF_CONDUCT.md)**. Be respectful, inclusive, and professional.
 
-## Getting Started
+## Getting Help
 
-### Prerequisites
+- 📖 **[Documentation](https://seanmdalton.github.io/pulsestage/)** - Comprehensive guides
+- 🏗️ **[Architecture Docs](https://seanmdalton.github.io/pulsestage/architecture/system-design/)** - System design
+- 🛠️ **[Development Guide](https://seanmdalton.github.io/pulsestage/development/setup/)** - Detailed setup
+- 💬 **[Discussions](https://github.com/seanmdalton/pulsestage/discussions)** - Ask questions
+- 🐛 **[Issues](https://github.com/seanmdalton/pulsestage/issues)** - Bug reports
 
-- **Node.js**: Version 24 LTS or higher
-- **Docker & Docker Compose**: For running the full stack locally
-- **Git**: For version control
-- **npm**: Comes with Node.js
+## Development Workflow
 
-### Repository Structure
+### Initial Setup
+```bash
+make setup      # Initialize environment & dependencies
+make dev        # Start with hot reload
+```
+
+### Daily Development
+```bash
+make dev        # Start dev environment
+# Edit files in web/src/ → changes apply instantly
+# Edit files in api/src/ → run: docker compose restart api
+```
+
+### Before Committing
+```bash
+make test       # Run all tests
+make lint       # Check code style
+make lint-fix   # Auto-fix style issues
+```
+
+### Helpful Commands
+```bash
+make logs       # View logs
+make clean      # Clean build artifacts
+make reset      # Reset database (dev mode)
+```
+
+## Project Structure
 
 ```
 pulsestage/
-├── api/                 # Backend API (Node.js/Express/TypeScript)
-├── web/                 # Frontend (React/TypeScript)
-├── docs/                # Documentation (MkDocs)
-├── docker-compose.yaml  # Main Docker configuration
-├── setup.sh            # Setup script
-└── README.md           # Project overview
+├── api/                  # Backend API (Node.js + Express)
+│   ├── src/
+│   ├── prisma/          # Database schema & migrations
+│   └── tests/
+├── web/                  # Frontend (React + TypeScript)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── contexts/
+│   └── e2e/
+├── docs/                 # Documentation (MkDocs)
+└── docker-compose.yaml   # Docker setup
 ```
-
-## Development Setup
-
-### 1. Fork and Clone
-
-1. Fork the repository on GitHub
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/pulsestage.git
-   cd pulsestage
-   ```
-
-### 2. Initial Setup
-
-Run the setup script to install dependencies and prepare the environment:
-
-```bash
-./setup.sh
-```
-
-This script will:
-- Install dependencies for both API and web applications
-- Set up environment files
-- Build Docker images
-- Start the database and Redis services
-
-### 3. Start Development Environment
-
-**Option 1: Docker with Hot Reload (Recommended)**
-
-```bash
-# Start all services with hot reload for web frontend
-make dev          # Foreground with logs
-# or
-make up           # Background mode
-
-# Web changes reload instantly!
-# API changes: docker compose restart api
-```
-
-**Option 2: Local Development (for API debugging)**
-
-```bash
-# Start only infrastructure
-docker compose up -d db redis
-
-# Terminal 1: API with hot reload
-cd api && npm run dev
-
-# Terminal 2: Web with hot reload
-cd web && npm run dev
-```
-
-### 4. Load Demo Data (Optional)
-
-```bash
-# Load demo data with Acme Corp tenant
-docker compose exec api npm run db:seed:full
-docker compose restart api
-```
-
-Visit [http://localhost:5173](http://localhost:5173) to see the application.
-
-## Making Changes
-
-### Branch Strategy
-
-1. **Create a feature branch** from `main`:
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Branch naming conventions**:
-   - `feature/description` - New features
-   - `fix/description` - Bug fixes
-   - `docs/description` - Documentation updates
-   - `refactor/description` - Code refactoring
-   - `test/description` - Test improvements
-
-### Development Workflow
-
-1. **Make your changes** following our [coding standards](#coding-standards)
-2. **Write tests** for new functionality
-3. **Update documentation** if needed
-4. **Run tests** to ensure everything works
-5. **Commit your changes** with clear commit messages
-
-### Environment Variables
-
-Copy the example environment file and customize as needed:
-
-```bash
-cp env.example .env
-```
-
-Key environment variables:
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string
-- `SESSION_SECRET` - Session encryption key
-- `CORS_ORIGIN` - Frontend URL for CORS
-
-## Testing
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run API tests only
-cd api && npm test
-
-# Run web tests only
-cd web && npm test
-
-# Run E2E tests
-cd web && npx playwright test
-
-# Run tests with coverage
-cd api && npm run test:coverage
-```
-
-### Test Coverage
-
-We aim for comprehensive test coverage:
-- **API**: Currently at 47.31% coverage (214 tests passing)
-- **Frontend**: Component and integration tests
-- **E2E**: Critical user journeys with Playwright
-
-### Writing Tests
-
-- **Unit tests**: Test individual functions and components
-- **Integration tests**: Test API endpoints and database interactions
-- **E2E tests**: Test complete user workflows
-- **Follow the AAA pattern**: Arrange, Act, Assert
-
-## Pull Request Process
-
-### Before Submitting
-
-1. **Ensure tests pass**:
-   ```bash
-   npm test
-   cd web && npx playwright test
-   ```
-
-2. **Check code quality**:
-   ```bash
-   cd api && npm run lint
-   cd web && npm run lint
-   ```
-
-3. **Update documentation** if your changes affect:
-   - API endpoints
-   - User interface
-   - Configuration
-   - Installation process
-
-### PR Guidelines
-
-1. **Create a clear title** describing the change
-2. **Write a detailed description**:
-   - What changes were made
-   - Why the changes were necessary
-   - How to test the changes
-   - Any breaking changes or migration steps
-
-3. **Link related issues** using `Fixes #123` or `Closes #123`
-
-4. **Include screenshots** for UI changes
-
-5. **Keep PRs focused** - one feature or bug fix per PR
-
-### PR Template
-
-```markdown
-## Description
-Brief description of changes
-
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-
-## Testing
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] E2E tests pass
-- [ ] Manual testing completed
-
-## Screenshots (if applicable)
-[Add screenshots here]
-
-## Checklist
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Documentation updated
-- [ ] Tests added/updated
-```
-
-### Review Process
-
-1. **Automated checks** must pass (CI/CD pipeline)
-2. **Code review** by maintainers
-3. **Approval** from at least one maintainer
-4. **Merge** after approval
-
-## Coding Standards
-
-### TypeScript
-
-- **Strict mode enabled** - No `any` types without justification
-- **Explicit return types** for functions
-- **Interface over type** for object shapes
-- **Use enums** for constants with multiple values
-
-### Code Style
-
-- **ESLint configuration** enforced
-- **Prettier formatting** for consistent style
-- **Meaningful variable names** - avoid abbreviations
-- **Small functions** - single responsibility principle
-- **DRY principle** - Don't Repeat Yourself
-
-### API Development
-
-- **RESTful endpoints** following REST conventions
-- **Input validation** using middleware
-- **Error handling** with proper HTTP status codes
-- **Rate limiting** on all public endpoints
-- **Authentication** required for protected routes
-
-### React Development
-
-- **Functional components** with hooks
-- **TypeScript interfaces** for props
-- **Custom hooks** for reusable logic
-- **Error boundaries** for error handling
-- **Accessibility** (a11y) considerations
-
-### Database
-
-- **Prisma ORM** for database operations
-- **Migrations** for schema changes
-- **Indexes** for performance optimization
-- **Constraints** for data integrity
 
 ## Documentation
 
-### Code Documentation
+All documentation lives in `docs/`:
+- **Getting Started**: Installation, quick start, configuration
+- **User Guide**: How to use PulseStage
+- **Moderator Guide**: Moderation tools
+- **Admin Guide**: Administration tasks
+- **Development**: Contributing, testing, code style
+- **Architecture**: System design, database schema
+- **API Reference**: REST API documentation
+- **Deployment**: Production setup, monitoring
 
-- **JSDoc comments** for public APIs
-- **Inline comments** for complex logic
-- **README updates** for significant changes
-- **API documentation** in OpenAPI format
-
-### User Documentation
-
-- **MkDocs** for comprehensive guides
-- **Clear examples** and code snippets
-- **Screenshots** for UI changes
-- **Troubleshooting** sections
-
-## Reporting Issues
-
-### Bug Reports
-
-Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) and include:
-
-- **Clear title** describing the issue
-- **Steps to reproduce** the problem
-- **Expected vs actual behavior**
-- **Environment details** (OS, browser, Node.js version)
-- **Screenshots** or error messages
-- **Logs** from browser console or server
-
-### Feature Requests
-
-Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) and include:
-
-- **Clear title** describing the feature
-- **Problem description** and use case
-- **Proposed solution** with examples
-- **Alternatives considered**
-- **Additional context** (screenshots, mockups)
-
-### Security Issues
-
-**Do not** report security vulnerabilities through public issues. Instead:
-
-1. Email [seanmdalton@pm.me](mailto:seanmdalton@pm.me)
-2. Include detailed reproduction steps
-3. Allow time for response before public disclosure
-
-## Community
-
-### Getting Help
-
-- **Documentation**: [https://seanmdalton.github.io/pulsestage/](https://seanmdalton.github.io/pulsestage/)
-- **Issues**: [GitHub Issues](https://github.com/seanmdalton/pulsestage/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/seanmdalton/pulsestage/discussions)
-
-### Contributing Areas
-
-We welcome contributions in many areas:
-
-- **Bug fixes** and performance improvements
-- **New features** and enhancements
-- **Documentation** improvements
-- **Test coverage** expansion
-- **UI/UX** improvements
-- **Security** enhancements
-- **Accessibility** improvements
-
-### Recognition
-
-Contributors are recognized in:
-- **GitHub contributors** list
-- **Release notes** for significant contributions
-- **Community highlights** in discussions
+When adding features, update relevant documentation.
 
 ## License
 
-By contributing to PulseStage, you agree that your contributions will be licensed under the Apache License 2.0.
+By contributing, you agree that your contributions will be licensed under the **Apache License 2.0**.
+
+## Questions?
+
+- 💬 Ask in **[Discussions](https://github.com/seanmdalton/pulsestage/discussions)**
+- 📧 Email: **[seanmdalton@pm.me](mailto:seanmdalton@pm.me)**
 
 ---
 
-Thank you for contributing to PulseStage! 🚀
-
-For questions about contributing, please open a [discussion](https://github.com/seanmdalton/pulsestage/discussions) or email [seanmdalton@pm.me](mailto:seanmdalton@pm.me).
+**Thank you for contributing to PulseStage!** 🎉
