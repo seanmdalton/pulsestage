@@ -4,7 +4,10 @@ dist
 .DS_Store
 .vscode
 coverage
-.cursor
+
+# Cursor AI artifacts (but keep .cursor/rules/)
+.cursor/screenshots/
+.cursor/*.md
 
 # Deployment files with actual secrets (keep local only)
 RENDER_DEPLOYMENT.md
