@@ -1827,6 +1827,211 @@ export function createApp(prisma: PrismaClient) {
     res.json(list);
   });
 
+  // Search questions endpoint with improved fuzzy matching
+  // Search questions - requires authentication
+  // NOTE: This MUST come before /questions/:id to avoid "search" being treated as an ID
+  app.get('/questions/search', requireAuth, async (req, res) => {
+    const { q: query, teamId } = req.query;
+
+    if (!query || typeof query !== 'string' || query.trim().length < 2) {
+      return res.json([]);
+    }
+
+    const searchTerm = query.trim();
+
+    try {
+      // Extract meaningful keywords from the search query
+      const extractKeywords = (text: string): string[] => {
+        // Remove common stop words and extract meaningful terms
+        const stopWords = new Set([
+          'the',
+          'a',
+          'an',
+          'and',
+          'or',
+          'but',
+          'in',
+          'on',
+          'at',
+          'to',
+          'for',
+          'of',
+          'with',
+          'by',
+          'can',
+          'you',
+          'we',
+          'i',
+          'is',
+          'are',
+          'was',
+          'were',
+          'be',
+          'been',
+          'have',
+          'has',
+          'had',
+          'do',
+          'does',
+          'did',
+          'will',
+          'would',
+          'could',
+          'should',
+          'may',
+          'might',
+          'must',
+          'shall',
+          'about',
+          'there',
+          'when',
+          'where',
+          'why',
+          'how',
+          'what',
+          'who',
+          'which',
+          'this',
+          'that',
+          'these',
+          'those',
+        ]);
+
+        return text
+          .toLowerCase()
+          .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+          .split(/\s+/)
+          .filter(word => word.length > 2 && !stopWords.has(word))
+          .slice(0, 5); // Limit to 5 most relevant keywords
+      };
+
+      const keywords = extractKeywords(searchTerm);
+
+      if (keywords.length === 0) {
+        // Fallback to original search if no keywords extracted
+        const whereClause: any = {
+          OR: [
+            {
+              body: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+            {
+              responseText: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+          ],
+        };
+
+        // Add team filter if provided
+        if (teamId && typeof teamId === 'string') {
+          whereClause.teamId = teamId;
+        }
+
+        const questions = await prisma.question.findMany({
+          where: whereClause,
+          include: {
+            team: true,
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+          orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
+          take: DATABASE_LIMITS.DEFAULT_PAGINATION,
+        });
+        return res.json(questions);
+      }
+
+      // Build dynamic OR conditions for each keyword
+      const bodyConditions = keywords.map(keyword => ({
+        body: {
+          contains: keyword,
+          mode: 'insensitive' as const,
+        },
+      }));
+
+      const responseConditions = keywords.map(keyword => ({
+        responseText: {
+          contains: keyword,
+          mode: 'insensitive' as const,
+        },
+      }));
+
+      // Search with keyword-based matching
+      const searchWhereClause: any = {
+        OR: [...bodyConditions, ...responseConditions],
+      };
+
+      // Add team filter if provided
+      if (teamId && typeof teamId === 'string') {
+        searchWhereClause.teamId = teamId;
+      }
+
+      const questions = await prisma.question.findMany({
+        where: searchWhereClause,
+        include: {
+          team: true,
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+        orderBy: [
+          { status: 'asc' }, // OPEN questions first
+          { upvotes: 'desc' },
+          { createdAt: 'desc' },
+        ],
+        take: 10,
+      });
+
+      // Score and rank results based on keyword matches
+      const scoredQuestions = questions.map(question => {
+        let score = 0;
+        const bodyLower = question.body.toLowerCase();
+        const responseLower = (question.responseText || '').toLowerCase();
+
+        // Score based on keyword matches
+        keywords.forEach(keyword => {
+          if (bodyLower.includes(keyword)) score += 2; // Body matches are more important
+          if (responseLower.includes(keyword)) score += 1;
+        });
+
+        // Bonus for exact phrase matches
+        if (bodyLower.includes(searchTerm.toLowerCase())) score += 5;
+        if (responseLower.includes(searchTerm.toLowerCase())) score += 3;
+
+        // Bonus for status and popularity
+        if (question.status === 'OPEN') score += 1;
+        score += question.upvotes * 0.1;
+
+        return { ...question, searchScore: score };
+      });
+
+      // Sort by search score, then by original criteria
+      const rankedQuestions = scoredQuestions
+        .filter(q => q.searchScore > 0)
+        .sort((a, b) => {
+          if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
+          if (a.status !== b.status) return a.status === 'OPEN' ? -1 : 1;
+          if (b.upvotes !== a.upvotes) return b.upvotes - a.upvotes;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
+        .slice(0, DATABASE_LIMITS.DEFAULT_SEARCH_LIMIT)
+        .map(({ searchScore: _searchScore, ...question }) => question); // Remove score from response
+
+      res.json(rankedQuestions);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: 'Search failed' });
+    }
+  });
+
   // Get a single question by ID
   // Get question by ID - requires authentication
   app.get('/questions/:id', requireAuth, async (req, res) => {
@@ -2718,218 +2923,6 @@ export function createApp(prisma: PrismaClient) {
       }
     }
   );
-
-  // Search questions endpoint with improved fuzzy matching
-  // Search questions - requires authentication
-  app.get('/questions/search', requireAuth, async (req, res) => {
-    console.log('🔎 Search endpoint hit:', {
-      query: req.query.q,
-      teamId: req.query.teamId,
-      user: req.user?.email,
-    });
-
-    const { q: query, teamId } = req.query;
-
-    if (!query || typeof query !== 'string' || query.trim().length < 2) {
-      console.log('🔎 Search: Query too short, returning empty array');
-      return res.json([]);
-    }
-
-    const searchTerm = query.trim();
-
-    try {
-      // Extract meaningful keywords from the search query
-      const extractKeywords = (text: string): string[] => {
-        // Remove common stop words and extract meaningful terms
-        const stopWords = new Set([
-          'the',
-          'a',
-          'an',
-          'and',
-          'or',
-          'but',
-          'in',
-          'on',
-          'at',
-          'to',
-          'for',
-          'of',
-          'with',
-          'by',
-          'can',
-          'you',
-          'we',
-          'i',
-          'is',
-          'are',
-          'was',
-          'were',
-          'be',
-          'been',
-          'have',
-          'has',
-          'had',
-          'do',
-          'does',
-          'did',
-          'will',
-          'would',
-          'could',
-          'should',
-          'may',
-          'might',
-          'must',
-          'shall',
-          'about',
-          'there',
-          'when',
-          'where',
-          'why',
-          'how',
-          'what',
-          'who',
-          'which',
-          'this',
-          'that',
-          'these',
-          'those',
-        ]);
-
-        return text
-          .toLowerCase()
-          .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
-          .split(/\s+/)
-          .filter(word => word.length > 2 && !stopWords.has(word))
-          .slice(0, 5); // Limit to 5 most relevant keywords
-      };
-
-      const keywords = extractKeywords(searchTerm);
-
-      if (keywords.length === 0) {
-        // Fallback to original search if no keywords extracted
-        const whereClause: any = {
-          OR: [
-            {
-              body: {
-                contains: searchTerm,
-                mode: 'insensitive',
-              },
-            },
-            {
-              responseText: {
-                contains: searchTerm,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        };
-
-        // Add team filter if provided
-        if (teamId && typeof teamId === 'string') {
-          whereClause.teamId = teamId;
-        }
-
-        const questions = await prisma.question.findMany({
-          where: whereClause,
-          include: {
-            team: true,
-            tags: {
-              include: {
-                tag: true,
-              },
-            },
-          },
-          orderBy: [{ status: 'asc' }, { upvotes: 'desc' }, { createdAt: 'desc' }],
-          take: DATABASE_LIMITS.DEFAULT_PAGINATION,
-        });
-        return res.json(questions);
-      }
-
-      // Build dynamic OR conditions for each keyword
-      const bodyConditions = keywords.map(keyword => ({
-        body: {
-          contains: keyword,
-          mode: 'insensitive' as const,
-        },
-      }));
-
-      const responseConditions = keywords.map(keyword => ({
-        responseText: {
-          contains: keyword,
-          mode: 'insensitive' as const,
-        },
-      }));
-
-      // Search with keyword-based matching
-      const searchWhereClause: any = {
-        OR: [...bodyConditions, ...responseConditions],
-      };
-
-      // Add team filter if provided
-      if (teamId && typeof teamId === 'string') {
-        searchWhereClause.teamId = teamId;
-      }
-
-      const questions = await prisma.question.findMany({
-        where: searchWhereClause,
-        include: {
-          team: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-        orderBy: [
-          { status: 'asc' }, // OPEN questions first
-          { upvotes: 'desc' },
-          { createdAt: 'desc' },
-        ],
-        take: 10,
-      });
-
-      // Score and rank results based on keyword matches
-      const scoredQuestions = questions.map(question => {
-        let score = 0;
-        const bodyLower = question.body.toLowerCase();
-        const responseLower = (question.responseText || '').toLowerCase();
-
-        // Score based on keyword matches
-        keywords.forEach(keyword => {
-          if (bodyLower.includes(keyword)) score += 2; // Body matches are more important
-          if (responseLower.includes(keyword)) score += 1;
-        });
-
-        // Bonus for exact phrase matches
-        if (bodyLower.includes(searchTerm.toLowerCase())) score += 5;
-        if (responseLower.includes(searchTerm.toLowerCase())) score += 3;
-
-        // Bonus for status and popularity
-        if (question.status === 'OPEN') score += 1;
-        score += question.upvotes * 0.1;
-
-        return { ...question, searchScore: score };
-      });
-
-      // Sort by search score, then by original criteria
-      const rankedQuestions = scoredQuestions
-        .filter(q => q.searchScore > 0)
-        .sort((a, b) => {
-          if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
-          if (a.status !== b.status) return a.status === 'OPEN' ? -1 : 1;
-          if (b.upvotes !== a.upvotes) return b.upvotes - a.upvotes;
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        })
-        .slice(0, DATABASE_LIMITS.DEFAULT_SEARCH_LIMIT)
-        .map(({ searchScore: _searchScore, ...question }) => question); // Remove score from response
-
-      console.log('🔎 Search results:', { count: rankedQuestions.length, query: searchTerm });
-      res.json(rankedQuestions);
-    } catch (error) {
-      console.error('🔎 Search error:', error);
-      res.status(500).json({ error: 'Search failed' });
-    }
-  });
 
   // Export endpoints (admin only)
 
