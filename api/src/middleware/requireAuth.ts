@@ -21,6 +21,15 @@ import { Request, Response, NextFunction } from 'express';
  * Returns 401 if user is not authenticated
  */
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  // Debug logging for search endpoint
+  if (req.path === '/questions/search') {
+    console.log('🔒 requireAuth check for search:', {
+      path: req.path,
+      hasUser: !!req.user,
+      user: req.user,
+    });
+  }
+
   if (!req.user) {
     return res.status(401).json({
       error: 'Unauthorized',

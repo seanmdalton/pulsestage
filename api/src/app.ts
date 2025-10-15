@@ -2722,9 +2722,16 @@ export function createApp(prisma: PrismaClient) {
   // Search questions endpoint with improved fuzzy matching
   // Search questions - requires authentication
   app.get('/questions/search', requireAuth, async (req, res) => {
+    console.log('🔎 Search endpoint hit:', {
+      query: req.query.q,
+      teamId: req.query.teamId,
+      user: req.user?.email,
+    });
+
     const { q: query, teamId } = req.query;
 
     if (!query || typeof query !== 'string' || query.trim().length < 2) {
+      console.log('🔎 Search: Query too short, returning empty array');
       return res.json([]);
     }
 
@@ -2916,9 +2923,10 @@ export function createApp(prisma: PrismaClient) {
         .slice(0, DATABASE_LIMITS.DEFAULT_SEARCH_LIMIT)
         .map(({ searchScore: _searchScore, ...question }) => question); // Remove score from response
 
+      console.log('🔎 Search results:', { count: rankedQuestions.length, query: searchTerm });
       res.json(rankedQuestions);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('🔎 Search error:', error);
       res.status(500).json({ error: 'Search failed' });
     }
   });
