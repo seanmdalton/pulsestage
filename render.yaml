@@ -1,0 +1,39 @@
+services:
+  # API Service
+  - type: web
+    name: pulsestage-demo-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: AUTH_MODE_DEMO
+        value: true
+      - key: SESSION_SECRET
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+      - key: ADMIN_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://demo.pulsestage.app,http://localhost:5173
+      - key: PORT
+        value: 3000
+
+  # Web Service
+  - type: web
+    name: pulsestage-demo-web
+    runtime: docker
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: ./web
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://api-demo.pulsestage.app
+
