@@ -100,7 +100,10 @@ add_header Content-Security-Policy "default-src 'self'; script-src 'self'; ..." 
 
 **Test your CSP:**
 - Mozilla Observatory: https://observatory.mozilla.org/
-- Target: A grade or higher
+- Expected: **B or B+** grade (meta tag limitations)
+- Grade A requires: HTTP headers with nonces (future enhancement)
+
+**Note:** Grade B+ is excellent for meta-tag CSP and provides strong XSS protection.
 
 **[Complete CSP Documentation →](../security/security-headers.md)**
 

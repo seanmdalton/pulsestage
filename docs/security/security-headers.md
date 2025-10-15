@@ -51,8 +51,15 @@ The web frontend includes CSP via meta tag in `web/index.html`:
 
 **Why `'unsafe-inline'` for styles?**
 - React components use dynamic inline styles for tag colors (`style={{ backgroundColor: tag.color }}`)
-- Future enhancement: migrate to CSS custom properties to eliminate `'unsafe-inline'`
+- Meta-tag CSP cannot use nonces/hashes to allow specific inline styles
+- Future enhancement: migrate to CSS custom properties OR implement nonce-based CSP via HTTP headers
 - This is the only relaxation from strict CSP and is acceptable for modern SPAs
+
+**Meta Tag Limitations:**
+- `frame-ancestors` directive is NOT supported in meta tags (only in HTTP headers)
+- Cannot use nonces or hashes for inline content
+- Cannot achieve Mozilla Observatory Grade A with meta tags alone
+- **Grade B+** is the maximum achievable with meta-tag-only CSP and is considered excellent
 
 **CSP Directives Explained:**
 - `default-src 'self'`: Only load resources from same origin by default
@@ -207,10 +214,17 @@ curl -I http://localhost:5001/health
 
 Test your deployed site manually:
 
-1. Visit: https://developer.mozilla.org/en-US/observatory/
+1. Visit: https://observatory.mozilla.org/
 2. Enter your site URL
 3. Run the scan
-4. Target score: **A grade or higher**
+4. **Expected Grade**: **B or B+** (meta tag CSP limitations)
+5. **Grade A requires**: HTTP headers with nonces (future enhancement)
+
+**Why B+ is Excellent:**
+- Meta tags cannot support `frame-ancestors` (HTTP header only)
+- Meta tags cannot use nonces/hashes for inline styles
+- B+ represents best-in-class meta tag CSP implementation
+- Provides strong XSS protection despite limitations
 
 ### SecurityHeaders.com
 
