@@ -2992,8 +2992,14 @@
 </span></code></pre></div>
 <p><strong>Why <code>'unsafe-inline'</code> for styles?</strong>
 - React components use dynamic inline styles for tag colors (<code>style={{ backgroundColor: tag.color }}</code>)
-- Future enhancement: migrate to CSS custom properties to eliminate <code>'unsafe-inline'</code>
+- Meta-tag CSP cannot use nonces/hashes to allow specific inline styles
+- Future enhancement: migrate to CSS custom properties OR implement nonce-based CSP via HTTP headers
 - This is the only relaxation from strict CSP and is acceptable for modern SPAs</p>
+<p><strong>Meta Tag Limitations:</strong>
+- <code>frame-ancestors</code> directive is NOT supported in meta tags (only in HTTP headers)
+- Cannot use nonces or hashes for inline content
+- Cannot achieve Mozilla Observatory Grade A with meta tags alone
+- <strong>Grade B+</strong> is the maximum achievable with meta-tag-only CSP and is considered excellent</p>
 <p><strong>CSP Directives Explained:</strong>
 - <code>default-src 'self'</code>: Only load resources from same origin by default
 - <code>script-src 'self'</code>: No inline scripts, only bundled JavaScript
@@ -3094,11 +3100,17 @@
 <h3 id="mozilla-http-observatory-manual">Mozilla HTTP Observatory (Manual)<a class="headerlink" href="#mozilla-http-observatory-manual" title="Anchor link to this section">&para;</a></h3>
 <p>Test your deployed site manually:</p>
 <ol>
-<li>Visit: https://developer.mozilla.org/en-US/observatory/</li>
+<li>Visit: https://observatory.mozilla.org/</li>
 <li>Enter your site URL</li>
 <li>Run the scan</li>
-<li>Target score: <strong>A grade or higher</strong></li>
+<li><strong>Expected Grade</strong>: <strong>B or B+</strong> (meta tag CSP limitations)</li>
+<li><strong>Grade A requires</strong>: HTTP headers with nonces (future enhancement)</li>
 </ol>
+<p><strong>Why B+ is Excellent:</strong>
+- Meta tags cannot support <code>frame-ancestors</code> (HTTP header only)
+- Meta tags cannot use nonces/hashes for inline styles
+- B+ represents best-in-class meta tag CSP implementation
+- Provides strong XSS protection despite limitations</p>
 <h3 id="securityheaderscom">SecurityHeaders.com<a class="headerlink" href="#securityheaderscom" title="Anchor link to this section">&para;</a></h3>
 <p>Alternative testing tool:</p>
 <ol>
@@ -3198,7 +3210,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 20:47:18 UTC"><span class="timeago" datetime="2025-10-15T20:47:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 20:47:18 UTC">2025-10-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 23:27:51 UTC"><span class="timeago" datetime="2025-10-15T23:27:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 23:27:51 UTC">2025-10-15</span>
   </span>
 
     

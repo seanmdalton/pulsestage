@@ -12,20 +12,16 @@
         <meta name="author" content="Sean Dalton">
       
       
-        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/production/">
+        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/oauth-setup/">
       
       
-        <link rel="prev" href="../docker-compose/">
-      
-      
-        <link rel="next" href="../environment/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
     
     
-  <title>Production Deployment - PulseStage Documentation</title>
+  <title>OAuth Setup Guide - PulseStage Documentation</title>
 
     
       <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
@@ -80,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#production-deployment" class="md-skip">
+        <a href="#oauth-setup-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Production Deployment
+              OAuth Setup Guide
             
           </span>
         </div>
@@ -324,12 +320,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../docker-compose/" class="md-tabs__link">
           
   
@@ -2280,10 +2274,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -2301,22 +2293,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -2329,7 +2320,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Deployment
@@ -2363,32 +2354,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Production Deployment
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../production/" class="md-nav__link">
         
   
   
@@ -2399,422 +2368,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pre-deployment-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Pre-Deployment Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Environment Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#required-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Variables
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-hardening" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Hardening
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Security Hardening">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-secrets-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Secrets Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#1a-security-headers" class="md-nav__link">
-    <span class="md-ellipsis">
-      1a. Security Headers
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-network-security" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Network Security
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-database-security" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Database Security
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Authentication
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deployment Options
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Deployment Options">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-docker-compose-self-hosted" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 1: Docker Compose (Self-Hosted)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-cloud-platform-render-heroku" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 2: Cloud Platform (Render, Heroku)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-3-kubernetes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 3: Kubernetes
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Database Setup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#postgresql" class="md-nav__link">
-    <span class="md-ellipsis">
-      PostgreSQL
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#redis" class="md-nav__link">
-    <span class="md-ellipsis">
-      Redis
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#email-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Email Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Email Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#supported-providers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Supported Providers
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-sendgrid" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example: SendGrid
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ssltls-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSL/TLS Setup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="SSL/TLS Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-lets-encrypt-free" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 1: Let's Encrypt (Free)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-cloud-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 2: Cloud Provider
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-3-cloudflare" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 3: Cloudflare
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backups" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backups
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Backups">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#database-backups" class="md-nav__link">
-    <span class="md-ellipsis">
-      Database Backups
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#disaster-recovery" class="md-nav__link">
-    <span class="md-ellipsis">
-      Disaster Recovery
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scaling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scaling
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Scaling">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#vertical-scaling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Vertical Scaling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#horizontal-scaling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Horizontal Scaling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#monitoring" class="md-nav__link">
-    <span class="md-ellipsis">
-      Monitoring
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#maintenance" class="md-nav__link">
-    <span class="md-ellipsis">
-      Maintenance
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Maintenance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#updates" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updates
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-migrations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Database Migrations
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      See Also
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3044,277 +2597,267 @@
   
 
 
-<h1 id="production-deployment">Production Deployment<a class="headerlink" href="#production-deployment" title="Anchor link to this section">&para;</a></h1>
-<p>Deploy PulseStage to production with proper security and reliability.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
-<p>PulseStage can be deployed to:
-- <strong>Self-hosted</strong> with Docker Compose
-- <strong>Cloud platforms</strong> like Render, Heroku, Railway
-- <strong>Kubernetes</strong> (advanced)</p>
-<p>This guide covers general production considerations.</p>
-<h2 id="pre-deployment-checklist">Pre-Deployment Checklist<a class="headerlink" href="#pre-deployment-checklist" title="Anchor link to this section">&para;</a></h2>
-<p>✅ <strong><a href="../production-checklist/">Use the Production Checklist</a></strong> - Complete guide</p>
-<p>Quick checklist:
-- [ ] Generate secure secrets
-- [ ] Configure OAuth (GitHub/Google)
-- [ ] Set up PostgreSQL database
-- [ ] Set up Redis instance
-- [ ] Configure environment variables
-- [ ] Set up domain and SSL
-- [ ] Configure email provider (optional)
-- [ ] Set up backups
-- [ ] Plan monitoring</p>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Anchor link to this section">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│   Browser   │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>└──────┬──────┘
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>       │ HTTPS
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       ▼
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>┌─────────────┐
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   Nginx/    │ ← SSL termination
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  Traefik    │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>└──────┬──────┘
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>       │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>       ├────────► Web (React) :5173
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>       │
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>       └────────► API (Express) :3000
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                      │
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                      ├────► PostgreSQL :5432
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                      └────► Redis :6379
+<h1 id="oauth-setup-guide">OAuth Setup Guide<a class="headerlink" href="#oauth-setup-guide" title="Anchor link to this section">&para;</a></h1>
+<p>This guide walks through setting up OAuth authentication (GitHub and Google) for your PulseStage deployment.</p>
+<h2 id="github-oauth-setup">GitHub OAuth Setup<a class="headerlink" href="#github-oauth-setup" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-create-github-oauth-app">1. Create GitHub OAuth App<a class="headerlink" href="#1-create-github-oauth-app" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to <a href="https://github.com/settings/developers">GitHub Developer Settings → OAuth Apps</a></li>
+<li>Click <strong>"New OAuth App"</strong></li>
+<li>Fill in the application details:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application name</strong></td>
+<td><code>PulseStage Demo</code></td>
+<td>Or your organization name</td>
+</tr>
+<tr>
+<td><strong>Homepage URL</strong></td>
+<td><code>https://demo.pulsestage.app</code></td>
+<td>Your frontend URL</td>
+</tr>
+<tr>
+<td><strong>Authorization callback URL</strong></td>
+<td><code>https://api-demo.pulsestage.app/auth/github/callback</code></td>
+<td>Must match API URL + <code>/auth/github/callback</code></td>
+</tr>
+<tr>
+<td><strong>Application description</strong></td>
+<td><code>PulseStage Q&amp;A Platform</code></td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Click <strong>"Register application"</strong></li>
+<li><strong>Copy the Client ID</strong> (displayed immediately)</li>
+<li>Click <strong>"Generate a new client secret"</strong></li>
+<li><strong>Copy the Client Secret</strong> immediately (you won't see it again!)</li>
+</ol>
+<h3 id="2-configure-environment-variables">2. Configure Environment Variables<a class="headerlink" href="#2-configure-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<p>Add these to your deployment environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_client_id_here
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://api-demo.pulsestage.app/auth/github/callback
 </span></code></pre></div>
-<h2 id="environment-configuration">Environment Configuration<a class="headerlink" href="#environment-configuration" title="Anchor link to this section">&para;</a></h2>
-<h3 id="required-variables">Required Variables<a class="headerlink" href="#required-variables" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Database</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://user:pass@host:5432/pulsestage
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Cache &amp; Sessions</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://host:6379
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">SESSION_SECRET</span><span class="o">=</span>&lt;<span class="m">64</span>-char-random&gt;
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nv">CSRF_SECRET</span><span class="o">=</span>&lt;<span class="m">64</span>-char-random&gt;
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Authentication (GitHub example)</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_client_id
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_client_secret
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://api.yourdomain.com/auth/github/callback
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># Application</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://yourdomain.com
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://yourdomain.com
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="c1"># Admin</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="nv">ADMIN_KEY</span><span class="o">=</span>&lt;<span class="m">32</span>-char-random&gt;
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="nv">ADMIN_SESSION_SECRET</span><span class="o">=</span>&lt;<span class="m">64</span>-char-random&gt;
+<p><strong>For Render:</strong>
+1. Go to your API service dashboard
+2. Navigate to <strong>Environment</strong> tab
+3. Add each variable (Client Secret should be added as a secret)</p>
+<p><strong>For Docker Compose (local testing):</strong>
+1. Add to your <code>.env</code> file (do NOT commit this!)
+2. Callback URL should be <code>http://localhost:3000/auth/github/callback</code></p>
+<h3 id="3-test-the-integration">3. Test the Integration<a class="headerlink" href="#3-test-the-integration" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Visit your frontend login page</li>
+<li>You should now see a <strong>"Sign in with GitHub"</strong> button</li>
+<li>Click it to test the OAuth flow</li>
+<li>Authorize the application</li>
+<li>You should be redirected back and logged in</li>
+</ol>
+<h2 id="google-oauth-setup">Google OAuth Setup<a class="headerlink" href="#google-oauth-setup" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-create-google-cloud-project">1. Create Google Cloud Project<a class="headerlink" href="#1-create-google-cloud-project" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to <a href="https://console.cloud.google.com/">Google Cloud Console</a></li>
+<li>Create a new project or select an existing one</li>
+<li>Navigate to <strong>APIs &amp; Services → Credentials</strong></li>
+<li>Click <strong>"Create Credentials" → "OAuth client ID"</strong></li>
+</ol>
+<h3 id="2-configure-oauth-consent-screen">2. Configure OAuth Consent Screen<a class="headerlink" href="#2-configure-oauth-consent-screen" title="Anchor link to this section">&para;</a></h3>
+<p>Before creating credentials, you'll need to configure the consent screen:</p>
+<ol>
+<li>Click <strong>"Configure Consent Screen"</strong></li>
+<li>Select <strong>"External"</strong> (unless you're in Google Workspace)</li>
+<li>Fill in required fields:</li>
+<li><strong>App name</strong>: <code>PulseStage</code></li>
+<li><strong>User support email</strong>: Your email</li>
+<li><strong>Developer contact</strong>: Your email</li>
+<li>Click <strong>"Save and Continue"</strong></li>
+<li>Skip "Scopes" (default is fine)</li>
+<li>Add test users if in testing mode</li>
+<li>Click <strong>"Save and Continue"</strong></li>
+</ol>
+<h3 id="3-create-oauth-credentials">3. Create OAuth Credentials<a class="headerlink" href="#3-create-oauth-credentials" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Back in <strong>Credentials</strong>, click <strong>"Create Credentials" → "OAuth client ID"</strong></li>
+<li>Select <strong>"Web application"</strong></li>
+<li>Fill in details:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Name</strong></td>
+<td><code>PulseStage Web</code></td>
+<td>Descriptive name</td>
+</tr>
+<tr>
+<td><strong>Authorized JavaScript origins</strong></td>
+<td><code>https://demo.pulsestage.app</code></td>
+<td>Your frontend URL</td>
+</tr>
+<tr>
+<td><strong>Authorized redirect URIs</strong></td>
+<td><code>https://api-demo.pulsestage.app/auth/google/callback</code></td>
+<td>Must match API URL + <code>/auth/google/callback</code></td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Click <strong>"Create"</strong></li>
+<li><strong>Copy the Client ID and Client Secret</strong></li>
+</ol>
+<h3 id="4-configure-environment-variables">4. Configure Environment Variables<a class="headerlink" href="#4-configure-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<p>Add these to your deployment environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_client_id_here.apps.googleusercontent.com
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>https://api-demo.pulsestage.app/auth/google/callback
 </span></code></pre></div>
-<p><strong><a href="../environment/">Complete Environment Reference →</a></strong></p>
-<h2 id="security-hardening">Security Hardening<a class="headerlink" href="#security-hardening" title="Anchor link to this section">&para;</a></h2>
-<h3 id="1-secrets-management">1. Secrets Management<a class="headerlink" href="#1-secrets-management" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Never hardcode secrets</strong>. Use:
-- Environment variables
-- Secret management service (AWS Secrets Manager, HashiCorp Vault)
-- Encrypted configuration files</p>
-<h3 id="1a-security-headers">1a. Security Headers<a class="headerlink" href="#1a-security-headers" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Implement Content Security Policy (CSP)</strong> for the frontend:</p>
-<ul>
-<li>✅ <strong>Meta tag</strong> - Already included in <code>web/index.html</code></li>
-<li>✅ <strong>Nginx headers</strong> - Add to your web server config</li>
-</ul>
-<div class="language-nginx highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># See docs/deployment/nginx-csp.conf for full configuration</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">add_header</span><span class="w"> </span><span class="s">Content-Security-Policy</span><span class="w"> </span><span class="s">&quot;default-src</span><span class="w"> </span><span class="s">&#39;self&#39;</span><span class="p">;</span><span class="w"> </span><span class="k">script-src</span><span class="w"> </span><span class="s">&#39;self&#39;</span><span class="p">;</span><span class="w"> </span><span class="k">...&quot;</span><span class="w"> </span><span class="s">always</span><span class="p">;</span>
+<p><strong>For Render:</strong>
+1. Go to your API service dashboard
+2. Navigate to <strong>Environment</strong> tab
+3. Add each variable (Client Secret should be added as a secret)</p>
+<p><strong>For Docker Compose (local testing):</strong>
+1. Add to your <code>.env</code> file (do NOT commit this!)
+2. Callback URL should be <code>http://localhost:3000/auth/google/callback</code></p>
+<h3 id="5-test-the-integration">5. Test the Integration<a class="headerlink" href="#5-test-the-integration" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Visit your frontend login page</li>
+<li>You should now see a <strong>"Sign in with Google"</strong> button</li>
+<li>Click it to test the OAuth flow</li>
+<li>Sign in with your Google account</li>
+<li>You should be redirected back and logged in</li>
+</ol>
+<h2 id="render-configuration-renderyaml">Render Configuration (render.yaml)<a class="headerlink" href="#render-configuration-renderyaml" title="Anchor link to this section">&para;</a></h2>
+<p>Here's the complete configuration for <code>render.yaml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">services</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="c1"># API Service</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pulsestage-demo-api</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">envVars</span><span class="p">:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="c1"># ... other vars ...</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="c1"># GitHub OAuth (optional)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_CLIENT_ID</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_CLIENT_SECRET</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_CALLBACK_URL</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://api-demo.pulsestage.app/auth/github/callback</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">      </span><span class="c1"># Google OAuth (optional)</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GOOGLE_CLIENT_ID</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GOOGLE_CLIENT_SECRET</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GOOGLE_CALLBACK_URL</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://api-demo.pulsestage.app/auth/google/callback</span>
 </span></code></pre></div>
-<p><strong>Test your CSP:</strong>
-- Mozilla Observatory: https://observatory.mozilla.org/
-- Expected: <strong>B or B+</strong> grade (meta tag limitations)
-- Grade A requires: HTTP headers with nonces (future enhancement)</p>
-<p><strong>Note:</strong> Grade B+ is excellent for meta-tag CSP and provides strong XSS protection.</p>
-<p><strong><a href="../../security/security-headers/">Complete CSP Documentation →</a></strong></p>
-<h3 id="2-network-security">2. Network Security<a class="headerlink" href="#2-network-security" title="Anchor link to this section">&para;</a></h3>
-<ul>
-<li>✅ Use HTTPS only (<code>secure: true</code> cookies)</li>
-<li>✅ Configure CORS properly</li>
-<li>✅ Enable rate limiting</li>
-<li>✅ Use security headers (Helmet)</li>
-<li>✅ Keep services on private network</li>
-</ul>
-<h3 id="3-database-security">3. Database Security<a class="headerlink" href="#3-database-security" title="Anchor link to this section">&para;</a></h3>
-<ul>
-<li>✅ Use strong passwords</li>
-<li>✅ Limit network access</li>
-<li>✅ Enable SSL connections</li>
-<li>✅ Regular backups</li>
-<li>✅ Principle of least privilege</li>
-</ul>
-<h3 id="4-authentication">4. Authentication<a class="headerlink" href="#4-authentication" title="Anchor link to this section">&para;</a></h3>
-<ul>
-<li>✅ <strong>Disable demo mode</strong> (<code>AUTH_MODE_DEMO=false</code>)</li>
-<li>✅ Use OAuth (GitHub/Google)</li>
-<li>✅ Configure session timeouts</li>
-<li>✅ Monitor failed login attempts</li>
-</ul>
-<h2 id="deployment-options">Deployment Options<a class="headerlink" href="#deployment-options" title="Anchor link to this section">&para;</a></h2>
-<h3 id="option-1-docker-compose-self-hosted">Option 1: Docker Compose (Self-Hosted)<a class="headerlink" href="#option-1-docker-compose-self-hosted" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Best for:</strong> Full control, on-premises deployment</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/seanmdalton/pulsestage.git
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>pulsestage
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Configure .env</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>make<span class="w"> </span>setup
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>make<span class="w"> </span>start
+<p><strong>Notes:</strong>
+- <code>sync: false</code> means these values must be set manually in Render dashboard
+- This prevents secrets from being committed to the repo
+- Callback URLs are safe to hardcode (they're not secrets)</p>
+<h2 id="multi-mode-authentication">Multi-Mode Authentication<a class="headerlink" href="#multi-mode-authentication" title="Anchor link to this section">&para;</a></h2>
+<p>PulseStage supports multiple authentication modes simultaneously:</p>
+<h3 id="demo-oauth-recommended-for-public-demos">Demo + OAuth (Recommended for Public Demos)<a class="headerlink" href="#demo-oauth-recommended-for-public-demos" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
 </span></code></pre></div>
-<p><strong><a href="../docker-compose/">Docker Compose Guide →</a></strong></p>
-<h3 id="option-2-cloud-platform-render-heroku">Option 2: Cloud Platform (Render, Heroku)<a class="headerlink" href="#option-2-cloud-platform-render-heroku" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Best for:</strong> Managed infrastructure, easy scaling</p>
-<p><strong>Render example:</strong>
-1. Connect GitHub repository
-2. Configure environment variables
-3. Deploy via <code>render.yaml</code></p>
-<p><strong><a href="../render-deployment.template/">Render Deployment Guide →</a></strong></p>
-<h3 id="option-3-kubernetes">Option 3: Kubernetes<a class="headerlink" href="#option-3-kubernetes" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Best for:</strong> Enterprise scale, complex deployments</p>
-<ul>
-<li>Use Helm charts (community-maintained)</li>
-<li>Configure persistent volumes</li>
-<li>Set up ingress controller</li>
-<li>Configure horizontal pod autoscaling</li>
-</ul>
-<h2 id="database-setup">Database Setup<a class="headerlink" href="#database-setup" title="Anchor link to this section">&para;</a></h2>
-<h3 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Minimum requirements:</strong>
-- Version: 16+
-- Extensions: <code>pg_trgm</code> (for full-text search)
-- Storage: 10GB minimum</p>
-<p><strong>Recommended:</strong>
-- Connection pooling (PgBouncer)
-- Read replicas for high load
-- Regular backups (automated)</p>
-<h3 id="redis">Redis<a class="headerlink" href="#redis" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Minimum requirements:</strong>
-- Version: 7+
-- Memory: 512MB minimum</p>
-<p><strong>Recommended:</strong>
-- Persistence enabled
-- High availability (Redis Sentinel/Cluster)
-- Monitoring</p>
-<h2 id="email-configuration">Email Configuration<a class="headerlink" href="#email-configuration" title="Anchor link to this section">&para;</a></h2>
-<p><strong>Optional but recommended</strong> for user notifications.</p>
-<h3 id="supported-providers">Supported Providers<a class="headerlink" href="#supported-providers" title="Anchor link to this section">&para;</a></h3>
-<ul>
-<li><strong>SMTP</strong>: SendGrid, AWS SES, Mailgun</li>
-<li><strong>Resend</strong>: Modern email API</li>
-</ul>
-<h3 id="example-sendgrid">Example: SendGrid<a class="headerlink" href="#example-sendgrid" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>smtp.sendgrid.net
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">587</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nv">SMTP_USER</span><span class="o">=</span>apikey
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nv">SMTP_PASSWORD</span><span class="o">=</span>your_api_key
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nv">SMTP_FROM</span><span class="o">=</span>noreply@yourdomain.com
+<p><strong>Result:</strong> Users can choose:
+- Quick demo (alice, bob, moderator, admin)
+- Create permanent account via GitHub OAuth</p>
+<h3 id="oauth-only-production">OAuth Only (Production)<a class="headerlink" href="#oauth-only-production" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Don&#39;t set AUTH_MODE_DEMO (or set to false)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
 </span></code></pre></div>
-<p><strong><a href="../email-configuration/">Complete Email Configuration →</a></strong></p>
-<h2 id="ssltls-setup">SSL/TLS Setup<a class="headerlink" href="#ssltls-setup" title="Anchor link to this section">&para;</a></h2>
-<h3 id="option-1-lets-encrypt-free">Option 1: Let's Encrypt (Free)<a class="headerlink" href="#option-1-lets-encrypt-free" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Using Certbot</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>certbot<span class="w"> </span>--nginx<span class="w"> </span>-d<span class="w"> </span>yourdomain.com<span class="w"> </span>-d<span class="w"> </span>api.yourdomain.com
+<p><strong>Result:</strong> Only OAuth login options are displayed</p>
+<h3 id="github-google-maximum-flexibility">GitHub + Google (Maximum Flexibility)<a class="headerlink" href="#github-google-maximum-flexibility" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
 </span></code></pre></div>
-<h3 id="option-2-cloud-provider">Option 2: Cloud Provider<a class="headerlink" href="#option-2-cloud-provider" title="Anchor link to this section">&para;</a></h3>
-<p>Most cloud platforms (Render, Heroku) handle SSL automatically.</p>
-<h3 id="option-3-cloudflare">Option 3: Cloudflare<a class="headerlink" href="#option-3-cloudflare" title="Anchor link to this section">&para;</a></h3>
-<p>Free SSL proxy with additional security features.</p>
-<h2 id="backups">Backups<a class="headerlink" href="#backups" title="Anchor link to this section">&para;</a></h2>
-<h3 id="database-backups">Database Backups<a class="headerlink" href="#database-backups" title="Anchor link to this section">&para;</a></h3>
-<p><strong>Automated daily backups:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="ch">#!/bin/bash</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># backup.sh</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d_%H%M%S<span class="k">)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-T<span class="w"> </span>postgres<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>pulsestage<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>gzip<span class="w"> </span>&gt;<span class="w"> </span>backups/pulsestage_<span class="nv">$DATE</span>.sql.gz
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Keep last 30 days</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>find<span class="w"> </span>backups/<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.sql.gz&quot;</span><span class="w"> </span>-mtime<span class="w"> </span>+30<span class="w"> </span>-delete
+<p><strong>Result:</strong> Users can choose either OAuth provider</p>
+<h2 id="testing-oauth-locally">Testing OAuth Locally<a class="headerlink" href="#testing-oauth-locally" title="Anchor link to this section">&para;</a></h2>
+<h3 id="1-update-etchosts-if-needed">1. Update /etc/hosts (if needed)<a class="headerlink" href="#1-update-etchosts-if-needed" title="Anchor link to this section">&para;</a></h3>
+<p>If testing with a custom domain locally:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/hosts
 </span></code></pre></div>
-<p><strong>Add to crontab:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="m">0</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>/path/to/backup.sh
+<p>Add:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>127.0.0.1 local.pulsestage.app
 </span></code></pre></div></p>
-<h3 id="disaster-recovery">Disaster Recovery<a class="headerlink" href="#disaster-recovery" title="Anchor link to this section">&para;</a></h3>
-<p>Test restores regularly:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Test restore</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>gunzip<span class="w"> </span>&lt;<span class="w"> </span>backup.sql.gz<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-T<span class="w"> </span>postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>pulsestage
+<h3 id="2-configure-local-environment">2. Configure Local Environment<a class="headerlink" href="#2-configure-local-environment" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># api/.env</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_dev_client_id
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_dev_client_secret
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/auth/github/callback
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_dev_client_id.apps.googleusercontent.com
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_dev_client_secret
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/auth/google/callback
 </span></code></pre></div>
-<h2 id="scaling">Scaling<a class="headerlink" href="#scaling" title="Anchor link to this section">&para;</a></h2>
-<h3 id="vertical-scaling">Vertical Scaling<a class="headerlink" href="#vertical-scaling" title="Anchor link to this section">&para;</a></h3>
-<p>Increase resources for single instances:
-- CPU: 2+ cores recommended
-- Memory: 4GB+ recommended
-- Storage: Scale with data growth</p>
-<h3 id="horizontal-scaling">Horizontal Scaling<a class="headerlink" href="#horizontal-scaling" title="Anchor link to this section">&para;</a></h3>
-<p>For high traffic:
-- <strong>Multiple API instances</strong> behind load balancer
-- <strong>Read replicas</strong> for PostgreSQL
-- <strong>Redis Cluster</strong> for distributed caching
-- <strong>CDN</strong> for static assets</p>
-<h2 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Anchor link to this section">&para;</a></h2>
-<p><strong>Essential monitoring:</strong>
-- Health checks (<code>/health</code> endpoint)
-- Error tracking
-- Performance metrics
-- Resource usage</p>
-<p><strong><a href="../monitoring/">Complete Monitoring Guide →</a></strong></p>
-<h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Anchor link to this section">&para;</a></h2>
-<h3 id="updates">Updates<a class="headerlink" href="#updates" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Pull latest changes</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>git<span class="w"> </span>pull
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Update dependencies</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nb">cd</span><span class="w"> </span>api<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>ci
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nb">cd</span><span class="w"> </span>web<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>ci
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="c1"># Run migrations</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>migrate<span class="w"> </span>deploy
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="c1"># Restart services</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</span></code></pre></div>
-<h3 id="database-migrations">Database Migrations<a class="headerlink" href="#database-migrations" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Check migration status</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>migrate<span class="w"> </span>status
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Apply pending migrations</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>migrate<span class="w"> </span>deploy
+<p><strong>Important:</strong> Use separate OAuth apps for development and production!</p>
+<h3 id="3-test-the-flow">3. Test the Flow<a class="headerlink" href="#3-test-the-flow" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>make<span class="w"> </span>dev
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># Visit http://localhost:5173</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># Click &quot;Sign in with GitHub&quot; or &quot;Sign in with Google&quot;</span>
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
-<p><strong><a href="../render-troubleshooting/">Complete Troubleshooting Guide →</a></strong></p>
-<p>Quick fixes:</p>
-<p><strong>API not responding:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>api
-</span></code></pre></div></p>
-<p><strong>Database connection issues:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT 1;&quot;</span>
-</span></code></pre></div></p>
-<p><strong>Redis connection issues:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>redis<span class="w"> </span>redis-cli<span class="w"> </span>ping
-</span></code></pre></div></p>
-<h2 id="security-checklist">Security Checklist<a class="headerlink" href="#security-checklist" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> HTTPS enabled</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Demo mode disabled</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> OAuth configured</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Strong secrets generated</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Rate limiting enabled</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> CORS properly configured</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Security headers enabled</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Database access restricted</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Backups automated</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Monitoring set up</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Audit logging enabled</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Content moderation active</li>
-</ul>
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Anchor link to this section">&para;</a></h2>
+<h3 id="oauth-is-not-enabled-error">"OAuth is not enabled" Error<a class="headerlink" href="#oauth-is-not-enabled-error" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause:</strong> Environment variables not set correctly</p>
+<p><strong>Fix:</strong> Verify all three variables are set:
+- <code>GITHUB_CLIENT_ID</code>
+- <code>GITHUB_CLIENT_SECRET</code>
+- <code>GITHUB_CALLBACK_URL</code> (or use default)</p>
+<h3 id="redirect-uri-mismatch-error">"Redirect URI mismatch" Error<a class="headerlink" href="#redirect-uri-mismatch-error" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause:</strong> Callback URL in GitHub/Google doesn't match the URL being called</p>
+<p><strong>Fix:</strong> Ensure the callback URL in your OAuth app configuration exactly matches:
+- Production: <code>https://api-demo.pulsestage.app/auth/github/callback</code>
+- Local: <code>http://localhost:3000/auth/github/callback</code></p>
+<h3 id="oauth-button-not-showing">OAuth Button Not Showing<a class="headerlink" href="#oauth-button-not-showing" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause:</strong> Frontend can't detect OAuth is enabled</p>
+<p><strong>Fix:</strong>
+1. Check <code>/auth/modes</code> endpoint: <code>curl https://api-demo.pulsestage.app/auth/modes</code>
+2. Should return: <code>{ "modes": [...], "oauth": { "github": true } }</code>
+3. Verify API logs show: <code>🔐 Auth: Enabled modes: demo, oauth</code></p>
+<h3 id="session-not-persisting-after-oauth">Session Not Persisting After OAuth<a class="headerlink" href="#session-not-persisting-after-oauth" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause:</strong> Cookie domain mismatch or SameSite policy</p>
+<p><strong>Fix:</strong>
+1. Ensure <code>FRONTEND_URL</code> is set correctly in API
+2. Check browser cookies (should see <code>connect.sid</code> with <code>.pulsestage.app</code> domain)
+3. Verify <code>CORS_ORIGINS</code> includes both frontend and API URLs</p>
+<h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Anchor link to this section">&para;</a></h2>
+<ol>
+<li>✅ <strong>Use separate OAuth apps</strong> for dev, staging, and production</li>
+<li>✅ <strong>Never commit secrets</strong> to git (use <code>sync: false</code> in render.yaml)</li>
+<li>✅ <strong>Rotate secrets regularly</strong> (GitHub settings → Regenerate)</li>
+<li>✅ <strong>Restrict callback URLs</strong> to only your domains</li>
+<li>✅ <strong>Monitor OAuth app usage</strong> in GitHub/Google dashboards</li>
+<li>✅ <strong>Use organization accounts</strong> for production OAuth apps (not personal)</li>
+</ol>
+<h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Anchor link to this section">&para;</a></h2>
 <ul>
-<li><strong><a href="../production-checklist/">Production Checklist</a></strong> - Pre-launch guide</li>
-<li><strong><a href="../production-runbook/">Production Runbook</a></strong> - Operational procedures</li>
-<li><strong><a href="../docker-compose/">Docker Compose Deployment</a></strong> - Self-hosted setup</li>
-<li><strong><a href="../environment/">Environment Variables</a></strong> - Configuration reference</li>
-<li><strong><a href="../monitoring/">Monitoring</a></strong> - Monitoring setup</li>
+<li>📖 <a href="../../architecture/authentication/">Authentication Architecture</a></li>
+<li>🔐 <a href="../../security/security-headers/">Security Headers</a></li>
+<li>🚀 <a href="./render.md">Render Deployment</a></li>
+<li>🧪 <a href="../../development/testing/#oauth-testing">Testing OAuth Flows</a></li>
 </ul>
 
 
@@ -3338,7 +2881,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 23:27:51 UTC"><span class="timeago" datetime="2025-10-15T23:27:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 23:27:51 UTC">2025-10-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 23:32:31 UTC"><span class="timeago" datetime="2025-10-15T23:32:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 23:32:31 UTC">2025-10-15</span>
   </span>
 
     
@@ -3348,7 +2891,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 19:43:35 UTC"><span class="timeago" datetime="2025-10-04T19:43:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 19:43:35 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 23:32:31 UTC"><span class="timeago" datetime="2025-10-15T23:32:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 23:32:31 UTC">2025-10-15</span>
   </span>
 
     
@@ -3380,44 +2923,6 @@
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../docker-compose/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker Compose Deployment">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Docker Compose Deployment
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../environment/" class="md-footer__link md-footer__link--next" aria-label="Next: Environment Variables">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Environment Variables
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
