@@ -35,18 +35,49 @@ export interface DirectEmailJob {
 
 export type EmailQueueJob = EmailJob | DirectEmailJob;
 
-// Redis connection for Bull
-const redisConnection = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD,
-};
+/**
+ * Parse REDIS_URL for BullMQ connection
+ * BullMQ requires host/port/password object format
+ */
+function getRedisConnection() {
+  const redisUrl = process.env.REDIS_URL;
+
+  if (!redisUrl) {
+    console.warn('⚠️  REDIS_URL not configured - email queue disabled');
+    // Return a dummy connection to satisfy TypeScript
+    // The worker won't start anyway, so this queue won't be used
+    return {
+      host: 'localhost',
+      port: 6379,
+    };
+  }
+
+  try {
+    // Parse redis://host:port or redis://user:pass@host:port
+    const url = new URL(redisUrl);
+
+    return {
+      host: url.hostname,
+      port: parseInt(url.port || '6379', 10),
+      password: url.password || undefined,
+      username: url.username || undefined,
+    };
+  } catch (error) {
+    console.error('Failed to parse REDIS_URL for email queue:', error);
+    // Return dummy connection on parse error
+    return {
+      host: 'localhost',
+      port: 6379,
+    };
+  }
+}
 
 /**
  * Email queue instance
+ * Note: Queue is always created, but worker only starts if REDIS_URL is configured
  */
 export const emailQueue = new Queue<EmailQueueJob>('email', {
-  connection: redisConnection,
+  connection: getRedisConnection(),
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -73,6 +104,15 @@ export function startEmailWorker() {
     console.log('📧 Email worker already started');
     return worker;
   }
+
+  // Don't start worker if Redis is not properly configured
+  if (!process.env.REDIS_URL || process.env.REDIS_URL.includes('localhost')) {
+    console.warn('⚠️  Email worker not started - REDIS_URL not properly configured');
+    console.warn('   Email notifications will not be sent');
+    return null;
+  }
+
+  const connection = getRedisConnection();
 
   worker = new Worker<EmailQueueJob>(
     'email',
@@ -134,7 +174,7 @@ export function startEmailWorker() {
       }
     },
     {
-      connection: redisConnection,
+      connection,
       concurrency: 5, // Process 5 emails concurrently
     }
   );
