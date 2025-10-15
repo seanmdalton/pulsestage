@@ -159,6 +159,14 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
     // Load mock data if not already loaded
     await loadMockData();
 
+    console.log('🔍 mockAuth check:', {
+      path: req.path,
+      hasSession: !!req.session,
+      hasSessionUser: !!req.session?.user,
+      sessionId: req.sessionID,
+      cookies: req.headers.cookie ? 'present' : 'missing',
+    });
+
     // Priority 1: Check for session user (from demo auth or OAuth)
     if (req.session?.user) {
       const sessionUser = req.session.user;
