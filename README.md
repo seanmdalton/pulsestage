@@ -99,6 +99,27 @@ make dev        # Start with local builds (hot reload) - demo data auto-seeds!
 
 **Note:** Authentication is required even in development mode. Visit `/login` to select a demo user to continue.
 
+### 🔄 Demo Reset System
+
+For **demo deployments**, PulseStage includes an automated reset system that keeps your demo instance fresh:
+
+**Features:**
+- 🗓️ **Daily automatic resets** via GitHub Actions (3 AM UTC)
+- 🔐 **Secure admin-key protected** endpoint
+- 🔄 **Transaction-safe** - preserves users, teams, tags while clearing questions
+- 📊 **12 fresh questions** re-seeded (including moderation examples)
+- 📝 **Full audit logging** for all reset operations
+
+**Manual reset:**
+```bash
+curl -X POST https://api-demo.pulsestage.app/admin/reset-demo \
+  -H "x-admin-key: YOUR_ADMIN_KEY"
+```
+
+See **[Demo Reset System](docs/deployment/demo-reset-system.md)** for complete documentation.
+
+---
+
 See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow guide.
 
 **Quick commands:**
@@ -121,7 +142,7 @@ See **[DEVELOPMENT.md](DEVELOPMENT.md)** for the complete development workflow g
 - **Backend**: Node.js 24 LTS, Express, TypeScript
 - **Database**: PostgreSQL 16 with Prisma ORM
 - **Cache**: Redis 7 for rate limiting
-- **Testing**: Vitest (231 tests), Playwright E2E
+- **Testing**: Vitest (310 tests), Playwright E2E
 - **Deployment**: Docker Compose
 - **Security**: Helmet, CSRF protection, Content Security Policy, Audit logging
 

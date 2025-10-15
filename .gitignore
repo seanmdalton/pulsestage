@@ -4,6 +4,7 @@ dist
 .DS_Store
 .vscode
 coverage
+.cursor
 
 # Deployment files with actual secrets (keep local only)
 RENDER_DEPLOYMENT.md

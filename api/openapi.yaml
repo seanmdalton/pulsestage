@@ -2399,6 +2399,105 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /admin/reset-demo:
+    post:
+      tags:
+        - Admin
+      summary: Reset demo instance
+      description: |
+        Resets the demo instance to a clean state with fresh sample data.
+
+        **Security:**
+        - Requires `x-admin-key` header with valid `ADMIN_KEY`
+        - Only works when `AUTH_MODE_DEMO=true` (prevents production accidents)
+
+        **What it does:**
+        - Deletes all user-generated questions, upvotes, and audit logs
+        - Preserves demo users, teams, tags, and team memberships
+        - Re-seeds 12 fresh sample questions (4 under review)
+
+        **Use cases:**
+        - Scheduled daily resets via GitHub Actions
+        - Manual cleanup after demos or testing
+        - Restoring clean state after data experiments
+      security:
+        - AdminKey: []
+      responses:
+        '200':
+          description: Demo instance reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Demo instance reset successfully'
+                  timestamp:
+                    type: string
+                    format: date-time
+                  resetItems:
+                    type: object
+                    properties:
+                      questionsCleared:
+                        type: number
+                        description: Number of questions deleted
+                        example: 12
+                      upvotesCleared:
+                        type: number
+                        description: Number of upvotes deleted
+                        example: 5
+                      auditLogsCleared:
+                        type: number
+                        description: Number of audit logs deleted
+                        example: 24
+                      demoDataReseeded:
+                        type: boolean
+                        description: Whether demo data was successfully re-seeded
+                        example: true
+        '401':
+          description: Unauthorized - invalid or missing admin key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Unauthorized'
+                  message:
+                    type: string
+                    example: 'Invalid or missing admin key'
+        '403':
+          description: Forbidden - demo mode is not enabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Demo mode is not enabled'
+                  message:
+                    type: string
+                    example: 'This endpoint only works when AUTH_MODE_DEMO=true'
+        '500':
+          description: Internal server error - reset failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Failed to reset demo instance'
+                  message:
+                    type: string
+                    example: 'Transaction failed: constraint violation'
+
   /admin/email-queue:
     get:
       tags:
