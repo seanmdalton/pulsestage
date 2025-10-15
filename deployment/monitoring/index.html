@@ -2245,12 +2245,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/contributing/" class="md-nav__link">
+      <a href="../../development/contributing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Contributing to PulseStage
+    None
     
   </span>
   
@@ -2348,7 +2348,7 @@
   
   
   <span class="md-ellipsis">
-    Docker Compose
+    Docker Compose Deployment
     
   </span>
   
@@ -2371,7 +2371,7 @@
   
   
   <span class="md-ellipsis">
-    Production
+    Production Deployment
     
   </span>
   
@@ -2444,6 +2444,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Monitoring
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -2455,6 +2468,352 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#health-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Health Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Health Check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend Health
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Application Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-health-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in Health Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-metrics-to-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Metrics to Monitor
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#application-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Logs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log Levels
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#important-log-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Important Log Patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Audit Logging
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alerting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alerting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alerting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#set-up-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set Up Alerts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-uptime-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Uptime Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redis-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redis Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resource Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Stats
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disk Usage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup Verification
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#failed-login-attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Failed Login Attempts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unusual-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unusual Activity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-cpu-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      High CPU Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Memory Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slow-response-times" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slow Response Times
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2579,7 +2938,7 @@
   
   
   <span class="md-ellipsis">
-    Branding
+    PulseStage Branding (Quick Start)
     
   </span>
   
@@ -2617,7 +2976,271 @@
 
 
 <h1 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Anchor link to this section">&para;</a></h1>
-<p>Documentation coming soon...</p>
+<p>Monitor PulseStage in production to ensure reliability and performance.</p>
+<h2 id="health-endpoints">Health Endpoints<a class="headerlink" href="#health-endpoints" title="Anchor link to this section">&para;</a></h2>
+<h3 id="api-health-check">API Health Check<a class="headerlink" href="#api-health-check" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>https://api.yourdomain.com/health
+</span></code></pre></div>
+<p>Response:
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-10-15T12:00:00.000Z&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;uptime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2d 4h 30m&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;connected&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">&quot;latency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5ms&quot;</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">&quot;redis&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;connected&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nt">&quot;latency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2ms&quot;</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span><span class="nt">&quot;rateLimiting&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nt">&quot;requestsInLastHour&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="nt">&quot;strategies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;github&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;google&quot;</span><span class="p">]</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<h3 id="frontend-health">Frontend Health<a class="headerlink" href="#frontend-health" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-I<span class="w"> </span>https://yourdomain.com
+</span></code></pre></div>
+<p>Should return <code>200 OK</code>.</p>
+<h2 id="application-metrics">Application Metrics<a class="headerlink" href="#application-metrics" title="Anchor link to this section">&para;</a></h2>
+<h3 id="built-in-health-dashboard">Built-in Health Dashboard<a class="headerlink" href="#built-in-health-dashboard" title="Anchor link to this section">&para;</a></h3>
+<p>Visit <code>/admin/health</code> for real-time metrics:</p>
+<ul>
+<li><strong>System Status</strong>: API, database, Redis connectivity</li>
+<li><strong>Rate Limiting</strong>: Request counts and limits</li>
+<li><strong>Auth Status</strong>: Enabled authentication modes</li>
+<li><strong>Uptime</strong>: Service uptime</li>
+</ul>
+<p><strong>Access</strong>: Requires admin role</p>
+<h3 id="key-metrics-to-monitor">Key Metrics to Monitor<a class="headerlink" href="#key-metrics-to-monitor" title="Anchor link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Endpoint</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Response Time</strong></td>
+<td><code>/health</code></td>
+<td>&lt; 100ms</td>
+</tr>
+<tr>
+<td><strong>Database Latency</strong></td>
+<td><code>/health</code></td>
+<td>&lt; 10ms</td>
+</tr>
+<tr>
+<td><strong>Redis Latency</strong></td>
+<td><code>/health</code></td>
+<td>&lt; 5ms</td>
+</tr>
+<tr>
+<td><strong>Error Rate</strong></td>
+<td>Application logs</td>
+<td>&lt; 1%</td>
+</tr>
+<tr>
+<td><strong>Uptime</strong></td>
+<td><code>/health</code></td>
+<td>&gt; 99.9%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Anchor link to this section">&para;</a></h2>
+<h3 id="application-logs">Application Logs<a class="headerlink" href="#application-logs" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Docker Compose:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>web
+</span></code></pre></div></p>
+<p><strong>Production:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>pulsestage-api<span class="w"> </span>-f
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>pulsestage-web<span class="w"> </span>-f
+</span></code></pre></div></p>
+<h3 id="log-levels">Log Levels<a class="headerlink" href="#log-levels" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li><strong>ERROR</strong>: Critical issues requiring immediate attention</li>
+<li><strong>WARN</strong>: Potential problems</li>
+<li><strong>INFO</strong>: General application flow</li>
+<li><strong>DEBUG</strong>: Detailed debugging (development only)</li>
+</ul>
+<h3 id="important-log-patterns">Important Log Patterns<a class="headerlink" href="#important-log-patterns" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Session Issues:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>🍪 Session config: secure=true, sameSite=lax
+</span></code></pre></div></p>
+<p><strong>Authentication:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>🔐 Auth modes enabled: github, google
+</span></code></pre></div></p>
+<p><strong>Database:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>✅ Database connected successfully
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>❌ Database connection failed
+</span></code></pre></div></p>
+<p><strong>Redis:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>🔒 Redis connected for rate limiting
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>❌ Failed to connect to Redis
+</span></code></pre></div></p>
+<h2 id="audit-logging">Audit Logging<a class="headerlink" href="#audit-logging" title="Anchor link to this section">&para;</a></h2>
+<p>PulseStage logs all admin actions for compliance:</p>
+<ul>
+<li>User role changes</li>
+<li>Team member additions/removals</li>
+<li>Question moderation (pin, freeze, delete)</li>
+<li>Bulk operations</li>
+<li>Settings changes</li>
+</ul>
+<p><strong>Access audit logs:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Via Admin Panel</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>/admin/audit
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Via API</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>https://api.yourdomain.com/admin/audit?limit<span class="o">=</span><span class="m">100</span>
+</span></code></pre></div></p>
+<h2 id="alerting">Alerting<a class="headerlink" href="#alerting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="set-up-alerts">Set Up Alerts<a class="headerlink" href="#set-up-alerts" title="Anchor link to this section">&para;</a></h3>
+<p>Monitor these conditions:</p>
+<ol>
+<li><strong>API Health Check Fails</strong></li>
+<li>Check: <code>curl https://api.yourdomain.com/health</code></li>
+<li>
+<p>Alert: Response code ≠ 200</p>
+</li>
+<li>
+<p><strong>High Error Rate</strong></p>
+</li>
+<li>Check: Application logs</li>
+<li>
+<p>Alert: Error count &gt; 10/minute</p>
+</li>
+<li>
+<p><strong>Database Connection Lost</strong></p>
+</li>
+<li>Check: <code>/health</code> endpoint</li>
+<li>
+<p>Alert: <code>database.status ≠ "connected"</code></p>
+</li>
+<li>
+<p><strong>Redis Connection Lost</strong></p>
+</li>
+<li>Check: <code>/health</code> endpoint</li>
+<li>
+<p>Alert: <code>redis.status ≠ "connected"</code></p>
+</li>
+<li>
+<p><strong>High Response Time</strong></p>
+</li>
+<li>Check: API response time</li>
+<li>Alert: Response time &gt; 1 second</li>
+</ol>
+<h3 id="example-uptime-monitoring">Example: Uptime Monitoring<a class="headerlink" href="#example-uptime-monitoring" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Using Uptime Robot (free):</strong></p>
+<ol>
+<li>Add HTTP(s) Monitor</li>
+<li>URL: <code>https://api.yourdomain.com/health</code></li>
+<li>Monitoring Interval: 5 minutes</li>
+<li>Alert Contacts: Email, SMS, Slack</li>
+</ol>
+<p><strong>Using Healthchecks.io:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Add to crontab</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>*/5<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>curl<span class="w"> </span>-fsS<span class="w"> </span>--retry<span class="w"> </span><span class="m">3</span><span class="w"> </span>https://hc-ping.com/your-uuid-here<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</span></code></pre></div>
+<h2 id="performance-monitoring">Performance Monitoring<a class="headerlink" href="#performance-monitoring" title="Anchor link to this section">&para;</a></h2>
+<h3 id="database-performance">Database Performance<a class="headerlink" href="#database-performance" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Check slow queries</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>pulsestage<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="s2">  SELECT query, calls, mean_exec_time</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="s2">  FROM pg_stat_statements</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="s2">  ORDER BY mean_exec_time DESC</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="s2">  LIMIT 10;</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="s2">&quot;</span>
+</span></code></pre></div>
+<h3 id="redis-performance">Redis Performance<a class="headerlink" href="#redis-performance" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check Redis stats</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>redis<span class="w"> </span>redis-cli<span class="w"> </span>INFO<span class="w"> </span>stats
+</span></code></pre></div>
+<h3 id="api-performance">API Performance<a class="headerlink" href="#api-performance" title="Anchor link to this section">&para;</a></h3>
+<p>Monitor response times for key endpoints:
+- <code>GET /questions</code> - Should be &lt; 200ms
+- <code>GET /teams</code> - Should be &lt; 100ms
+- <code>POST /questions</code> - Should be &lt; 300ms
+- <code>GET /health</code> - Should be &lt; 50ms</p>
+<h2 id="resource-usage">Resource Usage<a class="headerlink" href="#resource-usage" title="Anchor link to this section">&para;</a></h2>
+<h3 id="docker-stats">Docker Stats<a class="headerlink" href="#docker-stats" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker<span class="w"> </span>stats
+</span></code></pre></div>
+<p>Monitor:
+- <strong>CPU usage</strong>: Should be &lt; 80%
+- <strong>Memory usage</strong>: Should be &lt; 80%
+- <strong>Network I/O</strong>: Watch for anomalies</p>
+<h3 id="disk-usage">Disk Usage<a class="headerlink" href="#disk-usage" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Check database size</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="s2">  SELECT pg_database.datname,</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="s2">         pg_size_pretty(pg_database_size(pg_database.datname)) AS size</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="s2">  FROM pg_database;</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="s2">&quot;</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="c1"># Check disk space</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>df<span class="w"> </span>-h
+</span></code></pre></div>
+<h2 id="backup-verification">Backup Verification<a class="headerlink" href="#backup-verification" title="Anchor link to this section">&para;</a></h2>
+<p>Regularly verify backups work:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Test database backup</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>postgres<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>pulsestage<span class="w"> </span>&gt;<span class="w"> </span>test-backup.sql
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Test restore to separate database</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>postgres<span class="w"> </span>createdb<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>test_restore
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-T<span class="w"> </span>postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>test_restore<span class="w"> </span>&lt;<span class="w"> </span>test-backup.sql
+</span></code></pre></div>
+<h2 id="security-monitoring">Security Monitoring<a class="headerlink" href="#security-monitoring" title="Anchor link to this section">&para;</a></h2>
+<h3 id="failed-login-attempts">Failed Login Attempts<a class="headerlink" href="#failed-login-attempts" title="Anchor link to this section">&para;</a></h3>
+<p>Monitor for brute force attacks:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Check logs for repeated failures</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Authentication failed&quot;</span>
+</span></code></pre></div>
+<h3 id="unusual-activity">Unusual Activity<a class="headerlink" href="#unusual-activity" title="Anchor link to this section">&para;</a></h3>
+<p>Watch for:
+- Bulk operations outside business hours
+- Repeated 401/403 errors
+- Unusual rate limit hits</p>
+<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Check rate limit stats</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>curl<span class="w"> </span>https://api.yourdomain.com/health<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.rateLimiting&#39;</span>
+</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="high-cpu-usage">High CPU Usage<a class="headerlink" href="#high-cpu-usage" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Check slow queries</li>
+<li>Review recent changes</li>
+<li>Check for infinite loops in logs</li>
+</ol>
+<h3 id="high-memory-usage">High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Check for memory leaks</li>
+<li>Review Redis memory usage</li>
+<li>Check database connections</li>
+</ol>
+<h3 id="slow-response-times">Slow Response Times<a class="headerlink" href="#slow-response-times" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Check database performance</li>
+<li>Check Redis performance</li>
+<li>Review recent deployments</li>
+<li>Check resource utilization</li>
+</ol>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><strong><a href="../production-runbook/">Production Runbook</a></strong> - Operational procedures</li>
+<li><strong><a href="../render-troubleshooting/">Troubleshooting Guide</a></strong> - Common issues</li>
+<li><strong><a href="../../admin-guide/overview/">Health Dashboard</a></strong> - Admin interface</li>
+</ul>
 
 
 
@@ -2640,7 +3263,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 19:43:35 UTC"><span class="timeago" datetime="2025-10-04T19:43:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 19:43:35 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 20:36:25 UTC"><span class="timeago" datetime="2025-10-15T20:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 20:36:25 UTC">2025-10-15</span>
   </span>
 
     

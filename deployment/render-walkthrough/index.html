@@ -12,7 +12,7 @@
         <meta name="author" content="Sean Dalton">
       
       
-        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/deployment-checklist.template/">
+        <link rel="canonical" href="https://seanmdalton.github.io/pulsestage/deployment/render-walkthrough/">
       
       
       
@@ -21,7 +21,7 @@
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
     
     
-  <title>🚀 Render Deployment Quick Checklist - PulseStage Documentation</title>
+  <title>🚀 PulseStage Render Demo Deployment - Interactive Walkthrough - PulseStage Documentation</title>
 
     
       <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#render-deployment-quick-checklist" class="md-skip">
+        <a href="#pulsestage-render-demo-deployment-interactive-walkthrough" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              🚀 Render Deployment Quick Checklist
+              🚀 PulseStage Render Demo Deployment - Interactive Walkthrough
             
           </span>
         </div>
@@ -2597,178 +2597,473 @@
   
 
 
-<h1 id="render-deployment-quick-checklist">🚀 Render Deployment Quick Checklist<a class="headerlink" href="#render-deployment-quick-checklist" title="Anchor link to this section">&para;</a></h1>
-<p><strong>Target</strong>: <code>demo.pulsestage.app</code><br />
-<strong>Status</strong>: Ready to deploy</p>
+<h1 id="pulsestage-render-demo-deployment-interactive-walkthrough">🚀 PulseStage Render Demo Deployment - Interactive Walkthrough<a class="headerlink" href="#pulsestage-render-demo-deployment-interactive-walkthrough" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Goal:</strong> Deploy PulseStage demo to <code>demo.pulsestage.app</code> and <code>api-demo.pulsestage.app</code></p>
 <hr />
-<h2 id="pre-flight">Pre-Flight ✈️<a class="headerlink" href="#pre-flight" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Secrets generated ✓ (see RENDER_DEPLOYMENT.md)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Render account ready</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Cloudflare account for <code>pulsestage.app</code> ready</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> GitHub account ready</li>
-</ul>
+<h2 id="generated-secrets-from-previous-step">📋 <strong>Generated Secrets</strong> (from previous step)<a class="headerlink" href="#generated-secrets-from-previous-step" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">SESSION_SECRET</span><span class="o">=</span>EhiH9YQpeu4_b5hDXpGjqK6Z4jLfrXqropnP8lOpnjga-QIZwVGGxxEBD0I-wzu8
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">CSRF_SECRET</span><span class="o">=</span>QoLuL3YnUS8TRLteZtYTqA08LGeRCU9k5LHtbO616bWdSwBevHVH2Ez533TBMyu8
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">ADMIN_KEY</span><span class="o">=</span>7KxZJaIWjWql9B3p96OZK6_oAoEiNYNK
+</span></code></pre></div>
+<p><strong>⚠️ KEEP THIS FILE LOCAL - It's in .gitignore</strong></p>
 <hr />
-<h2 id="phase-1-github-oauth-setup-optional-skip-for-demo-mode">Phase 1: GitHub OAuth Setup (OPTIONAL - Skip for Demo Mode)<a class="headerlink" href="#phase-1-github-oauth-setup-optional-skip-for-demo-mode" title="Anchor link to this section">&para;</a></h2>
-<p><strong>Note</strong>: For demo instance with <code>AUTH_MODE_DEMO=true</code>, OAuth is optional. You can skip this phase and users will log in as demo users (alice, bob, moderator, admin).</p>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>SKIP</strong> (using demo mode only)</li>
-</ul>
-<p><strong>OR if you want OAuth</strong>:
-- [ ] Create OAuth app at https://github.com/settings/developers
-  - Name: <code>PulseStage Demo</code>
-  - Homepage: <code>https://demo.pulsestage.app</code>
-  - Callback: <code>https://api-demo.pulsestage.app/auth/github/callback</code>
-- [ ] Save <code>GITHUB_CLIENT_ID</code>
-- [ ] Save <code>GITHUB_CLIENT_SECRET</code></p>
-<hr />
-<h2 id="phase-2-render-services-15-min">Phase 2: Render Services (15 min)<a class="headerlink" href="#phase-2-render-services-15-min" title="Anchor link to this section">&para;</a></h2>
-<h3 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create database: <code>pulsestage-demo-db</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Plan: Starter ($7/mo)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Region: Oregon (US West)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Copy <code>DATABASE_URL</code></li>
-</ul>
-<h3 id="redis">Redis<a class="headerlink" href="#redis" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create Redis: <code>pulsestage-demo-redis</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Plan: Starter ($10/mo)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Same region as database</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Copy <code>REDIS_URL</code></li>
-</ul>
-<hr />
-<h2 id="phase-3-deploy-api-10-min">Phase 3: Deploy API (10 min)<a class="headerlink" href="#phase-3-deploy-api-10-min" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create web service: <code>pulsestage-demo-api</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Connect repo: <code>seanmdalton/pulsestage</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Root directory: <code>api</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Runtime: Docker</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Plan: Starter ($7/mo)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add environment variables:</li>
-<li><code>NODE_ENV=production</code></li>
-<li><code>AUTH_MODE_DEMO=true</code> ⭐ (enables demo login!)</li>
-<li><code>DATABASE_URL</code> (from Phase 2)</li>
-<li><code>REDIS_URL</code> (from Phase 2)</li>
-<li>All secrets (see RENDER_DEPLOYMENT.md)</li>
-<li>CORS settings</li>
-<li><strong>Skip GitHub OAuth vars</strong> (optional)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Health check: <code>/health/ready</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deploy and wait (~5-10 min)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Copy internal URL</li>
-</ul>
-<hr />
-<h2 id="phase-4-deploy-web-10-min">Phase 4: Deploy Web (10 min)<a class="headerlink" href="#phase-4-deploy-web-10-min" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create web service: <code>pulsestage-demo-web</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Connect repo: <code>seanmdalton/pulsestage</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Root directory: <code>web</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Runtime: Docker</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Plan: Starter ($7/mo)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>VITE_API_URL</code> (use internal API URL for now)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deploy and wait (~5-10 min)</li>
-</ul>
-<hr />
-<h2 id="phase-5-custom-domains-10-min">Phase 5: Custom Domains (10 min)<a class="headerlink" href="#phase-5-custom-domains-10-min" title="Anchor link to this section">&para;</a></h2>
-<h3 id="render-configuration">Render Configuration<a class="headerlink" href="#render-configuration" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add domain to web service: <code>demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Copy web CNAME target</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add domain to API service: <code>api-demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Copy API CNAME target</li>
-</ul>
-<h3 id="cloudflare-dns">Cloudflare DNS<a class="headerlink" href="#cloudflare-dns" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add CNAME record: <code>demo</code> → [web CNAME] (proxied)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add CNAME record: <code>api-demo</code> → [API CNAME] (proxied)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Wait for DNS propagation (~2-5 min)</li>
-</ul>
-<hr />
-<h2 id="phase-6-update-configuration-5-min">Phase 6: Update Configuration (5 min)<a class="headerlink" href="#phase-6-update-configuration-5-min" title="Anchor link to this section">&para;</a></h2>
-<h3 id="api-service">API Service<a class="headerlink" href="#api-service" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update <code>CORS_ORIGIN=https://demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update <code>CORS_ORIGINS=https://demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Save (auto redeploy)</li>
-</ul>
-<h3 id="web-service">Web Service<a class="headerlink" href="#web-service" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update <code>VITE_API_URL=https://api-demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Save (auto redeploy)</li>
-</ul>
-<h3 id="github-oauth-optional">GitHub OAuth (Optional)<a class="headerlink" href="#github-oauth-optional" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>SKIP</strong> if using demo mode only</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>OR</strong> Update callback URL to <code>https://api-demo.pulsestage.app/auth/github/callback</code></li>
-</ul>
-<hr />
-<h2 id="phase-7-database-setup-5-min">Phase 7: Database Setup (5 min)<a class="headerlink" href="#phase-7-database-setup-5-min" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open API Shell in Render</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run: <code>npx prisma migrate deploy</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run: <code>node dist/seed-test-users.js</code> ⭐ (demo users!)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run: <code>node dist/seed-teams.js</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run: <code>node dist/seed-tags.js</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run: <code>node dist/seed-multi-tenant-data.js</code> ⭐ (sample questions!)</li>
-</ul>
-<hr />
-<h2 id="phase-8-testing-10-min">Phase 8: Testing (10 min)<a class="headerlink" href="#phase-8-testing-10-min" title="Anchor link to this section">&para;</a></h2>
-<h3 id="api-health">API Health<a class="headerlink" href="#api-health" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Test: <code>curl https://api-demo.pulsestage.app/health</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Test: <code>curl https://api-demo.pulsestage.app/health/ready</code></li>
-</ul>
-<h3 id="web-frontend">Web Frontend<a class="headerlink" href="#web-frontend" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Visit: <code>https://demo.pulsestage.app</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Should redirect to login</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Should see "Try Demo" section</li>
-</ul>
-<h3 id="demo-login">Demo Login<a class="headerlink" href="#demo-login" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Select demo user (Alice, Bob, Moderator, or Admin)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Click "Continue as [user]"</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Should see demo data banner</li>
-</ul>
-<h3 id="test-as-alice-regular-user">Test as Alice (Regular User)<a class="headerlink" href="#test-as-alice-regular-user" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> View questions by team</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Submit a question to Engineering</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Upvote a question</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Search questions</li>
-</ul>
-<h3 id="test-as-moderator">Test as Moderator<a class="headerlink" href="#test-as-moderator" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Access moderation queue</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Review/answer questions</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Pin or tag a question</li>
-</ul>
-<h3 id="test-as-admin">Test as Admin<a class="headerlink" href="#test-as-admin" title="Anchor link to this section">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Access admin panel</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> View health dashboard</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Manage teams/users</li>
-</ul>
-<hr />
-<h2 id="post-deployment">Post-Deployment<a class="headerlink" href="#post-deployment" title="Anchor link to this section">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Monitor logs for 24 hours</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Share URL with team</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Document any issues</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set up monitoring alerts</li>
-</ul>
-<hr />
-<h2 id="monthly-cost-31">Monthly Cost: $31<a class="headerlink" href="#monthly-cost-31" title="Anchor link to this section">&para;</a></h2>
+<h2 id="step-1-create-postgresql-database"><strong>Step 1: Create PostgreSQL Database</strong> 🗄️<a class="headerlink" href="#step-1-create-postgresql-database" title="Anchor link to this section">&para;</a></h2>
+<h3 id="11-go-to-render-dashboard">1.1 Go to Render Dashboard<a class="headerlink" href="#11-go-to-render-dashboard" title="Anchor link to this section">&para;</a></h3>
 <ul>
-<li>PostgreSQL: $7</li>
-<li>Redis: $10</li>
-<li>API Service: $7</li>
-<li>Web Service: $7</li>
+<li>Visit: https://dashboard.render.com</li>
+<li>Click <strong>"New +"</strong> → <strong>"PostgreSQL"</strong></li>
+</ul>
+<h3 id="12-configure-database">1.2 Configure Database<a class="headerlink" href="#12-configure-database" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Name:                 pulsestage-demo-db
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Database:             pulsestage_demo
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>User:                 pulsestage_demo_user
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Region:               Oregon (US West) - or closest to you
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Plan:                 Free
+</span></code></pre></div>
+<h3 id="13-click-create-database">1.3 Click "Create Database"<a class="headerlink" href="#13-click-create-database" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>⏳ Wait 2-3 minutes for provisioning</li>
+<li>✅ Status shows "Available"</li>
+</ul>
+<h3 id="14-copy-connection-strings">1.4 Copy Connection Strings<a class="headerlink" href="#14-copy-connection-strings" title="Anchor link to this section">&para;</a></h3>
+<p>Once available, copy these from the database page:</p>
+<p><strong>Internal Database URL</strong> (for API service):
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>postgres://pulsestage_demo_user:XXXXX@dpg-XXXXX/pulsestage_demo
+</span></code></pre></div></p>
+<p><strong>External Database URL</strong> (for local testing - optional):
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>postgres://pulsestage_demo_user:XXXXX@dpg-XXXXX-a.oregon-postgres.render.com/pulsestage_demo
+</span></code></pre></div></p>
+<p>📝 <strong>Save these!</strong> You'll need the Internal URL for the API service.</p>
+<hr />
+<h2 id="step-2-create-redis-instance"><strong>Step 2: Create Redis Instance</strong> 🔴<a class="headerlink" href="#step-2-create-redis-instance" title="Anchor link to this section">&para;</a></h2>
+<h3 id="21-go-to-render-dashboard">2.1 Go to Render Dashboard<a class="headerlink" href="#21-go-to-render-dashboard" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Click <strong>"New +"</strong> → <strong>"Redis"</strong></li>
+</ul>
+<h3 id="22-configure-redis">2.2 Configure Redis<a class="headerlink" href="#22-configure-redis" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Name:                 pulsestage-demo-redis
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Region:               Oregon (US West) - MUST match database region
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Plan:                 Free
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>Maxmemory Policy:     allkeys-lru (default)
+</span></code></pre></div>
+<h3 id="23-click-create-redis">2.3 Click "Create Redis"<a class="headerlink" href="#23-click-create-redis" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>⏳ Wait 1-2 minutes for provisioning</li>
+<li>✅ Status shows "Available"</li>
+</ul>
+<h3 id="24-copy-connection-string">2.4 Copy Connection String<a class="headerlink" href="#24-copy-connection-string" title="Anchor link to this section">&para;</a></h3>
+<p>Once available, copy the <strong>Internal Redis URL</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>redis://red-XXXXX:6379
+</span></code></pre></div></p>
+<p>📝 <strong>Save this!</strong> You'll need it for rate limiting and sessions.</p>
+<hr />
+<h2 id="step-3-create-api-service"><strong>Step 3: Create API Service</strong> 🔧<a class="headerlink" href="#step-3-create-api-service" title="Anchor link to this section">&para;</a></h2>
+<h3 id="31-go-to-render-dashboard">3.1 Go to Render Dashboard<a class="headerlink" href="#31-go-to-render-dashboard" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Click <strong>"New +"</strong> → <strong>"Web Service"</strong></li>
+</ul>
+<h3 id="32-connect-github-repository">3.2 Connect GitHub Repository<a class="headerlink" href="#32-connect-github-repository" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Select <strong>"Build and deploy from a Git repository"</strong></li>
+<li>Click <strong>"Connect account"</strong> (if not already connected)</li>
+<li>Find and select: <code>seanmdalton/pulsestage</code></li>
+<li>Click <strong>"Connect"</strong></li>
+</ul>
+<h3 id="33-configure-api-service">3.3 Configure API Service<a class="headerlink" href="#33-configure-api-service" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Name:                 pulsestage-demo-api
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Region:               Oregon (US West) - MUST match database/redis
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Branch:               main
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Root Directory:       api
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Runtime:              Docker
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>Plan:                 Free ($0/month)
+</span></code></pre></div>
+<h3 id="34-environment-variables">3.4 Environment Variables<a class="headerlink" href="#34-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<p>Click <strong>"Advanced"</strong> → <strong>"Add Environment Variable"</strong></p>
+<p>Add these <strong>ONE BY ONE</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Node Environment</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Database (from Step 1.4 - Internal URL)</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://pulsestage_demo_user:XXXXX@dpg-XXXXX/pulsestage_demo
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Redis (from Step 2.4 - Internal URL) ⚠️ REQUIRED!</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://red-XXXXX:6379
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># Demo Mode</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="c1"># Session Secrets (generated earlier)</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="nv">SESSION_SECRET</span><span class="o">=</span>EhiH9YQpeu4_b5hDXpGjqK6Z4jLfrXqropnP8lOpnjga-QIZwVGGxxEBD0I-wzu8
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="nv">CSRF_SECRET</span><span class="o">=</span>QoLuL3YnUS8TRLteZtYTqA08LGeRCU9k5LHtbO616bWdSwBevHVH2Ez533TBMyu8
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="nv">ADMIN_KEY</span><span class="o">=</span>7KxZJaIWjWql9B3p96OZK6_oAoEiNYNK
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="c1"># Admin Session (reuse ADMIN_KEY for simplicity)</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="nv">ADMIN_SESSION_SECRET</span><span class="o">=</span>7KxZJaIWjWql9B3p96OZK6_oAoEiNYNK
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="c1"># CORS (will update after web service is created)</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>https://demo.pulsestage.app
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://demo.pulsestage.app
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="c1"># Port (Render default)</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="nv">PORT</span><span class="o">=</span><span class="m">3000</span>
+</span></code></pre></div>
+<h3 id="35-click-create-web-service">3.5 Click "Create Web Service"<a class="headerlink" href="#35-click-create-web-service" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>⏳ First deploy takes ~5-8 minutes (building Docker image)</li>
+<li>✅ Wait for status: "Live"</li>
+</ul>
+<p><strong>⚠️ COMMON ERROR:</strong> If you see <code>ECONNREFUSED 127.0.0.1:6379</code>:
+- You forgot to add <code>REDIS_URL</code> environment variable
+- Go back to Step 3.4 and verify <code>REDIS_URL</code> is set to your <strong>Internal</strong> Redis URL
+- Save changes to redeploy</p>
+<h3 id="36-note-your-api-url">3.6 Note Your API URL<a class="headerlink" href="#36-note-your-api-url" title="Anchor link to this section">&para;</a></h3>
+<p>Once deployed, Render assigns a URL like:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>https://pulsestage-demo-api.onrender.com
+</span></code></pre></div></p>
+<p>📝 <strong>Save this!</strong> You'll need it for the web service.</p>
+<hr />
+<h2 id="step-4-seed-demo-data"><strong>Step 4: Seed Demo Data</strong> 🌱<a class="headerlink" href="#step-4-seed-demo-data" title="Anchor link to this section">&para;</a></h2>
+<h3 id="41-open-render-shell">4.1 Open Render Shell<a class="headerlink" href="#41-open-render-shell" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Go to API service page</li>
+<li>Click <strong>"Shell"</strong> tab (top right)</li>
+<li>Wait for shell to connect</li>
+</ul>
+<h3 id="42-run-seed-commands">4.2 Run Seed Commands<a class="headerlink" href="#42-run-seed-commands" title="Anchor link to this section">&para;</a></h3>
+<p>In the Render shell, run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Seed teams</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>npm<span class="w"> </span>run<span class="w"> </span>db:seed:teams
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Seed tags</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>npm<span class="w"> </span>run<span class="w"> </span>db:seed:tags
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Seed demo users and questions</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>npm<span class="w"> </span>run<span class="w"> </span>db:seed:demo
+</span></code></pre></div>
+<p>Expected output:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>✅ Created team: General
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>✅ Created team: Engineering
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>✅ Created team: Product
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>✅ Created team: People
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>✅ Created 12 demo questions
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>🎉 Demo data ready!
+</span></code></pre></div></p>
+<h3 id="43-verify-seeding">4.3 Verify Seeding<a class="headerlink" href="#43-verify-seeding" title="Anchor link to this section">&para;</a></h3>
+<p>In the shell, check the database:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>npx<span class="w"> </span>prisma<span class="w"> </span>db<span class="w"> </span>pull<span class="w"> </span>--force
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>npx<span class="w"> </span>prisma<span class="w"> </span>db<span class="w"> </span>push<span class="w"> </span>--accept-data-loss<span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div></p>
+<p>Should show: "Your database is in sync"</p>
+<hr />
+<h2 id="step-5-create-web-service"><strong>Step 5: Create Web Service</strong> 🌐<a class="headerlink" href="#step-5-create-web-service" title="Anchor link to this section">&para;</a></h2>
+<h3 id="51-go-to-render-dashboard">5.1 Go to Render Dashboard<a class="headerlink" href="#51-go-to-render-dashboard" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Click <strong>"New +"</strong> → <strong>"Web Service"</strong></li>
+</ul>
+<h3 id="52-connect-same-repository">5.2 Connect Same Repository<a class="headerlink" href="#52-connect-same-repository" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>Select <strong>"Build and deploy from a Git repository"</strong></li>
+<li>Select: <code>seanmdalton/pulsestage</code> (already connected)</li>
+</ul>
+<h3 id="53-configure-web-service">5.3 Configure Web Service<a class="headerlink" href="#53-configure-web-service" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Name:                 pulsestage-demo-web
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>Region:               Oregon (US West) - MUST match API
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Branch:               main
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>Root Directory:       web
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>Runtime:              Docker
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>Plan:                 Free ($0/month)
+</span></code></pre></div>
+<h3 id="54-environment-variables">5.4 Environment Variables<a class="headerlink" href="#54-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<p>Click <strong>"Advanced"</strong> → <strong>"Add Environment Variable"</strong></p>
+<p>Add this <strong>ONE</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># API URL (from Step 3.6)</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nv">VITE_API_URL</span><span class="o">=</span>https://api-demo.pulsestage.app
+</span></code></pre></div>
+<h3 id="55-click-create-web-service">5.5 Click "Create Web Service"<a class="headerlink" href="#55-click-create-web-service" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>⏳ First deploy takes ~4-6 minutes</li>
+<li>✅ Wait for status: "Live"</li>
+</ul>
+<h3 id="56-note-your-web-url">5.6 Note Your Web URL<a class="headerlink" href="#56-note-your-web-url" title="Anchor link to this section">&para;</a></h3>
+<p>Once deployed, Render assigns a URL like:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>https://pulsestage-demo-web.onrender.com
+</span></code></pre></div></p>
+<p>📝 <strong>Save this!</strong> You'll configure custom domains next.</p>
+<hr />
+<h2 id="step-6-configure-custom-domains"><strong>Step 6: Configure Custom Domains</strong> 🌍<a class="headerlink" href="#step-6-configure-custom-domains" title="Anchor link to this section">&para;</a></h2>
+<h3 id="61-api-domain-api-demopulsestageapp">6.1 API Domain (api-demo.pulsestage.app)<a class="headerlink" href="#61-api-domain-api-demopulsestageapp" title="Anchor link to this section">&para;</a></h3>
+<p><strong>In Render (API Service):</strong>
+1. Go to API service page
+2. Click <strong>"Settings"</strong> tab
+3. Scroll to <strong>"Custom Domain"</strong>
+4. Click <strong>"Add Custom Domain"</strong>
+5. Enter: <code>api-demo.pulsestage.app</code>
+6. Click <strong>"Save"</strong></p>
+<p><strong>Copy the CNAME record shown:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>api-demo.pulsestage.app → pulsestage-demo-api.onrender.com
+</span></code></pre></div></p>
+<p><strong>In Cloudflare:</strong>
+1. Go to https://dash.cloudflare.com
+2. Select domain: <code>pulsestage.app</code>
+3. Click <strong>"DNS"</strong> → <strong>"Records"</strong>
+4. Click <strong>"Add record"</strong>
+   - Type: <code>CNAME</code>
+   - Name: <code>api-demo</code>
+   - Target: <code>pulsestage-demo-api.onrender.com</code>
+   - Proxy status: ☁️ <strong>Proxied</strong> (orange cloud)
+   - TTL: Auto
+5. Click <strong>"Save"</strong></p>
+<h3 id="62-web-domain-demopulsestageapp">6.2 Web Domain (demo.pulsestage.app)<a class="headerlink" href="#62-web-domain-demopulsestageapp" title="Anchor link to this section">&para;</a></h3>
+<p><strong>In Render (Web Service):</strong>
+1. Go to Web service page
+2. Click <strong>"Settings"</strong> tab
+3. Scroll to <strong>"Custom Domain"</strong>
+4. Click <strong>"Add Custom Domain"</strong>
+5. Enter: <code>demo.pulsestage.app</code>
+6. Click <strong>"Save"</strong></p>
+<p><strong>Copy the CNAME record shown:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>demo.pulsestage.app → pulsestage-demo-web.onrender.com
+</span></code></pre></div></p>
+<p><strong>In Cloudflare:</strong>
+1. Still in DNS settings for <code>pulsestage.app</code>
+2. Click <strong>"Add record"</strong>
+   - Type: <code>CNAME</code>
+   - Name: <code>demo</code>
+   - Target: <code>pulsestage-demo-web.onrender.com</code>
+   - Proxy status: ☁️ <strong>Proxied</strong> (orange cloud)
+   - TTL: Auto
+3. Click <strong>"Save"</strong></p>
+<h3 id="63-wait-for-dns-propagation">6.3 Wait for DNS Propagation<a class="headerlink" href="#63-wait-for-dns-propagation" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li>⏳ Usually 1-5 minutes with Cloudflare</li>
+<li>✅ Render shows "Verified" next to custom domains</li>
+</ul>
+<h3 id="64-enable-ssl">6.4 Enable SSL<a class="headerlink" href="#64-enable-ssl" title="Anchor link to this section">&para;</a></h3>
+<p><strong>In Render:</strong>
+- SSL is automatic once domain is verified
+- ✅ Both services should show 🔒 next to custom domains</p>
+<hr />
+<h2 id="step-7-update-cors-configuration"><strong>Step 7: Update CORS Configuration</strong> 🔄<a class="headerlink" href="#step-7-update-cors-configuration" title="Anchor link to this section">&para;</a></h2>
+<p>Now that you have custom domains, update the API CORS settings:</p>
+<h3 id="71-update-api-environment-variables">7.1 Update API Environment Variables<a class="headerlink" href="#71-update-api-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to API service in Render</li>
+<li>Click <strong>"Environment"</strong> tab</li>
+<li>Update these two variables:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>https://demo.pulsestage.app
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://demo.pulsestage.app
+</span></code></pre></div>
+<ol>
+<li>Click <strong>"Save Changes"</strong></li>
+<li>Render will automatically redeploy (~2 minutes)</li>
+</ol>
+<hr />
+<h2 id="step-8-configure-github-actions-secret"><strong>Step 8: Configure GitHub Actions Secret</strong> 🔧<a class="headerlink" href="#step-8-configure-github-actions-secret" title="Anchor link to this section">&para;</a></h2>
+<p>For the demo reset system to work:</p>
+<h3 id="81-add-github-secret">8.1 Add GitHub Secret<a class="headerlink" href="#81-add-github-secret" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to: https://github.com/seanmdalton/pulsestage</li>
+<li>Click <strong>"Settings"</strong> → <strong>"Secrets and variables"</strong> → <strong>"Actions"</strong></li>
+<li>Click <strong>"New repository secret"</strong></li>
+<li>Name: <code>ADMIN_KEY</code></li>
+<li>Value: <code>7KxZJaIWjWql9B3p96OZK6_oAoEiNYNK</code> (from earlier)</li>
+<li>Click <strong>"Add secret"</strong></li>
+</ol>
+<h3 id="82-test-the-workflow">8.2 Test the Workflow<a class="headerlink" href="#82-test-the-workflow" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to <strong>"Actions"</strong> tab</li>
+<li>Click <strong>"Reset Demo Instance"</strong></li>
+<li>Click <strong>"Run workflow"</strong> → <strong>"Run workflow"</strong></li>
+<li>Wait for completion (~30 seconds)</li>
+<li>✅ Should see green checkmark</li>
+</ol>
+<hr />
+<h2 id="step-9-test-the-demo"><strong>Step 9: Test the Demo</strong> 🧪<a class="headerlink" href="#step-9-test-the-demo" title="Anchor link to this section">&para;</a></h2>
+<h3 id="91-visit-demo-site">9.1 Visit Demo Site<a class="headerlink" href="#91-visit-demo-site" title="Anchor link to this section">&para;</a></h3>
+<p>Open: https://demo.pulsestage.app</p>
+<p>Expected: Login page with demo users</p>
+<h3 id="92-test-demo-login">9.2 Test Demo Login<a class="headerlink" href="#92-test-demo-login" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Click <strong>"Alice (Demo User)"</strong></li>
+<li>Should redirect to: <code>https://demo.pulsestage.app/general</code></li>
+<li>✅ You should see the submit question page</li>
+</ol>
+<h3 id="93-test-question-submission">9.3 Test Question Submission<a class="headerlink" href="#93-test-question-submission" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Enter a test question: "Is the demo working?"</li>
+<li>Click <strong>"Submit Question"</strong></li>
+<li>✅ Question should appear in the open questions list</li>
+</ol>
+<h3 id="94-test-api-health">9.4 Test API Health<a class="headerlink" href="#94-test-api-health" title="Anchor link to this section">&para;</a></h3>
+<p>Visit: https://api-demo.pulsestage.app/health</p>
+<p>Expected response:
+<div class="language-json highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-10-15T01:30:00.000Z&quot;</span><span class="p">,</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nt">&quot;uptime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<h3 id="95-test-demo-reset">9.5 Test Demo Reset<a class="headerlink" href="#95-test-demo-reset" title="Anchor link to this section">&para;</a></h3>
+<p>Run this from your terminal:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://api-demo.pulsestage.app/admin/reset-demo<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;x-admin-key: 7KxZJaIWjWql9B3p96OZK6_oAoEiNYNK&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span>
+</span></code></pre></div></p>
+<p>Expected response:
+<div class="language-json highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Demo instance reset successfully&quot;</span><span class="p">,</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-10-15T01:30:00.000Z&quot;</span><span class="p">,</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">  </span><span class="nt">&quot;resetItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">    </span><span class="nt">&quot;questionsCleared&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">    </span><span class="nt">&quot;upvotesCleared&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">    </span><span class="nt">&quot;auditLogsCleared&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">    </span><span class="nt">&quot;demoDataReseeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<hr />
+<h2 id="step-10-configure-cloudflare-settings"><strong>Step 10: Configure Cloudflare Settings</strong> ☁️<a class="headerlink" href="#step-10-configure-cloudflare-settings" title="Anchor link to this section">&para;</a></h2>
+<h3 id="101-ssltls-settings">10.1 SSL/TLS Settings<a class="headerlink" href="#101-ssltls-settings" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>In Cloudflare dashboard</li>
+<li>Go to <strong>"SSL/TLS"</strong> → <strong>"Overview"</strong></li>
+<li>Set mode to: <strong>"Full (strict)"</strong></li>
+<li>This ensures end-to-end encryption</li>
+</ol>
+<h3 id="102-caching-rules-optional">10.2 Caching Rules (Optional)<a class="headerlink" href="#102-caching-rules-optional" title="Anchor link to this section">&para;</a></h3>
+<p>For better performance:</p>
+<ol>
+<li>Go to <strong>"Caching"</strong> → <strong>"Configuration"</strong></li>
+<li>Click <strong>"Create rule"</strong></li>
+</ol>
+<p><strong>For API:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Rule name: API No Cache
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>When incoming requests match: Hostname equals api-demo.pulsestage.app
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>Then: Cache eligibility → Bypass cache
+</span></code></pre></div></p>
+<p><strong>For Web (static assets):</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Rule name: Web Asset Cache
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>When incoming requests match: 
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>  Hostname equals demo.pulsestage.app AND
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>  File extension is in {js, css, png, jpg, svg, woff2}
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>Then: Cache eligibility → Eligible for cache
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>     Browser Cache TTL → 1 hour
+</span></code></pre></div></p>
+<hr />
+<h2 id="deployment-complete"><strong>✅ Deployment Complete!</strong><a class="headerlink" href="#deployment-complete" title="Anchor link to this section">&para;</a></h2>
+<p>Your demo is now live at:
+- 🌐 <strong>Web</strong>: https://demo.pulsestage.app
+- 🔧 <strong>API</strong>: https://api-demo.pulsestage.app
+- 📊 <strong>Health</strong>: https://api-demo.pulsestage.app/health
+- 📚 <strong>Swagger</strong>: https://api-demo.pulsestage.app/api-docs</p>
+<hr />
+<h2 id="daily-automatic-resets"><strong>🔄 Daily Automatic Resets</strong><a class="headerlink" href="#daily-automatic-resets" title="Anchor link to this section">&para;</a></h2>
+<p>The GitHub Actions workflow will automatically reset your demo:
+- <strong>Schedule</strong>: Daily at 3 AM UTC (11 PM EST / 8 PM PST)
+- <strong>What it does</strong>: Clears user-submitted questions, re-seeds demo data
+- <strong>Manual trigger</strong>: Actions tab → "Reset Demo Instance" → Run workflow</p>
+<hr />
+<h2 id="monitoring"><strong>📊 Monitoring</strong><a class="headerlink" href="#monitoring" title="Anchor link to this section">&para;</a></h2>
+<h3 id="render-dashboard">Render Dashboard<a class="headerlink" href="#render-dashboard" title="Anchor link to this section">&para;</a></h3>
+<ul>
+<li><strong>Metrics</strong>: CPU, memory, request volume</li>
+<li><strong>Logs</strong>: Real-time application logs</li>
+<li><strong>Alerts</strong>: Email notifications for downtime</li>
+</ul>
+<h3 id="health-checks">Health Checks<a class="headerlink" href="#health-checks" title="Anchor link to this section">&para;</a></h3>
+<p>Render automatically pings:
+- Web: <code>https://demo.pulsestage.app/</code>
+- API: <code>https://api-demo.pulsestage.app/health</code></p>
+<p>If health check fails, Render will:
+1. Restart the service automatically
+2. Send email notification
+3. Show "Unhealthy" in dashboard</p>
+<hr />
+<h2 id="maintenance"><strong>🛠️ Maintenance</strong><a class="headerlink" href="#maintenance" title="Anchor link to this section">&para;</a></h2>
+<h3 id="viewing-logs">Viewing Logs<a class="headerlink" href="#viewing-logs" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to service in Render</li>
+<li>Click <strong>"Logs"</strong> tab</li>
+<li>Use filter to search: <code>ERROR</code>, <code>WARN</code>, etc.</li>
+</ol>
+<h3 id="redeploying">Redeploying<a class="headerlink" href="#redeploying" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Automatic</strong> (on git push):
+- Any push to <code>main</code> branch triggers redeploy
+- ~5 minutes for API, ~4 minutes for Web</p>
+<p><strong>Manual</strong>:
+1. Go to service page
+2. Click <strong>"Manual Deploy"</strong> → <strong>"Deploy latest commit"</strong></p>
+<h3 id="updating-environment-variables">Updating Environment Variables<a class="headerlink" href="#updating-environment-variables" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Go to service → <strong>"Environment"</strong> tab</li>
+<li>Edit value</li>
+<li>Click <strong>"Save Changes"</strong></li>
+<li>Render auto-redeploys (~2-5 minutes)</li>
+</ol>
+<hr />
+<h2 id="troubleshooting"><strong>🐛 Troubleshooting</strong><a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="application-failed-to-respond">"Application failed to respond"<a class="headerlink" href="#application-failed-to-respond" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: Service not healthy
+<strong>Fix</strong>:
+1. Check logs for errors
+2. Verify DATABASE_URL is correct (Internal URL)
+3. Check Redis connection
+4. Manual deploy latest commit</p>
+<h3 id="origin-is-not-allowed-by-cors">"Origin is not allowed by CORS"<a class="headerlink" href="#origin-is-not-allowed-by-cors" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: CORS misconfiguration
+<strong>Fix</strong>:
+1. API → Environment
+2. Update <code>CORS_ORIGIN</code> to <code>https://demo.pulsestage.app</code>
+3. Update <code>CORS_ORIGINS</code> to <code>https://demo.pulsestage.app</code>
+4. Save (triggers redeploy)</p>
+<h3 id="invalid-or-missing-csrf-token">"Invalid or missing CSRF token"<a class="headerlink" href="#invalid-or-missing-csrf-token" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: Missing CSRF_SECRET
+<strong>Fix</strong>:
+1. Verify CSRF_SECRET is set in API environment
+2. Clear browser cookies
+3. Try again</p>
+<h3 id="demo-login-not-working">Demo login not working<a class="headerlink" href="#demo-login-not-working" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: Demo users not seeded
+<strong>Fix</strong>:
+1. API service → Shell
+2. Run: <code>npm run db:seed:demo</code>
+3. Verify: Should see "✅ Created 12 demo questions"</p>
+<h3 id="database-connection-errors">Database connection errors<a class="headerlink" href="#database-connection-errors" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Cause</strong>: Wrong DATABASE_URL
+<strong>Fix</strong>:
+1. Use <strong>Internal</strong> database URL (starts with <code>postgres://</code>)
+2. Don't use External URL (ends with <code>-a.oregon-postgres.render.com</code>)
+3. Update API environment variable
+4. Save (triggers redeploy)</p>
+<hr />
+<h2 id="cost-estimate"><strong>💰 Cost Estimate</strong><a class="headerlink" href="#cost-estimate" title="Anchor link to this section">&para;</a></h2>
+<p><strong>Free Tier:</strong>
+- PostgreSQL: Free (1 GB, 90-day limit then deleted)
+- Redis: Free (25 MB)
+- 2× Web Services: Free (750 hrs/month each)
+- <strong>Total: $0/month</strong> (for first 90 days)</p>
+<p><strong>After 90 Days (if you want to keep it):</strong>
+- PostgreSQL: $7/month (256 MB)
+- Redis: Free (still works)
+- 2× Web Services: Free
+- <strong>Total: $7/month</strong></p>
+<p><strong>⚠️ Free tier services sleep after 15 min of inactivity</strong>
+- First request takes ~30 seconds to wake up
+- Subsequent requests are instant
+- GitHub Actions reset keeps services awake</p>
+<hr />
+<h2 id="next-steps"><strong>🎯 Next Steps</strong><a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set calendar reminder to upgrade database before 90 days</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add uptime monitoring (e.g., UptimeRobot - free)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Share demo link: <code>https://demo.pulsestage.app</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Monitor first few automatic resets (3 AM UTC)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Consider adding Discord/Slack notifications for health checks</li>
 </ul>
 <hr />
-<p><strong>Started</strong>: <strong><em>_</em></strong><strong><em>_<br />
-<strong>Completed</strong>: </em></strong><strong><em>_</em></strong>_<br />
-<strong>Issues</strong>: <strong><em>_</em></strong>____</p>
+<p><strong>🎉 Congratulations!</strong> Your PulseStage demo is live and will automatically stay fresh with daily resets!</p>
 
 
 
@@ -2791,7 +3086,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 14, 2025 21:37:05 UTC"><span class="timeago" datetime="2025-10-14T21:37:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 14, 2025 21:37:05 UTC">2025-10-14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 20:36:25 UTC"><span class="timeago" datetime="2025-10-15T20:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 20:36:25 UTC">2025-10-15</span>
   </span>
 
     
@@ -2801,7 +3096,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 14, 2025 21:37:05 UTC"><span class="timeago" datetime="2025-10-14T21:37:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 14, 2025 21:37:05 UTC">2025-10-14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 03:03:13 UTC"><span class="timeago" datetime="2025-10-15T03:03:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 03:03:13 UTC">2025-10-15</span>
   </span>
 
     
