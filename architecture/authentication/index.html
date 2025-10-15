@@ -1523,6 +1523,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-production-deployment-organizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Production Deployment (Organizations)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-public-demo-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Public Demo Deployment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Local Development
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1544,6 +1577,15 @@
   
     <nav class="md-nav" aria-label="Backend Components">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#session-authentication-middleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Authentication Middleware
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#authmanager" class="md-nav__link">
@@ -3148,50 +3190,102 @@
 <h1 id="authentication-system">Authentication System<a class="headerlink" href="#authentication-system" title="Anchor link to this section">&para;</a></h1>
 <p>PulseStage implements a flexible, multi-mode authentication system designed to support different deployment scenarios: demo environments, self-hosted installations, and production deployments.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Anchor link to this section">&para;</a></h2>
-<p><strong>Authentication is required for all users.</strong> The authentication system automatically adapts based on <code>NODE_ENV</code>:</p>
-<p><strong>Development Mode (<code>NODE_ENV=development</code>)</strong>:
-- <strong>Demo Mode</strong>: Auto-enabled with pre-seeded users (<code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code>)
-- Users must login via <code>/login</code> to select a demo user
-- <strong>OAuth</strong> (Optional): Can be configured for testing OAuth flows locally</p>
-<p><strong>Production Mode (<code>NODE_ENV=production</code>)</strong>:
-- <strong>Demo Mode</strong>: Disabled
-- <strong>OAuth</strong>: GitHub and/or Google OAuth required (users must authenticate to access any page)
-- <strong>Setup Wizard</strong>: First-time configuration for organization settings (accessible without auth for initial setup only)</p>
+<p><strong>Authentication is required for all users.</strong> PulseStage supports two primary deployment scenarios:</p>
+<h3 id="1-production-deployment-organizations">1. Production Deployment (Organizations)<a class="headerlink" href="#1-production-deployment-organizations" title="Anchor link to this section">&para;</a></h3>
+<p>For organizations deploying PulseStage internally or for their customers:</p>
+<ul>
+<li><strong>OAuth Required</strong>: GitHub and/or Google OAuth for real user authentication</li>
+<li><strong>Demo Mode</strong>: Disabled (unless explicitly enabled with <code>AUTH_MODE_DEMO=true</code>)</li>
+<li><strong>Session-based authentication</strong> with Redis for scalability</li>
+<li><strong>Setup Wizard</strong>: First-time configuration for organization settings</li>
+</ul>
+<p><strong>Recommended Configuration:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...<span class="w">        </span><span class="c1"># Optional</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...<span class="w">    </span><span class="c1"># Optional</span>
+</span></code></pre></div></p>
+<h3 id="2-public-demo-deployment">2. Public Demo Deployment<a class="headerlink" href="#2-public-demo-deployment" title="Anchor link to this section">&para;</a></h3>
+<p>For public-facing demo instances (like demo.pulsestage.app):</p>
+<ul>
+<li><strong>Demo Mode</strong>: Explicitly enabled with <code>AUTH_MODE_DEMO=true</code></li>
+<li><strong>Pre-seeded users</strong>: <code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code></li>
+<li><strong>Instant login</strong>: No OAuth setup required</li>
+<li><strong>Ephemeral data</strong>: Typically resets daily</li>
+</ul>
+<p><strong>Demo Configuration:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># OAuth can also be enabled alongside demo mode</span>
+</span></code></pre></div></p>
+<h3 id="3-local-development">3. Local Development<a class="headerlink" href="#3-local-development" title="Anchor link to this section">&para;</a></h3>
+<p>For developers working on PulseStage:</p>
+<ul>
+<li><strong>Demo Mode</strong>: Auto-enabled when <code>NODE_ENV=development</code></li>
+<li><strong>OAuth</strong>: Optional (for testing OAuth flows)</li>
+<li><strong>x-mock-sso-user header</strong>: Supported for automated testing</li>
+</ul>
+<p><strong>Development Configuration:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># Demo mode auto-enabled, no other config needed</span>
+</span></code></pre></div></p>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Anchor link to this section">&para;</a></h2>
 <h3 id="backend-components">Backend Components<a class="headerlink" href="#backend-components" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>api/src/lib/auth/
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── types.ts        # TypeScript interfaces and types
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── demoMode.ts     # Demo mode implementation  
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── oauth.ts        # OAuth 2.0 flows (GitHub, Google)
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── index.ts        # AuthManager (orchestration layer)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>api/src/lib/auth/
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├── types.ts        # TypeScript interfaces and types
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── demoMode.ts     # Demo mode implementation  
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>├── oauth.ts        # OAuth 2.0 flows (GitHub, Google)
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>└── index.ts        # AuthManager (orchestration layer)
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>api/src/middleware/
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>└── sessionAuth.ts  # Session authentication middleware
+</span></code></pre></div>
+<h4 id="session-authentication-middleware">Session Authentication Middleware<a class="headerlink" href="#session-authentication-middleware" title="Anchor link to this section">&para;</a></h4>
+<p>The <code>sessionAuthMiddleware</code> is the core of the authentication system. It runs on <strong>every request</strong> and has three responsibilities:</p>
+<ol>
+<li><strong>Read session data</strong>: Extracts <code>req.session.user</code> (set by demo auth or OAuth)</li>
+<li><strong>Populate req.user</strong>: Makes user data available to downstream middleware and routes</li>
+<li><strong>Support test header</strong>: Allows <code>x-mock-sso-user</code> header in dev/test environments only</li>
+</ol>
+<p><strong>Key Points:</strong>
+- ✅ Always enabled in all environments (production, development, test)
+- ✅ Required for demo mode, OAuth, and any session-based auth to work
+- ✅ Blocks <code>x-mock-sso-user</code> header in production for security
+- ✅ Automatically falls back to OAuth if demo mode is disabled</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Middleware execution order (simplified)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">sessionMiddleware</span><span class="p">)</span><span class="w">           </span><span class="c1">// 1. Load session from Redis/memory</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">tenantResolverMiddleware</span><span class="p">)</span><span class="w">    </span><span class="c1">// 2. Identify tenant context</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">sessionAuthMiddleware</span><span class="p">)</span><span class="w">       </span><span class="c1">// 3. Authenticate user from session</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1">// ... route handlers can now access req.user</span>
 </span></code></pre></div>
 <h4 id="authmanager">AuthManager<a class="headerlink" href="#authmanager" title="Anchor link to this section">&para;</a></h4>
 <p>The <code>AuthManager</code> class orchestrates all authentication modes:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AuthManager</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;./lib/auth&#39;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">authManager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AuthManager</span><span class="p">(</span><span class="nx">prisma</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">// Check available modes</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">const</span><span class="w"> </span><span class="nx">modes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">getEnabledModes</span><span class="p">()</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">// Returns: [&#39;demo&#39;, &#39;oauth&#39;]</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">// Check if specific mode is enabled</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="kd">const</span><span class="w"> </span><span class="nx">isDemoEnabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">isModeEnabled</span><span class="p">(</span><span class="s1">&#39;demo&#39;</span><span class="p">)</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1">// Authenticate with demo mode</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">authenticateDemo</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="c1">// Handle OAuth callbacks</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">handleGitHubCallback</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">handleGoogleCallback</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AuthManager</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;./lib/auth&#39;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">authManager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AuthManager</span><span class="p">(</span><span class="nx">prisma</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1">// Check available modes</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="kd">const</span><span class="w"> </span><span class="nx">modes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">getEnabledModes</span><span class="p">()</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1">// Returns: [&#39;demo&#39;, &#39;oauth&#39;]</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="c1">// Check if specific mode is enabled</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="kd">const</span><span class="w"> </span><span class="nx">isDemoEnabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">isModeEnabled</span><span class="p">(</span><span class="s1">&#39;demo&#39;</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="c1">// Authenticate with demo mode</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">authenticateDemo</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1">// Handle OAuth callbacks</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">handleGitHubCallback</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">authManager</span><span class="p">.</span><span class="nx">handleGoogleCallback</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="frontend-components">Frontend Components<a class="headerlink" href="#frontend-components" title="Anchor link to this section">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>web/src/
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── components/
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│   ├── AuthSelector.tsx      # Landing page auth UI
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│   └── DemoModeBanner.tsx    # Banner for demo users
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>└── pages/
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    └── LoginPage.tsx          # Standalone login page
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>web/src/
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── components/
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   ├── AuthSelector.tsx      # Landing page auth UI
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>│   └── DemoModeBanner.tsx    # Banner for demo users
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>└── pages/
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    └── LoginPage.tsx          # Standalone login page
 </span></code></pre></div>
 <h4 id="authselector">AuthSelector<a class="headerlink" href="#authselector" title="Anchor link to this section">&para;</a></h4>
 <p>Responsive authentication UI that:
@@ -3209,11 +3303,11 @@
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Anchor link to this section">&para;</a></h2>
 <h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Anchor link to this section">&para;</a></h3>
 <h4 id="node_env-controls-auth-mode">NODE_ENV (Controls Auth Mode)<a class="headerlink" href="#node_env-controls-auth-mode" title="Anchor link to this section">&para;</a></h4>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Development mode - Enables demo users with auto-seeding</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Production mode - Requires OAuth configuration</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Development mode - Enables demo users with auto-seeding</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Production mode - Requires OAuth configuration</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
 </span></code></pre></div>
 <p><strong>Development Mode</strong> automatically:
 - Seeds demo users on startup (<code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code> @ <code>demo.pulsestage.dev</code>)
@@ -3245,13 +3339,13 @@
 <p>Configure environment variables:</p>
 </li>
 </ol>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># .env</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_client_id_here
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://your-domain.com/api/auth/github/callback
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Frontend URL (for redirects after auth)</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://your-domain.com
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># .env</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_client_id_here
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://your-domain.com/api/auth/github/callback
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># Frontend URL (for redirects after auth)</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://your-domain.com
 </span></code></pre></div>
 <h4 id="google-oauth">Google OAuth<a class="headerlink" href="#google-oauth" title="Anchor link to this section">&para;</a></h4>
 <p><strong>Setup Steps:</strong></p>
@@ -3270,58 +3364,58 @@
 <p>Configure environment variables:</p>
 </li>
 </ol>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># .env</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_client_id_here.apps.googleusercontent.com
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>https://your-domain.com/api/auth/google/callback
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Frontend URL (for redirects after auth)</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://your-domain.com
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># .env</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_client_id_here.apps.googleusercontent.com
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_client_secret_here
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>https://your-domain.com/api/auth/google/callback
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># Frontend URL (for redirects after auth)</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://your-domain.com
 </span></code></pre></div>
 <h3 id="multi-mode-configuration">Multi-Mode Configuration<a class="headerlink" href="#multi-mode-configuration" title="Anchor link to this section">&para;</a></h3>
 <p>You can enable multiple auth modes simultaneously:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># .env - Production Example</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># Demo mode disabled for production</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># GitHub OAuth for public-facing instance</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://app.example.com/api/auth/github/callback
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Google OAuth for enterprise SSO</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>https://app.example.com/api/auth/google/callback
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://app.example.com
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># .env - Production Example</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># Demo mode disabled for production</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1"># GitHub OAuth for public-facing instance</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>https://app.example.com/api/auth/github/callback
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># Google OAuth for enterprise SSO</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>https://app.example.com/api/auth/google/callback
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>https://app.example.com
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># .env - Self-Hosted Example</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># Enable demo mode for quick testing</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># (Demo users use @demo.pulsestage.dev emails)</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># GitHub OAuth for real users</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/github/callback
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># .env - Self-Hosted Example</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="c1"># Enable demo mode for quick testing</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1"># (Demo users use @demo.pulsestage.dev emails)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1"># GitHub OAuth for real users</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/github/callback
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
 </span></code></pre></div>
 <h2 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Anchor link to this section">&para;</a></h2>
 <h3 id="authentication-modes-endpoint">Authentication Modes Endpoint<a class="headerlink" href="#authentication-modes-endpoint" title="Anchor link to this section">&para;</a></h3>
 <p><strong>GET /auth/modes</strong></p>
 <p>Returns available authentication modes and configuration:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;oauth&quot;</span><span class="p">],</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;demo&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;moderator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">]</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">&quot;oauth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">&quot;github&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">&quot;google&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;oauth&quot;</span><span class="p">],</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;demo&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;moderator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">]</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">&quot;oauth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="nt">&quot;github&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="nt">&quot;google&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="demo-mode-endpoints">Demo Mode Endpoints<a class="headerlink" href="#demo-mode-endpoints" title="Anchor link to this section">&para;</a></h3>
 <p><strong>GET /auth/demo</strong></p>
@@ -3329,43 +3423,43 @@
 <p>Query Parameters:
 - <code>user</code> (required): Demo user identifier (<code>alice</code>, <code>bob</code>, <code>moderator</code>, <code>admin</code>)
 - <code>tenant</code> (optional): Tenant slug (defaults to <code>demo</code>)</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3000/auth/demo?user=alice&amp;tenant=demo&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3000/auth/demo?user=alice&amp;tenant=demo&quot;</span>
 </span></code></pre></div>
 <p>Response: Redirects to <code>FRONTEND_URL</code> with session cookie</p>
 <h3 id="oauth-endpoints">OAuth Endpoints<a class="headerlink" href="#oauth-endpoints" title="Anchor link to this section">&para;</a></h3>
 <p><strong>GET /auth/github</strong></p>
 <p>Initiates GitHub OAuth flow:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Browser navigates to:</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>https://your-domain.com/api/auth/github
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Browser navigates to:</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>https://your-domain.com/api/auth/github
 </span></code></pre></div>
 <p>Response: Redirects to GitHub authorization page</p>
 <p><strong>GET /auth/github/callback</strong></p>
 <p>Handles GitHub OAuth callback:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># GitHub redirects to:</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>https://your-domain.com/api/auth/github/callback?code<span class="o">=</span>...<span class="p">&amp;</span><span class="nv">state</span><span class="o">=</span>...
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># GitHub redirects to:</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>https://your-domain.com/api/auth/github/callback?code<span class="o">=</span>...<span class="p">&amp;</span><span class="nv">state</span><span class="o">=</span>...
 </span></code></pre></div>
 <p>Response: Redirects to <code>FRONTEND_URL</code> with session cookie</p>
 <p><strong>GET /auth/google</strong></p>
 <p>Initiates Google OAuth flow:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Browser navigates to:</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>https://your-domain.com/api/auth/google
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Browser navigates to:</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>https://your-domain.com/api/auth/google
 </span></code></pre></div>
 <p>Response: Redirects to Google authorization page</p>
 <p><strong>GET /auth/google/callback</strong></p>
 <p>Handles Google OAuth callback:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Google redirects to:</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>https://your-domain.com/api/auth/google/callback?code<span class="o">=</span>...<span class="p">&amp;</span><span class="nv">state</span><span class="o">=</span>...
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Google redirects to:</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>https://your-domain.com/api/auth/google/callback?code<span class="o">=</span>...<span class="p">&amp;</span><span class="nv">state</span><span class="o">=</span>...
 </span></code></pre></div>
 <p>Response: Redirects to <code>FRONTEND_URL</code> with session cookie</p>
 <h3 id="session-management">Session Management<a class="headerlink" href="#session-management" title="Anchor link to this section">&para;</a></h3>
 <p>Sessions are stored in Express session with the following structure:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">           </span><span class="c1">// User UUID</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">        </span><span class="c1">// User email  </span>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">         </span><span class="c1">// Display name</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="p">}</span>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">tenantSlug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span><span class="w">  </span><span class="c1">// Current tenant context</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">           </span><span class="c1">// User UUID</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">        </span><span class="c1">// User email  </span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w">         </span><span class="c1">// Display name</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">}</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">tenantSlug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span><span class="w">  </span><span class="c1">// Current tenant context</span>
 </span></code></pre></div>
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Anchor link to this section">&para;</a></h2>
 <h3 id="oauth-security">OAuth Security<a class="headerlink" href="#oauth-security" title="Anchor link to this section">&para;</a></h3>
@@ -3377,33 +3471,46 @@
 </ol>
 <h3 id="session-security">Session Security<a class="headerlink" href="#session-security" title="Anchor link to this section">&para;</a></h3>
 <p>Sessions are configured with secure defaults:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nx">secret</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.SESSION_SECRET</span><span class="p">,</span><span class="w">  </span><span class="c1">// Strong random secret required</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nx">resave</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nx">saveUninitialized</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nx">cookie</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="nx">secure</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.NODE_ENV</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;production&#39;</span><span class="p">,</span><span class="w">  </span><span class="c1">// HTTPS only in prod</span>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="nx">httpOnly</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">                                  </span><span class="c1">// No JavaScript access</span>
-</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="nx">sameSite</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;lax&#39;</span><span class="p">,</span><span class="w">                                 </span><span class="c1">// CSRF protection</span>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="nx">maxAge</span><span class="o">:</span><span class="w"> </span><span class="kt">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000</span><span class="w">                </span><span class="c1">// 30 days</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="p">}</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nx">secret</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.SESSION_SECRET</span><span class="p">,</span><span class="w">  </span><span class="c1">// Strong random secret required</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="nx">resave</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span><span class="nx">saveUninitialized</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">  </span><span class="nx">cookie</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="nx">secure</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.NODE_ENV</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;production&#39;</span><span class="p">,</span><span class="w">  </span><span class="c1">// HTTPS only in prod</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="nx">httpOnly</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">                                  </span><span class="c1">// No JavaScript access</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">    </span><span class="nx">sameSite</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;lax&#39;</span><span class="p">,</span><span class="w">                                 </span><span class="c1">// CSRF protection</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="nx">maxAge</span><span class="o">:</span><span class="w"> </span><span class="kt">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000</span><span class="w">                </span><span class="c1">// 30 days</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="demo-mode-security">Demo Mode Security<a class="headerlink" href="#demo-mode-security" title="Anchor link to this section">&para;</a></h3>
-<p><strong>⚠️ Demo mode is automatically disabled in production!</strong></p>
-<p>When <code>NODE_ENV=production</code>, demo mode is disabled and OAuth is required. Demo mode only activates in development environments:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Development - demo mode enabled</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Production - demo mode disabled, OAuth required</span>
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+<p>Demo mode is controlled by two factors:</p>
+<ol>
+<li><strong>Automatic in development</strong>: <code>NODE_ENV=development</code> enables demo mode</li>
+<li><strong>Explicit in production</strong>: <code>AUTH_MODE_DEMO=true</code> enables demo mode in production</li>
+</ol>
+<p><strong>⚠️ By default, demo mode is disabled in production</strong> unless explicitly enabled.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Development - demo mode auto-enabled</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># Production (Organization) - demo mode disabled, OAuth required</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="c1"># Production (Public Demo) - demo mode explicitly enabled</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
-<p>Demo mode is safe for:
-- Local development (<code>NODE_ENV=development</code>)
-- CI/CD testing environments
-- Public-facing demos (with ephemeral data)</p>
+<p><strong>When Demo Mode is Safe:</strong>
+- ✅ Local development (<code>NODE_ENV=development</code>)
+- ✅ CI/CD testing environments<br />
+- ✅ Public-facing demos with ephemeral data (set <code>AUTH_MODE_DEMO=true</code>)
+- ✅ Staging environments for testing auth flows</p>
+<p><strong>When Demo Mode Should Be Disabled:</strong>
+- ❌ Production deployments for organizations
+- ❌ Instances with sensitive or permanent data
+- ❌ Customer-facing applications requiring real authentication</p>
 <h2 id="user-experience">User Experience<a class="headerlink" href="#user-experience" title="Anchor link to this section">&para;</a></h2>
 <h3 id="first-time-login-flow">First-Time Login Flow<a class="headerlink" href="#first-time-login-flow" title="Anchor link to this section">&para;</a></h3>
 <ol>
@@ -3418,8 +3525,8 @@
 </ol>
 <h3 id="demo-user-experience">Demo User Experience<a class="headerlink" href="#demo-user-experience" title="Anchor link to this section">&para;</a></h3>
 <p>Demo users see a persistent banner on all pages:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>ℹ️  You&#39;re in demo mode. Data resets daily.
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    [Sign up to save your work]  [✕]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ℹ️  You&#39;re in demo mode. Data resets daily.
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    [Sign up to save your work]  [✕]
 </span></code></pre></div>
 <p>Banner characteristics:
 - Gradient blue background for visibility
@@ -3428,11 +3535,11 @@
 - Detects demo users by email domain</p>
 <h3 id="oauth-error-handling">OAuth Error Handling<a class="headerlink" href="#oauth-error-handling" title="Anchor link to this section">&para;</a></h3>
 <p>If OAuth fails, users are redirected to <code>/login?error=&lt;message&gt;</code>:</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// Example error scenarios:</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="o">-</span><span class="w"> </span><span class="nx">Missing</span><span class="w"> </span><span class="nx">authorization</span><span class="w"> </span><span class="nx">code</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="o">-</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="nx">parameter</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="o">-</span><span class="w"> </span><span class="nx">OAuth</span><span class="w"> </span><span class="nx">provider</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">error</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="o">-</span><span class="w"> </span><span class="nx">User</span><span class="w"> </span><span class="nx">account</span><span class="w"> </span><span class="nx">creation</span><span class="w"> </span><span class="nx">failure</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// Example error scenarios:</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="o">-</span><span class="w"> </span><span class="nx">Missing</span><span class="w"> </span><span class="nx">authorization</span><span class="w"> </span><span class="nx">code</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="o">-</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="nx">parameter</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="o">-</span><span class="w"> </span><span class="nx">OAuth</span><span class="w"> </span><span class="nx">provider</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">error</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="o">-</span><span class="w"> </span><span class="nx">User</span><span class="w"> </span><span class="nx">account</span><span class="w"> </span><span class="nx">creation</span><span class="w"> </span><span class="nx">failure</span>
 </span></code></pre></div>
 <p>The <code>LoginPage</code> component displays error messages in a prominent alert banner.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Anchor link to this section">&para;</a></h2>
@@ -3440,32 +3547,32 @@
 <ol>
 <li>
 <p><strong>Demo Mode</strong>:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Visit login page</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>http://localhost:5173/login
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># Select demo user and click &quot;Continue&quot;</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1"># Should redirect to home page with demo banner</span>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Visit login page</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>http://localhost:5173/login
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># Select demo user and click &quot;Continue&quot;</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="c1"># Should redirect to home page with demo banner</span>
 </span></code></pre></div></p>
 </li>
 <li>
 <p><strong>GitHub OAuth</strong>:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Set environment variables</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/github/callback
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
-</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="c1"># Visit login page and click &quot;Sign in with GitHub&quot;</span>
-</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="c1"># Complete OAuth flow on GitHub</span>
-</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="c1"># Should redirect back to http://localhost:5173</span>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Set environment variables</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/github/callback
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="c1"># Visit login page and click &quot;Sign in with GitHub&quot;</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="c1"># Complete OAuth flow on GitHub</span>
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="c1"># Should redirect back to http://localhost:5173</span>
 </span></code></pre></div></p>
 </li>
 <li>
 <p><strong>Google OAuth</strong> (similar to GitHub):
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/google/callback
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>...
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>...
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/api/auth/google/callback
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="nv">FRONTEND_URL</span><span class="o">=</span>http://localhost:5173
 </span></code></pre></div></p>
 </li>
 </ol>
@@ -3475,15 +3582,15 @@
 - <code>api/src/lib/auth/oauth.test.ts</code>
 - <code>api/src/lib/auth/index.test.ts</code></p>
 <p>Run tests:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nb">cd</span><span class="w"> </span>api
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>auth
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">cd</span><span class="w"> </span>api
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>npm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>auth
 </span></code></pre></div>
 <h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Anchor link to this section">&para;</a></h2>
 <h3 id="self-hosted-docker-compose">Self-Hosted (Docker Compose)<a class="headerlink" href="#self-hosted-docker-compose" title="Anchor link to this section">&para;</a></h3>
 <ol>
 <li>
 <p>Copy <code>env.example</code> to <code>.env</code>:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>cp<span class="w"> </span>env.example<span class="w"> </span>.env
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>cp<span class="w"> </span>env.example<span class="w"> </span>.env
 </span></code></pre></div></p>
 </li>
 <li>
@@ -3491,7 +3598,7 @@
 </li>
 <li>
 <p>Start services:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div></p>
 </li>
 <li>
@@ -3563,11 +3670,11 @@
 <h3 id="mock-sso-test-only">Mock SSO (Test-Only)<a class="headerlink" href="#mock-sso-test-only" title="Anchor link to this section">&para;</a></h3>
 <p>Mock SSO is a <strong>test-only</strong> authentication mechanism used by automated tests. It is <strong>not intended for user-facing development</strong>.</p>
 <p><strong>For Testing (via <code>x-mock-sso-user</code> header):</strong>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1">// In API tests</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/questions&#39;</span><span class="p">)</span>
-</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;x-mock-sso-user&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alice@demo.pulsestage.dev&#39;</span><span class="p">)</span>
-</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Test question&#39;</span><span class="w"> </span><span class="p">})</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1">// In API tests</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">request</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/questions&#39;</span><span class="p">)</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;x-mock-sso-user&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alice@demo.pulsestage.dev&#39;</span><span class="p">)</span>
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Test question&#39;</span><span class="w"> </span><span class="p">})</span>
 </span></code></pre></div></p>
 <p><strong>Security Safeguards:</strong>
 - ✅ Only enabled in <code>development</code> and <code>test</code> environments
@@ -3581,24 +3688,24 @@ Use <strong>Demo Mode</strong> (<code>/auth/demo</code>) instead of Mock SSO. It
 <ol>
 <li>
 <p>Set environment to production (disables demo mode automatically):
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># .env</span>
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># .env</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
 </span></code></pre></div></p>
 </li>
 <li>
 <p>Configure OAuth (required in production):
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># GitHub OAuth</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_github_client_id
-</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_github_client_secret
-</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>
-</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="c1"># and/or Google OAuth</span>
-</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_google_client_id
-</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_google_client_secret
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="c1"># GitHub OAuth</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_github_client_id
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_github_client_secret
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="c1"># and/or Google OAuth</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_google_client_id
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_google_client_secret
 </span></code></pre></div></p>
 </li>
 <li>
 <p>Generate secure secrets:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nb">cd</span><span class="w"> </span>api<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>generate-secrets
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="nb">cd</span><span class="w"> </span>api<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>generate-secrets
 </span></code></pre></div></p>
 </li>
 <li>
@@ -3658,7 +3765,7 @@ Use <strong>Demo Mode</strong> (<code>/auth/demo</code>) instead of Mock SSO. It
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 14, 2025 20:26:16 UTC"><span class="timeago" datetime="2025-10-14T20:26:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 14, 2025 20:26:16 UTC">2025-10-14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 16:47:54 UTC"><span class="timeago" datetime="2025-10-15T16:47:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 16:47:54 UTC">2025-10-15</span>
   </span>
 
     
