@@ -160,33 +160,15 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
     // Load mock data if not already loaded
     await loadMockData();
 
-    console.log('🔍 mockAuth check:', {
-      path: req.path,
-      hasSession: !!req.session,
-      hasSessionUser: !!req.session?.user,
-      sessionId: req.sessionID,
-      cookies: req.headers.cookie ? 'present' : 'missing',
-    });
-
     // Priority 1: Check for session user (from demo auth or OAuth)
     if (req.session?.user) {
       const sessionUser = req.session.user;
-      console.log('🔐 Session user found:', {
-        id: sessionUser.id,
-        email: sessionUser.email,
-        provider: sessionUser.provider,
-      });
 
       // Find full user details from mock data
       let user = mockUsers.find(u => u.id === sessionUser.id || u.email === sessionUser.email);
-      console.log(
-        '🔍 User in cache:',
-        user ? `Found: ${user.email}` : 'Not found, fetching from database...'
-      );
 
       // If not found in mock data, fetch from database (handles newly created users)
       if (!user && sessionUser.id) {
-        console.log('📥 Fetching user from database:', sessionUser.id);
         const dbUser = await prisma.user.findUnique({
           where: { id: sessionUser.id },
           include: {
@@ -195,7 +177,6 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
         });
 
         if (dbUser) {
-          console.log('✅ User found in database:', dbUser.email);
           const userMembership = dbUser.teamMemberships[0];
           user = {
             id: dbUser.id,
@@ -207,9 +188,6 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
           };
           // Add to mock users cache for next time
           mockUsers.push(user);
-          console.log('💾 Added user to cache');
-        } else {
-          console.log('❌ User not found in database');
         }
       }
 
@@ -236,8 +214,6 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
       }
 
       return next();
-    } else {
-      console.log('❌ No session user found in req.session');
     }
 
     // Priority 2: Check for mock SSO header (simulating SSO provider)

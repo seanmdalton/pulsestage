@@ -864,25 +864,14 @@ export function createApp(prisma: PrismaClient) {
       req.session.user = user;
       req.session.tenantSlug = (req.query.tenant as string) || 'demo';
 
-      console.log('🔐 Demo auth: Setting session user:', {
-        userId: user.id,
-        email: user.email,
-        sessionId: req.sessionID,
-      });
-
       // Save session before redirect (important!)
       req.session.save(err => {
         if (err) {
-          console.error('❌ Session save error:', err);
+          console.error('Session save error:', err);
           return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
             error: 'Failed to create session',
           });
         }
-
-        console.log('✅ Session saved successfully:', {
-          sessionId: req.sessionID,
-          userId: user.id,
-        });
 
         // Redirect to frontend
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
