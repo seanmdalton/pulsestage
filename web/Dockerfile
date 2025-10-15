@@ -20,8 +20,11 @@ COPY --from=deps /app/node_modules node_modules
 # Copy source code
 COPY . .
 
-# Build application (skip if NODE_ENV=development)
+# Build arguments for Vite environment variables
 ARG NODE_ENV=production
+ARG VITE_API_URL
+
+# Build application (skip if NODE_ENV=development)
 RUN if [ "$NODE_ENV" = "production" ]; then \
       npm run build; \
     else \

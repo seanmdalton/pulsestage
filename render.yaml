@@ -35,5 +35,6 @@ services:
     plan: free
     envVars:
       - key: VITE_API_URL
-        value: https://api-demo.pulsestage.app
+        value: https://pulsestage-demo-api.onrender.com
+    # Note: Render automatically passes envVars to Docker build as build args
 
