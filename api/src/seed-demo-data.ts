@@ -248,6 +248,15 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
     const team = teams.find(t => t.slug === q.teamSlug);
     if (!team) continue;
 
+    // Precompute values to avoid Prisma parsing issues
+    const now = new Date();
+    const questionStatus = (q as any).underReview
+      ? 'UNDER_REVIEW'
+      : q.answered
+        ? 'ANSWERED'
+        : 'OPEN';
+    const responseDate = q.answered ? now : null;
+
     // Build create data with explicit fields only
     const question = await prisma.question.create({
       data: {
@@ -256,9 +265,9 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
         tenantId: tenantId,
         authorId: q.authorId || null,
         upvotes: q.upvotes,
-        status: (q as any).underReview ? 'UNDER_REVIEW' : q.answered ? 'ANSWERED' : 'OPEN',
+        status: questionStatus,
         responseText: q.response || null,
-        respondedAt: q.answered ? new Date() : null,
+        respondedAt: responseDate,
         moderationReasons: (q as any).moderationReasons || [],
         moderationConfidence: (q as any).moderationConfidence || null,
         moderationProviders: (q as any).moderationProviders || [],
