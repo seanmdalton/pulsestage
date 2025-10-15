@@ -114,7 +114,7 @@ export function useSSE(options: SSEOptions = {}) {
               const error = new Error(
                 `HTTP ${response.status}: ${response.statusText}`
               )
-              onError?.(error as any)
+              onError?.(error as unknown as Event)
               throw error // Stop retrying
             } else {
               // Server error or rate limit, will retry
@@ -145,7 +145,7 @@ export function useSSE(options: SSEOptions = {}) {
           onerror(error) {
             console.error('SSE connection error:', error)
             setIsConnected(false)
-            onError?.(error as any)
+            onError?.(error as unknown as Event)
 
             // The library will automatically retry for server errors
             // We can return a delay in ms, or throw to stop retrying
