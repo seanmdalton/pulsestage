@@ -34,5 +34,12 @@ services:
   web:
     build:
       context: ./web
-      target: development
+      dockerfile: Dockerfile
+      target: deps  # Use deps stage which has node_modules
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./web:/app
+      - /app/node_modules  # Preserve node_modules from image
+    environment:
+      NODE_ENV: development
 
