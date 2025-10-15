@@ -21,6 +21,8 @@ services:
         sync: false
       - key: ADMIN_KEY
         sync: false
+      - key: FRONTEND_URL
+        value: https://demo.pulsestage.app
       - key: CORS_ORIGINS
         value: https://demo.pulsestage.app,http://localhost:5173
       - key: PORT
