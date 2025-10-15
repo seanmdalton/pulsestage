@@ -20,6 +20,7 @@
     "openapi:gen": "openapi-typescript ../api/openapi.yaml -o src/lib/api-types.ts"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@tailwindcss/line-clamp": "^0.4.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

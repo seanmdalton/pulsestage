@@ -15,6 +15,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import {
+  fetchEventSource,
+  EventStreamContentType,
+} from '@microsoft/fetch-event-source'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -50,80 +54,123 @@ export function useSSE(options: SSEOptions = {}) {
 
   const [isConnected, setIsConnected] = useState(false)
   const [lastHeartbeat, setLastHeartbeat] = useState<number | null>(null)
-  const eventSourceRef = useRef<EventSource | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const shouldConnectRef = useRef(true)
 
   useEffect(() => {
     shouldConnectRef.current = true
 
-    const connect = () => {
+    const connect = async () => {
       if (!shouldConnectRef.current) return
 
       // Get tenant from localStorage (set by SSO test page)
       const mockTenant = localStorage.getItem('mock-tenant') || 'default'
 
       // Construct SSE URL with tenant as query parameter
-      // EventSource doesn't support custom headers, so we use query params
       const url = `${API_URL}/events?tenant=${encodeURIComponent(mockTenant)}`
 
-      const eventSource = new EventSource(url)
-      eventSourceRef.current = eventSource
+      // Create abort controller for this connection
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
 
-      eventSource.onopen = () => {
-        setIsConnected(true)
-        onConnected?.()
+      try {
+        await fetchEventSource(url, {
+          signal: abortController.signal,
+          credentials: 'include', // Send cookies with request (critical for authentication!)
+          headers: {
+            Accept: 'text/event-stream',
+          },
+          async onopen(response) {
+            if (
+              response.ok &&
+              response.headers.get('content-type') === EventStreamContentType
+            ) {
+              setIsConnected(true)
+              onConnected?.()
 
-        // Clear any pending reconnect
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current)
-          reconnectTimeoutRef.current = null
-        }
+              if (process.env.NODE_ENV === 'development') {
+                console.log('📡 SSE: Connected to event stream')
+              }
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log('📡 SSE: Connected to event stream')
-        }
-      }
+              // Clear any pending reconnect
+              if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current)
+                reconnectTimeoutRef.current = null
+              }
 
-      eventSource.onmessage = (event) => {
-        try {
-          const sseEvent: SSEEvent = JSON.parse(event.data)
-
-          // Handle heartbeat separately
-          if (sseEvent.type === 'heartbeat') {
-            setLastHeartbeat(sseEvent.timestamp || Date.now())
-            return
-          }
-
-          // Handle other events
-          onEvent?.(sseEvent)
-
-          if (process.env.NODE_ENV === 'development') {
-            console.log('📡 SSE: Received event:', sseEvent.type)
-          }
-        } catch (error) {
-          console.error('Failed to parse SSE event:', error)
-        }
-      }
-
-      eventSource.onerror = (error) => {
-        console.error('SSE connection error:', error)
-        setIsConnected(false)
-        onError?.(error)
-
-        // Close current connection
-        eventSource.close()
-        eventSourceRef.current = null
-
-        // Schedule reconnect if still mounted
-        if (shouldConnectRef.current) {
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('📡 SSE: Attempting to reconnect...')
+              return // Continue processing
+            } else if (
+              response.status >= 400 &&
+              response.status < 500 &&
+              response.status !== 429
+            ) {
+              // Client error (like 401 Unauthorized), don't retry
+              console.error(
+                'SSE connection failed:',
+                response.status,
+                response.statusText
+              )
+              const error = new Error(
+                `HTTP ${response.status}: ${response.statusText}`
+              )
+              onError?.(error as any)
+              throw error // Stop retrying
+            } else {
+              // Server error or rate limit, will retry
+              console.warn('SSE connection error, will retry:', response.status)
+              throw new Error(`HTTP ${response.status}`)
             }
-            connect()
-          }, reconnectInterval)
+          },
+          onmessage(event) {
+            try {
+              const sseEvent: SSEEvent = JSON.parse(event.data)
+
+              // Handle heartbeat separately
+              if (sseEvent.type === 'heartbeat') {
+                setLastHeartbeat(sseEvent.timestamp || Date.now())
+                return
+              }
+
+              // Handle other events
+              onEvent?.(sseEvent)
+
+              if (process.env.NODE_ENV === 'development') {
+                console.log('📡 SSE: Received event:', sseEvent.type)
+              }
+            } catch (error) {
+              console.error('Failed to parse SSE event:', error)
+            }
+          },
+          onerror(error) {
+            console.error('SSE connection error:', error)
+            setIsConnected(false)
+            onError?.(error as any)
+
+            // The library will automatically retry for server errors
+            // We can return a delay in ms, or throw to stop retrying
+            if (shouldConnectRef.current && !abortController.signal.aborted) {
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`📡 SSE: Reconnecting in ${reconnectInterval}ms...`)
+              }
+              return reconnectInterval // Return retry interval
+            }
+            throw error // Stop retrying if we're unmounting
+          },
+          openWhenHidden: true, // Keep connection alive when tab is hidden
+        })
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Expected when unmounting, don't log
+          return
         }
+        console.error('SSE fetch error:', error)
+
+        // If we caught an error (like 401), the connection is closed
+        setIsConnected(false)
+        onDisconnected?.()
+
+        // Don't retry automatically - let user re-authenticate if needed
       }
     }
 
@@ -134,9 +181,9 @@ export function useSSE(options: SSEOptions = {}) {
     return () => {
       shouldConnectRef.current = false
 
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
-        eventSourceRef.current = null
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
       }
 
       if (reconnectTimeoutRef.current) {
