@@ -1,7 +1,7 @@
 import { beforeAll, afterAll, beforeEach } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
-import { resetMockData } from '../middleware/mockAuth.js';
+import { resetMockData } from '../middleware/sessionAuth.js';
 
 // Use a test database - set this BEFORE any imports that might use env
 const TEST_DATABASE_URL =

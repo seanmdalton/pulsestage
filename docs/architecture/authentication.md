@@ -4,17 +4,52 @@ PulseStage implements a flexible, multi-mode authentication system designed to s
 
 ## Overview
 
-**Authentication is required for all users.** The authentication system automatically adapts based on `NODE_ENV`:
+**Authentication is required for all users.** PulseStage supports two primary deployment scenarios:
 
-**Development Mode (`NODE_ENV=development`)**:
-- **Demo Mode**: Auto-enabled with pre-seeded users (`alice`, `bob`, `moderator`, `admin`)
-- Users must login via `/login` to select a demo user
-- **OAuth** (Optional): Can be configured for testing OAuth flows locally
+### 1. Production Deployment (Organizations)
+For organizations deploying PulseStage internally or for their customers:
 
-**Production Mode (`NODE_ENV=production`)**:
-- **Demo Mode**: Disabled
-- **OAuth**: GitHub and/or Google OAuth required (users must authenticate to access any page)
-- **Setup Wizard**: First-time configuration for organization settings (accessible without auth for initial setup only)
+- **OAuth Required**: GitHub and/or Google OAuth for real user authentication
+- **Demo Mode**: Disabled (unless explicitly enabled with `AUTH_MODE_DEMO=true`)
+- **Session-based authentication** with Redis for scalability
+- **Setup Wizard**: First-time configuration for organization settings
+
+**Recommended Configuration:**
+```bash
+NODE_ENV=production
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+GOOGLE_CLIENT_ID=...        # Optional
+GOOGLE_CLIENT_SECRET=...    # Optional
+```
+
+### 2. Public Demo Deployment
+For public-facing demo instances (like demo.pulsestage.app):
+
+- **Demo Mode**: Explicitly enabled with `AUTH_MODE_DEMO=true`
+- **Pre-seeded users**: `alice`, `bob`, `moderator`, `admin`
+- **Instant login**: No OAuth setup required
+- **Ephemeral data**: Typically resets daily
+
+**Demo Configuration:**
+```bash
+NODE_ENV=production
+AUTH_MODE_DEMO=true
+# OAuth can also be enabled alongside demo mode
+```
+
+### 3. Local Development
+For developers working on PulseStage:
+
+- **Demo Mode**: Auto-enabled when `NODE_ENV=development`
+- **OAuth**: Optional (for testing OAuth flows)
+- **x-mock-sso-user header**: Supported for automated testing
+
+**Development Configuration:**
+```bash
+NODE_ENV=development
+# Demo mode auto-enabled, no other config needed
+```
 
 ## Architecture
 
@@ -26,6 +61,31 @@ api/src/lib/auth/
 ├── demoMode.ts     # Demo mode implementation  
 ├── oauth.ts        # OAuth 2.0 flows (GitHub, Google)
 └── index.ts        # AuthManager (orchestration layer)
+
+api/src/middleware/
+└── sessionAuth.ts  # Session authentication middleware
+```
+
+#### Session Authentication Middleware
+
+The `sessionAuthMiddleware` is the core of the authentication system. It runs on **every request** and has three responsibilities:
+
+1. **Read session data**: Extracts `req.session.user` (set by demo auth or OAuth)
+2. **Populate req.user**: Makes user data available to downstream middleware and routes
+3. **Support test header**: Allows `x-mock-sso-user` header in dev/test environments only
+
+**Key Points:**
+- ✅ Always enabled in all environments (production, development, test)
+- ✅ Required for demo mode, OAuth, and any session-based auth to work
+- ✅ Blocks `x-mock-sso-user` header in production for security
+- ✅ Automatically falls back to OAuth if demo mode is disabled
+
+```typescript
+// Middleware execution order (simplified)
+app.use(sessionMiddleware)           // 1. Load session from Redis/memory
+app.use(tenantResolverMiddleware)    // 2. Identify tenant context
+app.use(sessionAuthMiddleware)       // 3. Authenticate user from session
+// ... route handlers can now access req.user
 ```
 
 #### AuthManager
@@ -319,24 +379,37 @@ Sessions are configured with secure defaults:
 
 ### Demo Mode Security
 
-**⚠️ Demo mode is automatically disabled in production!**
+Demo mode is controlled by two factors:
 
-When `NODE_ENV=production`, demo mode is disabled and OAuth is required. Demo mode only activates in development environments:
+1. **Automatic in development**: `NODE_ENV=development` enables demo mode
+2. **Explicit in production**: `AUTH_MODE_DEMO=true` enables demo mode in production
+
+**⚠️ By default, demo mode is disabled in production** unless explicitly enabled.
 
 ```bash
-# Development - demo mode enabled
+# Development - demo mode auto-enabled
 NODE_ENV=development
 
-# Production - demo mode disabled, OAuth required
+# Production (Organization) - demo mode disabled, OAuth required
 NODE_ENV=production
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
+
+# Production (Public Demo) - demo mode explicitly enabled
+NODE_ENV=production
+AUTH_MODE_DEMO=true
 ```
 
-Demo mode is safe for:
-- Local development (`NODE_ENV=development`)
-- CI/CD testing environments
-- Public-facing demos (with ephemeral data)
+**When Demo Mode is Safe:**
+- ✅ Local development (`NODE_ENV=development`)
+- ✅ CI/CD testing environments  
+- ✅ Public-facing demos with ephemeral data (set `AUTH_MODE_DEMO=true`)
+- ✅ Staging environments for testing auth flows
+
+**When Demo Mode Should Be Disabled:**
+- ❌ Production deployments for organizations
+- ❌ Instances with sensitive or permanent data
+- ❌ Customer-facing applications requiring real authentication
 
 ## User Experience
 

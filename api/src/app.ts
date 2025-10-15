@@ -40,14 +40,14 @@ import { createSessionMiddleware } from './middleware/session.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { requireAdminRole } from './middleware/requireAdminRole.js';
 import {
-  mockAuthMiddleware,
-  requireMockAuth,
+  sessionAuthMiddleware,
+  requireSessionAuth,
   getUserTeamsWithMembership,
   getUserPreferences,
   toggleTeamFavorite,
   setDefaultTeam, // eslint-disable-line @typescript-eslint/no-unused-vars
   setUserPreferences,
-} from './middleware/mockAuth.js';
+} from './middleware/sessionAuth.js';
 import { AuthManager, getDemoModeConfig } from './lib/auth/index.js';
 import { createTenantResolverMiddleware } from './middleware/tenantResolver.js';
 import { applyTenantMiddleware } from './middleware/prismaMiddleware.js';
@@ -158,14 +158,14 @@ export function createApp(prisma: PrismaClient) {
   app.use(createSessionMiddleware());
 
   // Tenant resolution middleware - resolves tenant from header/subdomain/default
-  // MUST come before mockAuthMiddleware to validate user's tenant
+  // MUST come before sessionAuthMiddleware to validate user's tenant
   app.use(createTenantResolverMiddleware(prisma));
 
-  // Mock authentication middleware
-  // In development: Supports x-mock-sso-user header for testing
-  // In production: Reads session user from demo auth or OAuth
-  // Note: The middleware itself blocks x-mock-sso-user in production for security
-  app.use(mockAuthMiddleware);
+  // Session authentication middleware
+  // Reads req.session.user (set by demo auth or OAuth) and populates req.user
+  // Also supports x-mock-sso-user header for testing (dev/test only)
+  // Required for all session-based authentication
+  app.use(sessionAuthMiddleware);
 
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
@@ -1949,7 +1949,7 @@ export function createApp(prisma: PrismaClient) {
   );
 
   // Check if user has upvoted a question
-  app.get('/questions/:id/upvote-status', mockAuthMiddleware, async (req, res) => {
+  app.get('/questions/:id/upvote-status', sessionAuthMiddleware, async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
 
@@ -4082,11 +4082,11 @@ export function createApp(prisma: PrismaClient) {
     }
   });
 
-  // User management endpoints with mock SSO
-  // Note: In production, replace mockAuthMiddleware with real SSO integration
+  // User management endpoints
+  // Authentication handled by sessionAuthMiddleware
 
   // Get current user
-  app.get('/users/me', requireMockAuth, (req, res) => {
+  app.get('/users/me', requireSessionAuth, (req, res) => {
     res.json({
       id: req.user!.id,
       email: req.user!.email,
@@ -4098,7 +4098,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Get user's questions
-  app.get('/users/me/questions', requireMockAuth, async (req, res) => {
+  app.get('/users/me/questions', requireSessionAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
 
@@ -4128,7 +4128,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Get user teams with membership info
-  app.get('/users/me/teams', requireMockAuth, async (req, res) => {
+  app.get('/users/me/teams', requireSessionAuth, async (req, res) => {
     try {
       const userTeams = await getUserTeamsWithMembership(req.user!.id, prisma);
       const preferences = await getUserPreferences(req.user!.id);
@@ -4145,7 +4145,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Update user preferences
-  app.put('/users/me/preferences', requireMockAuth, async (req, res) => {
+  app.put('/users/me/preferences', requireSessionAuth, async (req, res) => {
     const { favoriteTeams, defaultTeamId, emailNotifications } = req.body;
     const userId = req.user!.id;
 
@@ -4187,7 +4187,7 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // Toggle team favorite
-  app.post('/users/me/teams/:teamId/favorite', requireMockAuth, async (req, res) => {
+  app.post('/users/me/teams/:teamId/favorite', requireSessionAuth, async (req, res) => {
     const { teamId } = req.params;
     const userId = req.user!.id;
 

@@ -1,13 +1,14 @@
 /*
- * Mock Authentication Middleware (TEST-ONLY)
+ * Session Authentication Middleware
  *
- * This middleware is ONLY for automated testing via the x-mock-sso-user header.
- * It allows tests to authenticate as any user without going through OAuth.
+ * Primary responsibilities:
+ * 1. Read authenticated user from req.session (set by demo auth or OAuth)
+ * 2. Populate req.user for downstream middleware and route handlers
+ * 3. Support x-mock-sso-user header for automated testing (dev/test only)
  *
- * For local development, use Demo Mode authentication (/auth/demo).
- * For production, use OAuth (GitHub/Google).
- *
- * Security: Only enabled in development/test environments.
+ * This middleware is required for all session-based authentication to work,
+ * including demo mode and OAuth. The x-mock-sso-user header is blocked in
+ * production for security.
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -139,8 +140,8 @@ declare module 'express-serve-static-core' {
   }
 }
 
-// Mock authentication middleware
-export async function mockAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+// Session authentication middleware
+export async function sessionAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
     // Security: Only allow Mock SSO header in development/test environments
     const mockSSOHeader = req.headers['x-mock-sso-user'] as string;
@@ -275,8 +276,8 @@ export async function mockAuthMiddleware(req: Request, res: Response, next: Next
   }
 }
 
-// Require authentication middleware
-export async function requireMockAuth(req: Request, res: Response, next: NextFunction) {
+// Require authentication middleware (renamed from requireMockAuth for clarity)
+export async function requireSessionAuth(req: Request, res: Response, next: NextFunction) {
   try {
     // Load mock data if not already loaded
     await loadMockData();

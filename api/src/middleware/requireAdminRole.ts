@@ -5,11 +5,11 @@ const prisma = new PrismaClient();
 
 /**
  * Middleware to require admin or owner role
- * Depends on mockAuthMiddleware being applied first to populate req.user
+ * Depends on sessionAuthMiddleware being applied first to populate req.user
  */
 export async function requireAdminRole(req: Request, res: Response, next: NextFunction) {
   try {
-    // Check if user is authenticated (set by mockAuthMiddleware)
+    // Check if user is authenticated (set by sessionAuthMiddleware)
     if (!req.user) {
       return res.status(401).json({
         error: 'Unauthorized',
