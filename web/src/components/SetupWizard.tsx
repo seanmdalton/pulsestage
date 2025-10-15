@@ -18,8 +18,7 @@ type SetupStep =
   | 'loading'
   | 'complete'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function SetupWizard({ onComplete }: SetupWizardProps) {
+export function SetupWizard({ onComplete: _onComplete }: SetupWizardProps) {
   // Note: onComplete prop available for future use, currently we reload the page instead
   const [currentStep, setCurrentStep] = useState<SetupStep>('welcome')
   const [orgName, setOrgName] = useState('')

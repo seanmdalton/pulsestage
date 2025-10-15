@@ -32,6 +32,15 @@ if [ $API_LINT_EXIT_CODE -eq 1 ]; then
   exit 1
 fi
 
+echo "🔨 Building Web..."
+(cd web && npm run build)
+WEB_BUILD_EXIT_CODE=$?
+
+if [ $WEB_BUILD_EXIT_CODE -ne 0 ]; then
+  echo "❌ Web build failed. Please fix the build errors before pushing."
+  exit 1
+fi
+
 echo "📝 Checking Web code quality..."
 (cd web && npm run lint)
 WEB_LINT_EXIT_CODE=$?
@@ -44,4 +53,4 @@ if [ $WEB_LINT_EXIT_CODE -eq 1 ]; then
 fi
 
 echo "✅ All pre-push checks passed!"
-echo "🎉 API tests, build, and linting (API + Web) all successful!"
+echo "🎉 API tests, builds (API + Web), and linting all successful!"

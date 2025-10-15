@@ -1,9 +1,9 @@
-import React, {
+import {
   createContext,
   useState,
   useEffect,
   useContext,
-  ReactNode,
+  type ReactNode,
 } from 'react'
 import { apiClient, type Team } from '../lib/api'
 import { useSSE } from '../hooks/useSSE'
@@ -89,14 +89,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
         )
 
         // Also update currentTeam if it matches
-        setCurrentTeamState((prev) =>
-          prev?.id === question.teamId
-            ? {
-                ...prev,
-                _count: { questions: (prev._count?.questions || 0) + 1 },
-              }
-            : prev
-        )
+        setCurrentTeamState((prev) => {
+          if (!prev || prev.id !== question.teamId) return prev
+          return {
+            ...prev,
+            _count: { questions: (prev._count?.questions || 0) + 1 },
+          }
+        })
       }
     } else if (event.type === 'question:answered') {
       const question = event.data
@@ -116,16 +115,15 @@ export function TeamProvider({ children }: { children: ReactNode }) {
         )
 
         // Also update currentTeam if it matches
-        setCurrentTeamState((prev) =>
-          prev?.id === question.teamId
-            ? {
-                ...prev,
-                _count: {
-                  questions: Math.max(0, (prev._count?.questions || 0) - 1),
-                },
-              }
-            : prev
-        )
+        setCurrentTeamState((prev) => {
+          if (!prev || prev.id !== question.teamId) return prev
+          return {
+            ...prev,
+            _count: {
+              questions: Math.max(0, (prev._count?.questions || 0) - 1),
+            },
+          }
+        })
       }
     }
   }

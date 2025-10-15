@@ -75,7 +75,7 @@ export function Settings() {
 
       // Load tenant settings
       const settingsResponse = await apiClient.getTenantSettings()
-      setTenantSettings(settingsResponse.settings)
+      setTenantSettings(settingsResponse.settings as unknown as TenantSettings)
       setOriginalSettings(JSON.parse(JSON.stringify(settingsResponse.settings)))
     } catch (err) {
       console.error('Failed to load settings:', err)
@@ -186,7 +186,7 @@ export function Settings() {
         tenantSettings &&
         JSON.stringify(tenantSettings) !== JSON.stringify(originalSettings)
       ) {
-        await apiClient.updateTenantSettings(tenantSettings)
+        await apiClient.updateTenantSettings(tenantSettings as any)
         setOriginalSettings(JSON.parse(JSON.stringify(tenantSettings)))
         hasChanges = true
       }
@@ -202,8 +202,8 @@ export function Settings() {
       console.error('Failed to save settings:', err)
       // Try to extract the error message from the API response
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as any)?.response?.data?.message ||
+        (err as any)?.message ||
         'Failed to save settings. Please try again.'
       setError(errorMessage)
     } finally {

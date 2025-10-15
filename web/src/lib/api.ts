@@ -3,8 +3,13 @@ import type { components } from './api-types'
 
 // Re-export OpenAPI-generated types with extensions
 // The OpenAPI spec doesn't include team/tags/UNDER_REVIEW status in Question schema yet, so we extend it
-export type Question = Omit<components['schemas']['Question'], 'status'> & {
+export type Question = Omit<
+  components['schemas']['Question'],
+  'status' | 'responseText' | 'respondedAt'
+> & {
   status: 'OPEN' | 'ANSWERED' | 'UNDER_REVIEW'
+  responseText: string | null
+  respondedAt: string | null
   team?: Team | null
   tags?: QuestionTag[]
   teamId?: string | null
@@ -74,7 +79,13 @@ export interface TeamMembership {
   teamId: string
   role: 'member' | 'moderator' | 'admin' | 'owner'
   createdAt: string
-  user?: User
+  user?: {
+    id: string
+    email: string
+    name?: string
+    createdAt?: string
+    updatedAt?: string
+  }
   team?: Team
 }
 
@@ -252,7 +263,22 @@ const QuestionSchema = z.object({
 })
 
 // Export the full Question type with moderation fields for use in components
-export type QuestionWithModeration = z.infer<typeof QuestionSchema>
+export type QuestionWithModeration = Question & {
+  isPinned?: boolean
+  pinnedBy?: string | null
+  pinnedAt?: string | null
+  isFrozen?: boolean
+  frozenBy?: string | null
+  frozenAt?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: string | null
+  moderationFlags?: Array<{
+    reason: string
+    confidence: string
+    provider: string
+  }>
+  moderationProviders?: Array<'local' | 'openai'>
+}
 
 // Validation schemas removed as they're not currently used
 
@@ -1169,7 +1195,7 @@ class ApiClient {
         credentials: 'include',
       },
       UserTeamsResponseSchema
-    )
+    ) as Promise<UserTeamsResponse>
   }
 
   async toggleTeamFavorite(teamId: string): Promise<{ isFavorite: boolean }> {
@@ -1188,16 +1214,16 @@ class ApiClient {
   }
 
   async getUserQuestions(): Promise<Question[]> {
-    const QuestionSchema = z.object({
+    const UserQuestionSchema = z.object({
       id: z.string(),
       body: z.string(),
       upvotes: z.number(),
       status: z.enum(['OPEN', 'ANSWERED', 'UNDER_REVIEW']),
-      responseText: z.string().nullable().optional(),
-      respondedAt: z.string().nullable().optional(),
+      responseText: z.string().nullable(),
+      respondedAt: z.string().nullable(),
       createdAt: z.string(),
       updatedAt: z.string(),
-      teamId: z.string().optional(),
+      teamId: z.string().nullable().optional(),
       authorId: z.string().optional(),
       team: z
         .object({
@@ -1245,8 +1271,8 @@ class ApiClient {
       {
         credentials: 'include',
       },
-      z.array(QuestionSchema)
-    )
+      z.array(UserQuestionSchema)
+    ) as Promise<Question[]>
   }
 
   async updateTeamMember(

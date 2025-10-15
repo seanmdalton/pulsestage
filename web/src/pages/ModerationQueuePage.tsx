@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { apiClient } from '../lib/api'
-import type { QuestionWithModeration, Tag } from '../lib/api'
+import type { Question, QuestionWithModeration, Tag } from '../lib/api'
 import { useTeam } from '../contexts/TeamContext'
 import { useUser } from '../contexts/UserContext'
 import { ResponseModal } from '../components/ResponseModal'

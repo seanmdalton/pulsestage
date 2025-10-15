@@ -389,7 +389,12 @@ export function TeamManagement() {
                     {team._count?.questions || 0} questions
                   </span>
                   <span className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium">
-                    {team._count?.memberships || 0} members
+                    {'_count' in team &&
+                    team._count &&
+                    'memberships' in team._count
+                      ? (team._count.memberships as number)
+                      : 0}{' '}
+                    members
                   </span>
                 </div>
 
@@ -523,7 +528,15 @@ export function TeamManagement() {
                   This team currently has:
                 </p>
                 <ul className="mt-1 text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                  <li>• {deletingTeam._count.memberships || 0} members</li>
+                  <li>
+                    •{' '}
+                    {'_count' in deletingTeam &&
+                    deletingTeam._count &&
+                    'memberships' in deletingTeam._count
+                      ? (deletingTeam._count.memberships as number)
+                      : 0}{' '}
+                    members
+                  </li>
                   <li>• {deletingTeam._count.questions || 0} questions</li>
                 </ul>
               </div>

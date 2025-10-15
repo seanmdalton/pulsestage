@@ -61,10 +61,10 @@ export function ProfilePage() {
   }
 
   const favoriteTeams = userTeams.filter((team) => favorites.includes(team.id))
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _teamsWithRoles = userTeams.filter(
-    (team) => getUserRoleInTeam(team.id) !== 'member'
-  )
+  // Note: teamsWithRoles available for future filtering feature
+  // const teamsWithRoles = userTeams.filter(
+  //   (team) => getUserRoleInTeam(team.id) !== 'member'
+  // )
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

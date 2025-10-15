@@ -153,20 +153,24 @@ export function QuestionDetailPage() {
     <div className="max-w-4xl mx-auto">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        <Link
-          to={`/${question.team.slug}`}
-          className="hover:text-blue-600 dark:hover:text-blue-400"
-        >
-          {question.team.name}
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          to={`/${question.team.slug}/${isAnswered ? 'answered' : 'open'}`}
-          className="hover:text-blue-600 dark:hover:text-blue-400"
-        >
-          {isAnswered ? 'Answered Questions' : 'Open Questions'}
-        </Link>
-        <span className="mx-2">/</span>
+        {question.team && (
+          <>
+            <Link
+              to={`/${question.team.slug}`}
+              className="hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              {question.team.name}
+            </Link>
+            <span className="mx-2">/</span>
+            <Link
+              to={`/${question.team.slug}/${isAnswered ? 'answered' : 'open'}`}
+              className="hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              {isAnswered ? 'Answered Questions' : 'Open Questions'}
+            </Link>
+            <span className="mx-2">/</span>
+          </>
+        )}
         <span className="text-gray-900 dark:text-gray-100">
           Question Details
         </span>
