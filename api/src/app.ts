@@ -161,11 +161,11 @@ export function createApp(prisma: PrismaClient) {
   // MUST come before mockAuthMiddleware to validate user's tenant
   app.use(createTenantResolverMiddleware(prisma));
 
-  // Mock authentication middleware (for local development only)
-  // Validates user belongs to current tenant
-  if (process.env.NODE_ENV !== 'production') {
-    app.use(mockAuthMiddleware);
-  }
+  // Mock authentication middleware
+  // In development: Supports x-mock-sso-user header for testing
+  // In production: Reads session user from demo auth or OAuth
+  // Note: The middleware itself blocks x-mock-sso-user in production for security
+  app.use(mockAuthMiddleware);
 
   // Swagger UI - only in development
   if (process.env.NODE_ENV !== 'production') {
