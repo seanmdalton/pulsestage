@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useUser } from '../contexts/UserContext'
 import { apiClient } from '../lib/api'
@@ -27,6 +27,7 @@ interface ModerationStats {
 
 export function ModeratorDashboardPage() {
   const { userTeams, getUserRoleInTeam } = useUser()
+  const navigate = useNavigate()
   const [stats, setStats] = useState<ModerationStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
 
@@ -225,6 +226,56 @@ export function ModeratorDashboardPage() {
             </div>
           </div>
         </Link>
+
+        {/* Presentation Mode Card */}
+        <button
+          onClick={() => navigate('/all/open/present')}
+          className="block p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow text-left w-full"
+        >
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-purple-600 dark:text-purple-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                Presentation Mode
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Full-screen view for displaying questions during meetings
+              </p>
+              <div className="flex items-center text-sm text-purple-600 dark:text-purple-400 font-medium">
+                <span>Enter presentation mode</span>
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </button>
       </div>
 
       {/* Your Teams Section */}

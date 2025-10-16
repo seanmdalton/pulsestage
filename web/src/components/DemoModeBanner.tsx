@@ -8,8 +8,6 @@
 import { useState, useMemo } from 'react'
 import { useUser } from '../contexts/UserContext'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
 // Check URL for demo query param once (outside component to avoid re-evaluation)
 const checkDemoFromUrl = () => {
   if (typeof window === 'undefined') return false
@@ -72,10 +70,12 @@ export function DemoModeBanner() {
           </div>
           <div className="order-3 mt-2 flex-shrink-0 w-full sm:order-2 sm:mt-0 sm:w-auto">
             <a
-              href={`${API_URL}/auth/github`}
+              href="https://github.com/seanmdalton/pulsestage"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-blue-50 transition-colors"
             >
-              Sign up to save your work
+              🚀 Deploy PulseStage for your team
             </a>
           </div>
           <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-3">

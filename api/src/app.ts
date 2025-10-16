@@ -458,9 +458,9 @@ export function createApp(prisma: PrismaClient) {
         });
       }
 
-      console.log('🔄 Starting demo reset for tenant:', tenantId);
+      console.log('🔄 Starting FULL demo reset for tenant:', tenantId);
 
-      // 4. Delete user-generated data (in transaction)
+      // 4. Delete ALL tenant data (complete wipe) in transaction
       const deleteCounts = await prisma.$transaction(async tx => {
         // Count items before deletion
         const questionCount = await tx.question.count({ where: { tenantId } });
@@ -470,45 +470,79 @@ export function createApp(prisma: PrismaClient) {
           },
         });
         const auditLogCount = await tx.auditLog.count({ where: { tenantId } });
+        const teamMembershipCount = await tx.teamMembership.count({
+          where: { team: { tenantId } },
+        });
+        const userPreferencesCount = await tx.userPreferences.count({ where: { tenantId } });
+        const userCount = await tx.user.count({ where: { tenantId } });
+        const tagCount = await tx.tag.count({ where: { tenantId } });
+        const teamCount = await tx.team.count({ where: { tenantId } });
 
-        // Delete question tags (foreign key constraint)
+        // Delete in correct order to respect foreign key constraints
+
+        // 1. Question-related data
         await tx.questionTag.deleteMany({
-          where: {
-            question: { tenantId },
-          },
+          where: { question: { tenantId } },
         });
-
-        // Delete upvotes
         await tx.upvote.deleteMany({
-          where: {
-            question: { tenantId },
-          },
+          where: { question: { tenantId } },
         });
-
-        // Delete questions
         await tx.question.deleteMany({
           where: { tenantId },
         });
 
-        // Delete audit logs (optional - keeps history clean)
+        // 2. Team memberships (depends on users and teams)
+        await tx.teamMembership.deleteMany({
+          where: { team: { tenantId } },
+        });
+
+        // 3. User preferences (depends on users)
+        await tx.userPreferences.deleteMany({
+          where: { tenantId },
+        });
+
+        // 4. Users (now safe to delete)
+        await tx.user.deleteMany({
+          where: { tenantId },
+        });
+
+        // 5. Tags and Teams
+        await tx.tag.deleteMany({
+          where: { tenantId },
+        });
+        await tx.team.deleteMany({
+          where: { tenantId },
+        });
+
+        // 6. Audit logs (keep history clean)
         await tx.auditLog.deleteMany({
           where: { tenantId },
         });
 
-        console.log('✅ Cleared existing data:', {
+        console.log('✅ Cleared ALL data:', {
           questions: questionCount,
           upvotes: upvoteCount,
           auditLogs: auditLogCount,
+          teamMemberships: teamMembershipCount,
+          userPreferences: userPreferencesCount,
+          users: userCount,
+          tags: tagCount,
+          teams: teamCount,
         });
 
         return {
           questions: questionCount,
           upvotes: upvoteCount,
           auditLogs: auditLogCount,
+          teamMemberships: teamMembershipCount,
+          userPreferences: userPreferencesCount,
+          users: userCount,
+          tags: tagCount,
+          teams: teamCount,
         };
       });
 
-      // 5. Re-seed demo data
+      // 5. Re-seed ALL demo data (teams, tags, users, questions)
       const { seedDemoData } = await import('./seed-demo-data.js');
       await seedDemoData(prisma, tenantId);
 
@@ -526,12 +560,17 @@ export function createApp(prisma: PrismaClient) {
       // 7. Return success
       res.json({
         success: true,
-        message: 'Demo instance reset successfully',
+        message: 'Demo instance fully reset successfully',
         timestamp: new Date().toISOString(),
         resetItems: {
           questionsCleared: deleteCounts.questions,
           upvotesCleared: deleteCounts.upvotes,
           auditLogsCleared: deleteCounts.auditLogs,
+          teamMembershipsCleared: deleteCounts.teamMemberships,
+          userPreferencesCleared: deleteCounts.userPreferences,
+          usersCleared: deleteCounts.users,
+          tagsCleared: deleteCounts.tags,
+          teamsCleared: deleteCounts.teams,
           demoDataReseeded: true,
         },
       });

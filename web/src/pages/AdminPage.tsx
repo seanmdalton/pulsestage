@@ -145,14 +145,6 @@ export function AdminPage() {
                 }
               />
             </div>
-
-            <button
-              onClick={() => navigate('/all/open/present')}
-              className="px-4 py-2 text-sm rounded-md transition-colors self-start sm:self-auto bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
-              title="Enter presentation mode"
-            >
-              Presentation Mode
-            </button>
           </div>
         </div>
 
