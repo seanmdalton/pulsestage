@@ -59,9 +59,9 @@ export function TeamContextBar({
 
   const handleSubmit = () => {
     if (teamSlug) {
-      navigate(`/submit?team=${teamSlug}`)
+      navigate(`/${teamSlug}`)
     } else {
-      navigate('/submit')
+      navigate('/all')
     }
   }
 
