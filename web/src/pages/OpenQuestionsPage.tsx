@@ -13,6 +13,7 @@ import { setFormattedPageTitle } from '../utils/titleUtils'
 import { useUser } from '../contexts/UserContext'
 import { useSSE } from '../hooks/useSSE'
 import type { SSEEvent } from '../hooks/useSSE'
+import { TeamContextBar } from '../components/TeamContextBar'
 
 export function OpenQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([])
@@ -234,52 +235,62 @@ export function OpenQuestionsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Open Questions
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Viewing:{' '}
-            <span className="font-medium">
-              {getTeamDisplayName(currentTeam)}
-            </span>
-          </p>
-        </div>
-        <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400">
-            Loading questions...
+      <>
+        <TeamContextBar
+          teamName={currentTeam?.name || null}
+          teamSlug={currentTeam?.slug || null}
+          teamDescription={currentTeam?.description}
+          showSubmitButton={true}
+        />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Open Questions
+            </h1>
+          </div>
+          <div className="text-center py-8">
+            <div className="text-gray-500 dark:text-gray-400">
+              Loading questions...
+            </div>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Open Questions
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Viewing:{' '}
-            <span className="font-medium">
-              {getTeamDisplayName(currentTeam)}
-            </span>
-          </p>
+      <>
+        <TeamContextBar
+          teamName={currentTeam?.name || null}
+          teamSlug={currentTeam?.slug || null}
+          teamDescription={currentTeam?.description}
+          showSubmitButton={true}
+        />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Open Questions
+            </h1>
+          </div>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+            <div className="text-red-800 dark:text-red-300">Error: {error}</div>
+          </div>
         </div>
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-          <div className="text-red-800 dark:text-red-300">Error: {error}</div>
-        </div>
-      </div>
+      </>
     )
   }
 
   return (
     <>
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+      <TeamContextBar
+        teamName={currentTeam?.name || null}
+        teamSlug={currentTeam?.slug || null}
+        teamDescription={currentTeam?.description}
+        showSubmitButton={true}
+      />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 mt-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Open Questions
@@ -287,12 +298,6 @@ export function OpenQuestionsPage() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               {questions.length} question{questions.length !== 1 ? 's' : ''}{' '}
               awaiting answers
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-              Viewing:{' '}
-              <span className="font-medium">
-                {getTeamDisplayName(currentTeam)}
-              </span>
             </p>
           </div>
           {hasAdminRole && questions.length > 0 && (
