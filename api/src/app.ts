@@ -543,9 +543,43 @@ export function createApp(prisma: PrismaClient) {
       });
 
       // 5. Re-seed ALL demo data (teams, tags, users, questions)
+      // Re-create default teams first (after full wipe)
+      console.log('🏗️  Re-creating default teams...');
+      const defaultTeams = [
+        {
+          name: 'General',
+          slug: 'general',
+          description: 'General organizational questions',
+        },
+        {
+          name: 'Engineering',
+          slug: 'engineering',
+          description: 'Technical and development questions',
+        },
+        {
+          name: 'Product',
+          slug: 'product',
+          description: 'Product strategy and feature questions',
+        },
+        {
+          name: 'People',
+          slug: 'people',
+          description: 'HR, culture, and people-related questions',
+        },
+      ];
+
+      for (const teamData of defaultTeams) {
+        await prisma.team.create({
+          data: {
+            ...teamData,
+            tenantId,
+          },
+        });
+      }
+      console.log('✅ Re-created default teams');
+
       const { seedDemoData } = await import('./seed-demo-data.js');
       await seedDemoData(prisma, tenantId);
-
       console.log('✅ Re-seeded demo data');
 
       // 6. Log successful reset
