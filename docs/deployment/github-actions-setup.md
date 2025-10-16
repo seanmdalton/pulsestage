@@ -79,6 +79,19 @@ curl -X POST \
 
 ## Troubleshooting
 
+### Error: 403 Forbidden (Cloudflare Challenge)
+
+**Cause**: Cloudflare's bot protection is blocking GitHub Actions requests.
+
+**Symptoms**: 
+- HTTP Status 403
+- Response contains HTML with "Just a moment..." or Cloudflare challenge page
+
+**Solution**: The workflow now includes a `User-Agent` header to bypass bot detection. If this still fails:
+1. Check if your Render service has additional Cloudflare security rules
+2. Consider whitelisting GitHub Actions IP ranges in Cloudflare
+3. Or use Render's direct `.onrender.com` URL instead of custom domain
+
 ### Error: "Invalid or missing admin key"
 
 **Cause**: The key doesn't match what's in Render's `ADMIN_KEY` environment variable.
