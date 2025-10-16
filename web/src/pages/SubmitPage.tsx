@@ -239,131 +239,133 @@ export function SubmitPage() {
         }
         showSubmitButton={false}
       />
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 mt-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Submit a Question
-          </h1>
-        </div>
-
-        {!currentTeam && (
-          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-              <div>
-                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                  Select a Team to Submit Questions
-                </h3>
-                <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                  Please select a specific team from the team selector to submit
-                  questions. Questions must be associated with a team.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="question"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Your Question
-              {settings && (
-                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                  ({settings.questions.minLength}-{settings.questions.maxLength}{' '}
-                  characters)
-                </span>
-              )}
-            </label>
-            <textarea
-              id="question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder={
-                currentTeam
-                  ? 'Ask your question here...'
-                  : 'Please select a team first to submit questions'
-              }
-              className={`w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                !currentTeam
-                  ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-600'
-                  : hasAttemptedSubmit && validationError
-                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
-              }`}
-              rows={6}
-              maxLength={settings?.questions.maxLength || 2000}
-              disabled={isSubmitting || !currentTeam}
-            />
-            <div className="mt-1 flex justify-between items-start">
-              <div
-                className={`text-sm ${
-                  hasAttemptedSubmit && validationError
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-gray-500 dark:text-gray-400'
-                }`}
-              >
-                {hasAttemptedSubmit && validationError ? (
-                  validationError
-                ) : (
-                  <>
-                    {question.trim().length}/
-                    {settings?.questions.maxLength || 2000} characters
-                  </>
-                )}
-              </div>
-            </div>
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-8 mt-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Submit a Question
+            </h1>
           </div>
 
-          {message && (
-            <div
-              className={`p-4 rounded-md ${
-                message.type === 'success'
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800'
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'
-              }`}
-            >
-              <div className="whitespace-pre-line">{message.text}</div>
+          {!currentTeam && (
+            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                    Select a Team to Submit Questions
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                    Please select a specific team from the team selector to
+                    submit questions. Questions must be associated with a team.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={!question.trim() || isSubmitting || !currentTeam}
-            className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSubmitting
-              ? 'Submitting...'
-              : !currentTeam
-                ? 'Select a Team First'
-                : 'Submit Question'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="question"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Your Question
+                {settings && (
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                    ({settings.questions.minLength}-
+                    {settings.questions.maxLength} characters)
+                  </span>
+                )}
+              </label>
+              <textarea
+                id="question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder={
+                  currentTeam
+                    ? 'Ask your question here...'
+                    : 'Please select a team first to submit questions'
+                }
+                className={`w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                  !currentTeam
+                    ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-600'
+                    : hasAttemptedSubmit && validationError
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                }`}
+                rows={6}
+                maxLength={settings?.questions.maxLength || 2000}
+                disabled={isSubmitting || !currentTeam}
+              />
+              <div className="mt-1 flex justify-between items-start">
+                <div
+                  className={`text-sm ${
+                    hasAttemptedSubmit && validationError
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {hasAttemptedSubmit && validationError ? (
+                    validationError
+                  ) : (
+                    <>
+                      {question.trim().length}/
+                      {settings?.questions.maxLength || 2000} characters
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
 
-        {/* Search Results */}
-        <SearchResults
-          results={searchResults}
-          loading={searchLoading}
-          query={debouncedQuestion}
-          onUpvote={handleUpvote}
-          upvotedQuestions={new Set()}
-          upvoteStatus={upvoteStatus}
-        />
-      </div>
+            {message && (
+              <div
+                className={`p-4 rounded-md ${
+                  message.type === 'success'
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'
+                }`}
+              >
+                <div className="whitespace-pre-line">{message.text}</div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!question.trim() || isSubmitting || !currentTeam}
+              className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting
+                ? 'Submitting...'
+                : !currentTeam
+                  ? 'Select a Team First'
+                  : 'Submit Question'}
+            </button>
+          </form>
+
+          {/* Search Results */}
+          <SearchResults
+            results={searchResults}
+            loading={searchLoading}
+            query={debouncedQuestion}
+            onUpvote={handleUpvote}
+            upvotedQuestions={new Set()}
+            upvoteStatus={upvoteStatus}
+          />
+        </div>
+      </main>
     </>
   )
 }
