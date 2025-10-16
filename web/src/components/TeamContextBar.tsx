@@ -4,7 +4,7 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 interface TeamContextBarProps {
   teamName: string | null
   teamSlug: string | null
-  teamDescription?: string
+  teamDescription?: string | null
   showSubmitButton?: boolean
 }
 
