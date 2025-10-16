@@ -9,6 +9,13 @@ coverage
 .cursor/screenshots/
 .cursor/*.md
 
+# Temporary documentation (session-specific, not for git)
+docs-temp/
+*-TESTING-*.md
+*-TEMP-*.md
+TESTING-*.md
+QUICK-*.md
+
 # Deployment files with actual secrets (keep local only)
 RENDER_DEPLOYMENT.md
 DEPLOYMENT_CHECKLIST.md

@@ -120,80 +120,76 @@ function App() {
                     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
                       <Navbar />
                       <DemoModeBanner />
-                      <main className="container mx-auto px-4 py-8">
-                        <Routes>
-                          {/* Default routes - smart redirect to user's default team or /all */}
-                          <Route
-                            path="/"
-                            element={<SmartRedirect fallbackTo="/all" />}
-                          />
-                          <Route
-                            path="/open"
-                            element={<SmartRedirect fallbackTo="/all/open" />}
-                          />
-                          <Route
-                            path="/answered"
-                            element={
-                              <SmartRedirect fallbackTo="/all/answered" />
-                            }
-                          />
+                      <Routes>
+                        {/* Default routes - smart redirect to user's default team or /all */}
+                        <Route
+                          path="/"
+                          element={<SmartRedirect fallbackTo="/all" />}
+                        />
+                        <Route
+                          path="/open"
+                          element={<SmartRedirect fallbackTo="/all/open" />}
+                        />
+                        <Route
+                          path="/answered"
+                          element={<SmartRedirect fallbackTo="/all/answered" />}
+                        />
 
-                          {/* Team-based routes */}
-                          <Route path="/:teamSlug" element={<SubmitPage />} />
-                          <Route
-                            path="/:teamSlug/open"
-                            element={<OpenQuestionsPage />}
-                          />
-                          <Route
-                            path="/:teamSlug/answered"
-                            element={<AnsweredQuestionsPage />}
-                          />
+                        {/* Team-based routes */}
+                        <Route path="/:teamSlug" element={<SubmitPage />} />
+                        <Route
+                          path="/:teamSlug/open"
+                          element={<OpenQuestionsPage />}
+                        />
+                        <Route
+                          path="/:teamSlug/answered"
+                          element={<AnsweredQuestionsPage />}
+                        />
 
-                          {/* Admin routes (not team-scoped) */}
-                          {/* Moderator routes - must come before /:teamSlug */}
-                          <Route
-                            path="/moderator"
-                            element={<ModeratorDashboardPage />}
-                          />
-                          <Route
-                            path="/moderator/queue"
-                            element={<ModerationQueuePage />}
-                          />
-                          <Route
-                            path="/moderator/export"
-                            element={<ExportPage />}
-                          />
+                        {/* Admin routes (not team-scoped) */}
+                        {/* Moderator routes - must come before /:teamSlug */}
+                        <Route
+                          path="/moderator"
+                          element={<ModeratorDashboardPage />}
+                        />
+                        <Route
+                          path="/moderator/queue"
+                          element={<ModerationQueuePage />}
+                        />
+                        <Route
+                          path="/moderator/export"
+                          element={<ExportPage />}
+                        />
 
-                          {/* Admin routes */}
-                          <Route path="/admin" element={<AdminPage />} />
-                          <Route
-                            path="/admin/login"
-                            element={<AdminLoginPage />}
-                          />
-                          <Route path="/admin/audit" element={<AuditPage />} />
-                          <Route
-                            path="/admin/health"
-                            element={<HealthDashboardPage />}
-                          />
+                        {/* Admin routes */}
+                        <Route path="/admin" element={<AdminPage />} />
+                        <Route
+                          path="/admin/login"
+                          element={<AdminLoginPage />}
+                        />
+                        <Route path="/admin/audit" element={<AuditPage />} />
+                        <Route
+                          path="/admin/health"
+                          element={<HealthDashboardPage />}
+                        />
 
-                          {/* Profile routes (not team-scoped) */}
-                          <Route path="/profile" element={<ProfilePage />} />
-                          <Route
-                            path="/profile/favorites"
-                            element={<ProfilePage />}
-                          />
-                          <Route
-                            path="/profile/questions"
-                            element={<ProfilePage />}
-                          />
+                        {/* Profile routes (not team-scoped) */}
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route
+                          path="/profile/favorites"
+                          element={<ProfilePage />}
+                        />
+                        <Route
+                          path="/profile/questions"
+                          element={<ProfilePage />}
+                        />
 
-                          {/* Question detail route */}
-                          <Route
-                            path="/questions/:id"
-                            element={<QuestionDetailPage />}
-                          />
-                        </Routes>
-                      </main>
+                        {/* Question detail route */}
+                        <Route
+                          path="/questions/:id"
+                          element={<QuestionDetailPage />}
+                        />
+                      </Routes>
                     </div>
                   </AuthGuard>
                 }
