@@ -31,7 +31,7 @@ global.IntersectionObserver = class IntersectionObserver {
     return []
   }
   unobserve() {}
-} as any
+} as unknown as typeof IntersectionObserver
 
 // Mock scrollTo
 window.scrollTo = vi.fn()
@@ -43,7 +43,7 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 }
-global.localStorage = localStorageMock as any
+global.localStorage = localStorageMock as unknown as Storage
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -52,7 +52,7 @@ const sessionStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 }
-global.sessionStorage = sessionStorageMock as any
+global.sessionStorage = sessionStorageMock as unknown as Storage
 
 // Suppress console errors in tests (optional, can be commented out for debugging)
 // const originalError = console.error;

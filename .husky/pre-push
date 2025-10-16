@@ -48,13 +48,12 @@ if [ $WEB_BUILD_EXIT_CODE -ne 0 ]; then
 fi
 
 echo "📝 Checking Web code quality..."
-(cd web && npm run lint)
+(cd web && npm run lint -- --max-warnings=-1)
 WEB_LINT_EXIT_CODE=$?
 
-# Only fail if there are actual errors (exit code 1), not warnings (exit code 2)
-if [ $WEB_LINT_EXIT_CODE -eq 1 ]; then
-  echo "❌ Web linting failed with errors. Please fix the errors before pushing."
-  echo "💡 Warnings are allowed but errors must be fixed."
+# Fail on any linting issues (errors)
+if [ $WEB_LINT_EXIT_CODE -ne 0 ]; then
+  echo "❌ Web linting failed. Please fix the errors before pushing."
   exit 1
 fi
 
