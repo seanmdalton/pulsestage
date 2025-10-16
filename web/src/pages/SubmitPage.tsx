@@ -197,19 +197,23 @@ export function SubmitPage() {
       setHasAttemptedSubmit(false)
       questionAtSubmit.current = ''
 
-      // Check if question is under review
+      // Check if question is under review (API returns a message field when flagged)
       const responseWithMessage = response as typeof response & {
         message?: string
+        status?: string
       }
-      if (responseWithMessage.message?.includes('under review')) {
+      if (
+        responseWithMessage.status === 'UNDER_REVIEW' ||
+        responseWithMessage.message?.toLowerCase().includes('under review')
+      ) {
         setMessage({
           type: 'success',
-          text: `Your question has been submitted and is under moderator review. You'll be notified once it's published.`,
+          text: `⚠️ Your question is under review and will be published after moderator approval. You can check its status in your profile.`,
         })
       } else {
         setMessage({
           type: 'success',
-          text: `Question submitted successfully to ${currentTeam.name}!`,
+          text: `✅ Question submitted successfully to ${currentTeam.name}!`,
         })
       }
     } catch (error) {
