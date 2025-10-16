@@ -266,18 +266,18 @@ export class OAuthStrategy {
 
     const ssoId = `${profile.provider}-${profile.id}`;
 
-    // Find existing user by SSO ID or email
-    let user = await this.prisma.user.findFirst({
+    // Try to find existing user by email (most reliable for OAuth)
+    let user = await this.prisma.user.findUnique({
       where: {
-        OR: [
-          { ssoId, tenantId: tenant.id },
-          { email: profile.email, tenantId: tenant.id },
-        ],
+        tenantId_email: {
+          tenantId: tenant.id,
+          email: profile.email,
+        },
       },
     });
 
     if (user) {
-      // Update existing user
+      // Update existing user with latest OAuth info
       user = await this.prisma.user.update({
         where: { id: user.id },
         data: {
