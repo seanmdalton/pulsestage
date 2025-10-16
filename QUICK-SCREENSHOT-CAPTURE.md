@@ -235,3 +235,4 @@ npm run test:e2e -- screenshots.spec.ts --debug
 
 Happy screenshot capturing! 📸
 
+
