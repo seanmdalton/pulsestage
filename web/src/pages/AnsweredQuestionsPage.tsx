@@ -4,7 +4,6 @@ import type { Question } from '../lib/api'
 import { groupQuestionsByWeek } from '../utils/dateUtils'
 import { AnswerModal } from '../components/AnswerModal'
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl'
-import { getTeamDisplayName } from '../contexts/TeamContext'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 import {
   QuestionFilters,

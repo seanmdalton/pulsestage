@@ -4,7 +4,6 @@ import type { Question } from '../lib/api'
 import { useDebounce } from '../hooks/useDebounce'
 import { SearchResults } from '../components/SearchResults'
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl'
-import { getTeamDisplayName } from '../contexts/TeamContext'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 import { TeamContextBar } from '../components/TeamContextBar'
 

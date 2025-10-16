@@ -8,7 +8,6 @@ import {
   type FilterState,
 } from '../components/QuestionFilters'
 import { useTeamFromUrl } from '../hooks/useTeamFromUrl'
-import { getTeamDisplayName } from '../contexts/TeamContext'
 import { setFormattedPageTitle } from '../utils/titleUtils'
 import { useUser } from '../contexts/UserContext'
 import { useSSE } from '../hooks/useSSE'
