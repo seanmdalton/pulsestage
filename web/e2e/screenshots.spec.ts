@@ -13,9 +13,18 @@ test.use({
   deviceScaleFactor: 2, // Retina quality
 })
 
-const DEMO_USER = 'user@demo.pulsestage.dev'
-const ADMIN_USER = 'admin@demo.pulsestage.dev'
+const DEMO_USER = 'User (Demo)' // Display name in dropdown
+const ADMIN_USER = 'Admin (Demo)' // Display name in dropdown
 const BASE_URL = 'http://localhost:5173'
+
+// Helper function to login
+async function loginAs(page: any, userLabel: string) {
+  await page.goto(`${BASE_URL}/login`)
+  await page.waitForSelector('select', { timeout: 10000 })
+  await page.selectOption('select', { label: userLabel })
+  await page.click('button:has-text("Continue as")')
+  await page.waitForLoadState('networkidle')
+}
 
 test.describe('PulseStage Screenshots for README', () => {
   test.beforeEach(async ({ page }) => {
@@ -27,7 +36,8 @@ test.describe('PulseStage Screenshots for README', () => {
     await page.goto(`${BASE_URL}/login`)
 
     // Wait for auth selector to load
-    await page.waitForSelector('text=Demo Mode', { timeout: 5000 })
+    await page.waitForSelector('text=Try Demo', { timeout: 10000 })
+    await page.waitForTimeout(500) // Let UI settle
 
     await page.screenshot({
       path: 'screenshots/01-login-demo.png',
@@ -37,12 +47,10 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('02 - Open Questions (Main View)', async ({ page }) => {
     // Login as demo user
-    await page.goto(`${BASE_URL}/login`)
-    await page.waitForSelector(`text=${DEMO_USER}`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Wait for questions to load
-    await page.waitForSelector('text=Open Questions', { timeout: 5000 })
+    await page.waitForSelector('text=Open Questions', { timeout: 10000 })
     await page.waitForTimeout(1000) // Let data settle
 
     await page.screenshot({
@@ -53,8 +61,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('03 - Submit Question', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Navigate to submit
     await page.goto(`${BASE_URL}/submit`)
@@ -68,8 +75,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('04 - Question Detail (Answered)', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Go to answered questions
     await page.goto(`${BASE_URL}/answered`)
@@ -90,9 +96,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('05 - Moderator Dashboard', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.waitForSelector(`text=${ADMIN_USER}`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to moderator dashboard
     await page.goto(`${BASE_URL}/moderator`)
@@ -107,8 +111,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('06 - Moderation Queue', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to moderation queue
     await page.goto(`${BASE_URL}/moderation-queue`)
@@ -122,8 +125,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('07 - Answered Timeline', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Navigate to answered
     await page.goto(`${BASE_URL}/answered`)
@@ -138,8 +140,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('08 - Admin Panel', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to admin
     await page.goto(`${BASE_URL}/admin`)
@@ -154,8 +155,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('09 - Tag Management', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to admin and tags tab
     await page.goto(`${BASE_URL}/admin`)
@@ -176,8 +176,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('10 - Team Management', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to admin and teams tab
     await page.goto(`${BASE_URL}/admin`)
@@ -198,8 +197,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('11 - User Profile', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Navigate to profile
     await page.goto(`${BASE_URL}/profile`)
@@ -213,8 +211,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('12 - Presentation Mode', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Navigate to presentation mode
     await page.goto(`${BASE_URL}/presentation`)
@@ -228,8 +225,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('13 - Search Results', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Wait for main page
     await page.waitForSelector('input[placeholder*="Search"]', {
@@ -248,8 +244,7 @@ test.describe('PulseStage Screenshots for README', () => {
 
   test('14 - Dark Mode', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Wait for page to load
     await page.waitForTimeout(1000)
@@ -274,8 +269,7 @@ test.describe('PulseStage Screenshots for README', () => {
     await context.setViewportSize({ width: 375, height: 812 }) // iPhone X
 
     // Login
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Wait for questions
     await page.waitForTimeout(1000)
@@ -290,8 +284,7 @@ test.describe('PulseStage Screenshots for README', () => {
 test.describe('Additional Context Screenshots', () => {
   test('16 - Demo Banner', async ({ page }) => {
     // Show the demo mode banner
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${DEMO_USER}`)
+    await loginAs(page, DEMO_USER)
 
     // Make sure demo banner is visible
     await page.waitForSelector('text=Demo Mode', { timeout: 5000 })
@@ -305,8 +298,7 @@ test.describe('Additional Context Screenshots', () => {
 
   test('17 - Moderation Stats', async ({ page }) => {
     // Login as admin
-    await page.goto(`${BASE_URL}/login`)
-    await page.click(`text=${ADMIN_USER}`)
+    await loginAs(page, ADMIN_USER)
 
     // Navigate to moderation stats
     await page.goto(`${BASE_URL}/admin/moderation-stats`)
