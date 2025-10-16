@@ -20,9 +20,7 @@ jobs:
             -X POST \
             -H "x-admin-key: ${{ secrets.DEMO_ADMIN_KEY }}" \
             -H "Content-Type: application/json" \
-            -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-            -H "Accept: application/json" \
-            https://api-demo.pulsestage.app/admin/reset-demo)
+            https://pulsestage-demo-api.onrender.com/admin/reset-demo)
           
           http_status=$(echo "$response" | grep "HTTP_STATUS" | cut -d':' -f2)
           body=$(echo "$response" | sed '/HTTP_STATUS/d')

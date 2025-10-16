@@ -2,14 +2,20 @@
 
 echo "🔍 Running pre-push checks..."
 
-# Run API tests and build to ensure everything works
-echo "🧪 Running API tests..."
-(cd api && npm run test)
-API_TEST_EXIT_CODE=$?
-
-if [ $API_TEST_EXIT_CODE -ne 0 ]; then
-  echo "❌ API tests failed. Please fix the test failures before pushing."
-  exit 1
+# Check if Docker services are running
+if docker compose ps | grep -q "Up"; then
+  echo "🧪 Running API tests..."
+  (cd api && npm run test)
+  API_TEST_EXIT_CODE=$?
+  
+  if [ $API_TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ API tests failed. Please fix the test failures before pushing."
+    exit 1
+  fi
+else
+  echo "⚠️  Docker services not running - skipping tests"
+  echo "💡 Start services with: docker compose up"
+  echo "   Tests will still run in CI pipeline"
 fi
 
 echo "🔨 Building API..."
