@@ -67,19 +67,21 @@ export function TeamContextBar({
 
   return (
     <div
-      className={`sticky top-16 z-10 border-b ${colors.bg} ${colors.border} transition-colors`}
+      className={`sticky top-16 z-10 w-full border-b ${colors.bg} ${colors.border} transition-colors shadow-sm`}
     >
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h2
-              className={`text-xl font-semibold ${colors.text} flex items-center gap-2`}
+              className={`text-base sm:text-lg font-semibold ${colors.text} flex items-center gap-2`}
             >
-              <span className="text-2xl">📂</span>
+              <span className="text-lg sm:text-xl" aria-hidden="true">
+                {teamName ? '📂' : '🌐'}
+              </span>
               {displayName}
             </h2>
             {description && (
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-0.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                 {description}
               </p>
             )}
@@ -88,8 +90,8 @@ export function TeamContextBar({
             <button
               onClick={handleSubmit}
               className={`
-                ml-4 inline-flex items-center gap-2 rounded-md px-4 py-2
-                text-sm font-medium text-white shadow-sm
+                flex-shrink-0 inline-flex items-center gap-2 rounded-md px-3 py-2 sm:px-4
+                text-xs sm:text-sm font-medium text-white shadow-sm
                 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                 dark:focus:ring-offset-gray-900
@@ -101,7 +103,7 @@ export function TeamContextBar({
                   : 'Submit a question'
               }
             >
-              <PlusIcon className="h-5 w-5" />
+              <PlusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">Submit Question</span>
               <span className="sm:hidden">Submit</span>
             </button>
