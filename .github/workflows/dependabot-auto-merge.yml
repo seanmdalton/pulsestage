@@ -17,41 +17,19 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     
     steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Auto-merge minor/patch updates
+        uses: ahmadnassri/action-dependabot-auto-merge@v2
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      
-      - name: Wait for CI checks
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          running-workflow-name: 'Auto-merge Dependabot PRs'
-          # Wait for these critical checks to pass
-          check-regexp: '(CI|Docker Build|Security Scan|Tests)'
-          allowed-conclusions: success
-      
-      - name: Auto-approve PR
-        run: |
-          gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Enable auto-merge
-        run: |
-          gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Comment on PR
-        run: |
-          gh pr comment "$PR_URL" --body "✅ All checks passed! Auto-merging this Dependabot PR."
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use a PAT with repo scope - GITHUB_TOKEN doesn't have permission to approve PRs
+          # For now, we'll just enable auto-merge without approval
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Only auto-merge minor and patch updates (as configured in dependabot.yml)
+          target: minor
+          # Approve the PR (will fail with GITHUB_TOKEN, but auto-merge will still work)
+          approve: false
+          # Command to pass to Dependabot (merge, squash, rebase)
+          command: squash
 
