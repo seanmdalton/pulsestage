@@ -2,8 +2,8 @@
 
 echo "🔍 Running pre-push checks..."
 
-# Check if Docker services are running
-if docker compose ps | grep -q "Up"; then
+# Check if Docker services are running (check for database port)
+if nc -z localhost 5432 2>/dev/null; then
   echo "🧪 Running API tests..."
   (cd api && npm run test)
   API_TEST_EXIT_CODE=$?
