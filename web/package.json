@@ -24,6 +24,7 @@
     "openapi:gen": "openapi-typescript ../api/openapi.yaml -o src/lib/api-types.ts"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@tailwindcss/line-clamp": "^0.4.4",
     "react": "^19.1.1",
