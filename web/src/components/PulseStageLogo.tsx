@@ -14,8 +14,8 @@ export function PulseStageLogo({
   size = 'md',
   forceTheme,
 }: PulseStageLogoProps) {
-  const { theme } = useTheme()
-  const isDarkMode = forceTheme ? forceTheme === 'dark' : theme === 'dark'
+  const { colorMode } = useTheme()
+  const isDarkMode = forceTheme ? forceTheme === 'dark' : colorMode === 'dark'
 
   // Size classes for the logo
   const sizeClasses = {

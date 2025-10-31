@@ -32,24 +32,57 @@ export async function seedTags() {
       },
     });
 
-    // Create "Currently Presenting" tag
-    await prisma.tag.upsert({
-      where: {
-        tenantId_name: {
-          tenantId: tenant.id,
-          name: 'Currently Presenting',
-        },
-      },
-      update: {},
-      create: {
-        tenantId: tenant.id,
+    // Create default tags
+    const defaultTags = [
+      {
         name: 'Currently Presenting',
         description: 'Question is currently being presented in presentation mode',
-        color: '#10B981', // Green color
+        color: '#10B981',
       },
-    });
+      {
+        name: 'Feature Request',
+        description: 'Suggestion for a new feature or improvement',
+        color: '#3B82F6',
+      },
+      {
+        name: 'Bug',
+        description: 'Report of an issue or problem',
+        color: '#EF4444',
+      },
+      {
+        name: 'Question',
+        description: 'General question or inquiry',
+        color: '#8B5CF6',
+      },
+      {
+        name: 'Process',
+        description: 'Related to internal processes or procedures',
+        color: '#F59E0B',
+      },
+      {
+        name: 'Technical',
+        description: 'Technical or engineering-related topic',
+        color: '#06B6D4',
+      },
+    ];
 
-    console.log('✅ Default tags seeded successfully');
+    for (const tag of defaultTags) {
+      await prisma.tag.upsert({
+        where: {
+          tenantId_name: {
+            tenantId: tenant.id,
+            name: tag.name,
+          },
+        },
+        update: {},
+        create: {
+          tenantId: tenant.id,
+          ...tag,
+        },
+      });
+    }
+
+    console.log(`✅ Default tags seeded successfully (${defaultTags.length} tags)`);
   } catch (error) {
     console.error('❌ Error seeding tags:', error);
     throw error;

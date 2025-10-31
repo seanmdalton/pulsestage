@@ -111,14 +111,22 @@ export function TeamSelector() {
     let pageType = ''
 
     if (pathParts.length >= 2) {
-      pageType = pathParts[1] // 'open' or 'answered'
+      pageType = pathParts[1] // 'open', 'answered', 'dashboard', 'questions', etc.
     }
 
-    // Navigate to the same page type but for the selected team
-    if (pageType === 'open' || pageType === 'answered') {
-      navigate(`/${teamSlug}/${pageType}`)
+    // Navigate to appropriate page based on current context
+    if (pageType === 'dashboard') {
+      navigate(`/${teamSlug}/dashboard`)
+    } else if (
+      pageType === 'questions' ||
+      pageType === 'open' ||
+      pageType === 'answered'
+    ) {
+      // For questions-related pages, go to questions page
+      navigate(`/${teamSlug}/questions`)
     } else {
-      navigate(`/${teamSlug}`)
+      // Default to questions page for team selection
+      navigate(`/${teamSlug}/questions`)
     }
   }
 

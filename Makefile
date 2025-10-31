@@ -1,4 +1,4 @@
-.PHONY: help setup dev up down clean test test-api test-web lint lint-fix format security logs db-seed db-reset validate-ci install
+.PHONY: help setup dev up down clean test test-api test-web lint lint-fix format security logs db-seed db-test-seed validate-ci install preflight
 
 # Default target - show help
 help:
@@ -8,6 +8,7 @@ help:
 	@echo "Setup & Environment:"
 	@echo "  make setup        - Initialize environment (.env file)"
 	@echo "  make install      - Install all dependencies (API + Web)"
+	@echo "  make preflight    - ⭐ Validate entire dev environment is ready for testing"
 	@echo ""
 	@echo "Development:"
 	@echo "  make dev          - Start local development (foreground, hot reload for web)"
@@ -29,8 +30,8 @@ help:
 	@echo "  make format       - Format code (Prettier)"
 	@echo ""
 	@echo "Database:"
-	@echo "  make db-seed      - Seed multi-tenant test data (dev mode auto-seeds on startup)"
-	@echo "  make db-reset     - Reset database (wipe volumes and restart)"
+	@echo "  make db-seed      - ⭐ Reset & seed all data (teams, users, questions, pulse)"
+	@echo "  make db-test-seed - Validate seed data integrity"
 	@echo ""
 
 # Setup - Initialize environment
@@ -147,21 +148,22 @@ validate-ci:
 logs:
 	@docker compose logs -f
 
-# Seed database with multi-tenant test data
-# Note: Development mode auto-seeds demo data on startup
+# Complete database seed - ONE command for everything
+# This is idempotent and always gives you a clean, working environment
 db-seed:
-	@echo "🌱 Seeding multi-tenant test data (for testing/CI)..."
-	@echo "ℹ️  Note: Development mode auto-seeds demo data on startup"
-	@docker compose exec api npm run db:seed:full
-	@echo "✅ Multi-tenant test data seeded! Restart API: docker compose restart api"
+	@echo "🌱 Resetting and seeding complete demo environment..."
+	@cd api && npx tsx scripts/reset-and-seed-all.ts
+	@echo ""
+	@echo "✅ Done! Ready to test at http://localhost:5173"
 
-# Reset database (wipe volumes and restart)
-# Development mode will auto-seed demo data on restart
-db-reset:
-	@echo "🔄 Resetting database (wiping volumes)..."
-	@docker compose down -v
-	@docker compose up -d
-	@echo "⏳ Waiting for services to start..."
-	@sleep 10
-	@echo "✅ Database reset! Demo data auto-seeded in development mode."
+# Validate seed data integrity (smoke tests)
+db-test-seed:
+	@echo "🧪 Validating seed data..."
+	@cd api && npx tsx scripts/test-seed-data.ts
+
+# Pre-flight check - Validate everything is ready for testing
+# This should ALWAYS be run before asking the user to test
+preflight:
+	@echo "🚀 Running Pre-Flight Checks..."
+	@cd api && npx tsx scripts/preflight-check.ts
 

@@ -205,10 +205,25 @@ async function start() {
     console.log('📧 Starting email worker...');
     startEmailWorker();
 
-    // 5. Create Express app
+    // 5. Start scheduler (for pulse invitations and other background jobs)
+    console.log('📅 Initializing scheduler...');
+    const { initializeScheduler } = await import('./scheduler/index.js');
+    const scheduler = initializeScheduler(prisma);
+
+    if (process.env.PULSE_ENABLED === 'true') {
+      console.log('📅 Starting Pulse scheduler...');
+      scheduler.start();
+    } else {
+      console.log('ℹ️  Pulse scheduler disabled (PULSE_ENABLED not set to true)');
+    }
+
+    // Store scheduler for graceful shutdown
+    (global as any).scheduler = scheduler;
+
+    // 6. Create Express app
     const app = createApp(prisma);
 
-    // 6. Start HTTP server
+    // 7. Start HTTP server
     const server = app.listen(env.PORT, async () => {
       try {
         // Auto-bootstrap if needed
@@ -229,7 +244,7 @@ async function start() {
       }
     });
 
-    // 7. Setup graceful shutdown handlers
+    // 8. Setup graceful shutdown handlers
     const gracefulShutdown = async (signal: string) => {
       console.log('');
       console.log(`\n🛑 ${signal} received, shutting down gracefully...`);
@@ -239,6 +254,12 @@ async function start() {
         console.log('✅ HTTP server closed');
 
         try {
+          // Stop scheduler if running
+          const scheduler = (global as any).scheduler;
+          if (scheduler) {
+            scheduler.stop();
+          }
+
           // Disconnect from database
           await shutdownDatabase(prisma);
 

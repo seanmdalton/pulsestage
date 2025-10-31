@@ -14,11 +14,14 @@ import { setFormattedPageTitle } from '../utils/titleUtils'
 export function AdminPage() {
   const { isLoading: authLoading } = useAdmin()
   const { userTeams, getUserRoleInTeam } = useUser()
-  const { theme } = useTheme()
+  const { colorMode, theme } = useTheme()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<
-    'teams' | 'tags' | 'users' | 'audit' | 'settings'
+    'teams' | 'tags' | 'users' | 'audit' | 'settings' | 'pulse'
   >('teams')
+
+  // Get current theme colors
+  const themeColors = colorMode === 'light' ? theme.light : theme.dark
   const [healthStatus, setHealthStatus] = useState<
     'checking' | 'healthy' | 'unhealthy'
   >('checking')
@@ -81,7 +84,7 @@ export function AdminPage() {
   // Show loading while checking user roles
   if (userTeams.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
           Admin Panel
         </h1>
@@ -99,13 +102,13 @@ export function AdminPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
             {/* Icon only */}
             <img
               src={
-                theme === 'dark'
+                colorMode === 'dark'
                   ? '/pulsestage-icon-light.svg'
                   : '/pulsestage-icon-dark.svg'
               }
@@ -155,9 +158,17 @@ export function AdminPage() {
               onClick={() => setActiveTab('teams')}
               className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'teams'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  ? ''
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
+              style={
+                activeTab === 'teams'
+                  ? {
+                      borderBottomColor: themeColors.primary,
+                      color: themeColors.primary,
+                    }
+                  : { borderBottomColor: 'transparent' }
+              }
             >
               Teams
             </button>
@@ -165,9 +176,17 @@ export function AdminPage() {
               onClick={() => setActiveTab('tags')}
               className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'tags'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  ? ''
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
+              style={
+                activeTab === 'tags'
+                  ? {
+                      borderBottomColor: themeColors.primary,
+                      color: themeColors.primary,
+                    }
+                  : { borderBottomColor: 'transparent' }
+              }
             >
               Tags
             </button>
@@ -178,9 +197,17 @@ export function AdminPage() {
                   onClick={() => setActiveTab('users')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === 'users'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      ? ''
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
+                  style={
+                    activeTab === 'users'
+                      ? {
+                          borderBottomColor: themeColors.primary,
+                          color: themeColors.primary,
+                        }
+                      : { borderBottomColor: 'transparent' }
+                  }
                 >
                   Users
                 </button>
@@ -188,9 +215,17 @@ export function AdminPage() {
                   onClick={() => setActiveTab('audit')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === 'audit'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      ? ''
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
+                  style={
+                    activeTab === 'audit'
+                      ? {
+                          borderBottomColor: themeColors.primary,
+                          color: themeColors.primary,
+                        }
+                      : { borderBottomColor: 'transparent' }
+                  }
                 >
                   Audit Log
                 </button>
@@ -198,14 +233,29 @@ export function AdminPage() {
                   onClick={() => setActiveTab('settings')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === 'settings'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      ? ''
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
+                  style={
+                    activeTab === 'settings'
+                      ? {
+                          borderBottomColor: themeColors.primary,
+                          color: themeColors.primary,
+                        }
+                      : { borderBottomColor: 'transparent' }
+                  }
                 >
                   Settings
                 </button>
               </>
             )}
+            {/* Pulse Settings - accessible to all admins */}
+            <button
+              onClick={() => navigate('/admin/pulse/settings')}
+              className="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+            >
+              ⚙️ Pulse Settings
+            </button>
           </nav>
         </div>
 

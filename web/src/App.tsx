@@ -18,6 +18,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { SubmitPage } from './pages/SubmitPage'
 import { OpenQuestionsPage } from './pages/OpenQuestionsPage'
 import { AnsweredQuestionsPage } from './pages/AnsweredQuestionsPage'
+import { QuestionsPage } from './pages/QuestionsPage'
+import { DashboardPage } from './pages/DashboardPage'
 import { AdminPage } from './pages/AdminPage'
 import { AdminLoginPage } from './pages/AdminLoginPage'
 import { AuditPage } from './pages/AuditPage'
@@ -29,6 +31,9 @@ import { ModeratorDashboardPage } from './pages/ModeratorDashboardPage'
 import { ModerationQueuePage } from './pages/ModerationQueuePage'
 import { ExportPage } from './pages/ExportPage'
 import { LoginPage } from './pages/LoginPage'
+import { PulseDashboardPage } from './pages/PulseDashboardPage'
+import { PulseSettingsPage } from './pages/PulseSettingsPage'
+import { PulseRespondPage } from './pages/PulseRespondPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
@@ -37,11 +42,14 @@ import { AuthGuard } from './components/AuthGuard'
 import { AdminProvider } from './contexts/AdminContext'
 import { TeamProvider } from './contexts/TeamContext'
 import { UserProvider } from './contexts/UserContext'
+import { useTheme } from './contexts/ThemeContext'
 import { useEffect, useState } from 'react'
 import { getBaseTitle } from './utils/titleUtils'
 import { apiClient } from './lib/api'
 
-function App() {
+function AppContent() {
+  const { theme, colorMode } = useTheme()
+  const themeColors = colorMode === 'light' ? theme.light : theme.dark
   const [needsSetup, setNeedsSetup] = useState<boolean | null>(null)
   const [checkingSetup, setCheckingSetup] = useState(true)
 
@@ -117,26 +125,50 @@ function App() {
                 path="/*"
                 element={
                   <AuthGuard>
-                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                    <div
+                      className="min-h-screen transition-colors"
+                      style={{
+                        backgroundColor: themeColors.background,
+                        color: themeColors.text,
+                      }}
+                    >
                       <Navbar />
                       <DemoModeBanner />
                       <Routes>
                         {/* Default routes - smart redirect to user's default team or /all */}
                         <Route
                           path="/"
-                          element={<SmartRedirect fallbackTo="/all" />}
+                          element={
+                            <SmartRedirect fallbackTo="/all/dashboard" />
+                          }
                         />
+
+                        {/* Legacy redirects - maintain backward compatibility */}
                         <Route
                           path="/open"
-                          element={<SmartRedirect fallbackTo="/all/open" />}
+                          element={
+                            <SmartRedirect fallbackTo="/all/questions?view=open" />
+                          }
                         />
                         <Route
                           path="/answered"
-                          element={<SmartRedirect fallbackTo="/all/answered" />}
+                          element={
+                            <SmartRedirect fallbackTo="/all/questions?view=answered" />
+                          }
                         />
 
                         {/* Team-based routes */}
+                        <Route
+                          path="/:teamSlug/dashboard"
+                          element={<DashboardPage />}
+                        />
+                        <Route
+                          path="/:teamSlug/questions"
+                          element={<QuestionsPage />}
+                        />
                         <Route path="/:teamSlug" element={<SubmitPage />} />
+
+                        {/* Legacy team routes - redirect to new consolidated pages */}
                         <Route
                           path="/:teamSlug/open"
                           element={<OpenQuestionsPage />}
@@ -172,6 +204,20 @@ function App() {
                           path="/admin/health"
                           element={<HealthDashboardPage />}
                         />
+                        <Route
+                          path="/admin/pulse/settings"
+                          element={<PulseSettingsPage />}
+                        />
+
+                        {/* Pulse routes (team-scoped, like Q&A) */}
+                        <Route
+                          path="/:teamSlug/pulse/dashboard"
+                          element={<PulseDashboardPage />}
+                        />
+                        <Route
+                          path="/pulse/respond"
+                          element={<PulseRespondPage />}
+                        />
 
                         {/* Profile routes (not team-scoped) */}
                         <Route path="/profile" element={<ProfilePage />} />
@@ -200,6 +246,11 @@ function App() {
       </UserProvider>
     </Router>
   )
+}
+
+// Wrap AppContent with Router since we need it before useTheme
+function App() {
+  return <AppContent />
 }
 
 export default App

@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import { apiClient } from '../lib/api'
+import type { ThemeName } from '../lib/themes'
+import { themes } from '../lib/themes'
+import { ThemePreviewCard } from './ThemePreviewCard'
+import { useTheme } from '../contexts/ThemeContext'
 
 type TenantSettings = {
   questions: {
@@ -20,6 +24,7 @@ type TenantSettings = {
     }
   }
   branding: {
+    theme: ThemeName
     logo: string | null
     logoUrl: string | null
     primaryColor: string
@@ -37,10 +42,14 @@ type TenantSettings = {
 }
 
 export function Settings() {
+  const { setTheme: applyTheme, theme, colorMode } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  // Get current theme colors for inline styles
+  const themeColors = colorMode === 'light' ? theme.light : theme.dark
 
   // Organization settings (from /admin/settings)
   const [orgName, setOrgName] = useState('')
@@ -392,6 +401,126 @@ export function Settings() {
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               The tenant identifier cannot be changed after creation.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Settings */}
+      <div
+        className="rounded-lg shadow mb-6"
+        style={{ backgroundColor: themeColors.surface }}
+      >
+        <div
+          className="p-6 border-b"
+          style={{ borderColor: themeColors.border }}
+        >
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Theme & Appearance
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Choose a theme that matches your brand. Each theme supports light
+            and dark mode.
+          </p>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.values(themes).map((theme) => (
+              <ThemePreviewCard
+                key={theme.name}
+                theme={theme}
+                isSelected={tenantSettings.branding.theme === theme.name}
+                onSelect={() => {
+                  const newTheme = theme.name
+                  setTenantSettings({
+                    ...tenantSettings,
+                    branding: {
+                      ...tenantSettings.branding,
+                      theme: newTheme,
+                    },
+                  })
+                  // Apply theme immediately for preview
+                  applyTheme(newTheme)
+                }}
+              />
+            ))}
+          </div>
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              💡 <strong>Tip:</strong> Theme changes are previewed immediately.
+              Click "Save All Changes" below to persist your selection.
+            </p>
+          </div>
+
+          {/* Debug: Show current theme colors */}
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-semibold">
+              🔍 Debug: Current Theme State
+            </p>
+            <div className="space-y-2 text-xs text-gray-700 dark:text-gray-300 font-mono">
+              <div>
+                Context Theme: <strong>{theme.name}</strong>
+              </div>
+              <div>
+                Context Mode: <strong>{colorMode}</strong>
+              </div>
+              <div>
+                Settings Theme: <strong>{tenantSettings.branding.theme}</strong>
+              </div>
+              <div className="pt-2 border-t border-gray-300 dark:border-gray-600">
+                <p className="font-semibold mb-1">Theme Colors from Context:</p>
+                <div>
+                  Primary:{' '}
+                  <strong style={{ color: themeColors.primary }}>
+                    {themeColors.primary}
+                  </strong>
+                </div>
+                <div>
+                  Secondary:{' '}
+                  <strong style={{ color: themeColors.secondary }}>
+                    {themeColors.secondary}
+                  </strong>
+                </div>
+                <div>
+                  Accent:{' '}
+                  <strong style={{ color: themeColors.accent }}>
+                    {themeColors.accent}
+                  </strong>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded border border-gray-300"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                  title="CSS Variable"
+                />
+                <span className="text-xs">CSS Var</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded border border-gray-300"
+                  style={{ backgroundColor: themeColors.primary }}
+                  title="Context Value"
+                />
+                <span className="text-xs">Context</span>
+              </div>
+              <button
+                onClick={() => {
+                  console.log('🧪 TEST BUTTON CLICKED')
+                  console.log('Current theme from context:', theme.name)
+                  console.log('Current colors:', themeColors)
+                }}
+                className="px-3 py-1 text-xs rounded border border-gray-400"
+                style={{
+                  backgroundColor: themeColors.primary,
+                  color: 'white',
+                }}
+              >
+                Test Button
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -765,7 +894,13 @@ export function Settings() {
           <button
             onClick={handleSave}
             disabled={!hasChanges || saving || hasValidationErrors}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 text-white font-medium rounded-md shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            style={{
+              backgroundColor:
+                !hasChanges || saving || hasValidationErrors
+                  ? 'rgb(156, 163, 175)' // gray-400 for disabled
+                  : themeColors.primary,
+            }}
           >
             {saving ? 'Saving...' : 'Save All Changes'}
           </button>

@@ -234,6 +234,7 @@ describe('Settings Service', () => {
     it('should update branding colors with valid hex codes', async () => {
       const settings = await updateTenantSettings(prisma, testTenant.id, {
         branding: {
+          theme: 'executive-blue',
           primaryColor: '#FF5733',
           accentColor: '#33FF57',
           logoUrl: null,
@@ -243,12 +244,14 @@ describe('Settings Service', () => {
 
       expect(settings.branding.primaryColor).toBe('#FF5733');
       expect(settings.branding.accentColor).toBe('#33FF57');
+      expect(settings.branding.theme).toBe('executive-blue');
     });
 
     it('should reject invalid hex color codes', async () => {
       await expect(
         updateTenantSettings(prisma, testTenant.id, {
           branding: {
+            theme: 'refined-teal',
             primaryColor: 'invalid-color',
             accentColor: '#33FF57',
             logoUrl: null,
@@ -256,6 +259,20 @@ describe('Settings Service', () => {
           },
         })
       ).rejects.toThrow();
+    });
+
+    it('should reject invalid theme names', async () => {
+      await expect(
+        updateTenantSettings(prisma, testTenant.id, {
+          branding: {
+            theme: 'invalid-theme' as any,
+            primaryColor: '#FF5733',
+            accentColor: '#33FF57',
+            logoUrl: null,
+            faviconUrl: null,
+          },
+        })
+      ).rejects.toThrow(/Invalid theme/);
     });
   });
 

@@ -428,19 +428,22 @@ export function OpenQuestionsPage() {
                             handleUpvote(question.id)
                           }}
                           disabled={hasUpvoted || !canUpvote}
-                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                            hasUpvoted || !canUpvote
-                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
+                          className={`px-3 py-1 text-sm rounded-md transition-all flex items-center gap-1 ${
+                            hasUpvoted
+                              ? 'bg-orange-500 dark:bg-orange-600 text-white shadow-md cursor-default'
+                              : !canUpvote
+                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
                           }`}
                           title={
                             !canUpvote
                               ? 'Cannot upvote your own question'
                               : hasUpvoted
-                                ? 'Already upvoted'
+                                ? 'You upvoted this'
                                 : 'Upvote this question'
                           }
                         >
+                          <span>{hasUpvoted ? '▲' : '△'}</span>
                           {hasUpvoted ? 'Upvoted' : 'Upvote'}
                         </button>
                       )

@@ -131,6 +131,11 @@ export function useSSE(options: SSEOptions = {}) {
           },
           onmessage(event) {
             try {
+              // Ignore empty messages (keep-alive pings)
+              if (!event.data || event.data.trim() === '') {
+                return
+              }
+
               const sseEvent: SSEEvent = JSON.parse(event.data)
 
               // Handle heartbeat separately

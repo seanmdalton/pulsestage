@@ -25,6 +25,29 @@ export interface CreateQuestionRequest {
 export type RespondRequest = components['schemas']['RespondRequest']
 export type HealthResponse = components['schemas']['HealthResponse']
 
+// Pulse types
+export interface PulseInvite {
+  id: string
+  token: string
+  questionId: string
+  questionText: string
+  scale: string
+  expiresAt: string
+  createdAt: string
+}
+
+export interface PulseHistoryWeek {
+  weekStart: string
+  responseCount: number
+  averageScore: number | null
+  responses: Array<{
+    id: string
+    questionText: string
+    score: number
+    respondedAt: string
+  }>
+}
+
 // Team types (manual until we update OpenAPI spec)
 export interface Team {
   id: string
@@ -127,6 +150,7 @@ export interface TenantSettingsType {
     }
   }
   branding: {
+    theme: string
     primaryColor: string
     accentColor: string
     logoUrl: string | null
@@ -1068,6 +1092,7 @@ class ApiClient {
           }),
         }),
         branding: z.object({
+          theme: z.string(),
           primaryColor: z.string(),
           accentColor: z.string(),
           logoUrl: z.string().nullable(),
@@ -1086,6 +1111,180 @@ class ApiClient {
       {
         credentials: 'include',
       },
+      ResponseSchema
+    )
+  }
+
+  // Pulse Dashboard methods
+  async getPulseSummary(
+    range: string = '8w',
+    teamId?: string,
+    threshold?: number
+  ): Promise<{
+    tenantId: string
+    anonThreshold: number
+    summary: {
+      overallTrend: Array<{
+        weekStart: string
+        average: number | null
+        participation: number | null // Can be null when no invites
+        responseCount: number
+        insufficient: boolean
+      }>
+      participationRate: number
+      totalResponses: number
+      totalInvites: number
+    }
+    questions: Array<{
+      questionId: string
+      questionText: string
+      category: string | null
+      scale: string
+      overallAverage: number | null // Can be null when insufficient data
+      insufficient: boolean
+      trend: Array<{
+        weekStart: string
+        average: number | null
+        participation: number | null // Can be null when no invites
+        responseCount: number
+        insufficient: boolean
+      }>
+    }>
+    heatmap: Record<
+      string,
+      Record<string, { average: number | null; insufficient: boolean }>
+    >
+  }> {
+    const params = new URLSearchParams({ range })
+    if (teamId) {
+      params.append('team', teamId)
+    }
+    if (threshold !== undefined) {
+      params.append('threshold', threshold.toString())
+    }
+
+    const PulseSummarySchema = z.object({
+      tenantId: z.string(),
+      anonThreshold: z.number(),
+      summary: z.object({
+        overallTrend: z.array(
+          z.object({
+            weekStart: z.string(),
+            average: z.number().nullable(),
+            participation: z.number().nullable(), // Can be null when no invites
+            responseCount: z.number(),
+            insufficient: z.boolean(),
+          })
+        ),
+        participationRate: z.number(),
+        totalResponses: z.number(),
+        totalInvites: z.number(),
+      }),
+      questions: z.array(
+        z.object({
+          questionId: z.string(),
+          questionText: z.string(),
+          category: z.string().nullable(),
+          scale: z.string(),
+          overallAverage: z.number().nullable(), // Can be null when insufficient data
+          insufficient: z.boolean(),
+          trend: z.array(
+            z.object({
+              weekStart: z.string(),
+              average: z.number().nullable(),
+              participation: z.number().nullable(), // Can be null when no invites
+              responseCount: z.number(),
+              insufficient: z.boolean(),
+            })
+          ),
+        })
+      ),
+      heatmap: z.record(
+        z.string(),
+        z.record(
+          z.string(),
+          z.object({
+            average: z.number().nullable(),
+            insufficient: z.boolean(),
+          })
+        )
+      ),
+    })
+
+    return this.request(
+      `/pulse/summary?${params.toString()}`,
+      { credentials: 'include' },
+      PulseSummarySchema
+    )
+  }
+
+  // User-specific Pulse methods
+  async getMyPulseInvites(): Promise<{
+    invites: Array<{
+      id: string
+      token: string
+      questionId: string
+      questionText: string
+      scale: string
+      expiresAt: string
+      createdAt: string
+    }>
+  }> {
+    const ResponseSchema = z.object({
+      invites: z.array(
+        z.object({
+          id: z.string(),
+          token: z.string(),
+          questionId: z.string(),
+          questionText: z.string(),
+          scale: z.string(),
+          expiresAt: z.string(),
+          createdAt: z.string(),
+        })
+      ),
+    })
+
+    return this.request(
+      '/pulse/my-invites',
+      { credentials: 'include' },
+      ResponseSchema
+    )
+  }
+
+  async getMyPulseHistory(weeks: number = 8): Promise<{
+    history: Array<{
+      weekStart: string
+      responseCount: number
+      averageScore: number | null
+      responses: Array<{
+        id: string
+        questionText: string
+        score: number
+        respondedAt: string
+      }>
+    }>
+  }> {
+    const ResponseSchema = z.object({
+      history: z.array(
+        z.object({
+          weekStart: z.string(),
+          responseCount: z.number(),
+          averageScore: z.number().nullable(),
+          responses: z.array(
+            z.object({
+              id: z.string(),
+              questionText: z.string(),
+              score: z.number(),
+              respondedAt: z.string(),
+            })
+          ),
+        })
+      ),
+    })
+
+    return this.request(
+      `/pulse/my-history?weeks=${weeks}`,
+      { credentials: 'include' },
       ResponseSchema
     )
   }

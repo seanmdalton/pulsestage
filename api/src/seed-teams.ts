@@ -4,24 +4,14 @@ const prisma = new PrismaClient();
 
 const defaultTeams = [
   {
-    name: 'General',
-    slug: 'general',
-    description: 'General organizational questions',
-  },
-  {
     name: 'Engineering',
     slug: 'engineering',
-    description: 'Technical and development questions',
+    description: 'Technical development, infrastructure, and engineering culture',
   },
   {
     name: 'Product',
     slug: 'product',
-    description: 'Product strategy and feature questions',
-  },
-  {
-    name: 'People',
-    slug: 'people',
-    description: 'HR, culture, and people-related questions',
+    description: 'Product strategy, roadmap, and feature prioritization',
   },
 ];
 
@@ -59,36 +49,6 @@ async function seedTeams() {
       console.log(`✅ Created team: ${team.name}`);
     } else {
       console.log(`⏭️  Team already exists: ${team.name}`);
-    }
-  }
-
-  // Assign existing questions without teamId to General team
-  const generalTeam = await prisma.team.findUnique({
-    where: {
-      tenantId_slug: {
-        tenantId: tenant.id,
-        slug: 'general',
-      },
-    },
-  });
-
-  if (generalTeam) {
-    const unassignedQuestions = await prisma.question.findMany({
-      where: {
-        tenantId: tenant.id,
-        teamId: null,
-      },
-    });
-
-    if (unassignedQuestions.length > 0) {
-      await prisma.question.updateMany({
-        where: {
-          tenantId: tenant.id,
-          teamId: null,
-        },
-        data: { teamId: generalTeam.id },
-      });
-      console.log(`✅ Assigned ${unassignedQuestions.length} existing questions to General team`);
     }
   }
 

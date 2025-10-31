@@ -55,6 +55,7 @@ export function SubmitPage() {
             },
           },
           branding: {
+            theme: 'refined-teal',
             primaryColor: '#3B82F6',
             accentColor: '#10B981',
             logoUrl: null,

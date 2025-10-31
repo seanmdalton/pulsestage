@@ -12,28 +12,28 @@ interface TeamContextBarProps {
 const teamColors: Record<string, { bg: string; border: string; text: string }> =
   {
     general: {
-      bg: 'bg-slate-50 dark:bg-slate-800/30',
+      bg: 'bg-slate-50 dark:bg-slate-800',
       border: 'border-slate-200 dark:border-slate-700',
       text: 'text-slate-900 dark:text-slate-100',
     },
     engineering: {
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      bg: 'bg-blue-50 dark:bg-blue-950',
       border: 'border-blue-200 dark:border-blue-800',
       text: 'text-blue-900 dark:text-blue-100',
     },
     product: {
-      bg: 'bg-purple-50 dark:bg-purple-900/20',
+      bg: 'bg-purple-50 dark:bg-purple-950',
       border: 'border-purple-200 dark:border-purple-800',
       text: 'text-purple-900 dark:text-purple-100',
     },
     people: {
-      bg: 'bg-green-50 dark:bg-green-900/20',
+      bg: 'bg-green-50 dark:bg-green-950',
       border: 'border-green-200 dark:border-green-800',
       text: 'text-green-900 dark:text-green-100',
     },
     // Default for "All Teams" or unknown teams
     default: {
-      bg: 'bg-gray-50 dark:bg-gray-800/30',
+      bg: 'bg-gray-50 dark:bg-gray-800',
       border: 'border-gray-200 dark:border-gray-700',
       text: 'text-gray-900 dark:text-gray-100',
     },

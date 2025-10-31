@@ -25,8 +25,13 @@ export const DEFAULT_SETTINGS = {
     },
   },
   branding: {
-    primaryColor: '#3B82F6',
-    accentColor: '#10B981',
+    theme: 'refined-teal' as
+      | 'executive-blue'
+      | 'modern-purple'
+      | 'refined-teal'
+      | 'indigo-professional',
+    primaryColor: '#3B82F6', // Legacy support - can override theme primary
+    accentColor: '#10B981', // Legacy support - can override theme accent
     logoUrl: null as string | null,
     faviconUrl: null as string | null,
   },
@@ -34,6 +39,15 @@ export const DEFAULT_SETTINGS = {
     allowAnonymousQuestions: true,
     requireQuestionApproval: false,
     enableEmailNotifications: false,
+  },
+  pulse: {
+    enabled: false, // Feature flag - enable Weekly Pulse
+    anonThreshold: 5, // Minimum responses to display aggregates
+    defaultCadence: 'weekly' as 'weekly' | 'biweekly' | 'monthly',
+    defaultTime: '09:00', // HH:mm format
+    rotatingCohorts: true, // Enable cohort rotation for daily freshness
+    channelSlack: false, // Enable Slack DM delivery
+    channelEmail: true, // Enable email delivery (fallback)
   },
 };
 
@@ -161,6 +175,12 @@ function validateSettings(settings: TenantSettingsType): void {
   }
   if (rateLimits.searchPerMinute < 1 || rateLimits.searchPerMinute > 500) {
     throw new Error('Search per minute must be between 1 and 500');
+  }
+
+  // Theme validation
+  const validThemes = ['executive-blue', 'modern-purple', 'refined-teal', 'indigo-professional'];
+  if (!validThemes.includes(settings.branding.theme)) {
+    throw new Error(`Invalid theme. Must be one of: ${validThemes.join(', ')}`);
   }
 
   // Color validation (basic hex check)

@@ -1,0 +1,165 @@
+# PulseStage Development Rules
+
+## Core Principle
+**The development environment must ALWAYS be functional before requesting user testing.**
+
+## Required Workflow
+
+### Before EVERY User Testing Request
+
+1. **Run Pre-Flight Check** (MANDATORY)
+   ```bash
+   make preflight
+   ```
+
+2. **Only proceed if exit code is 0**
+   - Exit code 0 = All systems operational
+   - Exit code 1 = Critical failures, DO NOT ask user to test
+
+3. **Provide Context**
+   - Specific URL to test
+   - What to look for
+   - Expected behavior
+
+### Standard Development Process
+
+1. **Make Changes**
+   - Implement feature/fix
+   - Update seed data if needed
+   - Update tests if needed
+
+2. **Restart Services** (if needed)
+   - API changes: Restart API server
+   - Database schema: Run `make db-seed`
+   - Auth changes: Restart API server
+
+3. **Validate** (REQUIRED)
+   ```bash
+   make preflight
+   ```
+
+4. **Request Testing** (only if pre-flight passes)
+
+## Key Commands
+
+### Most Important
+- `make preflight` - ⭐ REQUIRED before user testing
+- `make db-seed` - Reset & seed all data (idempotent)
+- `make db-test-seed` - Validate seed data integrity
+
+### Development
+- `make dev` - Start development (foreground)
+- `make up` - Start services (background)
+- `make down` - Stop services
+
+### Testing & Validation
+- `make test` - Run all tests
+- `make validate-ci` - Run CI checks locally
+
+## Seed Data Expectations
+
+After `make db-seed`:
+- **50 users total**:
+  - 4 login users (admin, alice, bob, moderator)
+  - 46 dummy users with realistic names
+- **2 teams** (Engineering, Product)
+- **36 Q&A questions** (10 open + 10 answered per team)
+- **10 active pulse questions**
+- **12 weeks of pulse historical data** (≥800 responses, always relative to "now")
+- **Team-specific trends**: Engineering improving, Product stable
+- **81.6% pulse participation rate**
+- **2 pulse cohorts** (Weekday, Weekend)
+- **Tenant**: `default`
+
+## Authentication
+
+### Demo Mode
+- **Tenant**: `default`
+- **Login Users**: admin, alice, bob, moderator
+- **Email Format**: `{username}@pulsestage.app`
+- **SSO IDs**: `{username}` (e.g., `admin`, not `demo-admin`)
+- **Primary Teams**: 
+  - admin, alice → Engineering
+  - bob, moderator → Product
+
+### Login Endpoint
+```
+GET /auth/demo?user={username}&tenant={tenant}
+```
+
+## Common Fixes
+
+### Site Not Running
+```bash
+# Check what's running
+ps aux | grep -E "(tsx|vite)"
+
+# Start API
+cd api && npm run dev > /tmp/api.log 2>&1 &
+
+# Start Frontend
+cd web && npm run dev > /tmp/web.log 2>&1 &
+
+# Validate
+make preflight
+```
+
+### Can't Login / No Data
+```bash
+make db-seed
+make preflight
+```
+
+### Changes Not Reflecting
+- Frontend: Hot reload should work automatically
+- API: Restart the API server
+- Database: Run `make db-seed`
+
+## Development Best Practices
+
+### DO ✅
+- Run `make preflight` before requesting user testing
+- Use Makefile commands (`make db-seed`, not `npx tsx scripts/...`)
+- Check exit codes before proceeding
+- Provide specific URLs and expected behavior
+- Test changes yourself before asking user to test
+- Keep seed data comprehensive and realistic
+
+### DON'T ❌
+- Ask user to test without running pre-flight check
+- Assume services are running
+- Skip validation after major changes
+- Create new users/tenants outside of seed data
+- Use hardcoded credentials that don't match seed data
+- Forget to restart services after code changes
+
+## File References
+
+- **Workflow Documentation**: `DEVELOPMENT_WORKFLOW.md` (comprehensive guide)
+- **Pre-Flight Script**: `api/scripts/preflight-check.ts`
+- **Seed Script**: `api/scripts/reset-and-seed-all.ts`
+- **Seed Validation**: `api/scripts/test-seed-data.ts`
+- **Seed Checklist**: `SEED_DATA_CHECKLIST.md`
+
+## Example User Testing Request
+
+```
+✅ Pre-flight check passed!
+
+Please test the Pulse Dashboard:
+1. Go to http://localhost:5173/login
+2. Select "Admin (Demo)"
+3. Navigate to http://localhost:5173/pulse/dashboard
+
+Expected:
+- 8 weeks of historical data visible
+- Charts display pulse trends
+- Participation rate shows ~70%
+
+Let me know if you see any issues!
+```
+
+---
+
+**Remember: No user testing requests without a successful pre-flight check. This is non-negotiable.**
+

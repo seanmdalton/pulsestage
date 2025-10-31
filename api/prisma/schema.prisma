@@ -14,6 +14,30 @@ enum QuestionStatus {
   UNDER_REVIEW
 }
 
+// Pulse enums
+enum PulseScale {
+  LIKERT_1_5  // 1-5 scale
+  NPS_0_10    // 0-10 Net Promoter Score
+}
+
+enum PulseCadence {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum PulseChannel {
+  SLACK
+  EMAIL
+}
+
+enum PulseInviteStatus {
+  PENDING
+  SENT
+  COMPLETED
+  EXPIRED
+}
+
 // Multi-tenancy: Tenant model
 model Tenant {
   id        String   @id @default(uuid())
@@ -30,6 +54,13 @@ model Tenant {
   userPreferences   UserPreferences[]
   auditLogs         AuditLog[]
   settings          TenantSettings?
+  
+  // Pulse relationships
+  pulseQuestions    PulseQuestion[]
+  pulseSchedules    PulseSchedule[]
+  pulseCohorts      PulseCohort[]
+  pulseInvites      PulseInvite[]
+  pulseResponses    PulseResponse[]
 }
 
 // Tenant-level settings (configurable via Admin UI)
@@ -59,10 +90,11 @@ model Team {
   updatedAt   DateTime   @updatedAt
   
   // Relationships
-  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  questions   Question[]
-  memberships TeamMembership[]
-  userPreferences UserPreferences[] // Teams that users have set as default
+  tenant          Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  questions       Question[]
+  memberships     TeamMembership[]
+  userPreferences UserPreferences[]     // Teams that users have set as default
+  primaryMembers  User[]                @relation("PrimaryTeamMembers") // Users who have this as their primary team
   
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -146,25 +178,29 @@ model QuestionTag {
 
 // User management for SSO integration
 model User {
-  id        String   @id @default(uuid())
-  tenantId  String
-  email     String
-  name      String?
-  ssoId     String?  // For SSO provider integration
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  tenantId      String
+  email         String
+  name          String?
+  ssoId         String?  // For SSO provider integration
+  primaryTeamId String?  // Primary team for pulse surveys and main affiliation
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   // Relationships
   tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  primaryTeam     Team?            @relation("PrimaryTeamMembers", fields: [primaryTeamId], references: [id], onDelete: SetNull)
   teamMemberships TeamMembership[]
   preferences     UserPreferences?
   questions       Question[]      // Questions submitted by this user
   upvotes         Upvote[]        // Upvotes given by this user
   auditLogs       AuditLog[]      // Audit logs for actions performed by this user
+  pulseInvites    PulseInvite[]   // Pulse invites sent to this user
   
   @@unique([tenantId, email])
   @@unique([tenantId, ssoId])
   @@index([tenantId])
+  @@index([primaryTeamId])
 }
 
 // Team membership with roles
@@ -240,4 +276,111 @@ model AuditLog {
   @@index([tenantId, userId])
   @@index([tenantId, action])
   @@index([tenantId, entityType, entityId])
+}
+
+// Weekly Pulse: Questions
+model PulseQuestion {
+  id          String      @id @default(uuid())
+  tenantId    String
+  text        String      // The question text (e.g., "How recognized do you feel this week?")
+  scale       PulseScale  @default(LIKERT_1_5)
+  active      Boolean     @default(true)
+  category    String?     // Optional category (e.g., "recognition", "alignment", "wellbeing")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relationships
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invites     PulseInvite[]
+  responses   PulseResponse[]
+  
+  @@index([tenantId])
+  @@index([tenantId, active])
+}
+
+// Weekly Pulse: Scheduling configuration per tenant
+model PulseSchedule {
+  id               String        @id @default(uuid())
+  tenantId         String
+  cadence          PulseCadence  @default(WEEKLY)
+  dayOfWeek        Int           @default(1) // 0=Sunday, 1=Monday, etc.
+  timeOfDay        String        @default("09:00") // HH:mm format
+  rotatingCohorts  Boolean       @default(true) // Enable cohort rotation
+  enabled          Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  
+  // Relationships
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId]) // One schedule per tenant
+  @@index([tenantId, enabled])
+}
+
+// Weekly Pulse: User cohorts for rotation
+model PulseCohort {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String   // e.g., "weekday-0", "weekday-1", etc.
+  userIds   Json     @default("[]") // Array of user IDs in this cohort
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+// Weekly Pulse: Invitations sent to users
+model PulseInvite {
+  id          String            @id @default(uuid())
+  tenantId    String
+  userId      String?           // Nullable for email-only invites
+  teamId      String?           // Team associated with this pulse (from user's primaryTeam)
+  channel     PulseChannel
+  questionId  String
+  token       String            @unique @default(uuid()) // For one-tap responses
+  expiresAt   DateTime
+  sentAt      DateTime?
+  completedAt DateTime?
+  status      PulseInviteStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  // Relationships
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  question    PulseQuestion     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, teamId])
+  @@index([tenantId, status])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// Weekly Pulse: Anonymous responses
+model PulseResponse {
+  id          String        @id @default(uuid())
+  tenantId    String
+  teamId      String?       // Team this response is associated with (from invite)
+  questionId  String
+  score       Int           // 1-5 for LIKERT, 0-10 for NPS
+  comment     String?       // Optional text feedback
+  cohortName  String?       // Which cohort this response came from
+  submittedAt DateTime      @default(now())
+  
+  // Relationships
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  question    PulseQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // No userId - responses are anonymous!
+  
+  @@index([tenantId])
+  @@index([tenantId, questionId])
+  @@index([tenantId, teamId])
+  @@index([tenantId, submittedAt])
 }

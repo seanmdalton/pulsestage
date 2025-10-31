@@ -63,7 +63,8 @@ export function AuthSelector() {
   const handleDemoLogin = () => {
     if (!selectedDemoUser) return
     // Redirect to backend demo auth endpoint
-    window.location.href = `${API_URL}/auth/demo?user=${selectedDemoUser}&tenant=demo`
+    // Use 'default' tenant to match seed data
+    window.location.href = `${API_URL}/auth/demo?user=${selectedDemoUser}&tenant=default`
   }
 
   const handleGitHubLogin = () => {

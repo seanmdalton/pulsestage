@@ -72,9 +72,10 @@ export class DemoAuthStrategy {
       });
     }
 
-    // Demo user email format: username@demo.pulsestage.dev
-    const email = `${username}@demo.pulsestage.dev`;
-    const ssoId = `demo-${username}`;
+    // Demo user email format: username@pulsestage.app
+    const email = `${username}@pulsestage.app`;
+    // Use simple username as SSO ID to match seed data
+    const ssoId = username;
 
     let user = await this.prisma.user.findFirst({
       where: { email, tenantId: tenant.id },

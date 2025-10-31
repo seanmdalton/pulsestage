@@ -303,32 +303,24 @@ export function QuestionDetailPage() {
           <button
             onClick={handleUpvote}
             disabled={upvoteStatus.hasUpvoted || !upvoteStatus.canUpvote}
-            className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center ${
-              upvoteStatus.hasUpvoted || !upvoteStatus.canUpvote
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                : 'bg-orange-100 dark:bg-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-600'
+            className={`px-6 py-2 text-sm font-medium rounded-md transition-all flex items-center ${
+              upvoteStatus.hasUpvoted
+                ? 'bg-orange-500 dark:bg-orange-600 text-white shadow-md cursor-default'
+                : !upvoteStatus.canUpvote
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-600'
             }`}
             title={
               !upvoteStatus.canUpvote
                 ? 'Cannot upvote your own question'
                 : upvoteStatus.hasUpvoted
-                  ? 'Already upvoted'
+                  ? 'You upvoted this'
                   : 'Upvote this question'
             }
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 15l7-7 7 7"
-              />
-            </svg>
+            <span className="text-lg mr-2">
+              {upvoteStatus.hasUpvoted ? '▲' : '△'}
+            </span>
             {upvoteStatus.hasUpvoted ? 'Upvoted' : 'Upvote Question'}
           </button>
 

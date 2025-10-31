@@ -414,6 +414,394 @@ export function createApp(prisma: PrismaClient) {
   });
 
   // ============================================================================
+  // WEEKLY PULSE ENDPOINTS
+  // ============================================================================
+
+  /**
+   * GET /pulse/summary
+   * Returns aggregated Pulse data with anonymity enforcement
+   * Query params:
+   *   - range: Time range (e.g., '4w', '8w', '12w') default: '8w'
+   *   - team: Optional team filter (future feature)
+   *   - threshold: Override anonymity threshold (default from settings)
+   */
+  app.get('/pulse/summary', requireAuth, async (req, res) => {
+    const { handleGetPulseSummary } = await import('./pulse/controller.js');
+    await handleGetPulseSummary(req, res, prisma);
+  });
+
+  /**
+   * GET /pulse/respond
+   * One-tap response page with token validation
+   * Query params:
+   *   - token: Unique invite token
+   *   - score: Optional score (if provided, submits immediately)
+   */
+  app.get('/pulse/respond', async (req, res) => {
+    const { handleGetPulseRespond } = await import('./pulse/controller.js');
+    await handleGetPulseRespond(req, res, prisma);
+  });
+
+  /**
+   * POST /pulse/respond
+   * Submit response via form (alternative to GET one-tap)
+   * Body: { token, score, comment? }
+   */
+  app.post('/pulse/respond', async (req, res) => {
+    const { handlePostPulseRespond } = await import('./pulse/controller.js');
+    await handlePostPulseRespond(req, res, prisma);
+  });
+
+  /**
+   * GET /pulse/my-invites
+   * Get pending pulse invites for current user
+   * Requires authentication
+   */
+  app.get('/pulse/my-invites', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const tenantId = req.tenant?.tenantId;
+
+      console.log('🔍 /pulse/my-invites request:', {
+        userId,
+        tenantId,
+        user: req.user,
+        tenant: req.tenant,
+      });
+
+      if (!userId || !tenantId) {
+        console.warn('⚠️  Missing userId or tenantId:', { userId, tenantId });
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const { getUserPendingInvites } = await import('./pulse/userService.js');
+      const invites = await getUserPendingInvites(prisma, userId, tenantId);
+
+      console.log(`✅ Found ${invites.length} pending invites for user ${userId}`);
+
+      return res.json({ invites });
+    } catch (error) {
+      console.error('Error fetching user pulse invites:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch pulse invites',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  /**
+   * GET /pulse/my-history
+   * Get user's pulse response history
+   * Query params: weeks (default: 8)
+   * Requires authentication
+   */
+  app.get('/pulse/my-history', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const tenantId = req.tenant?.tenantId;
+
+      if (!userId || !tenantId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const weeks = req.query.weeks ? parseInt(req.query.weeks as string) : 8;
+      const { getUserPulseHistory } = await import('./pulse/userService.js');
+      const history = await getUserPulseHistory(prisma, userId, tenantId, weeks);
+
+      return res.json({ history });
+    } catch (error) {
+      console.error('Error fetching user pulse history:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch pulse history',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  /**
+   * POST /admin/pulse/trigger
+   * Manually trigger pulse send (for testing)
+   * Requires admin permission
+   * Body: { tenantId?, cohortName? }
+   */
+  app.post('/admin/pulse/trigger', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const { tenantId, cohortName } = req.body;
+      const { manualTriggerPulseSend } = await import('./pulse/scheduler.js');
+
+      console.log(`Manual pulse trigger by admin: tenantId=${tenantId}, cohortName=${cohortName}`);
+
+      const result = await manualTriggerPulseSend(prisma, tenantId, cohortName);
+
+      return res.json({
+        success: true,
+        message: 'Pulse send triggered successfully',
+        result,
+      });
+    } catch (error) {
+      console.error('Error triggering pulse:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to trigger pulse',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
+
+  // ============================================================================
+  // PULSE ADMIN ENDPOINTS (Questions, Schedule, Cohorts Management)
+  // ============================================================================
+
+  /**
+   * GET /admin/pulse/questions
+   * Get all pulse questions for tenant
+   */
+  app.get('/admin/pulse/questions', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const questions = await prisma.pulseQuestion.findMany({
+        where: { tenantId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      return res.json({ questions });
+    } catch (error) {
+      console.error('Error fetching pulse questions:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch questions',
+      });
+    }
+  });
+
+  /**
+   * POST /admin/pulse/questions
+   * Create a new pulse question
+   * Body: { text, category?, scale }
+   */
+  app.post('/admin/pulse/questions', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const { text, category, scale } = req.body;
+
+      if (!text || !scale) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          error: 'Missing required fields: text, scale',
+        });
+      }
+
+      const question = await prisma.pulseQuestion.create({
+        data: {
+          tenantId,
+          text,
+          category: category || null,
+          scale: scale,
+          active: true,
+        },
+      });
+
+      return res.status(HTTP_STATUS.CREATED).json({ question });
+    } catch (error) {
+      console.error('Error creating pulse question:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to create question',
+      });
+    }
+  });
+
+  /**
+   * PATCH /admin/pulse/questions/:id
+   * Update a pulse question
+   * Body: { text?, category?, scale?, active? }
+   */
+  app.patch('/admin/pulse/questions/:id', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const { text, category, scale, active } = req.body;
+
+      // Verify question belongs to tenant
+      const existing = await prisma.pulseQuestion.findFirst({
+        where: { id, tenantId },
+      });
+
+      if (!existing) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Question not found' });
+      }
+
+      const question = await prisma.pulseQuestion.update({
+        where: { id },
+        data: {
+          ...(text !== undefined && { text }),
+          ...(category !== undefined && { category }),
+          ...(scale !== undefined && { scale }),
+          ...(active !== undefined && { active }),
+        },
+      });
+
+      return res.json({ question });
+    } catch (error) {
+      console.error('Error updating pulse question:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to update question',
+      });
+    }
+  });
+
+  /**
+   * DELETE /admin/pulse/questions/:id
+   * Delete a pulse question
+   */
+  app.delete('/admin/pulse/questions/:id', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      // Verify question belongs to tenant
+      const existing = await prisma.pulseQuestion.findFirst({
+        where: { id, tenantId },
+      });
+
+      if (!existing) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Question not found' });
+      }
+
+      await prisma.pulseQuestion.delete({
+        where: { id },
+      });
+
+      return res.json({ success: true, message: 'Question deleted' });
+    } catch (error) {
+      console.error('Error deleting pulse question:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to delete question',
+      });
+    }
+  });
+
+  /**
+   * GET /admin/pulse/schedule
+   * Get pulse schedule for tenant
+   */
+  app.get('/admin/pulse/schedule', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const schedule = await prisma.pulseSchedule.findUnique({
+        where: { tenantId },
+      });
+
+      return res.json({ schedule });
+    } catch (error) {
+      console.error('Error fetching pulse schedule:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch schedule',
+      });
+    }
+  });
+
+  /**
+   * PUT /admin/pulse/schedule
+   * Update pulse schedule for tenant
+   * Body: { cadence?, dayOfWeek?, timeOfDay?, rotatingCohorts?, enabled? }
+   */
+  app.put('/admin/pulse/schedule', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const { cadence, dayOfWeek, timeOfDay, rotatingCohorts, enabled } = req.body;
+
+      const schedule = await prisma.pulseSchedule.upsert({
+        where: { tenantId },
+        update: {
+          ...(cadence !== undefined && { cadence }),
+          ...(dayOfWeek !== undefined && { dayOfWeek }),
+          ...(timeOfDay !== undefined && { timeOfDay }),
+          ...(rotatingCohorts !== undefined && { rotatingCohorts }),
+          ...(enabled !== undefined && { enabled }),
+        },
+        create: {
+          tenantId,
+          cadence: cadence || 'WEEKLY',
+          dayOfWeek: dayOfWeek ?? 1,
+          timeOfDay: timeOfDay || '09:00',
+          rotatingCohorts: rotatingCohorts ?? true,
+          enabled: enabled ?? false,
+        },
+      });
+
+      return res.json({ schedule });
+    } catch (error) {
+      console.error('Error updating pulse schedule:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to update schedule',
+      });
+    }
+  });
+
+  /**
+   * GET /admin/pulse/cohorts
+   * Get pulse cohorts for tenant
+   */
+  app.get('/admin/pulse/cohorts', requirePermission('admin.access'), async (req, res) => {
+    try {
+      const tenantId = req.tenant?.tenantId;
+      if (!tenantId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Tenant ID required' });
+      }
+
+      const cohorts = await prisma.pulseCohort.findMany({
+        where: { tenantId },
+        orderBy: { name: 'asc' },
+      });
+
+      // Parse userIds and get user details
+      const cohortsWithUsers = await Promise.all(
+        cohorts.map(async cohort => {
+          const userIds = JSON.parse(cohort.userIds as string) as string[];
+          const users = await prisma.user.findMany({
+            where: { id: { in: userIds } },
+            select: { id: true, name: true, email: true },
+          });
+
+          return {
+            ...cohort,
+            userIds,
+            users,
+            userCount: userIds.length,
+          };
+        })
+      );
+
+      return res.json({ cohorts: cohortsWithUsers });
+    } catch (error) {
+      console.error('Error fetching pulse cohorts:', error);
+      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to fetch cohorts',
+      });
+    }
+  });
+
+  // ============================================================================
   // DEMO RESET ENDPOINT
   // ============================================================================
 
@@ -1607,8 +1995,20 @@ export function createApp(prisma: PrismaClient) {
     // Register client with event bus
     const clientId = eventBus.addClient(tenantId, res);
 
+    // Send keep-alive pings every 30 seconds to prevent connection timeout
+    const keepAliveInterval = setInterval(() => {
+      try {
+        // Send comment as keep-alive (comments don't trigger events in EventSource)
+        res.write(': keep-alive\n\n');
+      } catch (_error) {
+        // Connection closed, clean up
+        clearInterval(keepAliveInterval);
+      }
+    }, 30000);
+
     // Handle client disconnect
     req.on('close', () => {
+      clearInterval(keepAliveInterval);
       eventBus.removeClient(tenantId, clientId);
     });
   });
