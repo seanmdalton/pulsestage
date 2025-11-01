@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
     
     
   <title>Quick Start - PulseStage Documentation</title>
@@ -276,7 +276,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../user-guide/overview/" class="md-tabs__link">
+        <a href="../../user-guide/overview.md" class="md-tabs__link">
           
   
   
@@ -305,7 +305,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../architecture/system-design/" class="md-tabs__link">
+        <a href="../../architecture/system-design.md" class="md-tabs__link">
           
   
   
@@ -330,7 +330,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../deployment/docker-compose/" class="md-tabs__link">
+        <a href="../../deployment/docker-compose.md" class="md-tabs__link">
           
   
   
@@ -557,55 +557,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
+      Install
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#access" class="md-nav__link">
     <span class="md-ellipsis">
-      Installation
+      Access
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Installation">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log In
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#try-it-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      Try It Out
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Try It Out">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-clone-the-repository" class="md-nav__link">
+  <a href="#as-a-user-alice-or-bob" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Clone the Repository
+      As a User (alice or bob)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-run-setup" class="md-nav__link">
+  <a href="#as-a-moderator-moderator" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Run Setup
+      As a Moderator (moderator)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-start-the-services" class="md-nav__link">
+  <a href="#as-an-admin-admin" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Start the Services
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-access-pulsestage" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Access PulseStage
+      As an Admin (admin)
     </span>
   </a>
   
@@ -617,35 +626,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-wizard" class="md-nav__link">
+  <a href="#whats-included" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup Wizard
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Setup Wizard">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-load-demo-data-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 1: Load Demo Data (Recommended)
+      What's Included
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-create-your-own-organization" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#stop-services" class="md-nav__link">
     <span class="md-ellipsis">
-      Option 2: Create Your Own Organization
+      Stop Services
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#reset-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reset Data
+    </span>
+  </a>
   
 </li>
       
@@ -653,99 +656,6 @@
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next Steps
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Next Steps">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sign-in" class="md-nav__link">
-    <span class="md-ellipsis">
-      Sign In
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#explore-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Explore Features
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Mode
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup-wizard-doesnt-appear" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup Wizard Doesn't Appear
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#services-wont-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      Services Won't Start
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-connection-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      Database Connection Issues
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#need-help" class="md-nav__link">
-    <span class="md-ellipsis">
-      Need Help?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#whats-next" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's Next?
     </span>
   </a>
   
@@ -772,7 +682,7 @@
   
   
   <span class="md-ellipsis">
-    Installation Guide
+    Installation
     
   </span>
   
@@ -818,7 +728,7 @@
   
   
   <span class="md-ellipsis">
-    First Steps with PulseStage
+    First Steps
     
   </span>
   
@@ -841,7 +751,7 @@
   
   
   <span class="md-ellipsis">
-    Troubleshooting Guide
+    Troubleshooting
     
   </span>
   
@@ -921,12 +831,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/overview/" class="md-nav__link">
+      <a href="../../user-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    User Guide Overview
+    None
     
   </span>
   
@@ -1001,12 +911,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/submitting-questions/" class="md-nav__link">
+      <a href="../../user-guide/submitting-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Submitting Questions
+    None
     
   </span>
   
@@ -1024,12 +934,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/upvoting/" class="md-nav__link">
+      <a href="../../user-guide/upvoting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Upvoting
+    None
     
   </span>
   
@@ -1047,12 +957,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/search-browse/" class="md-nav__link">
+      <a href="../../user-guide/search-browse.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Search &amp; Browse
+    None
     
   </span>
   
@@ -1070,12 +980,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/teams/" class="md-nav__link">
+      <a href="../../user-guide/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -1093,12 +1003,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/profile/" class="md-nav__link">
+      <a href="../../user-guide/profile.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Profile
+    None
     
   </span>
   
@@ -1181,12 +1091,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/overview/" class="md-nav__link">
+      <a href="../../moderator-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderator Guide Overview
+    None
     
   </span>
   
@@ -1204,12 +1114,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/answering-questions/" class="md-nav__link">
+      <a href="../../moderator-guide/answering-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Answering Questions
+    None
     
   </span>
   
@@ -1227,12 +1137,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/tagging/" class="md-nav__link">
+      <a href="../../moderator-guide/tagging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tagging
+    None
     
   </span>
   
@@ -1250,12 +1160,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/moderation-queue/" class="md-nav__link">
+      <a href="../../moderator-guide/moderation-queue.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Queue
+    None
     
   </span>
   
@@ -1273,12 +1183,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/presentation-mode/" class="md-nav__link">
+      <a href="../../moderator-guide/presentation-mode.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Presentation Mode
+    None
     
   </span>
   
@@ -1365,12 +1275,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/overview/" class="md-nav__link">
+      <a href="../../admin-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin Guide Overview
+    None
     
   </span>
   
@@ -1388,12 +1298,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/team-management/" class="md-nav__link">
+      <a href="../../admin-guide/team-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Team Management
+    None
     
   </span>
   
@@ -1411,12 +1321,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/tag-management/" class="md-nav__link">
+      <a href="../../admin-guide/tag-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tag Management
+    None
     
   </span>
   
@@ -1434,12 +1344,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/roles-permissions/" class="md-nav__link">
+      <a href="../../admin-guide/roles-permissions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Roles Permissions
+    None
     
   </span>
   
@@ -1457,12 +1367,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/moderation-stats/" class="md-nav__link">
+      <a href="../../admin-guide/moderation-stats.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Stats
+    None
     
   </span>
   
@@ -1480,12 +1390,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/audit-logging/" class="md-nav__link">
+      <a href="../../admin-guide/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1503,12 +1413,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/export/" class="md-nav__link">
+      <a href="../../admin-guide/export.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Export
+    None
     
   </span>
   
@@ -1653,12 +1563,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/system-design/" class="md-nav__link">
+      <a href="../../architecture/system-design.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    System Design
+    None
     
   </span>
   
@@ -1676,12 +1586,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/database-schema/" class="md-nav__link">
+      <a href="../../architecture/database-schema.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Database Schema
+    None
     
   </span>
   
@@ -1699,12 +1609,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/authentication/" class="md-nav__link">
+      <a href="../../architecture/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication System
+    None
     
   </span>
   
@@ -1722,12 +1632,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/multi-tenancy/" class="md-nav__link">
+      <a href="../../architecture/multi-tenancy.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Multi-Tenancy Architecture
+    None
     
   </span>
   
@@ -1745,12 +1655,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/real-time/" class="md-nav__link">
+      <a href="../../architecture/real-time.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Real-Time Architecture
+    None
     
   </span>
   
@@ -1839,12 +1749,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/overview/" class="md-nav__link">
+      <a href="../../security/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Overview
+    None
     
   </span>
   
@@ -1862,12 +1772,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rbac/" class="md-nav__link">
+      <a href="../../security/rbac.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Role-Based Access Control (RBAC)
+    None
     
   </span>
   
@@ -1885,12 +1795,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/content-moderation/" class="md-nav__link">
+      <a href="../../security/content-moderation.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Content Moderation
+    None
     
   </span>
   
@@ -1908,12 +1818,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/audit-logging/" class="md-nav__link">
+      <a href="../../security/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1931,12 +1841,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/security-headers/" class="md-nav__link">
+      <a href="../../security/security-headers.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Headers
+    None
     
   </span>
   
@@ -1954,12 +1864,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/sessions/" class="md-nav__link">
+      <a href="../../security/sessions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Sessions
+    None
     
   </span>
   
@@ -1977,12 +1887,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/ci-scanning/" class="md-nav__link">
+      <a href="../../security/ci-scanning.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    CI Security Scanning
+    None
     
   </span>
   
@@ -2000,12 +1910,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rate-limiting/" class="md-nav__link">
+      <a href="../../security/rate-limiting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Rate Limiting
+    None
     
   </span>
   
@@ -2092,12 +2002,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    API Reference Overview
+    None
     
   </span>
   
@@ -2115,12 +2025,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/authentication/" class="md-nav__link">
+      <a href="../../api/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication
+    None
     
   </span>
   
@@ -2138,12 +2048,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/questions/" class="md-nav__link">
+      <a href="../../api/questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Questions
+    None
     
   </span>
   
@@ -2161,12 +2071,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/teams/" class="md-nav__link">
+      <a href="../../api/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -2184,12 +2094,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/tags/" class="md-nav__link">
+      <a href="../../api/tags.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tags
+    None
     
   </span>
   
@@ -2207,12 +2117,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/users/" class="md-nav__link">
+      <a href="../../api/users.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Users
+    None
     
   </span>
   
@@ -2230,12 +2140,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/admin/" class="md-nav__link">
+      <a href="../../api/admin.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin
+    None
     
   </span>
   
@@ -2324,12 +2234,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/setup/" class="md-nav__link">
+      <a href="../../development/setup.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Development Setup
+    None
     
   </span>
   
@@ -2347,12 +2257,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/running-locally/" class="md-nav__link">
+      <a href="../../development/running-locally.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Running Locally
+    None
     
   </span>
   
@@ -2370,12 +2280,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/testing/" class="md-nav__link">
+      <a href="../../development/testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing
+    None
     
   </span>
   
@@ -2393,12 +2303,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/email-testing/" class="md-nav__link">
+      <a href="../../development/email-testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing Email Functionality
+    None
     
   </span>
   
@@ -2416,12 +2326,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/migrations/" class="md-nav__link">
+      <a href="../../development/migrations.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Migrations
+    None
     
   </span>
   
@@ -2439,12 +2349,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-style/" class="md-nav__link">
+      <a href="../../development/code-style.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Code Style
+    None
     
   </span>
   
@@ -2462,12 +2372,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-review/" class="md-nav__link">
+      <a href="../../development/code-review.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    PulseStage - Comprehensive Code Review
+    None
     
   </span>
   
@@ -2580,12 +2490,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/docker-compose/" class="md-nav__link">
+      <a href="../../deployment/docker-compose.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Docker Compose Deployment
+    None
     
   </span>
   
@@ -2649,12 +2559,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/email-configuration/" class="md-nav__link">
+      <a href="../../deployment/email-configuration.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Email Configuration
+    None
     
   </span>
   
@@ -2844,173 +2754,61 @@
 
 
 <h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Anchor link to this section">&para;</a></h1>
-<p>Get PulseStage up and running in under 5 minutes!</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><strong>Docker</strong> and <strong>Docker Compose</strong> installed</li>
-<li><strong>Git</strong> for cloning the repository</li>
-<li>At least <strong>2GB RAM</strong> available</li>
-</ul>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Anchor link to this section">&para;</a></h2>
-<h3 id="1-clone-the-repository">1. Clone the Repository<a class="headerlink" href="#1-clone-the-repository" title="Anchor link to this section">&para;</a></h3>
+<p>Get PulseStage running in 5 minutes.</p>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Anchor link to this section">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/seanmdalton/pulsestage.git
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>pulsestage
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>./setup.sh
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
-<h3 id="2-run-setup">2. Run Setup<a class="headerlink" href="#2-run-setup" title="Anchor link to this section">&para;</a></h3>
-<p>The setup command creates your environment configuration with secure secrets:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>setup
-</span></code></pre></div>
-<p>This will:
-- Create <code>.env</code> file with all required configuration
-- Generate secure random secrets for sessions and CSRF
-- Set up database and Redis connection strings
-- Configure default ports and CORS settings</p>
-<p><strong>Note</strong>: The generated admin key is <code>dev-admin-key-change-me</code>. Change this in production!</p>
-<h3 id="3-start-the-services">3. Start the Services<a class="headerlink" href="#3-start-the-services" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>make<span class="w"> </span>start
-</span></code></pre></div>
-<p>This will:
-- Pull the latest published container images from GitHub Container Registry
-- Start all services in the background</p>
-<p>Services started:
-- <strong>PostgreSQL</strong> database on port 5432
-- <strong>Redis</strong> cache on port 6379
-- <strong>API</strong> server on port 3000 (<a href="https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-api">ghcr.io/seanmdalton/pulsestage-api:latest</a>)
-- <strong>Web</strong> frontend on port 5173 (<a href="https://github.com/seanmdalton/pulsestage/pkgs/container/pulsestage-web">ghcr.io/seanmdalton/pulsestage-web:latest</a>)</p>
-<p>The API automatically creates a default tenant on first startup (auto-bootstrap).</p>
-<h3 id="4-access-pulsestage">4. Access PulseStage<a class="headerlink" href="#4-access-pulsestage" title="Anchor link to this section">&para;</a></h3>
-<p>Open your browser and navigate to:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://localhost:5173
-</span></code></pre></div>
-<p>You'll see the <strong>Setup Wizard</strong> which guides you through initial setup.</p>
-<h2 id="setup-wizard">Setup Wizard<a class="headerlink" href="#setup-wizard" title="Anchor link to this section">&para;</a></h2>
-<p>On first visit, PulseStage presents a setup wizard with two options:</p>
-<h3 id="option-1-load-demo-data-recommended">Option 1: Load Demo Data (Recommended)<a class="headerlink" href="#option-1-load-demo-data-recommended" title="Anchor link to this section">&para;</a></h3>
-<p>Perfect for exploring PulseStage's features:</p>
+<h2 id="access">Access<a class="headerlink" href="#access" title="Anchor link to this section">&para;</a></h2>
+<p>Visit <code>http://localhost:5173</code></p>
+<h2 id="log-in">Log In<a class="headerlink" href="#log-in" title="Anchor link to this section">&para;</a></h2>
+<p>Click any demo user:
+- <strong>admin</strong> - Full access
+- <strong>alice</strong> - Member (Engineering team)
+- <strong>bob</strong> - Member (Product team)
+- <strong>moderator</strong> - Moderator (Product team)</p>
+<h2 id="try-it-out">Try It Out<a class="headerlink" href="#try-it-out" title="Anchor link to this section">&para;</a></h2>
+<h3 id="as-a-user-alice-or-bob">As a User (alice or bob)<a class="headerlink" href="#as-a-user-alice-or-bob" title="Anchor link to this section">&para;</a></h3>
 <ol>
-<li>Click <strong>"Load Demo Data"</strong></li>
-<li>Click <strong>"Continue"</strong></li>
-<li>Wait ~5-10 seconds for the system to:</li>
-<li>Create Acme Corp tenant</li>
-<li>Add 3 teams (Engineering, Product, Marketing)</li>
-<li>Create 4 demo users (Alice, Charlie, David, Emily)</li>
-<li>Generate 6 sample questions</li>
-<li>Add default tags</li>
-<li><strong>System will restart automatically</strong> to load the new users</li>
-</ol>
-<p>Demo includes:
-- <strong>Alice Anderson</strong> (alice.admin@acme.com) - Admin, Engineering team
-- <strong>Charlie Chen</strong> (charlie.owner@acme.com) - Owner, Product &amp; Marketing teams
-- <strong>David Martinez</strong> (david@acme.com) - Moderator, Engineering team
-- <strong>Emily Evans</strong> (emily.member@acme.com) - Member, Engineering &amp; Product teams</p>
-<h3 id="option-2-create-your-own-organization">Option 2: Create Your Own Organization<a class="headerlink" href="#option-2-create-your-own-organization" title="Anchor link to this section">&para;</a></h3>
-<p>For starting fresh with your own setup:</p>
-<ol>
-<li>Click <strong>"Set up a new team"</strong></li>
-<li><strong>Name your organization</strong> (e.g., "My Company")</li>
-<li><strong>Create admin user</strong> with your name and email</li>
-<li><strong>Create your first team</strong> (e.g., "Engineering")</li>
-<li><strong>System will restart automatically</strong> to create your account</li>
-<li>Navigate to <code>/sso-test.html</code> to sign in with your new account</li>
-</ol>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
-<h3 id="sign-in">Sign In<a class="headerlink" href="#sign-in" title="Anchor link to this section">&para;</a></h3>
-<p>After setup completes, navigate to:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5173/sso-test.html
-</span></code></pre></div>
-<p><strong>For Demo Data:</strong>
-- You'll see all 4 demo users listed
-- Click any user to sign in
-- Try different users to explore different roles</p>
-<p><strong>For Custom Setup:</strong>
-- You'll see your admin user
-- Click to sign in with your account</p>
-<h3 id="explore-features">Explore Features<a class="headerlink" href="#explore-features" title="Anchor link to this section">&para;</a></h3>
-<ol>
-<li><strong>Submit Your First Question</strong></li>
-<li>Navigate to any team page</li>
+<li>Navigate to your team (Engineering or Product)</li>
 <li>Click "Submit Question"</li>
-<li>
-<p>Enter your question and submit!</p>
-</li>
-<li>
-<p><strong>Try Presentation Mode</strong> (Moderator+)</p>
-</li>
-<li>Open a team with questions</li>
-<li>Click "Presentation Mode"</li>
-<li>
-<p>Perfect for live town halls</p>
-</li>
-<li>
-<p><strong>Access Admin Panel</strong> (Admin+)</p>
-</li>
-<li>Click your profile → "Admin Panel"</li>
-<li>Explore team management, user management, analytics</li>
-<li>
-<p>View audit logs and exports</p>
-</li>
-<li>
-<p><strong>Manage Teams</strong> (Admin+)</p>
-</li>
-<li>Create additional teams</li>
-<li>Add/remove members</li>
-<li>Configure team settings</li>
+<li>Enter a question (anonymous by default)</li>
+<li>Upvote other questions</li>
 </ol>
-<h2 id="development-mode">Development Mode<a class="headerlink" href="#development-mode" title="Anchor link to this section">&para;</a></h2>
-<p>For local development with instant feedback via hot reload:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Initialize and install dependencies</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>make<span class="w"> </span>setup
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>make<span class="w"> </span>install
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Start development environment</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>make<span class="w"> </span>dev
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Web frontend: Changes reload instantly (hot reload via Vite)</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># API backend: Restart with &#39;docker compose restart api&#39; after changes</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># In another terminal, seed demo data</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>make<span class="w"> </span>db-seed
+<h3 id="as-a-moderator-moderator">As a Moderator (moderator)<a class="headerlink" href="#as-a-moderator-moderator" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Navigate to Product team</li>
+<li>Click "Moderation Queue"</li>
+<li>Answer questions</li>
+<li>Tag, pin, or freeze questions</li>
+</ol>
+<h3 id="as-an-admin-admin">As an Admin (admin)<a class="headerlink" href="#as-an-admin-admin" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>Click "Admin" in navigation</li>
+<li>View audit logs</li>
+<li>Manage teams and users</li>
+<li>Monitor email queue</li>
+</ol>
+<h2 id="whats-included">What's Included<a class="headerlink" href="#whats-included" title="Anchor link to this section">&para;</a></h2>
+<p>Demo data includes:
+- 50 users (4 login + 46 dummy users)
+- 2 teams (Engineering, Product)
+- 36 Q&amp;A questions (10 open + 10 answered per team)
+- 12 weeks of pulse historical data
+- 800+ pulse responses</p>
+<h2 id="stop-services">Stop Services<a class="headerlink" href="#stop-services" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>down
 </span></code></pre></div>
-<p><strong>Hot Reload Benefits:</strong>
-- Edit React components in <code>web/src/</code> - see changes immediately
-- No rebuild needed for frontend changes
-- Fast iteration cycle for UI development</p>
-<p>See <strong><a href="../../development/setup/local-development/">Development Guide</a></strong> for the complete workflow.</p>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h2>
-<h3 id="setup-wizard-doesnt-appear">Setup Wizard Doesn't Appear<a class="headerlink" href="#setup-wizard-doesnt-appear" title="Anchor link to this section">&para;</a></h3>
-<p>Clear your browser's localStorage:
-1. Open DevTools (F12)
-2. Go to <strong>Application</strong> → <strong>Local Storage</strong> → <code>http://localhost:5173</code>
-3. Click <strong>"Clear All"</strong>
-4. Refresh the page</p>
-<p>Or use an <strong>incognito/private window</strong>.</p>
-<h3 id="services-wont-start">Services Won't Start<a class="headerlink" href="#services-wont-start" title="Anchor link to this section">&para;</a></h3>
-<p>Check if ports are already in use:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check port 5173 (web)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Check port 3000 (api)</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Check port 5432 (database)</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5432
+<h2 id="reset-data">Reset Data<a class="headerlink" href="#reset-data" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>make<span class="w"> </span>db-seed
 </span></code></pre></div>
-<h3 id="database-connection-issues">Database Connection Issues<a class="headerlink" href="#database-connection-issues" title="Anchor link to this section">&para;</a></h3>
-<p>Ensure PostgreSQL is running:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
-</span></code></pre></div>
-<p>All services should show "Up" status.</p>
-<h3 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Anchor link to this section">&para;</a></h3>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
 <ul>
-<li>Check the <a href="../installation/">Installation Guide</a> for detailed troubleshooting</li>
-<li>Visit our <a href="https://github.com/seanmdalton/pulsestage/issues">GitHub Issues</a></li>
-<li>See <a href="../troubleshooting/">Troubleshooting Guide</a></li>
-</ul>
-<h2 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><a href="../installation/">Installation Guide</a> - Detailed setup instructions</li>
-<li><a href="../configuration/">Configuration</a> - Environment variables and settings</li>
-<li><a href="../first-steps/">First Steps</a> - Guided tour of PulseStage features</li>
-<li><a href="../../development/setup/">Development Guide</a> - For contributors</li>
+<li><a href="../configuration/">Configuration</a> - Customize settings</li>
+<li><a href="../first-steps/">First Steps</a> - Set up for your organization</li>
+<li><a href="../../guides/user/overview/">User Guide</a> - Learn features</li>
 </ul>
 
 
@@ -3034,7 +2832,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 15, 2025 20:37:26 UTC"><span class="timeago" datetime="2025-10-15T20:37:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 15, 2025 20:37:26 UTC">2025-10-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 1, 2025 21:41:00 UTC"><span class="timeago" datetime="2025-11-01T21:41:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 1, 2025 21:41:00 UTC">2025-11-01</span>
   </span>
 
     
@@ -3098,13 +2896,13 @@
         
         
           
-          <a href="../installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation Guide">
+          <a href="../installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Installation Guide
+                Installation
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -18,14 +18,14 @@
         <link rel="prev" href="../first-steps/">
       
       
-        <link rel="next" href="../../user-guide/overview/">
+        <link rel="next" href="../../deployment/production/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
     
     
-  <title>Troubleshooting Guide - PulseStage Documentation</title>
+  <title>Troubleshooting - PulseStage Documentation</title>
 
     
       <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#troubleshooting-guide" class="md-skip">
+        <a href="#troubleshooting" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting Guide
+              Troubleshooting
             
           </span>
         </div>
@@ -276,7 +276,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../user-guide/overview/" class="md-tabs__link">
+        <a href="../../user-guide/overview.md" class="md-tabs__link">
           
   
   
@@ -305,7 +305,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../architecture/system-design/" class="md-tabs__link">
+        <a href="../../architecture/system-design.md" class="md-tabs__link">
           
   
   
@@ -330,7 +330,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../deployment/docker-compose/" class="md-tabs__link">
+        <a href="../../deployment/docker-compose.md" class="md-tabs__link">
           
   
   
@@ -535,7 +535,7 @@
   
   
   <span class="md-ellipsis">
-    Installation Guide
+    Installation
     
   </span>
   
@@ -581,7 +581,7 @@
   
   
   <span class="md-ellipsis">
-    First Steps with PulseStage
+    First Steps
     
   </span>
   
@@ -613,7 +613,7 @@
   
   
   <span class="md-ellipsis">
-    Troubleshooting Guide
+    Troubleshooting
     
   </span>
   
@@ -626,7 +626,7 @@
   
   
   <span class="md-ellipsis">
-    Troubleshooting Guide
+    Troubleshooting
     
   </span>
   
@@ -649,64 +649,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#api-connection-refused-err_connection_refused" class="md-nav__link">
+  <a href="#services-not-starting" class="md-nav__link">
     <span class="md-ellipsis">
-      API Connection Refused (ERR_CONNECTION_REFUSED)
+      Services Not Starting
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="API Connection Refused (ERR_CONNECTION_REFUSED)">
+    <nav class="md-nav" aria-label="Services Not Starting">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-check-if-docker-services-are-running" class="md-nav__link">
+  <a href="#check-docker-services" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Check if Docker services are running
+      Check Docker Services
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-if-services-are-not-running-start-them" class="md-nav__link">
+  <a href="#restart-services" class="md-nav__link">
     <span class="md-ellipsis">
-      2. If services are not running, start them
+      Restart Services
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-check-api-logs-for-errors" class="md-nav__link">
+  <a href="#view-logs" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Check API logs for errors
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-check-if-api-is-healthy" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Check if API is healthy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-verify-database-is-initialized" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Verify database is initialized
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-complete-restart" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. Complete restart
+      View Logs
     </span>
   </a>
   
@@ -714,6 +687,114 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cannot-log-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Log In
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cannot Log In">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#demo-mode-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      Demo Mode Not Working
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oauth-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      OAuth Not Working
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#no-data-empty-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      No Data / Empty Dashboard
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="No Data / Empty Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reseed-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reseed Database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-seed-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verify Seed Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-connection-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Connection Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Connection Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#postgresql-not-accessible" class="md-nav__link">
+    <span class="md-ellipsis">
+      PostgreSQL Not Accessible
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-migrations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run Migrations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#redis-connection-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redis Connection Errors
+    </span>
+  </a>
   
 </li>
       
@@ -724,31 +805,13 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      Database Issues
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Issues">
+    <nav class="md-nav" aria-label="Port Conflicts">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#reset-database-completely" class="md-nav__link">
+  <a href="#port-already-in-use" class="md-nav__link">
     <span class="md-ellipsis">
-      Reset database completely
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#check-database-connection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Check database connection
+      Port Already in Use
     </span>
   </a>
   
@@ -760,18 +823,159 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#web-container-issues" class="md-nav__link">
+  <a href="#email-not-sending" class="md-nav__link">
     <span class="md-ellipsis">
-      Web Container Issues
+      Email Not Sending
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Email Not Sending">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-email-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Email Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-mailpit-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test with Mailpit (Development)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-email-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Email Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Permission Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-answer-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Answer Questions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cannot-access-admin-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Access Admin Panel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slow-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slow Search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      High Memory Usage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend-not-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend Not Loading
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend Not Loading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#white-screen-blank-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      White Screen / Blank Page
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#401-unauthorized-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      401 Unauthorized Errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pre-flight-check-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-Flight Check Failures
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#still-not-working" class="md-nav__link">
+  <a href="#still-having-issues" class="md-nav__link">
     <span class="md-ellipsis">
-      Still Not Working?
+      Still Having Issues?
     </span>
   </a>
   
@@ -855,12 +1059,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/overview/" class="md-nav__link">
+      <a href="../../user-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    User Guide Overview
+    None
     
   </span>
   
@@ -935,12 +1139,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/submitting-questions/" class="md-nav__link">
+      <a href="../../user-guide/submitting-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Submitting Questions
+    None
     
   </span>
   
@@ -958,12 +1162,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/upvoting/" class="md-nav__link">
+      <a href="../../user-guide/upvoting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Upvoting
+    None
     
   </span>
   
@@ -981,12 +1185,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/search-browse/" class="md-nav__link">
+      <a href="../../user-guide/search-browse.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Search &amp; Browse
+    None
     
   </span>
   
@@ -1004,12 +1208,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/teams/" class="md-nav__link">
+      <a href="../../user-guide/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -1027,12 +1231,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/profile/" class="md-nav__link">
+      <a href="../../user-guide/profile.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Profile
+    None
     
   </span>
   
@@ -1115,12 +1319,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/overview/" class="md-nav__link">
+      <a href="../../moderator-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderator Guide Overview
+    None
     
   </span>
   
@@ -1138,12 +1342,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/answering-questions/" class="md-nav__link">
+      <a href="../../moderator-guide/answering-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Answering Questions
+    None
     
   </span>
   
@@ -1161,12 +1365,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/tagging/" class="md-nav__link">
+      <a href="../../moderator-guide/tagging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tagging
+    None
     
   </span>
   
@@ -1184,12 +1388,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/moderation-queue/" class="md-nav__link">
+      <a href="../../moderator-guide/moderation-queue.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Queue
+    None
     
   </span>
   
@@ -1207,12 +1411,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/presentation-mode/" class="md-nav__link">
+      <a href="../../moderator-guide/presentation-mode.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Presentation Mode
+    None
     
   </span>
   
@@ -1299,12 +1503,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/overview/" class="md-nav__link">
+      <a href="../../admin-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin Guide Overview
+    None
     
   </span>
   
@@ -1322,12 +1526,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/team-management/" class="md-nav__link">
+      <a href="../../admin-guide/team-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Team Management
+    None
     
   </span>
   
@@ -1345,12 +1549,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/tag-management/" class="md-nav__link">
+      <a href="../../admin-guide/tag-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tag Management
+    None
     
   </span>
   
@@ -1368,12 +1572,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/roles-permissions/" class="md-nav__link">
+      <a href="../../admin-guide/roles-permissions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Roles Permissions
+    None
     
   </span>
   
@@ -1391,12 +1595,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/moderation-stats/" class="md-nav__link">
+      <a href="../../admin-guide/moderation-stats.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Stats
+    None
     
   </span>
   
@@ -1414,12 +1618,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/audit-logging/" class="md-nav__link">
+      <a href="../../admin-guide/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1437,12 +1641,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/export/" class="md-nav__link">
+      <a href="../../admin-guide/export.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Export
+    None
     
   </span>
   
@@ -1587,12 +1791,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/system-design/" class="md-nav__link">
+      <a href="../../architecture/system-design.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    System Design
+    None
     
   </span>
   
@@ -1610,12 +1814,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/database-schema/" class="md-nav__link">
+      <a href="../../architecture/database-schema.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Database Schema
+    None
     
   </span>
   
@@ -1633,12 +1837,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/authentication/" class="md-nav__link">
+      <a href="../../architecture/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication System
+    None
     
   </span>
   
@@ -1656,12 +1860,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/multi-tenancy/" class="md-nav__link">
+      <a href="../../architecture/multi-tenancy.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Multi-Tenancy Architecture
+    None
     
   </span>
   
@@ -1679,12 +1883,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/real-time/" class="md-nav__link">
+      <a href="../../architecture/real-time.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Real-Time Architecture
+    None
     
   </span>
   
@@ -1773,12 +1977,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/overview/" class="md-nav__link">
+      <a href="../../security/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Overview
+    None
     
   </span>
   
@@ -1796,12 +2000,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rbac/" class="md-nav__link">
+      <a href="../../security/rbac.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Role-Based Access Control (RBAC)
+    None
     
   </span>
   
@@ -1819,12 +2023,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/content-moderation/" class="md-nav__link">
+      <a href="../../security/content-moderation.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Content Moderation
+    None
     
   </span>
   
@@ -1842,12 +2046,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/audit-logging/" class="md-nav__link">
+      <a href="../../security/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1865,12 +2069,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/security-headers/" class="md-nav__link">
+      <a href="../../security/security-headers.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Headers
+    None
     
   </span>
   
@@ -1888,12 +2092,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/sessions/" class="md-nav__link">
+      <a href="../../security/sessions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Sessions
+    None
     
   </span>
   
@@ -1911,12 +2115,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/ci-scanning/" class="md-nav__link">
+      <a href="../../security/ci-scanning.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    CI Security Scanning
+    None
     
   </span>
   
@@ -1934,12 +2138,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rate-limiting/" class="md-nav__link">
+      <a href="../../security/rate-limiting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Rate Limiting
+    None
     
   </span>
   
@@ -2026,12 +2230,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    API Reference Overview
+    None
     
   </span>
   
@@ -2049,12 +2253,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/authentication/" class="md-nav__link">
+      <a href="../../api/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication
+    None
     
   </span>
   
@@ -2072,12 +2276,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/questions/" class="md-nav__link">
+      <a href="../../api/questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Questions
+    None
     
   </span>
   
@@ -2095,12 +2299,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/teams/" class="md-nav__link">
+      <a href="../../api/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -2118,12 +2322,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/tags/" class="md-nav__link">
+      <a href="../../api/tags.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tags
+    None
     
   </span>
   
@@ -2141,12 +2345,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/users/" class="md-nav__link">
+      <a href="../../api/users.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Users
+    None
     
   </span>
   
@@ -2164,12 +2368,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/admin/" class="md-nav__link">
+      <a href="../../api/admin.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin
+    None
     
   </span>
   
@@ -2258,12 +2462,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/setup/" class="md-nav__link">
+      <a href="../../development/setup.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Development Setup
+    None
     
   </span>
   
@@ -2281,12 +2485,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/running-locally/" class="md-nav__link">
+      <a href="../../development/running-locally.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Running Locally
+    None
     
   </span>
   
@@ -2304,12 +2508,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/testing/" class="md-nav__link">
+      <a href="../../development/testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing
+    None
     
   </span>
   
@@ -2327,12 +2531,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/email-testing/" class="md-nav__link">
+      <a href="../../development/email-testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing Email Functionality
+    None
     
   </span>
   
@@ -2350,12 +2554,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/migrations/" class="md-nav__link">
+      <a href="../../development/migrations.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Migrations
+    None
     
   </span>
   
@@ -2373,12 +2577,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-style/" class="md-nav__link">
+      <a href="../../development/code-style.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Code Style
+    None
     
   </span>
   
@@ -2396,12 +2600,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-review/" class="md-nav__link">
+      <a href="../../development/code-review.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    PulseStage - Comprehensive Code Review
+    None
     
   </span>
   
@@ -2514,12 +2718,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/docker-compose/" class="md-nav__link">
+      <a href="../../deployment/docker-compose.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Docker Compose Deployment
+    None
     
   </span>
   
@@ -2583,12 +2787,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/email-configuration/" class="md-nav__link">
+      <a href="../../deployment/email-configuration.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Email Configuration
+    None
     
   </span>
   
@@ -2777,102 +2981,283 @@
   
 
 
-<h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Anchor link to this section">&para;</a></h1>
-<h2 id="api-connection-refused-err_connection_refused">API Connection Refused (ERR_CONNECTION_REFUSED)<a class="headerlink" href="#api-connection-refused-err_connection_refused" title="Anchor link to this section">&para;</a></h2>
-<p>If you see errors like:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>GET http://localhost:3000/teams net::ERR_CONNECTION_REFUSED
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>GET http://localhost:3000/admin/status net::ERR_CONNECTION_REFUSED
-</span></code></pre></div></p>
-<p>The API server is not running. Follow these steps:</p>
-<h3 id="1-check-if-docker-services-are-running">1. Check if Docker services are running<a class="headerlink" href="#1-check-if-docker-services-are-running" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+<h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Anchor link to this section">&para;</a></h1>
+<p>Common issues and solutions.</p>
+<h2 id="services-not-starting">Services Not Starting<a class="headerlink" href="#services-not-starting" title="Anchor link to this section">&para;</a></h2>
+<h3 id="check-docker-services">Check Docker Services<a class="headerlink" href="#check-docker-services" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
 </span></code></pre></div>
-<p>Expected output - all services should show "Up":
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>NAME                IMAGE                                      STATUS
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ama-app-api-1       ghcr.io/seanmdalton/pulsestage-api:latest  Up
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ama-app-db-1        postgres:16-alpine                         Up
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>ama-app-redis-1     redis:7-alpine                             Up
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>ama-app-web-1       ghcr.io/seanmdalton/pulsestage-web:latest  Up
-</span></code></pre></div></p>
-<h3 id="2-if-services-are-not-running-start-them">2. If services are not running, start them<a class="headerlink" href="#2-if-services-are-not-running-start-them" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<p>All services should show "Up":
+- api
+- web
+- db (PostgreSQL)
+- redis
+- mailpit</p>
+<h3 id="restart-services">Restart Services<a class="headerlink" href="#restart-services" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>down
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div>
-<h3 id="3-check-api-logs-for-errors">3. Check API logs for errors<a class="headerlink" href="#3-check-api-logs-for-errors" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>api
+<h3 id="view-logs">View Logs<a class="headerlink" href="#view-logs" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># All services</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Specific service</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>web
 </span></code></pre></div>
-<p>Common issues:
-- Database connection errors (check if PostgreSQL is running)
-- Missing environment variables (check your <code>.env</code> file)
-- Port already in use (another service using port 3000)</p>
-<h3 id="4-check-if-api-is-healthy">4. Check if API is healthy<a class="headerlink" href="#4-check-if-api-is-healthy" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>http://localhost:3000/health
-</span></code></pre></div>
-<p>Should return: <code>{"ok":true,"service":"ama-api"}</code></p>
-<h3 id="5-verify-database-is-initialized">5. Verify database is initialized<a class="headerlink" href="#5-verify-database-is-initialized" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>db:seed
-</span></code></pre></div>
-<h3 id="6-complete-restart">6. Complete restart<a class="headerlink" href="#6-complete-restart" title="Anchor link to this section">&para;</a></h3>
-<p>If nothing works, try a complete restart:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>down
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api
-</span></code></pre></div>
-<p>Watch the logs to see if the API starts successfully.</p>
-<h2 id="port-conflicts">Port Conflicts<a class="headerlink" href="#port-conflicts" title="Anchor link to this section">&para;</a></h2>
-<p>If port 3000 or 5173 is already in use:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Find what&#39;s using the port</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:5173
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># Or on Linux:</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>ss<span class="w"> </span>-tulpn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:3000
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>ss<span class="w"> </span>-tulpn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:5173
-</span></code></pre></div>
-<p>Then either:
-1. Stop the conflicting service
-2. Change ports in <code>docker-compose.yaml</code> and update <code>.env</code></p>
-<h2 id="database-issues">Database Issues<a class="headerlink" href="#database-issues" title="Anchor link to this section">&para;</a></h2>
-<h3 id="reset-database-completely">Reset database completely<a class="headerlink" href="#reset-database-completely" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v<span class="w">  </span><span class="c1"># Warning: This deletes all data!</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>db:seed:full
-</span></code></pre></div>
-<h3 id="check-database-connection">Check database connection<a class="headerlink" href="#check-database-connection" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>app<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT COUNT(*) FROM \&quot;Question\&quot;;&quot;</span>
-</span></code></pre></div>
-<h2 id="web-container-issues">Web Container Issues<a class="headerlink" href="#web-container-issues" title="Anchor link to this section">&para;</a></h2>
-<p>If web is running but API isn't, the web container might be trying to connect to the wrong API URL.</p>
-<p>Check the web container environment:
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>web<span class="w"> </span>env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>VITE_API_URL
-</span></code></pre></div></p>
-<p>Should show: <code>VITE_API_URL=http://localhost:3000</code></p>
-<h2 id="still-not-working">Still Not Working?<a class="headerlink" href="#still-not-working" title="Anchor link to this section">&para;</a></h2>
+<h2 id="cannot-log-in">Cannot Log In<a class="headerlink" href="#cannot-log-in" title="Anchor link to this section">&para;</a></h2>
+<h3 id="demo-mode-not-working">Demo Mode Not Working<a class="headerlink" href="#demo-mode-not-working" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Verify demo mode enabled</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Check .env</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>grep<span class="w"> </span>AUTH_MODE_DEMO<span class="w"> </span>.env
+</span></code></pre></div></li>
+</ol>
+<p>Should show: <code>AUTH_MODE_DEMO=true</code> (or empty in development)</p>
 <ol>
 <li>
-<p>Check all environment variables are set:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>cat<span class="w"> </span>.env
+<p><strong>Check API logs</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>auth
 </span></code></pre></div></p>
 </li>
 <li>
-<p>Ensure <code>.env</code> has all required variables:</p>
-</li>
-<li><code>SESSION_SECRET</code></li>
-<li><code>ADMIN_SESSION_SECRET</code></li>
-<li><code>CSRF_SECRET</code></li>
-<li>
-<p><code>ADMIN_KEY</code></p>
-</li>
-<li>
-<p>Regenerate secrets:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>./setup.sh
-</span></code></pre></div></p>
-</li>
-<li>
-<p>View all service logs:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs
+<p><strong>Verify database seeded</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>app<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT email FROM \&quot;User\&quot; WHERE email LIKE &#39;%@pulsestage.app&#39;;&quot;</span>
 </span></code></pre></div></p>
 </li>
 </ol>
+<p>Should show 4 demo users.</p>
+<h3 id="oauth-not-working">OAuth Not Working<a class="headerlink" href="#oauth-not-working" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Verify OAuth configuration</strong> in <code>.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_client_id
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_secret
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/auth/github/callback
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Check OAuth callback URL</strong> matches GitHub/Google OAuth app settings</p>
+</li>
+<li>
+<p><strong>Verify environment</strong> is production:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div></p>
+</li>
+</ol>
+<h2 id="no-data-empty-dashboard">No Data / Empty Dashboard<a class="headerlink" href="#no-data-empty-dashboard" title="Anchor link to this section">&para;</a></h2>
+<h3 id="reseed-database">Reseed Database<a class="headerlink" href="#reseed-database" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>make<span class="w"> </span>db-seed
+</span></code></pre></div>
+<p>This creates:
+- 50 users
+- 2 teams
+- 36 questions
+- 12 weeks of pulse data</p>
+<h3 id="verify-seed-data">Verify Seed Data<a class="headerlink" href="#verify-seed-data" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>make<span class="w"> </span>db-test-seed
+</span></code></pre></div>
+<p>Expected output:
+- Users: 50
+- Teams: 2
+- Questions: 36
+- Pulse responses: 800+</p>
+<h2 id="database-connection-errors">Database Connection Errors<a class="headerlink" href="#database-connection-errors" title="Anchor link to this section">&para;</a></h2>
+<h3 id="postgresql-not-accessible">PostgreSQL Not Accessible<a class="headerlink" href="#postgresql-not-accessible" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Check PostgreSQL running</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps<span class="w"> </span>db
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Test connection</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>app<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT 1;&quot;</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify DATABASE_URL</strong> in <code>.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://app:app@db:5432/ama
+</span></code></pre></div></p>
+</li>
+</ol>
+<h3 id="run-migrations">Run Migrations<a class="headerlink" href="#run-migrations" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>migrate<span class="w"> </span>deploy
+</span></code></pre></div>
+<h2 id="redis-connection-errors">Redis Connection Errors<a class="headerlink" href="#redis-connection-errors" title="Anchor link to this section">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Check Redis running</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps<span class="w"> </span>redis
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Test connection</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>redis<span class="w"> </span>redis-cli<span class="w"> </span>ping
+</span></code></pre></div></p>
+</li>
+</ol>
+<p>Expected: <code>PONG</code></p>
+<ol>
+<li><strong>Verify REDIS_URL</strong> in <code>.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://redis:6379
+</span></code></pre></div></li>
+</ol>
+<h2 id="port-conflicts">Port Conflicts<a class="headerlink" href="#port-conflicts" title="Anchor link to this section">&para;</a></h2>
+<h3 id="port-already-in-use">Port Already in Use<a class="headerlink" href="#port-already-in-use" title="Anchor link to this section">&para;</a></h3>
+<p>If ports 3000, 5173, 5432, 6379, or 8025 are in use:</p>
+<ol>
+<li>
+<p><strong>Find process using port</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Kill process</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>sudo<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>&lt;PID&gt;
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Or change ports</strong> in <code>docker-compose.yaml</code>:
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">ports</span><span class="p">:</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3001:3000&quot;</span><span class="w">  </span><span class="c1"># Use 3001 instead of 3000</span>
+</span></code></pre></div></p>
+</li>
+</ol>
+<h2 id="email-not-sending">Email Not Sending<a class="headerlink" href="#email-not-sending" title="Anchor link to this section">&para;</a></h2>
+<h3 id="check-email-configuration">Check Email Configuration<a class="headerlink" href="#check-email-configuration" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Verify email provider in .env</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>grep<span class="w"> </span>EMAIL_PROVIDER<span class="w"> </span>.env
+</span></code></pre></div>
+<h3 id="test-with-mailpit-development">Test with Mailpit (Development)<a class="headerlink" href="#test-with-mailpit-development" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Access Mailpit</strong>: <code>http://localhost:8025</code></li>
+<li><strong>Check emails</strong> in Mailpit inbox</li>
+<li><strong>Verify SMTP settings</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>mailpit
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">1025</span>
+</span></code></pre></div></li>
+</ol>
+<h3 id="production-email-issues">Production Email Issues<a class="headerlink" href="#production-email-issues" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Verify credentials</strong> for SMTP or Resend</li>
+<li><strong>Check email queue</strong>:</li>
+<li>Admin → Email Queue</li>
+<li><strong>View logs</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>email
+</span></code></pre></div></li>
+</ol>
+<h2 id="permission-errors">Permission Errors<a class="headerlink" href="#permission-errors" title="Anchor link to this section">&para;</a></h2>
+<h3 id="cannot-answer-questions">Cannot Answer Questions<a class="headerlink" href="#cannot-answer-questions" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Verify role</strong>:</li>
+<li>Admin → Users → [Your User]</li>
+<li>
+<p>Check team memberships and roles</p>
+</li>
+<li>
+<p><strong>Required role</strong>: Moderator, Admin, or Owner</p>
+</li>
+</ol>
+<h3 id="cannot-access-admin-panel">Cannot Access Admin Panel<a class="headerlink" href="#cannot-access-admin-panel" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Required role</strong>: Admin or Owner</li>
+<li><strong>Verify in database</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>app<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT email, role FROM \&quot;User\&quot; WHERE email = &#39;your@email.com&#39;;&quot;</span>
+</span></code></pre></div></li>
+</ol>
+<h2 id="performance-issues">Performance Issues<a class="headerlink" href="#performance-issues" title="Anchor link to this section">&para;</a></h2>
+<h3 id="slow-search">Slow Search<a class="headerlink" href="#slow-search" title="Anchor link to this section">&para;</a></h3>
+<p>Full-text search requires GIN indexes:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>api<span class="w"> </span>npx<span class="w"> </span>prisma<span class="w"> </span>migrate<span class="w"> </span>deploy
+</span></code></pre></div>
+<p>Verify indexes:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>app<span class="w"> </span>-d<span class="w"> </span>ama<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;\d \&quot;Question\&quot;;&quot;</span>
+</span></code></pre></div></p>
+<p>Should show <code>question_search_idx</code> (GIN index).</p>
+<h3 id="high-memory-usage">High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Check Docker resource limits</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>docker<span class="w"> </span>stats
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Increase Docker memory</strong> (Docker Desktop → Settings → Resources)</p>
+</li>
+<li>
+<p><strong>Reduce worker processes</strong> in production</p>
+</li>
+</ol>
+<h2 id="frontend-not-loading">Frontend Not Loading<a class="headerlink" href="#frontend-not-loading" title="Anchor link to this section">&para;</a></h2>
+<h3 id="white-screen-blank-page">White Screen / Blank Page<a class="headerlink" href="#white-screen-blank-page" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Check frontend logs</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>web
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify API accessible</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>curl<span class="w"> </span>http://localhost:3000/health
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Check CORS settings</strong> in <code>.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>http://localhost:5173
+</span></code></pre></div></p>
+</li>
+</ol>
+<h3 id="401-unauthorized-errors">401 Unauthorized Errors<a class="headerlink" href="#401-unauthorized-errors" title="Anchor link to this section">&para;</a></h3>
+<ol>
+<li><strong>Clear cookies</strong>: Browser DevTools → Application → Cookies → Clear</li>
+<li><strong>Log out and back in</strong></li>
+<li><strong>Verify session secrets</strong> in <code>.env</code> are set</li>
+</ol>
+<h2 id="pre-flight-check-failures">Pre-Flight Check Failures<a class="headerlink" href="#pre-flight-check-failures" title="Anchor link to this section">&para;</a></h2>
+<p>Run diagnostics:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>make<span class="w"> </span>preflight
+</span></code></pre></div>
+<p>This checks:
+- Docker services
+- Database connectivity
+- API health
+- Frontend accessibility
+- Authentication flow
+- Seed data integrity</p>
+<p>Exit code 0 = all checks passed</p>
+<p>Exit code 1 = see output for failed checks</p>
+<h2 id="still-having-issues">Still Having Issues?<a class="headerlink" href="#still-having-issues" title="Anchor link to this section">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Check logs</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify environment variables</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>cat<span class="w"> </span>.env
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>cat<span class="w"> </span>web/.env
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Reset everything</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v<span class="w">  </span><span class="c1"># WARNING: Deletes all data</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>./setup.sh
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>make<span class="w"> </span>db-seed
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Open an issue</strong>: <a href="https://github.com/seanmdalton/pulsestage/issues">GitHub Issues</a></p>
+</li>
+</ol>
+<p>Include:
+- Error messages
+- Docker logs
+- Environment (OS, Docker version)
+- Steps to reproduce</p>
 
 
 
@@ -2895,7 +3280,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 5, 2025 21:16:04 UTC"><span class="timeago" datetime="2025-10-05T21:16:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 5, 2025 21:16:04 UTC">2025-10-05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 1, 2025 21:41:00 UTC"><span class="timeago" datetime="2025-11-01T21:41:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 1, 2025 21:41:00 UTC">2025-11-01</span>
   </span>
 
     
@@ -2942,7 +3327,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../first-steps/" class="md-footer__link md-footer__link--prev" aria-label="Previous: First Steps with PulseStage">
+          <a href="../first-steps/" class="md-footer__link md-footer__link--prev" aria-label="Previous: First Steps">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2952,20 +3337,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                First Steps with PulseStage
+                First Steps
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../user-guide/overview/" class="md-footer__link md-footer__link--next" aria-label="Next: User Guide Overview">
+          <a href="../../deployment/production/" class="md-footer__link md-footer__link--next" aria-label="Next: Production Deployment">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                User Guide Overview
+                Production Deployment
               </div>
             </div>
             <div class="md-footer__button md-icon">

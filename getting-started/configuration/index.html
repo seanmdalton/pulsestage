@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
     
     
   <title>Configuration - PulseStage Documentation</title>
@@ -276,7 +276,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../user-guide/overview/" class="md-tabs__link">
+        <a href="../../user-guide/overview.md" class="md-tabs__link">
           
   
   
@@ -305,7 +305,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../architecture/system-design/" class="md-tabs__link">
+        <a href="../../architecture/system-design.md" class="md-tabs__link">
           
   
   
@@ -330,7 +330,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../deployment/docker-compose/" class="md-tabs__link">
+        <a href="../../deployment/docker-compose.md" class="md-tabs__link">
           
   
   
@@ -535,7 +535,7 @@
   
   
   <span class="md-ellipsis">
-    Installation Guide
+    Installation
     
   </span>
   
@@ -562,6 +562,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -573,6 +586,253 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Settings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#demo-mode-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Demo Mode (Development)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oauth-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      OAuth (Production)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth (Production)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub OAuth
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Google OAuth
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#email" class="md-nav__link">
+    <span class="md-ellipsis">
+      Email
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Email">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smtp" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMTP
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resend
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disable-email-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disable Email (Development)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content-moderation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Moderation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Moderation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openai-moderation-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI Moderation (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pulse-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pulse System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rate Limiting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      Feature Flags
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branding
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Files
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generate-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generate Secrets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -591,7 +851,7 @@
   
   
   <span class="md-ellipsis">
-    First Steps with PulseStage
+    First Steps
     
   </span>
   
@@ -614,7 +874,7 @@
   
   
   <span class="md-ellipsis">
-    Troubleshooting Guide
+    Troubleshooting
     
   </span>
   
@@ -694,12 +954,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/overview/" class="md-nav__link">
+      <a href="../../user-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    User Guide Overview
+    None
     
   </span>
   
@@ -774,12 +1034,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/submitting-questions/" class="md-nav__link">
+      <a href="../../user-guide/submitting-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Submitting Questions
+    None
     
   </span>
   
@@ -797,12 +1057,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/upvoting/" class="md-nav__link">
+      <a href="../../user-guide/upvoting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Upvoting
+    None
     
   </span>
   
@@ -820,12 +1080,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/search-browse/" class="md-nav__link">
+      <a href="../../user-guide/search-browse.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Search &amp; Browse
+    None
     
   </span>
   
@@ -843,12 +1103,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/teams/" class="md-nav__link">
+      <a href="../../user-guide/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -866,12 +1126,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/profile/" class="md-nav__link">
+      <a href="../../user-guide/profile.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Profile
+    None
     
   </span>
   
@@ -954,12 +1214,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/overview/" class="md-nav__link">
+      <a href="../../moderator-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderator Guide Overview
+    None
     
   </span>
   
@@ -977,12 +1237,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/answering-questions/" class="md-nav__link">
+      <a href="../../moderator-guide/answering-questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Answering Questions
+    None
     
   </span>
   
@@ -1000,12 +1260,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/tagging/" class="md-nav__link">
+      <a href="../../moderator-guide/tagging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tagging
+    None
     
   </span>
   
@@ -1023,12 +1283,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/moderation-queue/" class="md-nav__link">
+      <a href="../../moderator-guide/moderation-queue.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Queue
+    None
     
   </span>
   
@@ -1046,12 +1306,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../moderator-guide/presentation-mode/" class="md-nav__link">
+      <a href="../../moderator-guide/presentation-mode.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Presentation Mode
+    None
     
   </span>
   
@@ -1138,12 +1398,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/overview/" class="md-nav__link">
+      <a href="../../admin-guide/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin Guide Overview
+    None
     
   </span>
   
@@ -1161,12 +1421,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/team-management/" class="md-nav__link">
+      <a href="../../admin-guide/team-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Team Management
+    None
     
   </span>
   
@@ -1184,12 +1444,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/tag-management/" class="md-nav__link">
+      <a href="../../admin-guide/tag-management.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tag Management
+    None
     
   </span>
   
@@ -1207,12 +1467,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/roles-permissions/" class="md-nav__link">
+      <a href="../../admin-guide/roles-permissions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Roles Permissions
+    None
     
   </span>
   
@@ -1230,12 +1490,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/moderation-stats/" class="md-nav__link">
+      <a href="../../admin-guide/moderation-stats.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Moderation Stats
+    None
     
   </span>
   
@@ -1253,12 +1513,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/audit-logging/" class="md-nav__link">
+      <a href="../../admin-guide/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1276,12 +1536,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../admin-guide/export/" class="md-nav__link">
+      <a href="../../admin-guide/export.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Export
+    None
     
   </span>
   
@@ -1426,12 +1686,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/system-design/" class="md-nav__link">
+      <a href="../../architecture/system-design.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    System Design
+    None
     
   </span>
   
@@ -1449,12 +1709,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/database-schema/" class="md-nav__link">
+      <a href="../../architecture/database-schema.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Database Schema
+    None
     
   </span>
   
@@ -1472,12 +1732,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/authentication/" class="md-nav__link">
+      <a href="../../architecture/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication System
+    None
     
   </span>
   
@@ -1495,12 +1755,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/multi-tenancy/" class="md-nav__link">
+      <a href="../../architecture/multi-tenancy.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Multi-Tenancy Architecture
+    None
     
   </span>
   
@@ -1518,12 +1778,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/real-time/" class="md-nav__link">
+      <a href="../../architecture/real-time.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Real-Time Architecture
+    None
     
   </span>
   
@@ -1612,12 +1872,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/overview/" class="md-nav__link">
+      <a href="../../security/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Overview
+    None
     
   </span>
   
@@ -1635,12 +1895,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rbac/" class="md-nav__link">
+      <a href="../../security/rbac.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Role-Based Access Control (RBAC)
+    None
     
   </span>
   
@@ -1658,12 +1918,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/content-moderation/" class="md-nav__link">
+      <a href="../../security/content-moderation.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Content Moderation
+    None
     
   </span>
   
@@ -1681,12 +1941,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/audit-logging/" class="md-nav__link">
+      <a href="../../security/audit-logging.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Audit Logging
+    None
     
   </span>
   
@@ -1704,12 +1964,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/security-headers/" class="md-nav__link">
+      <a href="../../security/security-headers.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Security Headers
+    None
     
   </span>
   
@@ -1727,12 +1987,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/sessions/" class="md-nav__link">
+      <a href="../../security/sessions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Sessions
+    None
     
   </span>
   
@@ -1750,12 +2010,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/ci-scanning/" class="md-nav__link">
+      <a href="../../security/ci-scanning.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    CI Security Scanning
+    None
     
   </span>
   
@@ -1773,12 +2033,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/rate-limiting/" class="md-nav__link">
+      <a href="../../security/rate-limiting.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Rate Limiting
+    None
     
   </span>
   
@@ -1865,12 +2125,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    API Reference Overview
+    None
     
   </span>
   
@@ -1888,12 +2148,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/authentication/" class="md-nav__link">
+      <a href="../../api/authentication.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Authentication
+    None
     
   </span>
   
@@ -1911,12 +2171,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/questions/" class="md-nav__link">
+      <a href="../../api/questions.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Questions
+    None
     
   </span>
   
@@ -1934,12 +2194,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/teams/" class="md-nav__link">
+      <a href="../../api/teams.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Teams
+    None
     
   </span>
   
@@ -1957,12 +2217,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/tags/" class="md-nav__link">
+      <a href="../../api/tags.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Tags
+    None
     
   </span>
   
@@ -1980,12 +2240,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/users/" class="md-nav__link">
+      <a href="../../api/users.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Users
+    None
     
   </span>
   
@@ -2003,12 +2263,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/admin/" class="md-nav__link">
+      <a href="../../api/admin.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Admin
+    None
     
   </span>
   
@@ -2097,12 +2357,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/setup/" class="md-nav__link">
+      <a href="../../development/setup.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Development Setup
+    None
     
   </span>
   
@@ -2120,12 +2380,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/running-locally/" class="md-nav__link">
+      <a href="../../development/running-locally.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Running Locally
+    None
     
   </span>
   
@@ -2143,12 +2403,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/testing/" class="md-nav__link">
+      <a href="../../development/testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing
+    None
     
   </span>
   
@@ -2166,12 +2426,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/email-testing/" class="md-nav__link">
+      <a href="../../development/email-testing.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing Email Functionality
+    None
     
   </span>
   
@@ -2189,12 +2449,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/migrations/" class="md-nav__link">
+      <a href="../../development/migrations.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Migrations
+    None
     
   </span>
   
@@ -2212,12 +2472,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-style/" class="md-nav__link">
+      <a href="../../development/code-style.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Code Style
+    None
     
   </span>
   
@@ -2235,12 +2495,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/code-review/" class="md-nav__link">
+      <a href="../../development/code-review.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    PulseStage - Comprehensive Code Review
+    None
     
   </span>
   
@@ -2353,12 +2613,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/docker-compose/" class="md-nav__link">
+      <a href="../../deployment/docker-compose.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Docker Compose Deployment
+    None
     
   </span>
   
@@ -2422,12 +2682,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment/email-configuration/" class="md-nav__link">
+      <a href="../../deployment/email-configuration.md" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Email Configuration
+    None
     
   </span>
   
@@ -2617,7 +2877,155 @@
 
 
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Anchor link to this section">&para;</a></h1>
-<p>Documentation coming soon...</p>
+<p>PulseStage is configured via environment variables.</p>
+<h2 id="core-settings">Core Settings<a class="headerlink" href="#core-settings" title="Anchor link to this section">&para;</a></h2>
+<h3 id="required">Required<a class="headerlink" href="#required" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Database</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://user:password@host:5432/database
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Sessions (generate with: openssl rand -hex 32)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">SESSION_SECRET</span><span class="o">=</span>your_session_secret
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nv">ADMIN_SESSION_SECRET</span><span class="o">=</span>your_admin_session_secret
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># CSRF Protection (generate with: openssl rand -base64 32)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nv">CSRF_SECRET</span><span class="o">=</span>your_csrf_secret
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Redis</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://localhost:6379
+</span></code></pre></div>
+<h3 id="optional">Optional<a class="headerlink" href="#optional" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Server</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">PORT</span><span class="o">=</span><span class="m">3000</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development<span class="w">  </span><span class="c1"># or production</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Frontend</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">CORS_ORIGIN</span><span class="o">=</span>http://localhost:5173
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Tenant (multi-tenancy)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nv">DEFAULT_TENANT</span><span class="o">=</span>default
+</span></code></pre></div>
+<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Anchor link to this section">&para;</a></h2>
+<h3 id="demo-mode-development">Demo Mode (Development)<a class="headerlink" href="#demo-mode-development" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">AUTH_MODE_DEMO</span><span class="o">=</span><span class="nb">true</span><span class="w">  </span><span class="c1"># Auto-enabled when NODE_ENV=development</span>
+</span></code></pre></div>
+<p>Provides 4 pre-seeded demo users. Not for production.</p>
+<h3 id="oauth-production">OAuth (Production)<a class="headerlink" href="#oauth-production" title="Anchor link to this section">&para;</a></h3>
+<h4 id="github-oauth">GitHub OAuth<a class="headerlink" href="#github-oauth" title="Anchor link to this section">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">GITHUB_CLIENT_ID</span><span class="o">=</span>your_github_client_id
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">GITHUB_CLIENT_SECRET</span><span class="o">=</span>your_github_client_secret
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nv">GITHUB_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/auth/github/callback
+</span></code></pre></div>
+<h4 id="google-oauth">Google OAuth<a class="headerlink" href="#google-oauth" title="Anchor link to this section">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nv">GOOGLE_CLIENT_ID</span><span class="o">=</span>your_google_client_id
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">GOOGLE_CLIENT_SECRET</span><span class="o">=</span>your_google_client_secret
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nv">GOOGLE_CALLBACK_URL</span><span class="o">=</span>http://localhost:3000/auth/google/callback
+</span></code></pre></div>
+<p>See <a href="../../handbook/AUTHENTICATION/">handbook/AUTHENTICATION.md</a> for OAuth setup.</p>
+<h2 id="email">Email<a class="headerlink" href="#email" title="Anchor link to this section">&para;</a></h2>
+<h3 id="smtp">SMTP<a class="headerlink" href="#smtp" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>smtp
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>smtp.example.com
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">587</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nv">SMTP_USER</span><span class="o">=</span>your_smtp_user
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nv">SMTP_PASS</span><span class="o">=</span>your_smtp_password
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nv">SMTP_FROM</span><span class="o">=</span>noreply@example.com
+</span></code></pre></div>
+<h3 id="resend">Resend<a class="headerlink" href="#resend" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">EMAIL_PROVIDER</span><span class="o">=</span>resend
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">RESEND_API_KEY</span><span class="o">=</span>your_resend_api_key
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nv">RESEND_FROM</span><span class="o">=</span>noreply@example.com
+</span></code></pre></div>
+<h3 id="disable-email-development">Disable Email (Development)<a class="headerlink" href="#disable-email-development" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">EMAIL_ENABLED</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<p>See <a href="../../handbook/INTEGRATIONS/EMAIL/">handbook/INTEGRATIONS/EMAIL.md</a>.</p>
+<h2 id="content-moderation">Content Moderation<a class="headerlink" href="#content-moderation" title="Anchor link to this section">&para;</a></h2>
+<h3 id="openai-moderation-optional">OpenAI Moderation (Optional)<a class="headerlink" href="#openai-moderation-optional" title="Anchor link to this section">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>your_openai_api_key
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">OPENAI_MODERATION_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p>Enables AI-powered content moderation alongside local filters.</p>
+<p>See <a href="../../handbook/TRUST_AND_SAFETY/">handbook/TRUST_AND_SAFETY.md</a>.</p>
+<h2 id="pulse-system">Pulse System<a class="headerlink" href="#pulse-system" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Pulse invitations (requires email)</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">PULSE_INVITES_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Cohort size (users per cohort)</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nv">PULSE_COHORT_SIZE</span><span class="o">=</span><span class="m">20</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Invitation schedule (cron format: daily at 9 AM)</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nv">PULSE_INVITE_CRON</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="m">9</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*
+</span></code></pre></div>
+<p>See <a href="../../handbook/PULSE_SYSTEM/">handbook/PULSE_SYSTEM.md</a>.</p>
+<h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Enable/disable rate limiting</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">RATE_LIMIT_ENABLED</span><span class="o">=</span><span class="nb">true</span><span class="w">  </span><span class="c1"># Auto-disabled when NODE_ENV=development</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Redis required for rate limiting</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://localhost:6379
+</span></code></pre></div>
+<p>Rate limiting is disabled in development by default.</p>
+<p>See <a href="../../handbook/SECURITY_MODEL/#rate-limiting">handbook/SECURITY_MODEL.md</a>.</p>
+<h2 id="feature-flags">Feature Flags<a class="headerlink" href="#feature-flags" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Presentation mode</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">PRESENTATION_MODE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Data exports</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nv">EXPORTS_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># Audit logging</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="nv">AUDIT_LOG_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<h2 id="branding">Branding<a class="headerlink" href="#branding" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Website title</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nv">WEBSITE_TITLE</span><span class="o">=</span>PulseStage
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Welcome message (markdown supported)</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="nv">WELCOME_MESSAGE</span><span class="o">=</span>Welcome<span class="w"> </span>to<span class="w"> </span>PulseStage!
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># Logo URL (optional)</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="nv">LOGO_URL</span><span class="o">=</span>https://example.com/logo.png
+</span></code></pre></div>
+<h2 id="development">Development<a class="headerlink" href="#development" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Mock SSO for testing</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nv">MOCK_SSO</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nv">SSO_PROVIDER</span><span class="o">=</span>mock
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># Mailpit (local email testing)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nv">SMTP_HOST</span><span class="o">=</span>mailpit
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nv">SMTP_PORT</span><span class="o">=</span><span class="m">1025</span>
+</span></code></pre></div>
+<h2 id="environment-files">Environment Files<a class="headerlink" href="#environment-files" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><code>.env</code> - API configuration</li>
+<li><code>web/.env</code> - Frontend configuration</li>
+</ul>
+<p>Example <code>.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://app:app@localhost:5432/ama
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">SESSION_SECRET</span><span class="o">=</span>generated_by_setup_script
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">ADMIN_SESSION_SECRET</span><span class="o">=</span>generated_by_setup_script
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nv">CSRF_SECRET</span><span class="o">=</span>generated_by_setup_script
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nv">REDIS_URL</span><span class="o">=</span>redis://localhost:6379
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nv">NODE_ENV</span><span class="o">=</span>development
+</span></code></pre></div></p>
+<p>Example <code>web/.env</code>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nv">VITE_API_URL</span><span class="o">=</span>http://localhost:3000
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nv">VITE_WEBSITE_TITLE</span><span class="o">=</span>PulseStage
+</span></code></pre></div></p>
+<h2 id="generate-secrets">Generate Secrets<a class="headerlink" href="#generate-secrets" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Session secrets</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">32</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># CSRF secret</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>openssl<span class="w"> </span>rand<span class="w"> </span>-base64<span class="w"> </span><span class="m">32</span>
+</span></code></pre></div>
+<p>Or use <code>./setup.sh</code> which auto-generates all secrets.</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><a href="../first-steps/">First Steps</a> - Initial setup</li>
+<li><a href="../../deployment/production/">Production Deployment</a> - Production configuration</li>
+<li><a href="../../handbook/OPERATIONS/">handbook/OPERATIONS.md</a> - Operational details</li>
+</ul>
 
 
 
@@ -2640,7 +3048,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 4, 2025 19:43:35 UTC"><span class="timeago" datetime="2025-10-04T19:43:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 4, 2025 19:43:35 UTC">2025-10-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 1, 2025 21:41:00 UTC"><span class="timeago" datetime="2025-11-01T21:41:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 1, 2025 21:41:00 UTC">2025-11-01</span>
   </span>
 
     
@@ -2687,7 +3095,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../installation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation Guide">
+          <a href="../installation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2697,20 +3105,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Installation Guide
+                Installation
               </div>
             </div>
           </a>
         
         
           
-          <a href="../first-steps/" class="md-footer__link md-footer__link--next" aria-label="Next: First Steps with PulseStage">
+          <a href="../first-steps/" class="md-footer__link md-footer__link--next" aria-label="Next: First Steps">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                First Steps with PulseStage
+                First Steps
               </div>
             </div>
             <div class="md-footer__button md-icon">

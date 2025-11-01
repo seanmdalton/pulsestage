@@ -1,0 +1,57 @@
+# NOTE: This is a minimal example for handbook reference.
+# Canonical OpenAPI spec: /api/openapi.yaml (87KB, ~2600 lines)
+# Served at: GET /docs (development only, via Swagger UI)
+
+openapi: 3.0.3
+info:
+  title: PulseStage API (Handbook Reference)
+  version: 0.1.0
+  description: |
+    Minimal OpenAPI example for handbook.
+    For complete API documentation, see /api/openapi.yaml
+servers:
+  - url: https://api.pulsestage.app
+paths:
+  /ready:
+    get:
+      summary: Readiness
+      responses:
+        '200': { description: OK }
+  /pulse/respond:
+    post:
+      summary: One-tap response intake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, score]
+              properties:
+                token: { type: string, format: uuid }
+                score: { type: integer, minimum: 0, maximum: 10 }
+                comment: { type: string, maxLength: 1000 }
+      responses:
+        '200': { description: Recorded }
+        '400': { description: Invalid/expired token }
+  /pulse/summary:
+    get:
+      summary: Aggregated trend + heatmap (anonymity enforced)
+      parameters:
+        - in: query; name: range; schema: { type: string, example: "8w" }
+        - in: query; name: teamId; schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trend:
+                    type: array
+                    items: { type: object, properties: { week: {type: string}, avg: {type: number}, n: {type: integer} } }
+                  heatmap:
+                    type: array
+                    items: { type: object, properties: { questionId: {type: string}, buckets: {type: array} } }
+                  insufficient: { type: boolean }
