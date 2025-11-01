@@ -23,10 +23,10 @@ Found a bug? **[Open an issue](https://github.com/seanmdalton/pulsestage/issues/
 - Expected vs actual behavior
 - Environment details (OS, Node version, etc.)
 
-### 💡 Suggest Features
+###  Suggest Features
 Have an idea? **[Start a discussion](https://github.com/seanmdalton/pulsestage/discussions/new)** or open a feature request issue.
 
-### 🔧 Submit Code
+###  Submit Code
 1. **Fork** the repository
 2. **Create a branch**: `git checkout -b feature/your-feature`
 3. **Make changes** with tests
@@ -71,8 +71,8 @@ This project follows our **[Code of Conduct](CODE_OF_CONDUCT.md)**. Be respectfu
 ## Getting Help
 
 - 📖 **[Documentation](https://seanmdalton.github.io/pulsestage/)** - Comprehensive guides
-- 🏗️ **[Architecture Docs](https://seanmdalton.github.io/pulsestage/architecture/system-design/)** - System design
-- 🛠️ **[Development Guide](https://seanmdalton.github.io/pulsestage/development/setup/)** - Detailed setup
+-  **[Architecture Docs](https://seanmdalton.github.io/pulsestage/architecture/system-design/)** - System design
+- 🛠 **[Development Guide](https://seanmdalton.github.io/pulsestage/development/setup/)** - Detailed setup
 - 💬 **[Discussions](https://github.com/seanmdalton/pulsestage/discussions)** - Ask questions
 - 🐛 **[Issues](https://github.com/seanmdalton/pulsestage/issues)** - Bug reports
 
@@ -148,4 +148,4 @@ By contributing, you agree that your contributions will be licensed under the **
 
 ---
 
-**Thank you for contributing to PulseStage!** 🎉
+**Thank you for contributing to PulseStage!** 

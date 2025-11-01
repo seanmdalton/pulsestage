@@ -130,7 +130,7 @@ describe('OpenAI Filter Moderation', () => {
           process.env.OPENAI_API_KEY.startsWith('sk-');
 
         if (!hasValidKey) {
-          console.log('⏭️  Skipping OpenAI integration test (no valid API key)');
+          console.log('⏭  Skipping OpenAI integration test (no valid API key)');
           // Test passes - we're just documenting that it would work with a key
           // Verify the function returns null when no key is set
           const result = await moderateWithOpenAI('test');
@@ -192,7 +192,7 @@ describe('Combined Moderation', () => {
       const hasValidKey = originalEnv && !originalEnv.includes('invalid');
 
       if (!hasValidKey) {
-        console.log('⏭️  Skipping OpenAI integration test (no valid API key)');
+        console.log('⏭  Skipping OpenAI integration test (no valid API key)');
         // Test passes - just verify local works
         const result = await moderateContent('This is a normal question about project deadlines.');
         expect(result.providers).toEqual(['local']);

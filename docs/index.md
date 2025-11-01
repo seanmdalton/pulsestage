@@ -1,34 +1,16 @@
 # PulseStage
 
-<div align="center">
-  <img src="assets/pulsestage-wordmark-light.svg" alt="PulseStage" width="400">
-  <p><strong>Open-source Q&A Platform for Town Halls and All-Hands</strong></p>
-</div>
+**Employee engagement platform combining Q&A and pulse surveys.**
 
+Anonymous question submission, upvoting, team-scoped organization, and weekly sentiment tracking with role-based access control.
+
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/seanmdalton/pulsestage/blob/main/CHANGELOG.md)
 [![CI](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml/badge.svg)](https://github.com/seanmdalton/pulsestage/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 
-PulseStage helps teams capture questions, surface what matters with up-votes, and publish clear answers—then present it all live. Built as a full-stack AMA-style app with **multi-team spaces** and **role-based controls**, it's designed to increase employee engagement and organizational transparency.
-
-## Why PulseStage?
-
-- **Up-vote–only questions** to reduce noise and highlight priorities  
-- **Team-based organization** for different departments or forums  
-- **Role-based moderation** (viewer, member, moderator, admin, owner)  
-- **Advanced search** with full-text search, filters, and date ranges
-- **Moderation tools** - Pin, freeze, bulk operations, and analytics
-- **Presenter mode** for leadership meetings and all-hands  
-- **Tagging system** for organizing and categorizing questions
-- **Real-time updates** via Server-Sent Events (SSE)
-- **Audit logging** for compliance and security
-- **Exports** (CSV/JSON) for follow-ups and accountability  
-- **Self-hostable** with Docker (Postgres + Redis), open source (Apache-2.0)
+---
 
 ## Quick Start
-
-Get PulseStage running in under 5 minutes:
 
 ```bash
 git clone https://github.com/seanmdalton/pulsestage.git
@@ -37,88 +19,134 @@ cd pulsestage
 docker compose up
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to start using PulseStage!
+Visit `http://localhost:5173` and log in with demo credentials (admin, alice, bob, or moderator).
 
-For detailed setup instructions, see the [Installation Guide](getting-started/installation.md).
+See [Installation Guide](getting-started/installation.md) for production deployment.
 
-## Key Features
+---
 
-### 🏢 Multi-Team Organization
-- Organize questions by Engineering, Product, People, General teams
-- Easy team switching with question counts
-- Team management through Admin panel
-- Shareable URLs like `/engineering/open` or `/product/answered`
+## Core Features
 
-### ❓ Question Management
+### Q&A System
 - Anonymous question submission with team assignment
-- Full-text search with prefix matching (e.g., "mob" finds "mobile")
-- Advanced filters: tags, date ranges, status, team
-- Upvote system with protection against self-upvoting
-- Full-screen viewing for long questions and answers
-- Status tracking (Open and Answered)
-- Tag-based organization
+- Upvoting to surface priorities
+- Full-text search (PostgreSQL GIN indexes)
+- Moderator workflow (answer, tag, pin, freeze)
+- Bulk operations and moderation queue
+- Presentation mode for all-hands meetings
 
-### 👥 Role-Based Access Control
-- **Viewer**: Browse questions anonymously, upvote
-- **Member**: Submit and upvote questions
-- **Moderator**: Answer questions, tag, pin, freeze, present (team-scoped)
-- **Admin**: Full access including exports, audit logs, and team management
-- **Owner**: Complete control including user management
+### Weekly Pulse
+- Anonymous sentiment surveys with cohort rotation
+- Email invitations via BullMQ queue
+- One-tap response links (7-day expiration)
+- Team-scoped analytics with 12-week history
+- Anonymity enforcement (no userId in responses)
 
-### 📌 Moderation Tools
-- **Pin questions** to highlight important topics
-- **Freeze questions** to lock them from further interaction
-- **Bulk operations** - Tag, pin, freeze, or delete multiple questions at once
-- **Moderation queue** - Dedicated interface with comprehensive filters
-- **Analytics dashboard** - Track moderator performance and activity
-- **Quick actions** - Pin 📌, Freeze ❄️, Answer 💬 buttons on each question
+### Access Control
+Five roles with team-scoped permissions:
+- **Viewer** - Browse and upvote
+- **Member** - Submit questions and upvote
+- **Moderator** - Answer, tag, pin, freeze (team-scoped)
+- **Admin** - Full access, exports, audit logs (global)
+- **Owner** - Complete control (global)
 
-### 🎨 Modern User Experience
-- Beautiful, responsive design with dark mode
-- Real-time updates via Server-Sent Events (SSE)
-- Presentation mode optimized for large displays with live tag updates
-- Debounced search with instant feedback
-- Profile management with favorite teams
-- Persistent state across browser windows
+See [handbook/SECURITY_MODEL.md](handbook/SECURITY_MODEL.md) for details.
 
-### 🔒 Security & Compliance
-- Comprehensive audit logging (all admin/mod actions tracked)
-- Team-scoped permissions with RBAC enforcement
-- Tenant isolation for multi-tenancy
-- Session-based authentication with HttpOnly cookies
-- CSRF protection on all state-changing endpoints
-- Security headers (Helmet, CSP, HSTS, X-Frame-Options)
-- Rate limiting on all endpoints
-- MDN HTTP Observatory integration for security validation
+### Team Organization
+- Multi-team structure (e.g., Engineering, Product)
+- Team-scoped questions and pulse data
+- Org-level rollups for leadership
+- Primary team assignment for users
 
-## Technology Stack
+---
 
+## Technology
+
+- **Backend**: Node.js 24, Express, TypeScript, Prisma
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
-- **Backend**: Node.js 24 LTS, Express, TypeScript
-- **Database**: PostgreSQL 16 with Prisma ORM, full-text search (GIN indexes)
-- **Cache**: Redis 7 for rate limiting and session storage
-- **Testing**: Vitest (208 tests), Playwright E2E, MDN HTTP Observatory
-- **Security**: Helmet, CSRF protection (csrf-csrf), Content Security Policy
-- **Deployment**: Docker Compose with multi-stage builds
-- **CI/CD**: GitHub Actions with Semgrep (SAST), Trivy (security scanning), SBOM generation
+- **Database**: PostgreSQL 16 with full-text search
+- **Cache**: Redis 7 for sessions and rate limiting
+- **Queue**: BullMQ for email delivery
+- **Tests**: 336 API tests (Vitest) + E2E (Playwright)
+- **Deployment**: Docker Compose
+
+---
 
 ## Documentation
 
-- [Getting Started](getting-started/quick-start.md) - Installation and first steps
-- [User Guide](user-guide/overview.md) - How to use PulseStage
-- [Admin Guide](admin-guide/overview.md) - Managing teams, users, and settings
-- [Architecture](architecture/system-design.md) - Technical design and decisions
-- [Security](security/overview.md) - Security features and best practices
-- [API Reference](api/overview.md) - REST API documentation
-- [Development](development/setup.md) - Contributing and local development
+### Getting Started
+- [Installation](getting-started/installation.md) - Docker Compose setup
+- [Configuration](getting-started/configuration.md) - Environment variables
+- [Quick Start](getting-started/quick-start.md) - 5-minute setup
+- [Troubleshooting](getting-started/troubleshooting.md) - Common issues
+
+### User Guides
+- [User Guide](guides/user/overview.md) - Submit questions, upvote, search
+- [Moderator Guide](guides/moderator/overview.md) - Answer, moderate, present
+- [Admin Guide](guides/admin/overview.md) - Manage teams, users, settings
+
+### Handbook (Architecture & Operations)
+- [Product Vision](handbook/PRODUCT_VISION.md) - Features and design philosophy
+- [Data Model](handbook/DATA_MODEL_SNAPSHOT.md) - Database schema and invariants
+- [Security Model](handbook/SECURITY_MODEL.md) - RBAC, rate limiting, audit logging
+- [Authentication](handbook/AUTHENTICATION.md) - Multi-mode auth (Demo, OAuth)
+- [Development](handbook/DEVELOPMENT.md) - Workflow, testing, versioning
+- [Operations](handbook/OPERATIONS.md) - Deployment, monitoring, runbooks
+- [API Contracts](handbook/API_CONTRACTS/events.md) - OpenAPI spec, SSE events
+- [Architecture Decisions](handbook/DECISIONS/) - ADRs
+
+### Deployment
+- [Production Deployment](deployment/production.md) - Self-hosting guide
+- [Environment Variables](deployment/environment.md) - Configuration reference
+- [Monitoring](deployment/monitoring.md) - Health checks and observability
+
+---
+
+## Security
+
+- Multi-tenancy with tenant isolation
+- Role-based access control (5 roles)
+- Content moderation (local + OpenAI)
+- Rate limiting (Redis-based, per-tenant)
+- Audit logging (append-only)
+- CSRF protection and security headers
+- Anonymous pulse responses
+
+See [handbook/SECURITY_MODEL.md](handbook/SECURITY_MODEL.md).
+
+---
+
+## Development
+
+Requires: Docker, Node.js 24, PostgreSQL 16, Redis 7
+
+```bash
+# Start services
+make up
+
+# Seed demo data
+make db-seed
+
+# Run tests
+make test
+
+# Validate before push
+make validate-ci
+```
+
+See [handbook/DEVELOPMENT.md](handbook/DEVELOPMENT.md) for complete workflow.
+
+---
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](../LICENSE) for details.
+Apache License 2.0 - See [LICENSE](../LICENSE)
+
+---
 
 ## Support
 
-- 📖 [Documentation](https://seanmdalton.github.io/pulsestage/)
-- 🐛 [Issue Tracker](https://github.com/seanmdalton/pulsestage/issues)
-- 💬 [Discussions](https://github.com/seanmdalton/pulsestage/discussions)
-
+- **Documentation**: [https://seanmdalton.github.io/pulsestage/](https://seanmdalton.github.io/pulsestage/)
+- **Issues**: [https://github.com/seanmdalton/pulsestage/issues](https://github.com/seanmdalton/pulsestage/issues)
+- **Discussions**: [https://github.com/seanmdalton/pulsestage/discussions](https://github.com/seanmdalton/pulsestage/discussions)
+- **Changelog**: [CHANGELOG.md](https://github.com/seanmdalton/pulsestage/blob/main/CHANGELOG.md)

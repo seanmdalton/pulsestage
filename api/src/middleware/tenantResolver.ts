@@ -36,7 +36,7 @@ function resolveTenantSlug(req: Request): string {
   const allowHeader = process.env.NODE_ENV !== 'production' || env.ALLOW_TENANT_HEADER;
   if (allowHeader && headerTenant) {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 Tenant resolved from header: ${headerTenant}`);
+      console.log(` Tenant resolved from header: ${headerTenant}`);
     }
     return headerTenant;
   }
@@ -51,7 +51,7 @@ function resolveTenantSlug(req: Request): string {
 
       if (subdomain && subdomain !== 'www') {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`🔍 Tenant resolved from subdomain: ${subdomain}`);
+          console.log(` Tenant resolved from subdomain: ${subdomain}`);
         }
         return subdomain;
       }
@@ -61,14 +61,14 @@ function resolveTenantSlug(req: Request): string {
   // 3. Default to "default" tenant in single-tenant mode
   if (!env.MULTI_TENANT_MODE) {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Tenant resolved to default (single-tenant mode)');
+      console.log(' Tenant resolved to default (single-tenant mode)');
     }
     return 'default';
   }
 
   // 4. No tenant could be resolved in multi-tenant mode
   if (process.env.NODE_ENV === 'development') {
-    console.log('❌ No tenant could be resolved in multi-tenant mode');
+    console.log('[ERROR] No tenant could be resolved in multi-tenant mode');
   }
   return '';
 }
@@ -99,7 +99,7 @@ export function createTenantResolverMiddleware(prisma: PrismaClient) {
 
       if (!tenant) {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`❌ Tenant not found in database: ${tenantSlug}`);
+          console.log(`[ERROR] Tenant not found in database: ${tenantSlug}`);
         }
         return res.status(404).json({
           error: 'Tenant not found',

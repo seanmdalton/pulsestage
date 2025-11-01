@@ -34,7 +34,7 @@ export function createPrismaClient(): PrismaClient {
   if (isProduction) {
     client.$on('query', (e: any) => {
       if (e.duration > 1000) {
-        console.warn(`⚠️  Slow query detected (${e.duration}ms):`, {
+        console.warn(`[WARNING]  Slow query detected (${e.duration}ms):`, {
           query: e.query,
           params: e.params,
           duration: e.duration,
@@ -43,7 +43,7 @@ export function createPrismaClient(): PrismaClient {
     });
 
     client.$on('error', (e: any) => {
-      console.error('❌ Database error:', e);
+      console.error('[ERROR] Database error:', e);
     });
   }
 
@@ -91,7 +91,7 @@ export async function validateDatabaseConnection(client: PrismaClient): Promise<
 
       if (!hasPoolParams) {
         console.warn('');
-        console.warn('⚠️  WARNING: No connection pool parameters detected in DATABASE_URL');
+        console.warn('[WARNING]  WARNING: No connection pool parameters detected in DATABASE_URL');
         console.warn('   For production, consider adding:');
         console.warn('   ?connection_limit=20&pool_timeout=60&connect_timeout=10');
         console.warn('');
@@ -100,15 +100,15 @@ export async function validateDatabaseConnection(client: PrismaClient): Promise<
       // Check for default credentials
       if (dbUrl.includes(':app@') || dbUrl.includes('/app:')) {
         console.warn('');
-        console.warn('⚠️  WARNING: Default database credentials detected!');
+        console.warn('[WARNING]  WARNING: Default database credentials detected!');
         console.warn('   Please change default username/password for security.');
         console.warn('');
       }
     }
 
-    console.log('✅ Database connection validated');
+    console.log('[OK] Database connection validated');
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error('[ERROR] Database connection failed:', error);
     throw error;
   }
 }
@@ -119,5 +119,5 @@ export async function validateDatabaseConnection(client: PrismaClient): Promise<
 export async function shutdownDatabase(client: PrismaClient): Promise<void> {
   console.log('🔌 Disconnecting from database...');
   await client.$disconnect();
-  console.log('✅ Database disconnected');
+  console.log('[OK] Database disconnected');
 }

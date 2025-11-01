@@ -30,7 +30,7 @@ export async function seedTestUsers() {
       name: 'Default Organization',
     },
   });
-  console.log(`✅ Default tenant: ${tenant.name}`);
+  console.log(`[OK] Default tenant: ${tenant.name}`);
 
   // Get teams
   const engineeringTeam = await prisma.team.findUnique({
@@ -78,7 +78,7 @@ export async function seedTestUsers() {
       },
     });
 
-    console.log(`✅ Created/updated user: ${user.name} (${user.email})`);
+    console.log(`[OK] Created/updated user: ${user.name} (${user.email})`);
 
     // Create team memberships
     for (const membership of teams) {
@@ -98,11 +98,11 @@ export async function seedTestUsers() {
           role: membership.role,
         },
       });
-      console.log(`  ✅ Added to team with role: ${membership.role}`);
+      console.log(`  [OK] Added to team with role: ${membership.role}`);
     }
   }
 
-  console.log('🎉 Test user seeding completed!');
+  console.log(' Test user seeding completed!');
 }
 
 // Run if called directly

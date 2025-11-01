@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    console.log('⚙️  Enabling Pulse...');
+    console.log('⚙  Enabling Pulse...');
 
     // Get default tenant
     const tenant = await prisma.tenant.findUnique({
@@ -50,7 +50,7 @@ async function main() {
       },
     });
 
-    console.log('✅ Pulse enabled!');
+    console.log('[OK] Pulse enabled!');
 
     // Create a schedule
     console.log('📅 Creating schedule...');
@@ -72,17 +72,17 @@ async function main() {
       },
     });
 
-    console.log('✅ Schedule created!');
+    console.log('[OK] Schedule created!');
 
     // Check if we have questions
     const questionCount = await prisma.pulseQuestion.count({
       where: { tenantId: tenant.id, active: true },
     });
 
-    console.log(`📝 Active questions: ${questionCount}`);
+    console.log(` Active questions: ${questionCount}`);
 
     if (questionCount === 0) {
-      console.log('⚠️  No active questions found. Creating default questions...');
+      console.log('[WARNING]  No active questions found. Creating default questions...');
 
       const questions = [
         { text: 'How recognized do you feel this week?', category: 'recognition' },
@@ -102,13 +102,13 @@ async function main() {
         });
       }
 
-      console.log(`✅ Created ${questions.length} questions!`);
+      console.log(`[OK] Created ${questions.length} questions!`);
     }
 
     console.log('\n🎯 Pulse is now configured!');
     console.log('   Run: tsx scripts/trigger-pulse.ts');
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('[ERROR] Error:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

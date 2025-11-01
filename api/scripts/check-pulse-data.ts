@@ -8,7 +8,7 @@ async function main() {
   });
 
   if (!tenant) {
-    console.log('❌ Tenant not found');
+    console.log('[ERROR] Tenant not found');
     return;
   }
 
@@ -23,7 +23,7 @@ async function main() {
     take: 10,
   });
 
-  console.log(`\n💙 Total Pulse Responses: ${responses.length}`);
+  console.log(`\n Total Pulse Responses: ${responses.length}`);
   responses.forEach((r, i) => {
     console.log(`  ${i + 1}. Question: "${r.question.text.substring(0, 50)}..."`);
     console.log(`     Score: ${r.score}, Submitted: ${r.submittedAt.toISOString()}`);
@@ -40,7 +40,7 @@ async function main() {
     take: 5,
   });
 
-  console.log(`\n✅ Completed Invites: ${completedInvites.length}`);
+  console.log(`\n[OK] Completed Invites: ${completedInvites.length}`);
   completedInvites.forEach((inv, i) => {
     console.log(`  ${i + 1}. Completed: ${inv.completedAt?.toISOString() || 'N/A'}`);
   });
@@ -53,14 +53,14 @@ async function main() {
     },
   });
 
-  console.log(`\n⏳ Pending Invites: ${pendingInvites}`);
+  console.log(`\n Pending Invites: ${pendingInvites}`);
 
   // Check questions
   const questions = await prisma.pulseQuestion.count({
     where: { tenantId: tenant.id, active: true },
   });
 
-  console.log(`\n📝 Active Questions: ${questions}`);
+  console.log(`\n Active Questions: ${questions}`);
 }
 
 main().finally(() => prisma.$disconnect());

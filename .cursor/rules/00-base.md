@@ -1,5 +1,8 @@
 # PulseStage Base Rules
 
+**See `docs/handbook/` for product vision, architecture decisions, and API/UX contracts.**
+**See `/.cursorrules` for development workflow and validation requirements.**
+
 ## Priorities
 - Correctness > clarity > speed. Small diffs. Always show preview before apply.
 - Never change infra/auth/CSRF/CSP/rate-limits without explicit confirmation.
@@ -37,10 +40,11 @@
 - Use `DomainError { code, message, details? }`. Centralize HTTP mapping. No prod stack traces.
 - Single JSON logger. Never log secrets or PII.
 
-## Security musts
-- Enforce RBAC (viewer/member/moderator/admin/owner) on the server.
+## Security musts (see docs/handbook/SECURITY_MODEL.md)
+- Enforce RBAC (viewer/member/moderator/admin/owner) on the server (per ADR-0003).
 - Keep CSRF, Helmet, rate-limits, and CSP intact.
 - Secrets only from env. Validate env at boot with Zod.
+- Preserve anonymity: PulseResponse has NO userId field.
 
 ## Tests
 - New code includes unit tests. For routes: test 200 + validation 4xx + 403/404 + cross-tenant checks.

@@ -6,6 +6,6 @@ contact_links:
   - name: 💬 GitHub Discussions
     url: https://github.com/seanmdalton/pulsestage/discussions
     about: Ask questions and discuss ideas with the community
-  - name: 🔒 Security Issues
+  - name:  Security Issues
     url: mailto:seanmdalton@pm.me?subject=Security%20Issue%20Report
     about: Report security vulnerabilities privately (do not use public issues)

@@ -31,9 +31,9 @@ export async function initRedis() {
     redisClient.on('error', err => console.error('Redis Client Error', err));
 
     await redisClient.connect();
-    console.log('🔒 Redis connected for rate limiting (production mode)');
+    console.log(' Redis connected for rate limiting (production mode)');
   } catch (error) {
-    console.error('❌ Failed to connect to Redis for rate limiting:', error);
+    console.error('[ERROR] Failed to connect to Redis for rate limiting:', error);
 
     // In production, Redis is REQUIRED for rate limiting (security critical)
     if (isProduction) {

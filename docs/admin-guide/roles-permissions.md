@@ -1,3 +1,0 @@
-# Roles Permissions
-
-Documentation coming soon...

@@ -30,7 +30,7 @@ export async function seedMultiTenantData() {
       name: 'Acme Corp',
     },
   });
-  console.log(`✅ Created tenant: ${acmeTenant.name} (${acmeTenant.slug})`);
+  console.log(`[OK] Created tenant: ${acmeTenant.name} (${acmeTenant.slug})`);
 
   // Create teams for Acme
   const acmeEngineering = await prisma.team.upsert({
@@ -72,7 +72,7 @@ export async function seedMultiTenantData() {
     },
   });
 
-  console.log(`✅ Created teams: Engineering, Product, Marketing`);
+  console.log(`[OK] Created teams: Engineering, Product, Marketing`);
 
   // Create test users for Acme
   const acmeUsers = [
@@ -125,7 +125,7 @@ export async function seedMultiTenantData() {
       },
     });
 
-    console.log(`✅ Created user: ${user.name} (${user.email})`);
+    console.log(`[OK] Created user: ${user.name} (${user.email})`);
 
     // Create team memberships
     for (const membership of teams) {
@@ -192,8 +192,8 @@ export async function seedMultiTenantData() {
     });
   }
 
-  console.log(`✅ Created ${acmeQuestions.length} questions for Acme`);
-  console.log('🎉 Multi-tenant data seeding completed!');
+  console.log(`[OK] Created ${acmeQuestions.length} questions for Acme`);
+  console.log(' Multi-tenant data seeding completed!');
 }
 
 // Run if called directly

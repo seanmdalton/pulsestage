@@ -4,13 +4,13 @@
 
 set -e
 
-echo "🚀 PulseStage Setup"
+echo " PulseStage Setup"
 echo "===================="
 echo ""
 
 # Check if .env already exists
 if [ -f .env ]; then
-    echo "⚠️  .env file already exists"
+    echo "[WARNING]  .env file already exists"
     read -p "Do you want to overwrite it? (y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -20,7 +20,7 @@ if [ -f .env ]; then
 fi
 
 # Generate secure random secrets
-echo "📝 Generating secure secrets..."
+echo " Generating secure secrets..."
 SESSION_SECRET=$(openssl rand -base64 32)
 ADMIN_SESSION_SECRET=$(openssl rand -base64 32)
 CSRF_SECRET=$(openssl rand -base64 32)
@@ -56,16 +56,16 @@ MOCK_SSO=true
 SSO_PROVIDER="mock"
 EOF
 
-echo "✅ Created .env file with secure secrets"
+echo "[OK] Created .env file with secure secrets"
 echo ""
-echo "📋 Configuration Summary:"
+echo " Configuration Summary:"
 echo "   - Database: postgresql://app:app@localhost:5432/ama"
 echo "   - Redis: redis://localhost:6379"
 echo "   - API Port: 3000"
 echo "   - Web URL: http://localhost:5173"
-echo "   - Admin Key: dev-admin-key-change-me (⚠️  Change in production!)"
+echo "   - Admin Key: dev-admin-key-change-me ([WARNING]  Change in production!)"
 echo ""
-echo "⚙️  Next Steps:"
+echo "⚙  Next Steps:"
 echo "   1. Start services:        docker compose up -d"
 echo "   2. Access app:            http://localhost:5173"
 echo "   3. Follow Setup Wizard:   Choose 'Demo Data' or 'Create Organization'"

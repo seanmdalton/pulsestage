@@ -1,363 +1,432 @@
 # Production Deployment
 
-Deploy PulseStage to production with proper security and reliability.
+Deploy PulseStage to production using Docker Compose.
 
-## Overview
+## Prerequisites
 
-PulseStage can be deployed to:
-- **Self-hosted** with Docker Compose
-- **Cloud platforms** like Render, Heroku, Railway
-- **Kubernetes** (advanced)
+- Linux server (Ubuntu 22.04+ recommended)
+- Docker and Docker Compose
+- Domain name with SSL certificate
+- PostgreSQL 16 (managed or self-hosted)
+- Redis 7 (managed or self-hosted)
 
-This guide covers general production considerations.
+## Quick Deploy
 
-## Pre-Deployment Checklist
+```bash
+# Clone repository
+git clone https://github.com/seanmdalton/pulsestage.git
+cd pulsestage
 
-✅ **[Use the Production Checklist](production-checklist.md)** - Complete guide
+# Generate secrets
+./setup.sh
 
-Quick checklist:
-- [ ] Generate secure secrets
-- [ ] Configure OAuth (GitHub/Google)
-- [ ] Set up PostgreSQL database
-- [ ] Set up Redis instance
-- [ ] Configure environment variables
-- [ ] Set up domain and SSL
-- [ ] Configure email provider (optional)
-- [ ] Set up backups
-- [ ] Plan monitoring
+# Configure for production
+cp .env.example .env
+nano .env
 
-## Architecture
-
-```
-┌─────────────┐
-│   Browser   │
-└──────┬──────┘
-       │ HTTPS
-       ▼
-┌─────────────┐
-│   Nginx/    │ ← SSL termination
-│  Traefik    │
-└──────┬──────┘
-       │
-       ├────────► Web (React) :5173
-       │
-       └────────► API (Express) :3000
-                      │
-                      ├────► PostgreSQL :5432
-                      └────► Redis :6379
+# Start services
+docker compose up -d
 ```
 
 ## Environment Configuration
 
-### Required Variables
+### Required Settings
 
 ```bash
-# Database
-DATABASE_URL=postgresql://user:pass@host:5432/pulsestage
-
-# Cache & Sessions
-REDIS_URL=redis://host:6379
-SESSION_SECRET=<64-char-random>
-CSRF_SECRET=<64-char-random>
-
-# Authentication (GitHub example)
-GITHUB_CLIENT_ID=your_client_id
-GITHUB_CLIENT_SECRET=your_client_secret
-GITHUB_CALLBACK_URL=https://api.yourdomain.com/auth/github/callback
-
-# Application
+# Server
 NODE_ENV=production
-FRONTEND_URL=https://yourdomain.com
-CORS_ORIGINS=https://yourdomain.com
+PORT=3000
 
-# Admin
-ADMIN_KEY=<32-char-random>
-ADMIN_SESSION_SECRET=<64-char-random>
+# Database (use managed PostgreSQL recommended)
+DATABASE_URL=postgresql://user:password@host:5432/database
+
+# Redis (use managed Redis recommended)
+REDIS_URL=redis://host:6379
+
+# Sessions (generate with: openssl rand -hex 32)
+SESSION_SECRET=your_generated_secret
+ADMIN_SESSION_SECRET=your_generated_secret
+
+# CSRF (generate with: openssl rand -base64 32)
+CSRF_SECRET=your_generated_secret
+
+# Frontend
+CORS_ORIGIN=https://yourdomain.com
 ```
 
-**[Complete Environment Reference →](environment.md)**
+### Authentication
 
-## Security Hardening
-
-### 1. Secrets Management
-
-**Never hardcode secrets**. Use:
-- Environment variables
-- Secret management service (AWS Secrets Manager, HashiCorp Vault)
-- Encrypted configuration files
-
-### 1a. Security Headers
-
-**Implement Content Security Policy (CSP)** for the frontend:
-
-- ✅ **Meta tag** - Already included in `web/index.html`
-- ✅ **Nginx headers** - Add to your web server config
-
-```nginx
-# See docs/deployment/nginx-csp.conf for full configuration
-add_header Content-Security-Policy "default-src 'self'; script-src 'self'; ..." always;
-```
-
-**Test your CSP:**
-- Mozilla Observatory: https://observatory.mozilla.org/
-- Expected: **B or B+** grade (meta tag limitations)
-- Grade A requires: HTTP headers with nonces (future enhancement)
-
-**Note:** Grade B+ is excellent for meta-tag CSP and provides strong XSS protection.
-
-**[Complete CSP Documentation →](../security/security-headers.md)**
-
-### 2. Network Security
-
-- ✅ Use HTTPS only (`secure: true` cookies)
-- ✅ Configure CORS properly
-- ✅ Enable rate limiting
-- ✅ Use security headers (Helmet)
-- ✅ Keep services on private network
-
-### 3. Database Security
-
-- ✅ Use strong passwords
-- ✅ Limit network access
-- ✅ Enable SSL connections
-- ✅ Regular backups
-- ✅ Principle of least privilege
-
-### 4. Authentication
-
-- ✅ **Disable demo mode** (`AUTH_MODE_DEMO=false`)
-- ✅ Use OAuth (GitHub/Google)
-- ✅ Configure session timeouts
-- ✅ Monitor failed login attempts
-
-## Deployment Options
-
-### Option 1: Docker Compose (Self-Hosted)
-
-**Best for:** Full control, on-premises deployment
+Disable demo mode and configure OAuth:
 
 ```bash
-git clone https://github.com/seanmdalton/pulsestage.git
-cd pulsestage
-# Configure .env
-make setup
-make start
+AUTH_MODE_DEMO=false
+
+# GitHub OAuth (recommended)
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_CALLBACK_URL=https://yourdomain.com/auth/github/callback
+
+# Optional: Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=https://yourdomain.com/auth/google/callback
 ```
 
-**[Docker Compose Guide →](docker-compose.md)**
+See [GitHub OAuth Setup](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app) and [Google OAuth Setup](https://developers.google.com/identity/protocols/oauth2).
 
-### Option 2: Cloud Platform (Render, Heroku)
+### Email
 
-**Best for:** Managed infrastructure, easy scaling
-
-**Render example:**
-1. Connect GitHub repository
-2. Configure environment variables
-3. Deploy via `render.yaml`
-
-**[Render Deployment Guide →](render-deployment.template.md)**
-
-### Option 3: Kubernetes
-
-**Best for:** Enterprise scale, complex deployments
-
-- Use Helm charts (community-maintained)
-- Configure persistent volumes
-- Set up ingress controller
-- Configure horizontal pod autoscaling
-
-## Database Setup
-
-### PostgreSQL
-
-**Minimum requirements:**
-- Version: 16+
-- Extensions: `pg_trgm` (for full-text search)
-- Storage: 10GB minimum
-
-**Recommended:**
-- Connection pooling (PgBouncer)
-- Read replicas for high load
-- Regular backups (automated)
-
-### Redis
-
-**Minimum requirements:**
-- Version: 7+
-- Memory: 512MB minimum
-
-**Recommended:**
-- Persistence enabled
-- High availability (Redis Sentinel/Cluster)
-- Monitoring
-
-## Email Configuration
-
-**Optional but recommended** for user notifications.
-
-### Supported Providers
-
-- **SMTP**: SendGrid, AWS SES, Mailgun
-- **Resend**: Modern email API
-
-### Example: SendGrid
+Required for pulse invitations:
 
 ```bash
-SMTP_HOST=smtp.sendgrid.net
+# Using Resend (recommended)
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM=noreply@yourdomain.com
+
+# Or SMTP
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.example.com
 SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASSWORD=your_api_key
+SMTP_USER=your_user
+SMTP_PASS=your_password
 SMTP_FROM=noreply@yourdomain.com
 ```
 
-**[Complete Email Configuration →](email-configuration.md)**
-
-## SSL/TLS Setup
-
-### Option 1: Let's Encrypt (Free)
+### Content Moderation (Optional)
 
 ```bash
-# Using Certbot
-sudo certbot --nginx -d yourdomain.com -d api.yourdomain.com
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODERATION_ENABLED=true
 ```
 
-### Option 2: Cloud Provider
+See [handbook/TRUST_AND_SAFETY.md](../handbook/TRUST_AND_SAFETY.md).
 
-Most cloud platforms (Render, Heroku) handle SSL automatically.
+## Docker Compose
 
-### Option 3: Cloudflare
+### Pin Versions
 
-Free SSL proxy with additional security features.
+Production should use specific versions, not `latest`:
+
+```yaml
+services:
+  api:
+    image: ghcr.io/seanmdalton/pulsestage-api:0.1.0
+  web:
+    image: ghcr.io/seanmdalton/pulsestage-web:0.1.0
+```
+
+Available tags:
+- `0.1.0` (exact version)
+- `0.1` (minor version)
+- `0` (major version)
+- `latest` (always newest)
+
+See [CHANGELOG.md](../../CHANGELOG.md) for versions.
+
+### Resource Limits
+
+```yaml
+services:
+  api:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+```
+
+## Reverse Proxy
+
+### Nginx Configuration
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    # Frontend
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API
+    location /api/ {
+        proxy_pass http://localhost:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SSE (Server-Sent Events)
+    location /events {
+        proxy_pass http://localhost:3000/events;
+        proxy_set_header Connection '';
+        proxy_http_version 1.1;
+        chunked_transfer_encoding off;
+        proxy_buffering off;
+        proxy_cache off;
+    }
+}
+
+# HTTP redirect to HTTPS
+server {
+    listen 80;
+    server_name yourdomain.com;
+    return 301 https://$server_name$request_uri;
+}
+```
+
+### Traefik Configuration
+
+```yaml
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=your@email.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+
+  api:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`yourdomain.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+
+  web:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`yourdomain.com`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+```
+
+## Database
+
+### Using Managed PostgreSQL
+
+Recommended providers:
+- AWS RDS PostgreSQL
+- Google Cloud SQL for PostgreSQL
+- Azure Database for PostgreSQL
+- Supabase
+- Neon
+- DigitalOcean Managed Databases
+
+Minimum requirements:
+- PostgreSQL 16+
+- 2GB RAM
+- 20GB storage
+
+### Self-Hosted PostgreSQL
+
+If self-hosting, use PostgreSQL Docker service from `docker-compose.yaml`.
+
+**Important**: Configure backups.
 
 ## Backups
 
-### Database Backups
-
-**Automated daily backups:**
+### PostgreSQL Backups
 
 ```bash
-#!/bin/bash
-# backup.sh
-DATE=$(date +%Y%m%d_%H%M%S)
-docker compose exec -T postgres pg_dump -U postgres pulsestage \
-  | gzip > backups/pulsestage_$DATE.sql.gz
+# Daily backup script
+pg_dump $DATABASE_URL > backup-$(date +%Y%m%d).sql
 
-# Keep last 30 days
-find backups/ -name "*.sql.gz" -mtime +30 -delete
+# Restore from backup
+psql $DATABASE_URL < backup-20250101.sql
 ```
 
-**Add to crontab:**
-```bash
-0 2 * * * /path/to/backup.sh
-```
+### Automated Backups
 
-### Disaster Recovery
-
-Test restores regularly:
+Add to crontab:
 
 ```bash
-# Test restore
-gunzip < backup.sql.gz | \
-  docker compose exec -T postgres psql -U postgres pulsestage
+0 2 * * * /path/to/backup-script.sh
 ```
 
-## Scaling
+### Backup Retention
 
-### Vertical Scaling
-
-Increase resources for single instances:
-- CPU: 2+ cores recommended
-- Memory: 4GB+ recommended
-- Storage: Scale with data growth
-
-### Horizontal Scaling
-
-For high traffic:
-- **Multiple API instances** behind load balancer
-- **Read replicas** for PostgreSQL
-- **Redis Cluster** for distributed caching
-- **CDN** for static assets
+Recommended:
+- Daily backups: Keep 7 days
+- Weekly backups: Keep 4 weeks
+- Monthly backups: Keep 12 months
 
 ## Monitoring
 
-**Essential monitoring:**
-- Health checks (`/health` endpoint)
-- Error tracking
-- Performance metrics
-- Resource usage
+### Health Checks
 
-**[Complete Monitoring Guide →](monitoring.md)**
+Configure monitoring for these endpoints:
 
-## Maintenance
+- Liveness: `https://yourdomain.com/health/live`
+- Readiness: `https://yourdomain.com/health/ready`
+- Full health: `https://yourdomain.com/health`
 
-### Updates
+Expected response (healthy):
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-01-01T00:00:00.000Z",
+  "uptime": 123456,
+  "database": "ok",
+  "redis": "ok"
+}
+```
 
+See [Monitoring](monitoring.md) for detailed monitoring setup.
+
+## Updates
+
+### Update to New Version
+
+1. **Check changelog**: [CHANGELOG.md](../../CHANGELOG.md)
+
+2. **Pull new images**:
 ```bash
-# Pull latest changes
-git pull
+docker compose pull
+```
 
-# Update dependencies
-cd api && npm ci
-cd web && npm ci
-
-# Run migrations
+3. **Run migrations**:
+```bash
 docker compose exec api npx prisma migrate deploy
+```
 
-# Restart services
+4. **Restart services**:
+```bash
 docker compose up -d
 ```
 
-### Database Migrations
+5. **Verify health**:
+```bash
+curl https://yourdomain.com/health
+```
+
+### Rollback
 
 ```bash
-# Check migration status
-docker compose exec api npx prisma migrate status
+# Edit docker-compose.yaml to previous version
+docker compose up -d
+```
 
-# Apply pending migrations
-docker compose exec api npx prisma migrate deploy
+## Security
+
+### Environment Variables
+
+- Store in `.env` files (never commit to git)
+- Use strong, randomly generated secrets
+- Rotate secrets periodically
+
+### SSL/TLS
+
+- Use Let's Encrypt or commercial certificate
+- Force HTTPS (redirect HTTP to HTTPS)
+- Enable HSTS header
+
+### Rate Limiting
+
+Rate limiting is enabled by default in production:
+
+```bash
+RATE_LIMIT_ENABLED=true
+```
+
+See [handbook/SECURITY_MODEL.md](../handbook/SECURITY_MODEL.md#rate-limiting).
+
+### Audit Logging
+
+Audit logs track all admin/moderator actions:
+
+- View in Admin → Audit Logs
+- Stored in database (append-only)
+- Includes actor, action, entity, timestamp
+
+See [handbook/SECURITY_MODEL.md](../handbook/SECURITY_MODEL.md#audit-logging).
+
+## Scaling
+
+### Horizontal Scaling
+
+Run multiple API instances behind load balancer:
+
+```yaml
+services:
+  api:
+    deploy:
+      replicas: 3
+```
+
+Requires:
+- Shared PostgreSQL
+- Shared Redis (for sessions)
+- Load balancer (Nginx, Traefik, or cloud LB)
+
+### Vertical Scaling
+
+Increase resources in `docker-compose.yaml`:
+
+```yaml
+services:
+  api:
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
 ```
 
 ## Troubleshooting
 
-**[Complete Troubleshooting Guide →](render-troubleshooting.md)**
+### Services Won't Start
 
-Quick fixes:
-
-**API not responding:**
 ```bash
-docker compose logs api
-docker compose restart api
+# View logs
+docker compose logs -f
+
+# Check service status
+docker compose ps
 ```
 
-**Database connection issues:**
+### Database Connection Issues
+
 ```bash
-docker compose exec postgres psql -U postgres -c "SELECT 1;"
+# Test connection
+docker compose exec api npx prisma db push --preview-feature
+
+# Verify DATABASE_URL
+echo $DATABASE_URL
 ```
 
-**Redis connection issues:**
+### Redis Connection Issues
+
 ```bash
-docker compose exec redis redis-cli ping
+# Test Redis
+redis-cli -u $REDIS_URL ping
 ```
 
-## Security Checklist
+## Support
 
-- [ ] HTTPS enabled
-- [ ] Demo mode disabled
-- [ ] OAuth configured
-- [ ] Strong secrets generated
-- [ ] Rate limiting enabled
-- [ ] CORS properly configured
-- [ ] Security headers enabled
-- [ ] Database access restricted
-- [ ] Backups automated
-- [ ] Monitoring set up
-- [ ] Audit logging enabled
-- [ ] Content moderation active
-
-## See Also
-
-- **[Production Checklist](production-checklist.md)** - Pre-launch guide
-- **[Production Runbook](production-runbook.md)** - Operational procedures
-- **[Docker Compose Deployment](docker-compose.md)** - Self-hosted setup
-- **[Environment Variables](environment.md)** - Configuration reference
-- **[Monitoring](monitoring.md)** - Monitoring setup
+- [Monitoring Guide](monitoring.md) - Set up monitoring
+- [Environment Variables](environment.md) - All configuration options
+- [handbook/OPERATIONS.md](../handbook/OPERATIONS.md) - Operations runbook
+- [GitHub Issues](https://github.com/seanmdalton/pulsestage/issues) - Report issues

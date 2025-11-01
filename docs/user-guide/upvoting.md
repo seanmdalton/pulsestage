@@ -1,3 +1,0 @@
-# Upvoting
-
-Documentation coming soon...

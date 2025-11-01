@@ -27,7 +27,7 @@ async function seedTeams() {
       name: 'Default Organization',
     },
   });
-  console.log(`✅ Default tenant: ${tenant.name}`);
+  console.log(`[OK] Default tenant: ${tenant.name}`);
 
   for (const team of defaultTeams) {
     const existingTeam = await prisma.team.findUnique({
@@ -46,20 +46,20 @@ async function seedTeams() {
           tenantId: tenant.id,
         },
       });
-      console.log(`✅ Created team: ${team.name}`);
+      console.log(`[OK] Created team: ${team.name}`);
     } else {
-      console.log(`⏭️  Team already exists: ${team.name}`);
+      console.log(`⏭  Team already exists: ${team.name}`);
     }
   }
 
-  console.log('🎉 Team seeding completed!');
+  console.log(' Team seeding completed!');
 }
 
 // Run if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedTeams()
     .catch(error => {
-      console.error('❌ Error seeding teams:', error);
+      console.error('[ERROR] Error seeding teams:', error);
       throw error;
     })
     .finally(async () => {

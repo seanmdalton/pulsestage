@@ -20,12 +20,12 @@ const results: TestResult[] = [];
 
 function test(name: string, passed: boolean, message: string) {
   results.push({ test: name, passed, message });
-  const icon = passed ? '✅' : '❌';
+  const icon = passed ? '[OK]' : '[ERROR]';
   console.log(`${icon} ${name}: ${message}`);
 }
 
 async function main() {
-  console.log('🧪 Running Seed Data Validation Tests');
+  console.log('[TEST] Running Seed Data Validation Tests');
   console.log('='.repeat(60));
   console.log('');
 
@@ -299,19 +299,19 @@ async function main() {
     const failedTests = totalTests - passedTests;
 
     if (failedTests === 0) {
-      console.log(`✅ All ${totalTests} tests passed!`);
+      console.log(`[OK] All ${totalTests} tests passed!`);
       console.log('');
-      console.log('🎉 Seed data is valid and ready for testing!');
+      console.log(' Seed data is valid and ready for testing!');
       process.exit(0);
     } else {
-      console.log(`❌ ${failedTests} of ${totalTests} tests failed!`);
+      console.log(`[ERROR] ${failedTests} of ${totalTests} tests failed!`);
       console.log('');
-      console.log('⚠️  Seed data has issues. Run: make db-seed');
+      console.log('[WARNING]  Seed data has issues. Run: make db-seed');
       process.exit(1);
     }
   } catch (error) {
     console.error('');
-    console.error('❌ Test suite failed:', error);
+    console.error('[ERROR] Test suite failed:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

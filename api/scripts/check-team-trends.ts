@@ -9,7 +9,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function checkTeamTrends() {
-  console.log('🔍 Analyzing team-specific pulse trends...\n');
+  console.log('[SCAN] Analyzing team-specific pulse trends...\n');
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: 'default' } });
   if (!tenant) throw new Error('No tenant');
@@ -45,7 +45,7 @@ async function checkTeamTrends() {
     // Calculate averages
     const weeks = Object.keys(weeklyScores).sort();
     if (weeks.length === 0) {
-      console.log('  ⚠️ No data found\n');
+      console.log('  [WARNING] No data found\n');
       continue;
     }
 
@@ -58,7 +58,7 @@ async function checkTeamTrends() {
       weeklyScores[lastWeek].reduce((a, b) => a + b, 0) / weeklyScores[lastWeek].length;
 
     const trend = lastAvg - firstAvg;
-    const trendIcon = trend > 0.1 ? '📈 Improving' : trend < -0.1 ? '📉 Declining' : '➡️ Stable';
+    const trendIcon = trend > 0.1 ? '📈 Improving' : trend < -0.1 ? '📉 Declining' : '➡ Stable';
 
     console.log(`  Oldest week (${firstWeek}): ${firstAvg.toFixed(2)}`);
     console.log(`  Latest week (${lastWeek}): ${lastAvg.toFixed(2)}`);
@@ -79,7 +79,7 @@ async function checkTeamTrends() {
 
 checkTeamTrends()
   .catch(error => {
-    console.error('❌ Error:', error);
+    console.error('[ERROR] Error:', error);
     process.exit(1);
   })
   .finally(() => {

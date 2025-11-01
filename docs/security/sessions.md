@@ -1,3 +1,0 @@
-# Sessions
-
-Documentation coming soon...

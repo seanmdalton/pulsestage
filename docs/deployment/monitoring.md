@@ -103,14 +103,14 @@ journalctl -u pulsestage-web -f
 
 **Database:**
 ```
-✅ Database connected successfully
-❌ Database connection failed
+[OK] Database connected successfully
+[ERROR] Database connection failed
 ```
 
 **Redis:**
 ```
-🔒 Redis connected for rate limiting
-❌ Failed to connect to Redis
+ Redis connected for rate limiting
+[ERROR] Failed to connect to Redis
 ```
 
 ## Audit Logging

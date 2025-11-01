@@ -236,16 +236,16 @@ jobs:
           if [ -f semgrep-results.json ]; then
             HIGH_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "ERROR")] | length')
             
-            echo "🔍 Semgrep SAST Results:"
+            echo " Semgrep SAST Results:"
             echo "   High/Critical findings: $HIGH_COUNT"
             
             if [ "$HIGH_COUNT" -gt 0 ]; then
-              echo "❌ Found $HIGH_COUNT high/critical security issues"
+              echo " Found $HIGH_COUNT high/critical security issues"
               cat semgrep-results.json | jq -r '.results[] | select(.extra.severity == "ERROR") | "  - \(.extra.message) (\(.path):\(.start.line))"' | head -20
               exit 1
             fi
             
-            echo "✅ No high/critical security issues found"
+            echo " No high/critical security issues found"
           fi
 
       - name: Upload Semgrep results
@@ -306,16 +306,16 @@ jobs:
           if [ -f trivy-fs-results.json ]; then
             VULN_COUNT=$(cat trivy-fs-results.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length')
             
-            echo "🔍 Trivy Filesystem Scan Results:"
+            echo " Trivy Filesystem Scan Results:"
             echo "   High/Critical vulnerabilities: $VULN_COUNT"
             
             if [ "$VULN_COUNT" -gt 0 ]; then
-              echo "❌ Found $VULN_COUNT high/critical vulnerabilities in dependencies"
+              echo " Found $VULN_COUNT high/critical vulnerabilities in dependencies"
               cat trivy-fs-results.json | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -20
               exit 1
             fi
             
-            echo "✅ No high/critical vulnerabilities found in dependencies"
+            echo " No high/critical vulnerabilities found in dependencies"
           fi
 
       - name: Upload Trivy results
@@ -421,16 +421,16 @@ jobs:
           if [ -f trivy-${{ matrix.service }}-image.json ]; then
             VULN_COUNT=$(cat trivy-${{ matrix.service }}-image.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length')
             
-            echo "🔍 Trivy ${{ matrix.service }} Image Scan:"
+            echo " Trivy ${{ matrix.service }} Image Scan:"
             echo "   High/Critical vulnerabilities: $VULN_COUNT"
             
             if [ "$VULN_COUNT" -gt 0 ]; then
-              echo "❌ Found $VULN_COUNT high/critical vulnerabilities"
+              echo " Found $VULN_COUNT high/critical vulnerabilities"
               cat trivy-${{ matrix.service }}-image.json | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -20
               exit 1
             fi
             
-            echo "✅ No high/critical vulnerabilities found"
+            echo " No high/critical vulnerabilities found"
           fi
 
       - name: Upload Trivy image scan results
@@ -463,7 +463,7 @@ jobs:
       - name: Display SBOM summary
         run: |
           PACKAGE_COUNT=$(cat sbom-${{ matrix.service }}.spdx.json | jq '.packages | length')
-          echo "📦 SBOM Generated for ${{ matrix.service }}"
+          echo " SBOM Generated for ${{ matrix.service }}"
           echo "   Format: SPDX + CycloneDX JSON"
           echo "   Total packages: $PACKAGE_COUNT"
           echo "   Retention: 90 days"
@@ -518,7 +518,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # SBOM Info
-          echo "## 📦 SBOM Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "##  SBOM Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "- API component (SPDX + CycloneDX)" >> $GITHUB_STEP_SUMMARY
           echo "- Web component (SPDX + CycloneDX)" >> $GITHUB_STEP_SUMMARY
           echo "- Retention: 90 days" >> $GITHUB_STEP_SUMMARY
@@ -531,5 +531,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "**✅ All code quality checks, tests and security scans enabled!**" >> $GITHUB_STEP_SUMMARY
+          echo "** All code quality checks, tests and security scans enabled!**" >> $GITHUB_STEP_SUMMARY
 

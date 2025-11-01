@@ -68,7 +68,7 @@ if (isProduction) {
 
   if (missing.length > 0) {
     throw new Error(
-      `❌ Missing required environment variables in production: ${missing.join(', ')}\n` +
+      `[ERROR] Missing required environment variables in production: ${missing.join(', ')}\n` +
         `   Run 'npm run generate-secrets' to create secure random secrets.`
     );
   }
@@ -109,7 +109,7 @@ if (isProduction) {
 
   if (weak.length > 0) {
     throw new Error(
-      `❌ Weak or default secrets detected in production:\n` +
+      `[ERROR] Weak or default secrets detected in production:\n` +
         `   ${weak.join('\n   ')}\n\n` +
         `   Run 'npm run generate-secrets' to create secure random secrets.`
     );
@@ -119,7 +119,7 @@ if (isProduction) {
   const hasAllowlist = Array.isArray(parsed.CORS_ORIGINS) && parsed.CORS_ORIGINS.length > 0;
   if (!hasAllowlist || parsed.CORS_ORIGIN === '*') {
     throw new Error(
-      '❌ CORS_ORIGINS must be set to a comma-separated allowlist in production (no wildcard).\n' +
+      '[ERROR] CORS_ORIGINS must be set to a comma-separated allowlist in production (no wildcard).\n' +
         '   Example: CORS_ORIGINS=https://app.example.com,https://www.example.com'
     );
   }
@@ -127,7 +127,7 @@ if (isProduction) {
   // Validate REDIS_URL is not using default localhost in production
   if (parsed.REDIS_URL.includes('localhost') || parsed.REDIS_URL.includes('127.0.0.1')) {
     console.warn(
-      '⚠️  WARNING: REDIS_URL appears to use localhost in production.\n' +
+      '[WARNING]  WARNING: REDIS_URL appears to use localhost in production.\n' +
         '   Ensure this is correct for your deployment environment.'
     );
   }
@@ -138,7 +138,7 @@ if (isProduction) {
     parsed.DATABASE_URL.includes('password=app')
   ) {
     console.warn(
-      '⚠️  WARNING: DATABASE_URL appears to use default credentials.\n' +
+      '[WARNING]  WARNING: DATABASE_URL appears to use default credentials.\n' +
         '   Ensure you have changed the default database password!'
     );
   }

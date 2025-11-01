@@ -208,7 +208,7 @@ model TeamMembership {
   id        String   @id @default(uuid())
   userId    String
   teamId    String
-  role      String   @default("member") // member, moderator, admin, owner
+  role      String   @default("member") // viewer, member, moderator, admin, owner
   createdAt DateTime @default(now())
   
   // Relationships

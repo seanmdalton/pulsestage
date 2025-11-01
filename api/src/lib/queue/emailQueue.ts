@@ -43,7 +43,7 @@ function getRedisConnection() {
   const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    console.warn('⚠️  REDIS_URL not configured - email queue disabled');
+    console.warn('[WARNING]  REDIS_URL not configured - email queue disabled');
     // Return a dummy connection to satisfy TypeScript
     // The worker won't start anyway, so this queue won't be used
     return {
@@ -107,7 +107,7 @@ export function startEmailWorker() {
 
   // Don't start worker if Redis is not properly configured
   if (!process.env.REDIS_URL || process.env.REDIS_URL.includes('localhost')) {
-    console.warn('⚠️  Email worker not started - REDIS_URL not properly configured');
+    console.warn('[WARNING]  Email worker not started - REDIS_URL not properly configured');
     console.warn('   Email notifications will not be sent');
     return null;
   }
@@ -147,7 +147,7 @@ export function startEmailWorker() {
             throw new Error(`Failed to send email: ${result.error}`);
           }
 
-          console.log(`✅ Email sent successfully to ${job.data.data.to}:`, result.messageId);
+          console.log(`[OK] Email sent successfully to ${job.data.data.to}:`, result.messageId);
 
           // TODO: Add audit logging with proper tenant ID from job data
 
@@ -160,13 +160,13 @@ export function startEmailWorker() {
             throw new Error(`Failed to send email: ${result.error}`);
           }
 
-          console.log(`✅ Direct email sent successfully:`, result.messageId);
+          console.log(`[OK] Direct email sent successfully:`, result.messageId);
           return result;
         }
 
         throw new Error(`Unknown email job type: ${(job.data as any).type}`);
       } catch (error) {
-        console.error(`❌ Email job ${job.id} failed:`, error);
+        console.error(`[ERROR] Email job ${job.id} failed:`, error);
 
         // TODO: Add audit logging for failed emails with proper tenant ID
 
@@ -180,11 +180,11 @@ export function startEmailWorker() {
   );
 
   worker.on('completed', job => {
-    console.log(`✅ Email job ${job.id} completed`);
+    console.log(`[OK] Email job ${job.id} completed`);
   });
 
   worker.on('failed', (job, err) => {
-    console.error(`❌ Email job ${job?.id} failed:`, err);
+    console.error(`[ERROR] Email job ${job?.id} failed:`, err);
   });
 
   console.log('📧 Email worker started');

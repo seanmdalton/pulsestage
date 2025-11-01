@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 export function requireAdminSession(req: Request, res: Response, next: NextFunction) {
-  console.log('🔒 Admin session check:', {
+  console.log(' Admin session check:', {
     hasSession: !!req.session,
     sessionId: req.sessionID,
     isAdmin: req.session?.isAdmin,
@@ -11,7 +11,7 @@ export function requireAdminSession(req: Request, res: Response, next: NextFunct
   });
 
   if (!req.session?.isAdmin) {
-    console.log('❌ Admin session rejected: no admin session');
+    console.log('[ERROR] Admin session rejected: no admin session');
     return res.status(401).json({
       error: 'Admin authentication required',
       loginRequired: true,
@@ -22,7 +22,7 @@ export function requireAdminSession(req: Request, res: Response, next: NextFunct
   const loginTime = req.session.loginTime;
   if (loginTime && Date.now() - loginTime > 8 * 60 * 60 * 1000) {
     // 8 hours max
-    console.log('❌ Admin session expired');
+    console.log('[ERROR] Admin session expired');
     req.session.destroy(err => {
       if (err) console.error('Session destroy error:', err);
     });
@@ -32,6 +32,6 @@ export function requireAdminSession(req: Request, res: Response, next: NextFunct
     });
   }
 
-  console.log('✅ Admin session valid');
+  console.log('[OK] Admin session valid');
   next();
 }

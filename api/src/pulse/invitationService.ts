@@ -107,7 +107,7 @@ export async function sendPulseInvitations(
       const emailService = getEmailService();
       await emailService.send({
         to: { email: user.email, name: user.name || undefined },
-        subject: `Your Weekly Pulse 💙`,
+        subject: `Your Weekly Pulse `,
         html,
         text,
       });
@@ -132,7 +132,7 @@ export async function sendPulseInvitations(
     }
   }
 
-  console.log(`✅ Sent ${result.sent} invitations, ${result.failed} failed`);
+  console.log(`[OK] Sent ${result.sent} invitations, ${result.failed} failed`);
 
   return result;
 }

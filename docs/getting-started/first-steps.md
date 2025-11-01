@@ -1,404 +1,177 @@
-# First Steps with PulseStage
+# First Steps
 
-Welcome to PulseStage! This guide walks you through the main features and helps you get started.
+Set up PulseStage for your organization.
 
-## Table of Contents
+## 1. Configure Authentication
 
-- [Sign In](#sign-in)
-- [Understanding Roles](#understanding-roles)
-- [Submit Your First Question](#submit-your-first-question)
-- [Up-Vote Questions](#up-vote-questions)
-- [Browse and Search](#browse-and-search)
-- [Moderator Features](#moderator-features)
-- [Admin Panel](#admin-panel)
-- [Presentation Mode](#presentation-mode)
+### For Production
 
----
+Disable demo mode and configure OAuth:
 
-## Sign In
+```bash
+# .env
+NODE_ENV=production
+AUTH_MODE_DEMO=false
 
-After completing the Setup Wizard, you'll need to sign in:
+# GitHub OAuth (recommended)
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_CALLBACK_URL=https://your-domain.com/auth/github/callback
 
-### Demo Data Users
-
-Navigate to the SSO test page:
-```
-http://localhost:5173/sso-test.html
+# Optional: Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=https://your-domain.com/auth/google/callback
 ```
 
-You'll see 4 demo users:
-- **Alice Anderson** (alice.admin@acme.com) - Admin role, Engineering team
-- **Charlie Chen** (charlie.owner@acme.com) - Owner, Product & Marketing teams
-- **David Martinez** (david@acme.com) - Moderator, Engineering team
-- **Emily Evans** (emily.member@acme.com) - Member, Engineering & Product teams
+See [handbook/AUTHENTICATION.md](../handbook/AUTHENTICATION.md) for OAuth setup instructions.
 
-Click any user to sign in with their account.
+## 2. Create Teams
 
-### Custom Setup
+1. Log in as admin
+2. Navigate to Admin → Teams
+3. Click "Create Team"
+4. Enter team details:
+   - Name (e.g., "Engineering")
+   - Slug (e.g., "engineering")
+   - Description (optional)
 
-If you created your own organization:
-1. Navigate to `http://localhost:5173/sso-test.html`
-2. You'll see your admin user
-3. Click to sign in
+Recommended teams:
+- Engineering
+- Product
+- Marketing
+- Sales
+- General
 
----
+## 3. Invite Users
 
-## Understanding Roles
+Users are automatically created on first OAuth login.
 
-PulseStage has 5 role levels with increasing permissions:
+### Assign Team Memberships
 
-### Viewer (Default)
-- View questions and answers
-- Search and browse
-- No authentication required
+1. Admin → Teams → [Team Name]
+2. Click "Manage Members"
+3. Add users and assign roles:
+   - **Viewer** - Browse and upvote
+   - **Member** - Submit questions and upvote
+   - **Moderator** - Answer and moderate questions
+   - **Admin** - Full access (all teams)
+   - **Owner** - Complete control
 
-### Member
-- Everything Viewer can do, plus:
-- Submit questions
-- Up-vote questions
-- Edit/delete own questions
+### Set Primary Teams
 
-### Moderator
-- Everything Member can do, plus:
-- Answer questions
-- Pin/unpin questions
-- Freeze questions (prevent new upvotes)
-- Add/remove tags
-- Access Presentation Mode
-- **Team-scoped**: Only for assigned teams
+Each user needs a primary team:
 
-### Admin
-- Everything Moderator can do, plus:
-- Access Admin Panel
-- View moderation stats
-- Manage tags across all teams
-- Bulk operations
-- Export data
-- View audit logs
-- **Cross-team**: Access all teams
+1. Admin → Users → [User Name]
+2. Select "Primary Team"
+3. Save
 
-### Owner
-- Everything Admin can do, plus:
-- Create/edit/delete teams
-- Manage team members
-- Change user roles
-- Manage organization settings
-- **Full control**
+Primary team determines:
+- Default team view on login
+- Pulse invitation cohort
+- Team-scoped notifications
 
----
+## 4. Configure Email (Optional)
 
-## Submit Your First Question
+Required for pulse invitations and notifications.
 
-1. **Sign in** with any Member+ account
-2. **Select a team** from the navigation
-3. **Click "Submit Question"** button
-4. **Enter your question**
-   - Be clear and concise
-   - 10-2000 characters
-   - One question per submission
-5. **Click "Submit"**
+### Using Resend (Recommended)
 
-Your question will appear instantly with 1 automatic upvote (from you).
+```bash
+# .env
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM=noreply@yourdomain.com
+```
 
----
+### Using SMTP
 
-## Up-Vote Questions
+```bash
+# .env
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+SMTP_FROM=noreply@yourdomain.com
+```
 
-Help surface the most important questions:
+See [handbook/INTEGRATIONS/EMAIL.md](../handbook/INTEGRATIONS/EMAIL.md).
 
-1. **Browse open questions** in any team
-2. **Click the ⬆️ button** to upvote
-3. **Questions sort by upvote count** automatically
-4. **You can only upvote once** per question
+## 5. Enable Pulse Invitations (Optional)
 
-Upvoting helps prioritize what gets answered first.
+Weekly sentiment surveys with email invitations.
 
----
+```bash
+# .env
+PULSE_INVITES_ENABLED=true
+PULSE_COHORT_SIZE=20
+PULSE_INVITE_CRON=0 9 * * *  # Daily at 9 AM
+```
 
-## Browse and Search
+Requires email configuration.
 
-### Browse Questions
+See [handbook/PULSE_SYSTEM.md](../handbook/PULSE_SYSTEM.md).
 
-- **Open Questions**: Waiting for answers
-- **Answered Questions**: View all responses
-- **All Teams**: See questions across teams (Admin+)
+## 6. Customize Branding (Optional)
 
-### Search
+```bash
+# .env
+WEBSITE_TITLE=Your Company Q&A
+WELCOME_MESSAGE=Welcome to our employee engagement platform!
 
-Use the search bar to find specific questions:
+# web/.env
+VITE_WEBSITE_TITLE=Your Company Q&A
+```
 
-- **Full-text search**: Searches question body and responses
-- **Prefix matching**: Type partial words
-- **Filter by**:
-  - Team
-  - Tags
-  - Status (Open/Answered)
-  - Date range
+## 7. Set Up Monitoring
 
-Example searches:
-- "remote work"
-- "benefits"
-- "#urgent" (searches by tag)
+### Health Checks
 
----
+- Liveness: `http://your-domain.com/health/live`
+- Readiness: `http://your-domain.com/health/ready`
+- Full health: `http://your-domain.com/health`
 
-## Moderator Features
+### Audit Logs
 
-Available to Moderators, Admins, and Owners in their assigned teams.
+View all admin/moderator actions:
 
-### Answer Questions
+1. Admin → Audit Logs
+2. Filter by:
+   - Actor (who performed action)
+   - Action (what was done)
+   - Entity (what was affected)
+   - Date range
 
-1. **Click on a question** to open details
-2. **Click "Answer" button**
-3. **Write your response** (clear, comprehensive)
-4. **Click "Submit Answer"**
+## Common Tasks
 
-The question status changes to "Answered" and appears in the answered list.
+### Reset Demo Data
 
-### Pin Questions
+```bash
+make db-seed
+```
 
-Highlight important questions at the top:
+### View Email Queue
 
-1. **Open question details**
-2. **Click "Pin" button**
-3. **Pinned questions** appear first in the list
+Admin → Email Queue
 
-### Freeze Questions
+Shows all pending and sent emails.
 
-Prevent further upvotes (for already-answered questions):
+### Export Data
 
-1. **Open question details**
-2. **Click "Freeze" button**
-3. **Frozen questions** show a ❄️ icon
+Admin → Export
 
-### Add Tags
+Export questions, pulse responses, or audit logs as CSV/JSON.
 
-Organize questions with tags:
+### Manage Tags
 
-1. **Open question details**
-2. **Click "+ Tag"**
-3. **Select or create a tag**
-4. **Tags appear** on the question card
+Admin → Tags
 
-Common tags:
-- 🏷️ Important
-- 🔥 Urgent
-- 💡 Feature Request
-- ✅ Answered Live
-- 🎤 Currently Presenting
-
----
-
-## Admin Panel
-
-Available to Admins and Owners. Access via your profile menu → "Admin Panel".
-
-### Dashboard Tabs
-
-#### Moderation Queue
-- View all questions with filters
-- Bulk operations (pin, freeze, tag, delete)
-- Quick actions for common tasks
-- Real-time updates
-
-#### Stats
-- Questions answered per moderator
-- Average response time
-- Activity trends
-- Team-level analytics
-
-#### Teams
-- View all teams
-- Create new teams
-- Edit team details
-- Activate/deactivate teams
-- View member counts
-
-#### Tags
-- Create custom tags
-- Edit tag names and colors
-- Delete unused tags
-- See tag usage counts
-
-#### Users (Owner only)
-- View all users
-- Change user roles
-- Remove users from teams
-- Search by name/email
-
-#### Export
-- Export questions to CSV/JSON
-- Filter by date range, status, team
-- Include metadata and responses
-- Download for analysis
-
-#### Audit Logs (Admin+)
-- View all system actions
-- Track user changes
-- See who did what and when
-- Filter by action type, user, date
-
-#### Settings (Owner only)
-- Change organization name
-- Configure tenant settings
-- Manage organization-level options
-
----
-
-## Presentation Mode
-
-Perfect for live town halls and all-hands meetings. Available to Moderator+ roles.
-
-### Entering Presentation Mode
-
-1. **Navigate to a team**
-2. **Click "Presentation Mode"** in the top right
-3. **Full-screen view** optimized for projection
-4. **Questions auto-sort** by upvotes
-5. **Real-time updates** as votes come in
-
-### Using Presentation Mode
-
-- **Large, readable text** for audiences
-- **Auto-tagged** as "Currently Presenting"
-- **Answer inline** without leaving presentation
-- **Questions auto-mark** as "Reviewed" when answered
-- **Press ESC** to exit
-
-### Tips for Presentations
-
-1. **Sort by upvotes** to address top priorities
-2. **Use tags** to track answered questions
-3. **Pin important questions** to keep them visible
-4. **Answer live** for immediate engagement
-5. **Export afterwards** for follow-up items
-
----
+Create, edit, or delete question tags.
 
 ## Next Steps
 
-### Explore More Features
-
-- **[User Guide](../user-guide/overview.md)** - Detailed feature walkthrough
-- **[Moderator Guide](../moderator-guide/overview.md)** - Moderation best practices
-- **[Admin Guide](../admin-guide/overview.md)** - Admin panel features
-
-### Customize Your Installation
-
-- **[Configuration](configuration.md)** - Environment settings
-- **[Team Management](../admin-guide/team-management.md)** - Organize your teams
-- **[Role Management](../admin-guide/roles-permissions.md)** - Set up permissions
-
-### For Developers
-
-- **[Development Guide](../development/setup.md)** - Contribute to PulseStage
-- **[API Documentation](../api/overview.md)** - REST API reference
-- **[Architecture](../architecture/system-design.md)** - System design
-
----
-
-## Common Workflows
-
-### Town Hall Q&A Workflow
-
-1. **Before the meeting**:
-   - Admins create a team event (e.g., "Q1 All-Hands")
-   - Share the link with employees
-   - Employees submit questions ahead of time
-
-2. **During the meeting**:
-   - Moderator opens Presentation Mode
-   - Questions are sorted by upvotes
-   - Leadership answers top questions live
-   - Tag questions as "Answered Live"
-
-3. **After the meeting**:
-   - Admin exports unanswered questions
-   - Follow-up responses are added via the platform
-   - Transcript can be exported for documentation
-
-### Team Retrospective Workflow
-
-1. **Setup**:
-   - Create a team (e.g., "Engineering Retro")
-   - Invite team members
-
-2. **Collection Phase**:
-   - Team submits questions/topics
-   - Upvote most important items
-   - Use tags: "Went Well", "Needs Improvement", "Action Item"
-
-3. **Discussion Phase**:
-   - Open Presentation Mode
-   - Discuss top-voted items
-   - Answer/respond inline
-
-4. **Follow-Up**:
-   - Export action items
-   - Track progress in next retro
-
----
-
-## Tips & Best Practices
-
-### For Question Submitters
-
-- ✅ **Be specific**: "What's our remote work policy for 2025?" vs "Policy question?"
-- ✅ **One question per submission**: Makes it easier to answer
-- ✅ **Search first**: Your question might already be answered
-- ✅ **Upvote similar questions**: Rather than duplicating
-
-### For Moderators
-
-- ✅ **Answer promptly**: Within 48 hours when possible
-- ✅ **Be comprehensive**: Answer thoroughly to avoid follow-ups
-- ✅ **Use tags**: Organize for easier tracking
-- ✅ **Pin important**: Keep critical questions visible
-
-### For Admins
-
-- ✅ **Review audit logs**: Track system usage
-- ✅ **Monitor stats**: Identify response bottlenecks
-- ✅ **Export regularly**: Keep records for compliance
-- ✅ **Manage tags**: Keep them organized and relevant
-
----
-
-## Troubleshooting
-
-### Can't Submit Questions
-
-- Ensure you're signed in (Member+ role required)
-- Check you're on a team page, not the home page
-- Verify question length (10-2000 characters)
-
-### Not Seeing All Teams
-
-- Regular users only see teams they're members of
-- Admins see all teams
-- Check with your admin if you need access
-
-### Presentation Mode Not Available
-
-- Requires Moderator+ role
-- Must be on a team page with questions
-- Check your role in Profile → Teams
-
-### Changes Not Appearing
-
-- Hard refresh: Ctrl+F5 (Windows/Linux) or Cmd+Shift+R (Mac)
-- Clear browser cache
-- Check real-time connection (top-right indicator)
-
----
-
-## Getting Help
-
-- 📖 [Full Documentation](../index.md)
-- 🐛 [Report Issues](https://github.com/seanmdalton/pulsestage/issues)
-- 💬 [Discussions](https://github.com/seanmdalton/pulsestage/discussions)
-- 📧 Contact your PulseStage administrator
-
----
-
-Welcome to PulseStage! We hope you enjoy using it to improve communication and transparency in your organization. 🚀
+- [User Guide](../guides/user/overview.md) - User features
+- [Moderator Guide](../guides/moderator/overview.md) - Moderation workflow
+- [Admin Guide](../guides/admin/overview.md) - Administration
+- [Production Deployment](../deployment/production.md) - Production setup

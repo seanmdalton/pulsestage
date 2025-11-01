@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://pulsestage.app/schemas/pulse.response.recorded.v1.json",
+    "title": "pulse.response.recorded.v1",
+    "type": "object",
+    "required": ["event", "tenantId", "questionId", "score", "submittedAt"],
+    "properties": {
+        "event": { "const": "pulse.response.recorded.v1" },
+        "tenantId": { "type": "string" },
+        "questionId": { "type": "string" },
+        "score": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "cohortName": { "type": "string" },
+        "submittedAt": { "type": "string", "format": "date-time" }
+    },
+    "additionalProperties": false
+}

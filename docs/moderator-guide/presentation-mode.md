@@ -1,3 +1,0 @@
-# Presentation Mode
-
-Documentation coming soon...

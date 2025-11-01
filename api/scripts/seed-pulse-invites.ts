@@ -28,11 +28,11 @@ async function main() {
     });
 
     if (users.length === 0) {
-      console.log('⚠️  No users found in default tenant');
+      console.log('[WARNING]  No users found in default tenant');
       return;
     }
 
-    console.log(`📋 Found ${users.length} users`);
+    console.log(` Found ${users.length} users`);
 
     // Get active questions
     const questions = await prisma.pulseQuestion.findMany({
@@ -44,11 +44,11 @@ async function main() {
     });
 
     if (questions.length === 0) {
-      console.log('⚠️  No active pulse questions found');
+      console.log('[WARNING]  No active pulse questions found');
       return;
     }
 
-    console.log(`📝 Found ${questions.length} active questions`);
+    console.log(` Found ${questions.length} active questions`);
 
     // Clear existing PENDING invites (keep COMPLETED ones for history)
     const deletedCount = await prisma.pulseInvite.deleteMany({
@@ -58,7 +58,7 @@ async function main() {
       },
     });
 
-    console.log(`🗑️  Cleared ${deletedCount.count} existing pending invites`);
+    console.log(`🗑  Cleared ${deletedCount.count} existing pending invites`);
 
     // Create new invites - 1 question per user
     let created = 0;
@@ -84,7 +84,7 @@ async function main() {
       created++;
     }
 
-    console.log(`\n✅ Created ${created} pulse invites!`);
+    console.log(`\n[OK] Created ${created} pulse invites!`);
     console.log('\n📧 Users with pending invites:');
     for (const user of users) {
       console.log(`   - ${user.email}`);
@@ -95,7 +95,7 @@ async function main() {
     console.log('   2. Navigate to Dashboard');
     console.log('   3. You should see the "Pending Pulse" card with a badge!');
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('[ERROR] Error:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

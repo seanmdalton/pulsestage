@@ -1,3 +1,0 @@
-# Audit Logging
-
-Documentation coming soon...

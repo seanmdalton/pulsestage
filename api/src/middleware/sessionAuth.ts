@@ -100,11 +100,11 @@ async function loadMockData() {
 
     if (process.env.NODE_ENV === 'development') {
       console.log(
-        `✅ Loaded ${mockUsers.length} mock users, ${mockTeamMemberships.length} memberships, ${mockUserPreferences.length} preferences`
+        `[OK] Loaded ${mockUsers.length} mock users, ${mockTeamMemberships.length} memberships, ${mockUserPreferences.length} preferences`
       );
     }
   } catch (error) {
-    console.error('❌ Error loading mock SSO data:', error);
+    console.error('[ERROR] Error loading mock SSO data:', error);
   }
 }
 
@@ -198,7 +198,7 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
         if (currentTenant && user.tenantId !== currentTenant.tenantId) {
           if (process.env.NODE_ENV === 'development') {
             console.log(
-              `❌ Session Auth: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
+              `[ERROR] Session Auth: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
             );
           }
           // User belongs to different tenant - don't authenticate
@@ -229,7 +229,7 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
         if (currentTenant && user.tenantId !== currentTenant.tenantId) {
           if (process.env.NODE_ENV === 'development') {
             console.log(
-              `❌ Mock SSO: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
+              `[ERROR] Mock SSO: User ${user.email} (tenant: ${user.tenantId}) cannot authenticate in tenant ${currentTenant.tenantId}`
             );
           }
           // User belongs to different tenant - don't authenticate

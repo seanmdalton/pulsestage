@@ -46,7 +46,7 @@ describe('MDN HTTP Observatory Security Scan', () => {
     // Run Observatory scan against our local server root endpoint
     const result = await scan(TEST_HOST);
 
-    console.log('\n🔒 MDN HTTP Observatory Results:');
+    console.log('\n MDN HTTP Observatory Results:');
     console.log(`   Grade: ${result.scan.grade}`);
     console.log(`   Score: ${result.scan.score}/100`);
     console.log(`   Tests Passed: ${result.scan.testsPassed}/${result.scan.testsQuantity}`);
@@ -64,7 +64,7 @@ describe('MDN HTTP Observatory Security Scan', () => {
       expect(result.scan.score).toBeGreaterThanOrEqual(40);
       expect(result.scan.grade).toMatch(/^[ABC]/); // Accept C or better
 
-      console.log('   ℹ️  Development mode: relaxed CSP for Vite HMR');
+      console.log('   ℹ  Development mode: relaxed CSP for Vite HMR');
     } else {
       // Production mode: expect A grade
       const acceptableGrades = ['A+', 'A', 'A-'];
@@ -89,11 +89,11 @@ describe('MDN HTTP Observatory Security Scan', () => {
     if (isDevelopment) {
       // CSP exists but may have unsafe-eval
       expect(cspTest.result).toContain('csp-implemented');
-      console.log('\n📋 CSP Test Result (dev mode):', cspTest.result);
+      console.log('\n CSP Test Result (dev mode):', cspTest.result);
     } else {
       // Production should have fully passing CSP
       expect(cspTest.pass).toBe(true);
-      console.log('\n📋 CSP Test Result (production):', cspTest.result);
+      console.log('\n CSP Test Result (production):', cspTest.result);
     }
   }, 30000);
 
@@ -124,9 +124,9 @@ describe('MDN HTTP Observatory Security Scan', () => {
   it('should provide detailed test results', async () => {
     const result = await scan(TEST_HOST);
 
-    console.log('\n🔍 Detailed Test Results:');
+    console.log('\n Detailed Test Results:');
     Object.entries(result.tests).forEach(([testName, testResult]: [string, any]) => {
-      const status = testResult.pass ? '✅' : '❌';
+      const status = testResult.pass ? '[OK]' : '[ERROR]';
       console.log(`   ${status} ${testName}: ${testResult.result}`);
     });
 

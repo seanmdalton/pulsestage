@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔒 PulseStage Security Testing"
+echo "[SECURITY] PulseStage Security Testing"
 echo "=============================="
 echo ""
 
@@ -16,27 +16,26 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Check if Trivy is available (via Docker)
-echo "📋 Checking prerequisites..."
+echo " Checking prerequisites..."
 if ! docker --version > /dev/null 2>&1; then
-  echo -e "${RED}❌ Docker not available${NC}"
+  echo -e "${RED}[ERROR] Docker not available${NC}"
   exit 1
 fi
-echo -e "${GREEN}✅ Docker available${NC}"
+echo -e "${GREEN}[OK] Docker available${NC}"
 echo ""
 
-# Build images
-echo "🏗️  Building Docker images..."
-echo "Building API..."
-docker compose build --no-cache api > /dev/null 2>&1
-echo -e "${GREEN}✅ API built${NC}"
-
-echo "Building Web..."
-docker compose build --no-cache web > /dev/null 2>&1
-echo -e "${GREEN}✅ Web built${NC}"
+# Build images using make build (uses override file for local builds)
+echo "[BUILD]  Building Docker images..."
+make build > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "${RED}[ERROR] Failed to build images${NC}"
+  exit 1
+fi
+echo -e "${GREEN}[OK] Images built${NC}"
 echo ""
 
 # Run Trivy scans
-echo "🔍 Running Trivy security scans..."
+echo "[SCAN] Running Trivy security scans..."
 echo ""
 
 # Scan API image
@@ -49,14 +48,14 @@ API_RESULT=$(docker run --rm \
   --ignorefile /.trivyignore \
   --format json \
   --quiet \
-  ama-app-api:latest 2>/dev/null)
+  pulsestage-api:latest 2>/dev/null)
 
 API_VULN_COUNT=$(echo "$API_RESULT" | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length' 2>/dev/null || echo "0")
 
 if [ "$API_VULN_COUNT" -eq 0 ]; then
-  echo -e "${GREEN}✅ API image: 0 HIGH/CRITICAL vulnerabilities${NC}"
+  echo -e "${GREEN}[OK] API image: 0 HIGH/CRITICAL vulnerabilities${NC}"
 else
-  echo -e "${RED}❌ API image: $API_VULN_COUNT HIGH/CRITICAL vulnerabilities${NC}"
+  echo -e "${RED}[ERROR] API image: $API_VULN_COUNT HIGH/CRITICAL vulnerabilities${NC}"
   echo "$API_RESULT" | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -10
   exit 1
 fi
@@ -71,14 +70,14 @@ WEB_RESULT=$(docker run --rm \
   --ignorefile /.trivyignore \
   --format json \
   --quiet \
-  ama-app-web:latest 2>/dev/null)
+  ghcr.io/seanmdalton/pulsestage-web:latest 2>/dev/null)
 
 WEB_VULN_COUNT=$(echo "$WEB_RESULT" | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")] | length' 2>/dev/null || echo "0")
 
 if [ "$WEB_VULN_COUNT" -eq 0 ]; then
-  echo -e "${GREEN}✅ Web image: 0 HIGH/CRITICAL vulnerabilities${NC}"
+  echo -e "${GREEN}[OK] Web image: 0 HIGH/CRITICAL vulnerabilities${NC}"
 else
-  echo -e "${RED}❌ Web image: $WEB_VULN_COUNT HIGH/CRITICAL vulnerabilities${NC}"
+  echo -e "${RED}[ERROR] Web image: $WEB_VULN_COUNT HIGH/CRITICAL vulnerabilities${NC}"
   echo "$WEB_RESULT" | jq -r '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH") | "  - \(.PkgName)@\(.InstalledVersion): \(.Title) (Severity: \(.Severity))"' | head -10
   exit 1
 fi
@@ -86,33 +85,52 @@ fi
 echo ""
 
 # Test services
-echo "🧪 Testing services..."
+echo "[TEST] Testing services..."
 docker compose up -d > /dev/null 2>&1
-sleep 10
 
-# Test API
-if curl -sf http://localhost:3000/health > /dev/null; then
-  echo -e "${GREEN}✅ API responds correctly${NC}"
-else
-  echo -e "${RED}❌ API not responding${NC}"
-  docker compose logs api --tail 20
-  exit 1
-fi
+# Wait for services with retry logic
+echo "Waiting for services to start..."
+MAX_RETRIES=30
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+  if curl -sf http://localhost:3000/health > /dev/null 2>&1; then
+    echo -e "${GREEN}[OK] API responds correctly${NC}"
+    break
+  fi
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    echo -e "${RED}[ERROR] API not responding after ${MAX_RETRIES} retries${NC}"
+    docker compose logs api --tail 30
+    docker compose down > /dev/null 2>&1
+    exit 1
+  fi
+  sleep 2
+done
 
 # Test Web
 if curl -sf http://localhost:5173 > /dev/null; then
-  echo -e "${GREEN}✅ Web responds correctly${NC}"
+  echo -e "${GREEN}[OK] Web responds correctly${NC}"
 else
-  echo -e "${RED}❌ Web not responding${NC}"
+  echo -e "${RED}[ERROR] Web not responding${NC}"
   docker compose logs web --tail 20
+  docker compose down > /dev/null 2>&1
   exit 1
 fi
 
+# Clean up services
+echo ""
+echo "Stopping test services..."
+docker compose down > /dev/null 2>&1
+
 echo ""
 echo "═══════════════════════════════════════"
-echo -e "${GREEN}✅ ALL SECURITY CHECKS PASSED!${NC}"
+echo -e "${GREEN}[OK] ALL SECURITY CHECKS PASSED!${NC}"
 echo "═══════════════════════════════════════"
 echo ""
-echo "Safe to push to GitHub! 🚀"
+echo "Images scanned: 0 HIGH/CRITICAL vulnerabilities"
+echo "Services tested: API and Web responding correctly"
+echo ""
+echo "Safe to push to GitHub! "
 echo ""
 

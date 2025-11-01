@@ -25,11 +25,11 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
   console.log('🎭 Seeding demo data...');
 
   // Clear existing questions to prevent duplicates
-  console.log('🗑️  Clearing existing questions...');
+  console.log('🗑  Clearing existing questions...');
   await prisma.question.deleteMany({
     where: { tenantId },
   });
-  console.log('✅ Existing questions cleared');
+  console.log('[OK] Existing questions cleared');
 
   // Get all teams for the tenant
   const teams = await prisma.team.findMany({
@@ -185,7 +185,7 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
       },
     });
 
-    console.log(`  ✅ ${userData.name} (Primary: ${primaryTeam.name})`);
+    console.log(`  [OK] ${userData.name} (Primary: ${primaryTeam.name})`);
     userMap[userData.ssoId] = user;
 
     // Create user preferences if they don't exist
@@ -609,8 +609,10 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
     questionCount++;
   }
 
-  console.log(`  ✅ Created ${questionCount} sample questions (${underReviewCount} under review)`);
-  console.log('🎉 Demo data seeding completed!');
+  console.log(
+    `  [OK] Created ${questionCount} sample questions (${underReviewCount} under review)`
+  );
+  console.log(' Demo data seeding completed!');
 }
 
 // Run if called directly
@@ -631,7 +633,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       await seedDemoData(prisma, tenant.id);
     } catch (error) {
-      console.error('❌ Demo data seeding failed:', error);
+      console.error('[ERROR] Demo data seeding failed:', error);
       throw error;
     } finally {
       await prisma.$disconnect();

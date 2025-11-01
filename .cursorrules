@@ -1,7 +1,19 @@
 # PulseStage Development Rules
 
-## Core Principle
-**The development environment must ALWAYS be functional before requesting user testing.**
+**See also:** 
+- `docs/handbook/` for product vision, architecture decisions, and contracts.
+- `.cursor/rules/` for technical implementation details and code patterns.
+- `/working-docs/` for temporary analysis, reports, and working documents.
+
+## Core Principles
+
+1. **The development environment must ALWAYS be functional before requesting user testing.**
+2. **NO EMOJIS** in code, logs, scripts, documentation, or commit messages. Emojis are ONLY allowed in frontend UI components.
+3. **Team-first architecture** - Users have primaryTeamId; pulse and Q&A are team-scoped with org rollups.
+4. **Tenant isolation is absolute** - Every query MUST filter by tenantId (see `docs/handbook/TENANCY_MODEL.md`).
+5. **Anonymity by default** - PulseResponse has NO userId; aggregates only shown when n >= threshold.
+6. **Contracts > code** - OpenAPI spec, event schemas, and DB invariants are source of truth (see `docs/handbook/API_CONTRACTS/`).
+7. **RBAC enforcement** - 5 roles (viewer, member, moderator, admin, owner) enforced server-side (see ADR-0003).
 
 ## Required Workflow
 
@@ -43,18 +55,28 @@
 ## Key Commands
 
 ### Most Important
-- `make preflight` - ⭐ REQUIRED before user testing
+- `make preflight` - REQUIRED before user testing
+- `make validate-ci` - Run ALL CI checks locally (tests, linting, formatting, security)
 - `make db-seed` - Reset & seed all data (idempotent)
-- `make db-test-seed` - Validate seed data integrity
 
 ### Development
-- `make dev` - Start development (foreground)
-- `make up` - Start services (background)
-- `make down` - Stop services
+- `make dev` - Start development (foreground, hot reload)
+- `make up` - Start services (background, hot reload)
+- `make down` - Stop all services
+- `make build` - Build local Docker images for security scanning
+
+### Database
+- `make db-seed` - Reset & seed all data
+- `make db-test-seed` - Validate seed data integrity
 
 ### Testing & Validation
-- `make test` - Run all tests
-- `make validate-ci` - Run CI checks locally
+- `make test` - Run all tests (API + Web E2E)
+- `make test-api` - Run API tests only
+- `make test-web` - Run Web E2E tests
+- `make security` - Run security scans (Trivy on local builds)
+- `make lint` - Run linting (API + Web)
+- `make lint-fix` - Fix linting issues automatically
+- `make format` - Format code (Prettier)
 
 ## Seed Data Expectations
 
@@ -115,36 +137,170 @@ make preflight
 - API: Restart the API server
 - Database: Run `make db-seed`
 
+## Versioning (Semantic Versioning)
+
+PulseStage follows [semver.org](https://semver.org/): `MAJOR.MINOR.PATCH`
+
+### AI Responsibilities
+
+**PATCH (0.0.X) - Increment Automatically:**
+- Bug fixes, documentation updates, security patches
+- Update version in `api/package.json`, `web/package.json`, `CHANGELOG.md`, `README.md`
+- Commit message: `chore: release v0.0.X`
+
+**MINOR (0.X.0) - Propose to User:**
+- New features, new endpoints, new config options
+- ASK: "This adds [feature]. Release as v0.X.0?"
+- Wait for approval before updating version
+
+**MAJOR (X.0.0) - Warn User Before Implementation:**
+- Breaking changes (API, database, auth, config)
+- STOP and ASK: "This is BREAKING. Requires vX.0.0. Proceed?"
+- Create migration guide before implementing
+
+**Current Version:** `0.1.0` (pre-stable)
+
+See `docs/handbook/DEVELOPMENT.md` for complete versioning rules.
+
+---
+
+## Before Pushing to Git
+
+**MANDATORY: Run complete validation before every push**
+
+```bash
+make validate-ci
+```
+
+This command runs (in order):
+1. API tests (336 tests must pass)
+2. API build (must succeed)
+3. API linting (must pass)
+4. API formatting check (must pass)
+5. Web linting (must pass)
+6. Web formatting check (must pass)
+7. **Security scans** (Trivy image scans - must pass)
+
+**Exit code must be 0** - DO NOT push if any check fails.
+
+### Security Scans
+
+Security scans check for:
+- HIGH/CRITICAL vulnerabilities in Docker images
+- Vulnerable dependencies in package.json
+- OS-level vulnerabilities in base images
+
+**NEVER update `.trivyignore` without user approval** - Fix security issues, don't ignore them.
+
+### Local Docker Build System
+
+For security scanning and testing:
+1. `make build` builds images locally with tags: `pulsestage-api:latest`, `pulsestage-web:latest`
+2. Uses `docker-compose.override.yaml` to override ghcr.io image names with local tags
+3. `docker-compose.yaml` keeps ghcr.io references for open-source users pulling images
+4. `make security` scans the LOCAL builds, not public registry images
+
+If security scans fail:
+1. Check if base images can be updated (currently node:24.11.0-alpine, nginx:alpine)
+2. Check if vulnerable packages can be updated
+3. Investigate if vulnerabilities are actually exploitable in our context
+4. Only ask user about ignoring if truly a false positive with clear justification
+
 ## Development Best Practices
 
-### DO ✅
+### DO
 - Run `make preflight` before requesting user testing
+- Run `make validate-ci` before pushing to git
 - Use Makefile commands (`make db-seed`, not `npx tsx scripts/...`)
 - Check exit codes before proceeding
 - Provide specific URLs and expected behavior
 - Test changes yourself before asking user to test
 - Keep seed data comprehensive and realistic
+- Fix security vulnerabilities, don't ignore them
+- Use plain text for logs, documentation, and code output
 
-### DON'T ❌
+### DON'T
+- Use emojis in code, logs, scripts, documentation, or terminal output
 - Ask user to test without running pre-flight check
+- Push to git without running `make validate-ci`
 - Assume services are running
 - Skip validation after major changes
 - Create new users/tenants outside of seed data
 - Use hardcoded credentials that don't match seed data
 - Forget to restart services after code changes
+- Update `.trivyignore` without explicit user approval
+- Violate tenant isolation (missing tenantId filters)
+- Store userId in PulseResponse (breaks anonymity)
+- Make breaking changes to API contracts without versioning
+
+## Working Documents
+
+### Purpose
+The `/working-docs/` directory contains **temporary analysis files, reports, and working documents**.
+
+### When to Use Working Docs
+AI assistants MUST create working documents in `/working-docs/` for:
+- Gap analysis reports (e.g., documentation audits)
+- Code audit reports
+- Planning documents (specs, refactoring plans)
+- Investigation findings (performance, security)
+- Temporary analysis (before promoting to permanent docs)
+
+### Naming Convention
+Use descriptive, dated names:
+```
+working-docs/YYYY-MM-DD_topic_type.md
+```
+
+**Examples:**
+- `working-docs/2025-01-15_documentation_gaps_analysis.md`
+- `working-docs/2025-01-20_performance_audit.md`
+- `working-docs/2025-02-01_migration_plan.md`
+
+### Lifecycle
+1. **Create** - AI creates working doc during task
+2. **Use** - Reference during development/discussion
+3. **Promote or Delete**:
+   - Extract insights → add to `docs/handbook/` or `docs/`
+   - Delete if no lasting value
+   - Archive to `working-docs/archive/` if useful for history
+
+### NOT for Working Docs
+- Permanent documentation (use `docs/handbook/` or `docs/`)
+- Code files
+- Configuration files
+- User-facing documentation
+
+**Note:** `/working-docs/` is git-ignored (except README and archive/.gitkeep).
+
+---
 
 ## File References
 
-- **Workflow Documentation**: `DEVELOPMENT_WORKFLOW.md` (comprehensive guide)
+### Development Workflow
+- **Workflow Documentation**: `docs/handbook/DEVELOPMENT.md` (comprehensive guide)
 - **Pre-Flight Script**: `api/scripts/preflight-check.ts`
 - **Seed Script**: `api/scripts/reset-and-seed-all.ts`
 - **Seed Validation**: `api/scripts/test-seed-data.ts`
-- **Seed Checklist**: `SEED_DATA_CHECKLIST.md`
+
+### Handbook (Product & Architecture)
+- **Product Vision**: `docs/handbook/PRODUCT_VISION.md`
+- **Personas & Use Cases**: `docs/handbook/PERSONAS.md`, `docs/handbook/USE-CASES.md`
+- **Data Model**: `docs/handbook/DATA_MODEL_SNAPSHOT.md`
+- **Security Model**: `docs/handbook/SECURITY_MODEL.md`
+- **API Contracts**: `docs/handbook/API_CONTRACTS/` (OpenAPI, SSE events)
+- **Architecture Decisions**: `docs/handbook/DECISIONS/` (ADRs)
+- **Operations Runbook**: `docs/handbook/OPERATIONS.md`
+
+### Working Documents (Temporary)
+- **Directory**: `/working-docs/` (git-ignored)
+- **README**: `/working-docs/README.md` (explains workflow)
+- **Archive**: `/working-docs/archive/` (historical working docs)
 
 ## Example User Testing Request
 
 ```
-✅ Pre-flight check passed!
+Pre-flight check passed!
 
 Please test the Pulse Dashboard:
 1. Go to http://localhost:5173/login
@@ -152,14 +308,50 @@ Please test the Pulse Dashboard:
 3. Navigate to http://localhost:5173/pulse/dashboard
 
 Expected:
-- 8 weeks of historical data visible
+- 12 weeks of historical data visible
 - Charts display pulse trends
-- Participation rate shows ~70%
+- Participation rate shows ~81%
 
 Let me know if you see any issues!
 ```
 
 ---
 
-**Remember: No user testing requests without a successful pre-flight check. This is non-negotiable.**
+## Three-Tier Rule System
+
+**PulseStage uses three interconnected rule systems:**
+
+1. **`docs/handbook/`** = WHAT and WHY (product vision, architecture, contracts)
+2. **`.cursorrules`** = WORKFLOW (how to develop, validate, test)
+3. **`.cursor/rules/`** = TECHNICAL (implementation patterns, code style)
+
+All three must stay aligned. See `.cursor/rules/README.md` for details.
+
+### When Code Conflicts with Handbook
+1. **Check if handbook is outdated** - Code may have evolved
+2. **Propose handbook update** - Document the current reality
+3. **Ask user for approval** - Never silently ignore conflicts
+4. **Update both if needed** - Keep rules and handbook in sync
+
+### Required Checks During Development
+- [ ] Does this change violate tenant isolation? (see `docs/handbook/TENANCY_MODEL.md`)
+- [ ] Does this break anonymity guarantees? (see `docs/handbook/SECURITY_MODEL.md`)
+- [ ] Does this change API contracts? (update `/api/openapi.yaml`)
+- [ ] Does this affect team-scoping? (see `docs/handbook/DATA_MODEL_SNAPSHOT.md`)
+- [ ] Are ADRs still valid? (see `docs/handbook/DECISIONS/`)
+
+### AI Assistant Responsibilities
+When working on this codebase, I will:
+1. **Reference the handbook** for architectural decisions and constraints
+2. **Follow .cursorrules** for development workflow and validation
+3. **Identify conflicts** between handbook, rules, and actual code
+4. **Propose updates** when inconsistencies are found
+5. **Ask for clarification** rather than guessing intent
+
+---
+
+**Remember:**
+1. No user testing requests without a successful pre-flight check. This is non-negotiable.
+2. No emojis in code, logs, scripts, or documentation. Frontend UI only.
+3. Handbook defines constraints; .cursorrules defines workflow. Both must be followed.
 

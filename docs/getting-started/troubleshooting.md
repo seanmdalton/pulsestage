@@ -1,138 +1,318 @@
-# Troubleshooting Guide
+# Troubleshooting
 
-## API Connection Refused (ERR_CONNECTION_REFUSED)
+Common issues and solutions.
 
-If you see errors like:
-```
-GET http://localhost:3000/teams net::ERR_CONNECTION_REFUSED
-GET http://localhost:3000/admin/status net::ERR_CONNECTION_REFUSED
-```
+## Services Not Starting
 
-The API server is not running. Follow these steps:
-
-### 1. Check if Docker services are running
+### Check Docker Services
 
 ```bash
 docker compose ps
 ```
 
-Expected output - all services should show "Up":
-```
-NAME                IMAGE                                      STATUS
-ama-app-api-1       ghcr.io/seanmdalton/pulsestage-api:latest  Up
-ama-app-db-1        postgres:16-alpine                         Up
-ama-app-redis-1     redis:7-alpine                             Up
-ama-app-web-1       ghcr.io/seanmdalton/pulsestage-web:latest  Up
-```
+All services should show "Up":
+- api
+- web
+- db (PostgreSQL)
+- redis
+- mailpit
 
-### 2. If services are not running, start them
-
-```bash
-docker compose up -d
-```
-
-### 3. Check API logs for errors
-
-```bash
-docker compose logs api
-```
-
-Common issues:
-- Database connection errors (check if PostgreSQL is running)
-- Missing environment variables (check your `.env` file)
-- Port already in use (another service using port 3000)
-
-### 4. Check if API is healthy
-
-```bash
-curl http://localhost:3000/health
-```
-
-Should return: `{"ok":true,"service":"ama-api"}`
-
-### 5. Verify database is initialized
-
-```bash
-docker compose exec api npm run db:seed
-```
-
-### 6. Complete restart
-
-If nothing works, try a complete restart:
+### Restart Services
 
 ```bash
 docker compose down
 docker compose up -d
-docker compose logs -f api
 ```
 
-Watch the logs to see if the API starts successfully.
+### View Logs
+
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f api
+docker compose logs -f web
+```
+
+## Cannot Log In
+
+### Demo Mode Not Working
+
+1. **Verify demo mode enabled**:
+```bash
+# Check .env
+grep AUTH_MODE_DEMO .env
+```
+
+Should show: `AUTH_MODE_DEMO=true` (or empty in development)
+
+2. **Check API logs**:
+```bash
+docker compose logs -f api | grep -i auth
+```
+
+3. **Verify database seeded**:
+```bash
+docker compose exec db psql -U app -d ama -c "SELECT email FROM \"User\" WHERE email LIKE '%@pulsestage.app';"
+```
+
+Should show 4 demo users.
+
+### OAuth Not Working
+
+1. **Verify OAuth configuration** in `.env`:
+```bash
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+```
+
+2. **Check OAuth callback URL** matches GitHub/Google OAuth app settings
+
+3. **Verify environment** is production:
+```bash
+NODE_ENV=production
+AUTH_MODE_DEMO=false
+```
+
+## No Data / Empty Dashboard
+
+### Reseed Database
+
+```bash
+make db-seed
+```
+
+This creates:
+- 50 users
+- 2 teams
+- 36 questions
+- 12 weeks of pulse data
+
+### Verify Seed Data
+
+```bash
+make db-test-seed
+```
+
+Expected output:
+- Users: 50
+- Teams: 2
+- Questions: 36
+- Pulse responses: 800+
+
+## Database Connection Errors
+
+### PostgreSQL Not Accessible
+
+1. **Check PostgreSQL running**:
+```bash
+docker compose ps db
+```
+
+2. **Test connection**:
+```bash
+docker compose exec db psql -U app -d ama -c "SELECT 1;"
+```
+
+3. **Verify DATABASE_URL** in `.env`:
+```bash
+DATABASE_URL=postgresql://app:app@db:5432/ama
+```
+
+### Run Migrations
+
+```bash
+docker compose exec api npx prisma migrate deploy
+```
+
+## Redis Connection Errors
+
+1. **Check Redis running**:
+```bash
+docker compose ps redis
+```
+
+2. **Test connection**:
+```bash
+docker compose exec redis redis-cli ping
+```
+
+Expected: `PONG`
+
+3. **Verify REDIS_URL** in `.env`:
+```bash
+REDIS_URL=redis://redis:6379
+```
 
 ## Port Conflicts
 
-If port 3000 or 5173 is already in use:
+### Port Already in Use
 
+If ports 3000, 5173, 5432, 6379, or 8025 are in use:
+
+1. **Find process using port**:
 ```bash
-# Find what's using the port
-lsof -i :3000
-lsof -i :5173
-
-# Or on Linux:
-ss -tulpn | grep :3000
-ss -tulpn | grep :5173
+sudo lsof -i :3000
 ```
 
-Then either:
-1. Stop the conflicting service
-2. Change ports in `docker-compose.yaml` and update `.env`
+2. **Kill process**:
+```bash
+sudo kill -9 <PID>
+```
 
-## Database Issues
+3. **Or change ports** in `docker-compose.yaml`:
+```yaml
+ports:
+  - "3001:3000"  # Use 3001 instead of 3000
+```
 
-### Reset database completely
+## Email Not Sending
+
+### Check Email Configuration
 
 ```bash
-docker compose down -v  # Warning: This deletes all data!
+# Verify email provider in .env
+grep EMAIL_PROVIDER .env
+```
+
+### Test with Mailpit (Development)
+
+1. **Access Mailpit**: `http://localhost:8025`
+2. **Check emails** in Mailpit inbox
+3. **Verify SMTP settings**:
+```bash
+SMTP_HOST=mailpit
+SMTP_PORT=1025
+```
+
+### Production Email Issues
+
+1. **Verify credentials** for SMTP or Resend
+2. **Check email queue**:
+   - Admin → Email Queue
+3. **View logs**:
+```bash
+docker compose logs -f api | grep -i email
+```
+
+## Permission Errors
+
+### Cannot Answer Questions
+
+1. **Verify role**:
+   - Admin → Users → [Your User]
+   - Check team memberships and roles
+
+2. **Required role**: Moderator, Admin, or Owner
+
+### Cannot Access Admin Panel
+
+1. **Required role**: Admin or Owner
+2. **Verify in database**:
+```bash
+docker compose exec db psql -U app -d ama -c "SELECT email, role FROM \"User\" WHERE email = 'your@email.com';"
+```
+
+## Performance Issues
+
+### Slow Search
+
+Full-text search requires GIN indexes:
+
+```bash
+docker compose exec api npx prisma migrate deploy
+```
+
+Verify indexes:
+```bash
+docker compose exec db psql -U app -d ama -c "\d \"Question\";"
+```
+
+Should show `question_search_idx` (GIN index).
+
+### High Memory Usage
+
+1. **Check Docker resource limits**:
+```bash
+docker stats
+```
+
+2. **Increase Docker memory** (Docker Desktop → Settings → Resources)
+
+3. **Reduce worker processes** in production
+
+## Frontend Not Loading
+
+### White Screen / Blank Page
+
+1. **Check frontend logs**:
+```bash
+docker compose logs -f web
+```
+
+2. **Verify API accessible**:
+```bash
+curl http://localhost:3000/health
+```
+
+3. **Check CORS settings** in `.env`:
+```bash
+CORS_ORIGIN=http://localhost:5173
+```
+
+### 401 Unauthorized Errors
+
+1. **Clear cookies**: Browser DevTools → Application → Cookies → Clear
+2. **Log out and back in**
+3. **Verify session secrets** in `.env` are set
+
+## Pre-Flight Check Failures
+
+Run diagnostics:
+
+```bash
+make preflight
+```
+
+This checks:
+- Docker services
+- Database connectivity
+- API health
+- Frontend accessibility
+- Authentication flow
+- Seed data integrity
+
+Exit code 0 = all checks passed
+
+Exit code 1 = see output for failed checks
+
+## Still Having Issues?
+
+1. **Check logs**:
+```bash
+docker compose logs -f
+```
+
+2. **Verify environment variables**:
+```bash
+cat .env
+cat web/.env
+```
+
+3. **Reset everything**:
+```bash
+docker compose down -v  # WARNING: Deletes all data
+./setup.sh
 docker compose up -d
-docker compose exec api npm run db:seed:full
+make db-seed
 ```
 
-### Check database connection
+4. **Open an issue**: [GitHub Issues](https://github.com/seanmdalton/pulsestage/issues)
 
-```bash
-docker compose exec db psql -U app -d ama -c "SELECT COUNT(*) FROM \"Question\";"
-```
-
-## Web Container Issues
-
-If web is running but API isn't, the web container might be trying to connect to the wrong API URL.
-
-Check the web container environment:
-```bash
-docker compose exec web env | grep VITE_API_URL
-```
-
-Should show: `VITE_API_URL=http://localhost:3000`
-
-## Still Not Working?
-
-1. Check all environment variables are set:
-   ```bash
-   cat .env
-   ```
-
-2. Ensure `.env` has all required variables:
-   - `SESSION_SECRET`
-   - `ADMIN_SESSION_SECRET`
-   - `CSRF_SECRET`
-   - `ADMIN_KEY`
-
-3. Regenerate secrets:
-   ```bash
-   ./setup.sh
-   ```
-
-4. View all service logs:
-   ```bash
-   docker compose logs
-   ```
-
+Include:
+- Error messages
+- Docker logs
+- Environment (OS, Docker version)
+- Steps to reproduce

@@ -41,7 +41,7 @@ async function check(
     const result = await fn();
     results.push({ name, ...result, critical });
 
-    const icon = result.passed ? '✅' : '❌';
+    const icon = result.passed ? '[OK]' : '[ERROR]';
     console.log(`${icon} ${name}: ${result.message}`);
 
     if (!result.passed && critical) {
@@ -55,7 +55,7 @@ async function check(
     const message = error instanceof Error ? error.message : String(error);
     results.push({ name, passed: false, message, critical });
 
-    console.log(`❌ ${name}: ${message}`);
+    console.log(`[ERROR] ${name}: ${message}`);
 
     if (critical) {
       console.error(`\n💥 CRITICAL FAILURE: ${name}`);
@@ -68,7 +68,7 @@ async function check(
 }
 
 async function main() {
-  console.log('🚀 Running Pre-Flight Checks...');
+  console.log(' Running Pre-Flight Checks...');
   console.log('='.repeat(60));
   console.log('');
 
@@ -329,7 +329,7 @@ async function main() {
   const allCriticalPassed = critical.every(r => r.passed);
 
   if (allCriticalPassed && totalPassed === results.length) {
-    console.log('✅ ALL CHECKS PASSED - Ready for testing!');
+    console.log('[OK] ALL CHECKS PASSED - Ready for testing!');
     console.log('');
     console.log('🌐 Frontend: http://localhost:5173');
     console.log('🔌 API: http://localhost:3000');
@@ -338,15 +338,15 @@ async function main() {
     console.log('👤 Demo Login: admin@pulsestage.app (or alice, bob, diana, charlie)');
     process.exit(0);
   } else if (allCriticalPassed) {
-    console.log('⚠️  ALL CRITICAL CHECKS PASSED - Non-critical issues present');
+    console.log('[WARNING]  ALL CRITICAL CHECKS PASSED - Non-critical issues present');
     console.log(`   ${totalPassed}/${results.length} total checks passed`);
     console.log('   You can proceed with testing, but some features may not work.');
     process.exit(0);
   } else {
-    console.log('❌ CRITICAL CHECKS FAILED - Cannot proceed with testing');
+    console.log('[ERROR] CRITICAL CHECKS FAILED - Cannot proceed with testing');
     console.log(`   ${criticalPassed}/${critical.length} critical checks passed`);
     console.log('');
-    console.log('🔧 Common fixes:');
+    console.log(' Common fixes:');
     console.log('   - Run: docker-compose up -d');
     console.log('   - Run: make db-seed');
     console.log('   - Run: make dev (in separate terminals for api and web)');

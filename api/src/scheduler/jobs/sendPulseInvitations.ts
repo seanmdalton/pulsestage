@@ -39,7 +39,7 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
     });
 
     if (schedules.length === 0) {
-      console.log('ℹ️  No enabled pulse schedules found');
+      console.log('ℹ  No enabled pulse schedules found');
       return;
     }
 
@@ -55,7 +55,7 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
 
       if (!shouldRunToday) {
         console.log(
-          `⏭️  Skipping tenant ${schedule.tenant.slug}: scheduled for day ${schedule.dayOfWeek}, today is ${currentDayOfWeek}`
+          `⏭  Skipping tenant ${schedule.tenant.slug}: scheduled for day ${schedule.dayOfWeek}, today is ${currentDayOfWeek}`
         );
         continue;
       }
@@ -66,12 +66,12 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
 
       if (timeDiff > 15) {
         console.log(
-          `⏭️  Skipping tenant ${schedule.tenant.slug}: scheduled for ${scheduledTime}, current time ${currentTime} (${timeDiff} min difference)`
+          `⏭  Skipping tenant ${schedule.tenant.slug}: scheduled for ${scheduledTime}, current time ${currentTime} (${timeDiff} min difference)`
         );
         continue;
       }
 
-      console.log(`✅ Processing pulse for tenant: ${schedule.tenant.slug}`);
+      console.log(`[OK] Processing pulse for tenant: ${schedule.tenant.slug}`);
 
       // Determine which cohort to invite
       let cohortName: string;
@@ -97,7 +97,7 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
       });
 
       if (questions.length === 0) {
-        console.warn(`⚠️  No active questions for tenant ${schedule.tenant.slug}, skipping`);
+        console.warn(`[WARNING]  No active questions for tenant ${schedule.tenant.slug}, skipping`);
         continue;
       }
 
@@ -112,7 +112,9 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
       });
 
       if (!cohort) {
-        console.warn(`⚠️  Cohort '${cohortName}' not found for tenant ${schedule.tenant.slug}`);
+        console.warn(
+          `[WARNING]  Cohort '${cohortName}' not found for tenant ${schedule.tenant.slug}`
+        );
         continue;
       }
 
@@ -140,7 +142,7 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
       }
 
       if (eligibleUsers.length === 0) {
-        console.log(`ℹ️  All users in cohort '${cohortName}' already have invites this week`);
+        console.log(`ℹ  All users in cohort '${cohortName}' already have invites this week`);
         continue;
       }
 
@@ -166,13 +168,16 @@ export async function sendPulseInvitationsJob(prisma: PrismaClient) {
           `📊 Completed pulse for tenant ${schedule.tenant.slug}: ${result.sent} sent, ${result.failed} errors`
         );
       } catch (error) {
-        console.error(`❌ Error sending invitations for tenant ${schedule.tenant.slug}:`, error);
+        console.error(
+          `[ERROR] Error sending invitations for tenant ${schedule.tenant.slug}:`,
+          error
+        );
       }
     }
 
-    console.log('✅ Pulse invitation job completed');
+    console.log('[OK] Pulse invitation job completed');
   } catch (error) {
-    console.error('❌ Error in sendPulseInvitationsJob:', error);
+    console.error('[ERROR] Error in sendPulseInvitationsJob:', error);
     throw error;
   }
 }

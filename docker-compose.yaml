@@ -1,3 +1,18 @@
+# PulseStage Docker Compose Configuration
+#
+# Version Pinning:
+#   - Default: Uses 'latest' tag for automatic updates
+#   - Production: Pin to specific version for stability
+#   - Example: ghcr.io/seanmdalton/pulsestage-api:0.1.0
+#
+# Available Tags:
+#   - 0.1.0 (full version)
+#   - 0.1 (minor version)
+#   - 0 (major version)
+#   - latest (always newest)
+#
+# See CHANGELOG.md for version history and https://semver.org for versioning semantics.
+
 services:
   api:
     image: ghcr.io/seanmdalton/pulsestage-api:latest
@@ -21,7 +36,7 @@ services:
       - redis
 
   web:
-    image: ghcr.io/seanmdalton/pulsestage-web:latest
+    image: pulsestage-web:latest
     environment:
       VITE_API_URL: http://localhost:3000
       VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-PulseStage}

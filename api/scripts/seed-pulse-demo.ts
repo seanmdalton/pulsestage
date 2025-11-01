@@ -35,7 +35,7 @@ async function main() {
     throw new Error('No users found');
   }
 
-  console.log(`📋 Found ${users.length} users`);
+  console.log(` Found ${users.length} users`);
 
   // Get active questions
   const questions = await prisma.pulseQuestion.findMany({
@@ -49,13 +49,13 @@ async function main() {
     throw new Error('No active pulse questions found');
   }
 
-  console.log(`📝 Found ${questions.length} active questions`);
+  console.log(` Found ${questions.length} active questions`);
 
   // Clean up existing data
-  console.log('🧹 Cleaning up existing pulse data...');
+  console.log(' Cleaning up existing pulse data...');
   await prisma.pulseResponse.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.pulseInvite.deleteMany({ where: { tenantId: tenant.id } });
-  console.log('✅ Cleanup complete');
+  console.log('[OK] Cleanup complete');
 
   // Get users by team for team-specific trends
   const engineeringUsers = users.filter(
@@ -211,7 +211,7 @@ async function main() {
     }
   }
 
-  console.log(`\n✅ Pulse demo data seeded successfully!`);
+  console.log(`\n[OK] Pulse demo data seeded successfully!`);
   console.log(`\n📊 Summary:`);
   console.log(`   Total Invites: ${totalInvites}`);
   console.log(`   Total Responses: ${totalResponses}`);
@@ -228,7 +228,7 @@ async function main() {
 
 main()
   .catch(e => {
-    console.error('❌ Error:', e);
+    console.error('[ERROR] Error:', e);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

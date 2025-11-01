@@ -1,7 +1,7 @@
 # ==============================================================================
 # STAGE 1: Dependencies
 # ==============================================================================
-FROM node:24-alpine AS deps
+FROM node:24.11.0-alpine AS deps
 WORKDIR /app
 
 # Install OpenSSL for Prisma
@@ -14,7 +14,7 @@ RUN npm ci --prefer-offline --no-audit
 # ==============================================================================
 # STAGE 2: Builder
 # ==============================================================================
-FROM node:24-alpine AS builder
+FROM node:24.11.0-alpine AS builder
 WORKDIR /app
 
 # Install OpenSSL for Prisma
@@ -35,7 +35,7 @@ RUN npm run build
 # ==============================================================================
 # STAGE 3: Production Runtime
 # ==============================================================================
-FROM node:24-alpine
+FROM node:24.11.0-alpine
 
 # Set working directory
 WORKDIR /app

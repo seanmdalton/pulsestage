@@ -8,11 +8,11 @@ async function main() {
   });
 
   if (!admin) {
-    console.log('❌ Admin user not found');
+    console.log('[ERROR] Admin user not found');
     return;
   }
 
-  console.log('✅ Admin user found:', admin.email, admin.id);
+  console.log('[OK] Admin user found:', admin.email, admin.id);
 
   const invites = await prisma.pulseInvite.findMany({
     where: {

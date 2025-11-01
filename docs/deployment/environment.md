@@ -18,7 +18,7 @@ Then edit `.env` with your specific values.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | ✅ Yes | - | `postgresql://user:pass@host:5432/dbname` |
+| `DATABASE_URL` | PostgreSQL connection string | [OK] Yes | - | `postgresql://user:pass@host:5432/dbname` |
 
 **Format:** `postgresql://[user]:[password]@[host]:[port]/[database]?schema=[schema]`
 
@@ -32,8 +32,8 @@ Then edit `.env` with your specific values.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `REDIS_URL` | Full Redis connection string | ⚠️ One of `REDIS_URL` or `REDIS_HOST` | - | `redis://redis:6379` |
-| `REDIS_HOST` | Redis hostname | ⚠️ One of `REDIS_URL` or `REDIS_HOST` | `localhost` | `redis` |
+| `REDIS_URL` | Full Redis connection string | [WARNING] One of `REDIS_URL` or `REDIS_HOST` | - | `redis://redis:6379` |
+| `REDIS_HOST` | Redis hostname | [WARNING] One of `REDIS_URL` or `REDIS_HOST` | `localhost` | `redis` |
 | `REDIS_PORT` | Redis port | No | `6379` | `6379` |
 | `REDIS_PASSWORD` | Redis authentication password | No | - | `your-redis-password` |
 
@@ -54,7 +54,7 @@ Then edit `.env` with your specific values.
 |----------|-------------|----------|---------|---------|
 | `PORT` | API server port | No | `3000` | `3000` |
 | `NODE_ENV` | Environment mode | No | `development` | `production` |
-| `CORS_ORIGIN` | Allowed CORS origins (comma-separated) | ✅ Yes | `http://localhost:5173` | `https://app.yourdomain.com,https://admin.yourdomain.com` |
+| `CORS_ORIGIN` | Allowed CORS origins (comma-separated) | [OK] Yes | `http://localhost:5173` | `https://app.yourdomain.com,https://admin.yourdomain.com` |
 
 **`NODE_ENV` behavior:**
 - `development`: Rate limiting disabled, verbose logging
@@ -69,9 +69,9 @@ Then edit `.env` with your specific values.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `ADMIN_KEY` | Admin API key for protected endpoints | ✅ Yes | - | `your-secure-random-string-min-32-chars` |
+| `ADMIN_KEY` | Admin API key for protected endpoints | [OK] Yes | - | `your-secure-random-string-min-32-chars` |
 
-**⚠️ Security:**
+**[WARNING] Security:**
 - Generate a secure random string: `openssl rand -hex 32`
 - Never commit this to version control
 - Rotate periodically (every 90 days recommended)
@@ -88,7 +88,7 @@ Then edit `.env` with your specific values.
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
 | `MULTI_TENANT_MODE` | Enable multi-tenant subdomain routing | No | `false` | `true` or `false` |
-| `BASE_DOMAIN` | Base domain for tenant resolution | ⚠️ Required if `MULTI_TENANT_MODE=true` | - | `pulsestage.com` |
+| `BASE_DOMAIN` | Base domain for tenant resolution | [WARNING] Required if `MULTI_TENANT_MODE=true` | - | `pulsestage.com` |
 | `TENANT_HEADER` | Header name for tenant override | No | `x-tenant-id` | `x-tenant-slug` |
 
 **Single-tenant mode** (`MULTI_TENANT_MODE=false`):
@@ -115,10 +115,10 @@ See [Email Configuration Guide](./email-configuration.md) for complete setup ins
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `EMAIL_PROVIDER` | Email service to use | ✅ Yes | - | `smtp` or `resend` |
-| `EMAIL_FROM` | Sender email address | ✅ Yes | - | `noreply@yourdomain.com` |
+| `EMAIL_PROVIDER` | Email service to use | [OK] Yes | - | `smtp` or `resend` |
+| `EMAIL_FROM` | Sender email address | [OK] Yes | - | `noreply@yourdomain.com` |
 | `EMAIL_FROM_NAME` | Sender display name | No | `PulseStage` | `Your Company AMA` |
-| `FRONTEND_URL` | Frontend URL for email links | ✅ Yes | - | `https://yourdomain.com` |
+| `FRONTEND_URL` | Frontend URL for email links | [OK] Yes | - | `https://yourdomain.com` |
 
 ### SMTP Configuration
 
@@ -126,11 +126,11 @@ Only required when `EMAIL_PROVIDER=smtp`.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `SMTP_HOST` | SMTP server hostname | ✅ Yes | - | `smtp.sendgrid.net` |
-| `SMTP_PORT` | SMTP server port | ✅ Yes | - | `587` |
-| `SMTP_SECURE` | Use TLS (true for 465, false for 587) | ✅ Yes | - | `true` or `false` |
-| `SMTP_USER` | SMTP username | ⚠️ Usually required | - | `apikey` |
-| `SMTP_PASS` | SMTP password | ⚠️ Usually required | - | `SG.xxxxx` |
+| `SMTP_HOST` | SMTP server hostname | [OK] Yes | - | `smtp.sendgrid.net` |
+| `SMTP_PORT` | SMTP server port | [OK] Yes | - | `587` |
+| `SMTP_SECURE` | Use TLS (true for 465, false for 587) | [OK] Yes | - | `true` or `false` |
+| `SMTP_USER` | SMTP username | [WARNING] Usually required | - | `apikey` |
+| `SMTP_PASS` | SMTP password | [WARNING] Usually required | - | `SG.xxxxx` |
 
 **Common SMTP providers:**
 - **SendGrid**: `smtp.sendgrid.net:587`, user=`apikey`, pass=`SG.xxxxx`
@@ -144,7 +144,7 @@ Only required when `EMAIL_PROVIDER=resend`.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `RESEND_API_KEY` | Resend API key | ✅ Yes | - | `re_xxxxxxxxxxxxx` |
+| `RESEND_API_KEY` | Resend API key | [OK] Yes | - | `re_xxxxxxxxxxxxx` |
 
 **Setup:**
 1. Sign up at [resend.com](https://resend.com)
@@ -262,11 +262,11 @@ BASE_DOMAIN=pulsestage.com
 
 ### 1. Never Commit Secrets
 ```bash
-# ❌ Bad: Committed .env file
+# [ERROR] Bad: Committed .env file
 git add .env
 git commit -m "Add config"
 
-# ✅ Good: .env is in .gitignore
+# [OK] Good: .env is in .gitignore
 git add env.example
 git commit -m "Add example config"
 ```

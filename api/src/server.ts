@@ -33,7 +33,7 @@ async function autoBootstrap() {
     const tenantCount = await prisma.tenant.count();
 
     if (tenantCount === 0) {
-      console.log('🔧 Auto-bootstrap: No tenants found, creating default tenant...');
+      console.log(' Auto-bootstrap: No tenants found, creating default tenant...');
 
       await prisma.tenant.create({
         data: {
@@ -42,7 +42,7 @@ async function autoBootstrap() {
         },
       });
 
-      console.log('✅ Auto-bootstrap: Default tenant created');
+      console.log('[OK] Auto-bootstrap: Default tenant created');
     }
   } catch (error) {
     console.warn('Auto-bootstrap failed:', error);
@@ -72,7 +72,7 @@ async function seedDevelopmentData() {
     });
 
     if (!tenant) {
-      console.warn('⚠️  Default tenant not found, skipping demo user seeding');
+      console.warn('[WARNING]  Default tenant not found, skipping demo user seeding');
       return;
     }
 
@@ -111,7 +111,7 @@ async function seedDevelopmentData() {
     });
 
     if (teams.length === 0) {
-      console.warn('⚠️  No teams found, skipping demo user seeding');
+      console.warn('[WARNING]  No teams found, skipping demo user seeding');
       return;
     }
 
@@ -135,7 +135,7 @@ async function seedDevelopmentData() {
         },
       });
 
-      console.log(`  ✅ ${userData.name}`);
+      console.log(`  [OK] ${userData.name}`);
 
       // Create user preferences if they don't exist
       await prisma.userPreferences.upsert({
@@ -178,10 +178,10 @@ async function seedDevelopmentData() {
     console.log('✨ Demo data ready! Login at: http://localhost:5173/login');
     console.log('   👤 Demo users: alice, bob, moderator, admin');
     console.log('   🏢 Teams: General, Engineering, Product, People');
-    console.log('   🏷️  Tags: Multiple tags for organization');
+    console.log('   🏷  Tags: Multiple tags for organization');
     console.log('   ❓ Questions: 12 total (4 awaiting moderation)\n');
   } catch (error) {
-    console.warn('⚠️  Demo data seeding failed:', error);
+    console.warn('[WARNING]  Demo data seeding failed:', error);
     console.warn('   This is non-blocking - continuing startup...');
   }
 }
@@ -194,7 +194,7 @@ async function start() {
     await validateDatabaseConnection(prisma);
 
     // 2. Initialize Redis for rate limiting
-    console.log('🔒 Initializing rate limiting...');
+    console.log(' Initializing rate limiting...');
     await initRedis();
 
     // 3. Initialize Redis for session storage
@@ -214,7 +214,7 @@ async function start() {
       console.log('📅 Starting Pulse scheduler...');
       scheduler.start();
     } else {
-      console.log('ℹ️  Pulse scheduler disabled (PULSE_ENABLED not set to true)');
+      console.log('ℹ  Pulse scheduler disabled (PULSE_ENABLED not set to true)');
     }
 
     // Store scheduler for graceful shutdown
@@ -233,7 +233,7 @@ async function start() {
         await seedDevelopmentData();
 
         console.log('');
-        console.log('🚀 Server ready!');
+        console.log(' Server ready!');
         console.log(`   Port: ${env.PORT}`);
         console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`   CORS origin: ${env.CORS_ORIGIN}`);
@@ -247,11 +247,11 @@ async function start() {
     // 8. Setup graceful shutdown handlers
     const gracefulShutdown = async (signal: string) => {
       console.log('');
-      console.log(`\n🛑 ${signal} received, shutting down gracefully...`);
+      console.log(`\n ${signal} received, shutting down gracefully...`);
 
       // Stop accepting new connections
       server.close(async () => {
-        console.log('✅ HTTP server closed');
+        console.log('[OK] HTTP server closed');
 
         try {
           // Stop scheduler if running
@@ -275,7 +275,7 @@ async function start() {
 
       // Force shutdown after 30 seconds
       setTimeout(() => {
-        console.error('⚠️  Forced shutdown after timeout');
+        console.error('[WARNING]  Forced shutdown after timeout');
         // eslint-disable-next-line no-process-exit
         process.exit(1);
       }, 30000);
@@ -287,16 +287,16 @@ async function start() {
 
     // Handle uncaught errors
     process.on('uncaughtException', error => {
-      console.error('❌ Uncaught exception:', error);
+      console.error('[ERROR] Uncaught exception:', error);
       gracefulShutdown('uncaughtException');
     });
 
     process.on('unhandledRejection', (reason, promise) => {
-      console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
+      console.error('[ERROR] Unhandled rejection at:', promise, 'reason:', reason);
       gracefulShutdown('unhandledRejection');
     });
   } catch (error) {
-    console.error('❌ Fatal error during startup:', error);
+    console.error('[ERROR] Fatal error during startup:', error);
     // eslint-disable-next-line no-process-exit
     process.exit(1);
   }

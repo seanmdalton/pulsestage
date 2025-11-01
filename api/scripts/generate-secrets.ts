@@ -48,7 +48,9 @@ function generateSecrets() {
   console.log('🔐 Generated Secure Secrets for Production');
   console.log('='.repeat(80));
   console.log('');
-  console.log('⚠️  IMPORTANT: Store these in a secure secrets manager (e.g., HashiCorp Vault,');
+  console.log(
+    '[WARNING]  IMPORTANT: Store these in a secure secrets manager (e.g., HashiCorp Vault,'
+  );
   console.log('   AWS Secrets Manager, Azure Key Vault). Never commit to version control!');
   console.log('');
   console.log('-'.repeat(80));
@@ -63,13 +65,13 @@ function generateSecrets() {
 
   console.log('-'.repeat(80));
   console.log('');
-  console.log('📋 Next Steps:');
+  console.log(' Next Steps:');
   console.log('  1. Copy these values to your production .env file or secrets manager');
   console.log('  2. Update your deployment configuration');
   console.log('  3. Restart your application');
   console.log('  4. Securely delete this terminal output');
   console.log('');
-  console.log('🔒 Security Tips:');
+  console.log('[SECURITY] Security Tips:');
   console.log('  • Never reuse secrets across environments');
   console.log('  • Rotate secrets periodically (recommended: every 90 days)');
   console.log('  • Use different secrets for each deployment environment');
@@ -85,7 +87,7 @@ if (lengthArg) {
   if (customLength >= 32) {
     secrets.forEach(s => (s.length = customLength));
   } else {
-    console.error('❌ Error: Length must be at least 32 characters');
+    console.error('[ERROR] Error: Length must be at least 32 characters');
     process.exit(1);
   }
 }

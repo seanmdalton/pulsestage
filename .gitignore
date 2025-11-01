@@ -16,6 +16,11 @@ docs-temp/
 TESTING-*.md
 QUICK-*.md
 
+# Working documents (except README and archive/)
+working-docs/*.md
+!working-docs/README.md
+working-docs/archive/*.md
+
 # Deployment files with actual secrets (keep local only)
 RENDER_DEPLOYMENT.md
 DEPLOYMENT_CHECKLIST.md

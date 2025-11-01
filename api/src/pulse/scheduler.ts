@@ -42,7 +42,7 @@ async function processPulseSends(prisma: PrismaClient) {
         // Check if pulse is enabled in settings
         const settings = tenant.settings?.settings as any;
         if (!settings?.pulse?.enabled) {
-          console.log(`⏭️  Skipping tenant ${tenant.slug}: Pulse not enabled`);
+          console.log(`⏭  Skipping tenant ${tenant.slug}: Pulse not enabled`);
           continue;
         }
 
@@ -52,13 +52,13 @@ async function processPulseSends(prisma: PrismaClient) {
         });
 
         if (!schedule) {
-          console.log(`⏭️  Skipping tenant ${tenant.slug}: No schedule configured`);
+          console.log(`⏭  Skipping tenant ${tenant.slug}: No schedule configured`);
           continue;
         }
 
         // Check if rotation is enabled
         if (!schedule.rotatingCohorts) {
-          console.log(`⏭️  Skipping tenant ${tenant.slug}: Cohort rotation disabled`);
+          console.log(`⏭  Skipping tenant ${tenant.slug}: Cohort rotation disabled`);
           continue;
         }
 
@@ -71,16 +71,16 @@ async function processPulseSends(prisma: PrismaClient) {
         const result = await triggerPulseForCohort(prisma, tenant.id, cohortName);
 
         console.log(
-          `✅ Tenant ${tenant.slug}: Sent ${result.sent} invitations, ${result.failed} failed`
+          `[OK] Tenant ${tenant.slug}: Sent ${result.sent} invitations, ${result.failed} failed`
         );
       } catch (error) {
-        console.error(`❌ Error processing tenant ${tenant.slug}:`, error);
+        console.error(`[ERROR] Error processing tenant ${tenant.slug}:`, error);
       }
     }
 
-    console.log('✅ Pulse send process completed');
+    console.log('[OK] Pulse send process completed');
   } catch (error) {
-    console.error('❌ Error in pulse send process:', error);
+    console.error('[ERROR] Error in pulse send process:', error);
   }
 }
 
@@ -90,7 +90,7 @@ async function processPulseSends(prisma: PrismaClient) {
  */
 export function startPulseScheduler(prisma: PrismaClient) {
   if (scheduledTask) {
-    console.log('⚠️  Pulse scheduler already running');
+    console.log('[WARNING]  Pulse scheduler already running');
     return;
   }
 
@@ -113,7 +113,7 @@ export function startPulseScheduler(prisma: PrismaClient) {
     }
   );
 
-  console.log('✅ Pulse scheduler started');
+  console.log('[OK] Pulse scheduler started');
 }
 
 /**
@@ -123,7 +123,7 @@ export function stopPulseScheduler() {
   if (scheduledTask) {
     scheduledTask.stop();
     scheduledTask = null;
-    console.log('🛑 Pulse scheduler stopped');
+    console.log(' Pulse scheduler stopped');
   }
 }
 

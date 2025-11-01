@@ -90,7 +90,7 @@ export class AuditService {
 
           if (process.env.NODE_ENV === 'development') {
             console.log(
-              `📋 Audit: ${entry.action} by ${req.user?.email || 'system'} on ${entry.entityType}`
+              ` Audit: ${entry.action} by ${req.user?.email || 'system'} on ${entry.entityType}`
             );
           }
         } catch (error) {
@@ -192,6 +192,6 @@ export let auditService: AuditService;
 export function initAuditService(prisma: PrismaClient) {
   auditService = new AuditService(prisma);
   if (process.env.NODE_ENV === 'development') {
-    console.log('✅ Audit service initialized');
+    console.log('[OK] Audit service initialized');
   }
 }

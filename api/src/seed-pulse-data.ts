@@ -101,7 +101,7 @@ export async function seedPulseQuestions(tenantId: string) {
     });
   }
 
-  console.log(`✅ Seeded ${PULSE_QUESTIONS.length} Pulse questions`);
+  console.log(`[OK] Seeded ${PULSE_QUESTIONS.length} Pulse questions`);
 }
 
 /**
@@ -123,7 +123,7 @@ export async function seedPulseSchedule(tenantId: string) {
     },
   });
 
-  console.log('✅ Pulse schedule created');
+  console.log('[OK] Pulse schedule created');
 }
 
 /**
@@ -139,7 +139,7 @@ export async function seedPulseCohorts(tenantId: string) {
   });
 
   if (users.length === 0) {
-    console.log('⚠️  No users found for cohort creation');
+    console.log('[WARNING]  No users found for cohort creation');
     return;
   }
 
@@ -168,7 +168,7 @@ export async function seedPulseCohorts(tenantId: string) {
     });
   }
 
-  console.log(`✅ Created 5 cohorts with ~${cohortSize} users each`);
+  console.log(`[OK] Created 5 cohorts with ~${cohortSize} users each`);
 }
 
 /**
@@ -183,7 +183,7 @@ export async function seedPulseResponses(tenantId: string, weeks = 8) {
   });
 
   if (questions.length === 0) {
-    console.log('⚠️  No Pulse questions found');
+    console.log('[WARNING]  No Pulse questions found');
     return;
   }
 
@@ -193,7 +193,7 @@ export async function seedPulseResponses(tenantId: string, weeks = 8) {
   });
 
   if (users.length === 0) {
-    console.log('⚠️  No users found');
+    console.log('[WARNING]  No users found');
     return;
   }
 
@@ -299,7 +299,7 @@ export async function seedPulseResponses(tenantId: string, weeks = 8) {
     }
   }
 
-  console.log(`✅ Generated ${totalResponses} synthetic responses across ${weeks} weeks`);
+  console.log(`[OK] Generated ${totalResponses} synthetic responses across ${weeks} weeks`);
 }
 
 /**
@@ -315,7 +315,7 @@ export async function seedPulseData(tenantSlug = 'default') {
     });
 
     if (!tenant) {
-      console.error(`❌ Tenant '${tenantSlug}' not found`);
+      console.error(`[ERROR] Tenant '${tenantSlug}' not found`);
       return;
     }
 
@@ -331,9 +331,9 @@ export async function seedPulseData(tenantSlug = 'default') {
     // Seed synthetic responses (8 weeks of history)
     await seedPulseResponses(tenant.id, 8);
 
-    console.log('✅ Pulse data seeded successfully!');
+    console.log('[OK] Pulse data seeded successfully!');
   } catch (error) {
-    console.error('❌ Error seeding Pulse data:', error);
+    console.error('[ERROR] Error seeding Pulse data:', error);
     throw error;
   }
 }

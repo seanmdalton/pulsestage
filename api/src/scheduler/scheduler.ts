@@ -40,7 +40,7 @@ export class Scheduler {
    */
   register(name: string, schedule: string, task: () => Promise<void>) {
     if (this.jobs.has(name)) {
-      console.warn(`⚠️  Job '${name}' already registered, skipping`);
+      console.warn(`[WARNING]  Job '${name}' already registered, skipping`);
       return;
     }
 
@@ -52,11 +52,11 @@ export class Scheduler {
    * Start all registered jobs
    */
   start() {
-    console.log('🚀 Starting scheduler...');
+    console.log(' Starting scheduler...');
 
     for (const [name, job] of this.jobs.entries()) {
       if (!cron.validate(job.schedule)) {
-        console.error(`❌ Invalid cron schedule for job '${name}': ${job.schedule}`);
+        console.error(`[ERROR] Invalid cron schedule for job '${name}': ${job.schedule}`);
         continue;
       }
 
@@ -66,9 +66,9 @@ export class Scheduler {
           console.log(`⏰ Running scheduled job: ${name}`);
           try {
             await job.task();
-            console.log(`✅ Completed job: ${name}`);
+            console.log(`[OK] Completed job: ${name}`);
           } catch (error) {
-            console.error(`❌ Error in job '${name}':`, error);
+            console.error(`[ERROR] Error in job '${name}':`, error);
           }
         },
         {
@@ -78,26 +78,26 @@ export class Scheduler {
 
       job.cronJob = cronJob;
       cronJob.start();
-      console.log(`✅ Started job: ${name}`);
+      console.log(`[OK] Started job: ${name}`);
     }
 
-    console.log(`✅ Scheduler started with ${this.jobs.size} job(s)`);
+    console.log(`[OK] Scheduler started with ${this.jobs.size} job(s)`);
   }
 
   /**
    * Stop all jobs
    */
   stop() {
-    console.log('🛑 Stopping scheduler...');
+    console.log(' Stopping scheduler...');
 
     for (const [name, job] of this.jobs.entries()) {
       if (job.cronJob) {
         job.cronJob.stop();
-        console.log(`✅ Stopped job: ${name}`);
+        console.log(`[OK] Stopped job: ${name}`);
       }
     }
 
-    console.log('✅ Scheduler stopped');
+    console.log('[OK] Scheduler stopped');
   }
 
   /**
@@ -109,9 +109,9 @@ export class Scheduler {
       throw new Error(`Job '${name}' not found`);
     }
 
-    console.log(`🔧 Manually triggering job: ${name}`);
+    console.log(` Manually triggering job: ${name}`);
     await job.task();
-    console.log(`✅ Manual trigger completed: ${name}`);
+    console.log(`[OK] Manual trigger completed: ${name}`);
   }
 
   /**

@@ -39,7 +39,7 @@ export async function handleGetPulseSummary(req: Request, res: Response, prisma:
 
     const summary = await getPulseSummary(prisma, query);
 
-    console.log('✅ Pulse summary generated:', {
+    console.log('[OK] Pulse summary generated:', {
       totalResponses: summary.summary.totalResponses,
       totalInvites: summary.summary.totalInvites,
       participationRate: summary.summary.participationRate,
@@ -70,7 +70,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
         <html>
           <head><title>Invalid Link</title></head>
           <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-            <h1>❌ Invalid Response Link</h1>
+            <h1>[ERROR] Invalid Response Link</h1>
             <p>This link appears to be invalid or malformed.</p>
           </body>
         </html>
@@ -85,7 +85,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
         <html>
           <head><title>Link Not Found</title></head>
           <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-            <h1>❌ Link Not Found</h1>
+            <h1>[ERROR] Link Not Found</h1>
             <p>This response link could not be found. It may have been deleted or never existed.</p>
           </body>
         </html>
@@ -98,7 +98,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
         <html>
           <head><title>Already Responded</title></head>
           <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-            <h1>✅ Thank You!</h1>
+            <h1>[OK] Thank You!</h1>
             <p>You have already responded to this question:</p>
             <blockquote style="background: #f3f4f6; padding: 16px; border-left: 4px solid #3b82f6; margin: 24px 0;">
               ${inviteStatus.questionText}
@@ -132,7 +132,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
         <html>
           <head><title>Weekly Pulse</title></head>
           <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
-            <h1 style="text-align: center;">Your Weekly Pulse 💙</h1>
+            <h1 style="text-align: center;">Your Weekly Pulse </h1>
             <p style="text-align: center; color: #6b7280;">Take 5 seconds to share how you're feeling.</p>
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 24px 0; border-radius: 8px;">
               <p style="color: #1e40af; font-size: 18px; font-weight: 600; margin: 0;">
@@ -150,7 +150,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
                 }
               </div>
               <p style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 24px 0; font-size: 14px; color: #15803d;">
-                🔒 <strong>Your response is anonymous.</strong> Individual responses are never shared.
+                 <strong>Your response is anonymous.</strong> Individual responses are never shared.
               </p>
             </form>
           </body>
@@ -170,7 +170,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
         <html>
           <head><title>Error</title></head>
           <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-            <h1>❌ ${result.message}</h1>
+            <h1>[ERROR] ${result.message}</h1>
             <p style="color: #6b7280;">${result.error}</p>
           </body>
         </html>
@@ -181,7 +181,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
       <html>
         <head><title>Thank You!</title></head>
         <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-          <h1>✅ Thank You!</h1>
+          <h1>[OK] Thank You!</h1>
           <p style="font-size: 18px;">Your response has been recorded.</p>
           <blockquote style="background: #f3f4f6; padding: 16px; border-left: 4px solid #3b82f6; margin: 24px 0;">
             ${result.questionText}
@@ -199,7 +199,7 @@ export async function handleGetPulseRespond(req: Request, res: Response, prisma:
       <html>
         <head><title>Error</title></head>
         <body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-          <h1>❌ Something Went Wrong</h1>
+          <h1>[ERROR] Something Went Wrong</h1>
           <p>We couldn't process your response. Please try again or contact support.</p>
         </body>
       </html>

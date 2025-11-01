@@ -1,3 +1,0 @@
-# Tagging
-
-Documentation coming soon...

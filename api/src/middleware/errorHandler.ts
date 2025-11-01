@@ -63,7 +63,7 @@ export function errorHandler(
 
   // Log error details (always logged server-side)
   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
-    console.error('❌ Server error:', {
+    console.error('[ERROR] Server error:', {
       error: error.message,
       stack: error.stack,
       url: req.url,
@@ -73,7 +73,7 @@ export function errorHandler(
       tenantId: (req as any).tenant?.tenantId,
     });
   } else {
-    console.warn('⚠️  Client error:', {
+    console.warn('[WARNING]  Client error:', {
       error: error.message,
       url: req.url,
       method: req.method,

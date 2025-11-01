@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    console.log('🔍 Finding admin users...');
+    console.log('[SCAN] Finding admin users...');
 
     const tenant = await prisma.tenant.findUnique({
       where: { slug: 'default' },
@@ -38,12 +38,12 @@ async function main() {
     let adminUsers = adminMemberships.map(m => m.user);
 
     console.log(
-      `📋 Found ${adminUsers.length} admin users:`,
+      ` Found ${adminUsers.length} admin users:`,
       adminUsers.map(u => u.email)
     );
 
     if (adminUsers.length === 0) {
-      console.log('⚠️  No admin users found. Looking for any users...');
+      console.log('[WARNING]  No admin users found. Looking for any users...');
 
       // Just get any users from this tenant
       adminUsers = await prisma.user.findMany({
@@ -54,7 +54,7 @@ async function main() {
       });
 
       console.log(
-        `📋 Using ${adminUsers.length} regular users instead:`,
+        ` Using ${adminUsers.length} regular users instead:`,
         adminUsers.map(u => u.email)
       );
     }
@@ -71,7 +71,7 @@ async function main() {
       throw new Error('No active pulse questions found');
     }
 
-    console.log(`📝 Using question: "${question.text}"`);
+    console.log(` Using question: "${question.text}"`);
 
     // Send invites to admin users
     const { sendPulseInvitations } = await import('../src/pulse/invitationService.js');
@@ -83,7 +83,7 @@ async function main() {
       expiresInDays: 7,
     });
 
-    console.log('\n✅ Pulse invitations sent!');
+    console.log('\n[OK] Pulse invitations sent!');
     console.log(`   Sent: ${result.sent}`);
     console.log(`   Failed: ${result.failed}`);
 
@@ -93,7 +93,7 @@ async function main() {
       adminUsers.forEach(u => console.log(`   - ${u.email}`));
     }
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('[ERROR] Error:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

@@ -187,7 +187,7 @@ export function createApp(prisma: PrismaClient) {
         console.log('📚 API documentation available at /docs');
       }
     } catch (error) {
-      console.warn('⚠️  Failed to load OpenAPI spec:', error);
+      console.warn('[WARNING]  Failed to load OpenAPI spec:', error);
     }
   }
 
@@ -462,7 +462,7 @@ export function createApp(prisma: PrismaClient) {
       const userId = req.user?.id;
       const tenantId = req.tenant?.tenantId;
 
-      console.log('🔍 /pulse/my-invites request:', {
+      console.log(' /pulse/my-invites request:', {
         userId,
         tenantId,
         user: req.user,
@@ -470,14 +470,14 @@ export function createApp(prisma: PrismaClient) {
       });
 
       if (!userId || !tenantId) {
-        console.warn('⚠️  Missing userId or tenantId:', { userId, tenantId });
+        console.warn('[WARNING]  Missing userId or tenantId:', { userId, tenantId });
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       const { getUserPendingInvites } = await import('./pulse/userService.js');
       const invites = await getUserPendingInvites(prisma, userId, tenantId);
 
-      console.log(`✅ Found ${invites.length} pending invites for user ${userId}`);
+      console.log(`[OK] Found ${invites.length} pending invites for user ${userId}`);
 
       return res.json({ invites });
     } catch (error) {
@@ -907,7 +907,7 @@ export function createApp(prisma: PrismaClient) {
           where: { tenantId },
         });
 
-        console.log('✅ Cleared ALL data:', {
+        console.log('[OK] Cleared ALL data:', {
           questions: questionCount,
           upvotes: upvoteCount,
           auditLogs: auditLogCount,
@@ -932,7 +932,7 @@ export function createApp(prisma: PrismaClient) {
 
       // 5. Re-seed ALL demo data (teams, tags, users, questions)
       // Re-create default teams first (after full wipe)
-      console.log('🏗️  Re-creating default teams...');
+      console.log('  Re-creating default teams...');
       const defaultTeams = [
         {
           name: 'General',
@@ -964,11 +964,11 @@ export function createApp(prisma: PrismaClient) {
           },
         });
       }
-      console.log('✅ Re-created default teams');
+      console.log('[OK] Re-created default teams');
 
       const { seedDemoData } = await import('./seed-demo-data.js');
       await seedDemoData(prisma, tenantId);
-      console.log('✅ Re-seeded demo data');
+      console.log('[OK] Re-seeded demo data');
 
       // 6. Log successful reset
       await auditService.log(req, {
@@ -997,9 +997,9 @@ export function createApp(prisma: PrismaClient) {
         },
       });
 
-      console.log('🎉 Demo reset complete');
+      console.log(' Demo reset complete');
     } catch (error) {
-      console.error('❌ Demo reset failed:', error);
+      console.error('[ERROR] Demo reset failed:', error);
 
       // Log failed reset attempt
       if (req.tenant?.tenantId) {
@@ -1621,7 +1621,7 @@ export function createApp(prisma: PrismaClient) {
 
       if (needsSetup) {
         console.warn(
-          `⚠️  Setup needed for tenant ${tenantId}: teams=${teamCount}, users=${userCount}`
+          `[WARNING]  Setup needed for tenant ${tenantId}: teams=${teamCount}, users=${userCount}`
         );
       }
 
@@ -1693,7 +1693,7 @@ export function createApp(prisma: PrismaClient) {
         },
       });
 
-      console.log(`✅ Setup: Created first team "${name}" (${slug})`);
+      console.log(`[OK] Setup: Created first team "${name}" (${slug})`);
 
       res.json({
         success: true,
@@ -1760,7 +1760,7 @@ export function createApp(prisma: PrismaClient) {
         data: { name },
       });
 
-      console.log(`✅ Setup: Updated organization name to "${name}"`);
+      console.log(`[OK] Setup: Updated organization name to "${name}"`);
 
       res.json({
         success: true,
@@ -1852,7 +1852,7 @@ export function createApp(prisma: PrismaClient) {
         },
       });
 
-      console.log(`✅ Setup: Created admin user "${name}" (${email}) as owner of team`);
+      console.log(`[OK] Setup: Created admin user "${name}" (${email}) as owner of team`);
 
       res.json({
         success: true,
@@ -1913,7 +1913,7 @@ export function createApp(prisma: PrismaClient) {
           env: { ...process.env, TENANT_ID: tenantId },
         });
 
-        console.log('✅ Demo data loaded successfully');
+        console.log('[OK] Demo data loaded successfully');
 
         res.json({
           success: true,
@@ -2682,14 +2682,14 @@ export function createApp(prisma: PrismaClient) {
       const parse = adminLoginSchema.safeParse(req.body);
       if (!parse.success) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('❌ Login failed: Invalid request body');
+          console.log('[ERROR] Login failed: Invalid request body');
         }
         return res.status(400).json({ error: 'Admin key is required' });
       }
 
       if (parse.data.adminKey !== env.ADMIN_KEY) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('❌ Login failed: Invalid admin key');
+          console.log('[ERROR] Login failed: Invalid admin key');
         }
         return res.status(401).json({ error: 'Invalid admin key' });
       }
@@ -2699,7 +2699,7 @@ export function createApp(prisma: PrismaClient) {
       req.session.loginTime = Date.now();
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Admin login successful:', {
+        console.log('[OK] Admin login successful:', {
           sessionId: req.sessionID,
           loginTime: req.session.loginTime,
         });
@@ -2817,7 +2817,7 @@ export function createApp(prisma: PrismaClient) {
         data: updateData,
       });
 
-      console.log(`✅ Admin: Updated tenant settings for "${tenant.name}"`);
+      console.log(`[OK] Admin: Updated tenant settings for "${tenant.name}"`);
 
       // Log audit event
       if (req.user) {
@@ -4883,7 +4883,7 @@ export function createApp(prisma: PrismaClient) {
           },
         });
 
-        console.log(`✅ Admin: Added user ${user.email} to team ${team.name} with role ${role}`);
+        console.log(`[OK] Admin: Added user ${user.email} to team ${team.name} with role ${role}`);
 
         // Audit log
         if (req.user) {
@@ -5011,7 +5011,7 @@ export function createApp(prisma: PrismaClient) {
         });
 
         console.log(
-          `✅ Admin: Updated ${user.email} role in team ${team.name} from ${membership.role} to ${role}`
+          `[OK] Admin: Updated ${user.email} role in team ${team.name} from ${membership.role} to ${role}`
         );
 
         // Audit log
@@ -5132,7 +5132,7 @@ export function createApp(prisma: PrismaClient) {
           where: { id: membership.id },
         });
 
-        console.log(`✅ Admin: Removed user ${user.email} from team ${team.name}`);
+        console.log(`[OK] Admin: Removed user ${user.email} from team ${team.name}`);
 
         // Audit log
         if (req.user) {

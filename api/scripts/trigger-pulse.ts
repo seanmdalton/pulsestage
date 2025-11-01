@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    console.log('🚀 Triggering pulse send...');
+    console.log(' Triggering pulse send...');
 
     // Import the manual trigger function
     const { manualTriggerPulseSend } = await import('../src/pulse/scheduler.js');
@@ -19,11 +19,11 @@ async function main() {
     // Trigger for cohort_a (or all cohorts if not specified)
     const result = await manualTriggerPulseSend(prisma, undefined, 'cohort_a');
 
-    console.log('✅ Pulse send complete!');
+    console.log('[OK] Pulse send complete!');
     console.log('📊 Result:', JSON.stringify(result, null, 2));
     console.log('\n📧 Check Mailpit at: http://localhost:8025');
   } catch (error) {
-    console.error('❌ Error triggering pulse:', error);
+    console.error('[ERROR] Error triggering pulse:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

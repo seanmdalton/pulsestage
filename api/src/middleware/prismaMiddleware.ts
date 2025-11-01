@@ -52,7 +52,7 @@ export function createTenantScopingMiddleware(): Prisma.Middleware {
     // If no tenant context, allow the query (for migrations, seeds, etc.)
     if (!tenantContext) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`⚠️  Prisma query on ${model} without tenant context:`, action);
+        console.warn(`[WARNING]  Prisma query on ${model} without tenant context:`, action);
       }
       return next(params);
     }
@@ -130,6 +130,6 @@ export function applyTenantMiddleware(prisma: any) {
   prisma.$use(createTenantScopingMiddleware());
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('✅ Tenant scoping middleware applied to Prisma client');
+    console.log('[OK] Tenant scoping middleware applied to Prisma client');
   }
 }

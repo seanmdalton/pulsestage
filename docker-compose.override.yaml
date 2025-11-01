@@ -12,6 +12,7 @@
 
 services:
   api:
+    image: pulsestage-api:latest
     build: ./api
     environment:
       # Development mode - enables demo users and relaxed security
@@ -32,6 +33,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   
   web:
+    image: pulsestage-web:latest
     build:
       context: ./web
       dockerfile: Dockerfile

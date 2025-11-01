@@ -19,7 +19,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function seedTags() {
-  console.log('🏷️  Seeding default tags...');
+  console.log('🏷  Seeding default tags...');
 
   try {
     // Ensure default tenant exists
@@ -82,9 +82,9 @@ export async function seedTags() {
       });
     }
 
-    console.log(`✅ Default tags seeded successfully (${defaultTags.length} tags)`);
+    console.log(`[OK] Default tags seeded successfully (${defaultTags.length} tags)`);
   } catch (error) {
-    console.error('❌ Error seeding tags:', error);
+    console.error('[ERROR] Error seeding tags:', error);
     throw error;
   }
 }

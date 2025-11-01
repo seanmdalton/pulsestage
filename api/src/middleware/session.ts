@@ -27,10 +27,10 @@ export async function initSessionStore() {
     });
 
     await redisClient.connect();
-    console.log('✅ Redis session store connected');
+    console.log('[OK] Redis session store connected');
     return redisClient;
   } catch (error) {
-    console.error('❌ Failed to connect to Redis for session storage:', error);
+    console.error('[ERROR] Failed to connect to Redis for session storage:', error);
 
     // In production, Redis is REQUIRED for session storage (prevents session loss on restarts)
     if (isProduction) {
@@ -46,7 +46,9 @@ export async function initSessionStore() {
       throw new Error('Redis connection required for production session storage');
     }
 
-    console.warn('⚠️  Redis session store failed to connect in development - using memory store');
+    console.warn(
+      '[WARNING]  Redis session store failed to connect in development - using memory store'
+    );
     return null;
   }
 }
@@ -93,9 +95,11 @@ export function createSessionMiddleware() {
     if (isProduction) {
       // This should never happen due to initSessionStore() throwing in production,
       // but add as a fail-safe
-      throw new Error('❌ Redis session store not initialized - cannot start in production mode');
+      throw new Error(
+        '[ERROR] Redis session store not initialized - cannot start in production mode'
+      );
     }
-    console.warn('⚠️  Using memory session store (development mode only)');
+    console.warn('[WARNING]  Using memory session store (development mode only)');
   }
 
   return session(sessionConfig);

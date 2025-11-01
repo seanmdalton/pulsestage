@@ -17,15 +17,15 @@ async function main() {
 
   try {
     // Step 1: Push schema (will reset if needed)
-    console.log('1️⃣  Pushing database schema...');
+    console.log('1⃣  Pushing database schema...');
     execSync('npx prisma db push --force-reset --accept-data-loss', {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
-    console.log('✅ Schema pushed\n');
+    console.log('[OK] Schema pushed\n');
 
     // Step 2: Seed base data (teams and tags only)
-    console.log('2️⃣  Seeding base data (teams and tags)...');
+    console.log('2⃣  Seeding base data (teams and tags)...');
     const { seedTeams } = await import('../src/seed-teams.js');
     const { seedTags } = await import('../src/seed-tags.js');
 
@@ -41,10 +41,10 @@ async function main() {
       throw new Error('Default tenant not found after seeding teams');
     }
 
-    console.log('✅ Base data seeded (teams and tags)\n');
+    console.log('[OK] Base data seeded (teams and tags)\n');
 
     // Step 3: Enable Pulse
-    console.log('3️⃣  Enabling and configuring Pulse...');
+    console.log('3⃣  Enabling and configuring Pulse...');
 
     await prisma.tenantSettings.upsert({
       where: { tenantId: tenant.id },
@@ -131,16 +131,16 @@ async function main() {
       }
     }
 
-    console.log('✅ Pulse enabled\n');
+    console.log('[OK] Pulse enabled\n');
 
     // Step 4: Seed Q&A questions and users
-    console.log('4️⃣  Seeding Q&A questions and demo data...');
+    console.log('4⃣  Seeding Q&A questions and demo data...');
     const { seedDemoData } = await import('../src/seed-demo-data.js');
     await seedDemoData(prisma, tenant.id);
-    console.log('✅ Q&A questions seeded\n');
+    console.log('[OK] Q&A questions seeded\n');
 
     // Step 5: Create demo pulse cohorts (after users are created)
-    console.log('5️⃣  Creating pulse cohorts...');
+    console.log('5⃣  Creating pulse cohorts...');
     const users = await prisma.user.findMany({
       where: { tenantId: tenant.id },
       select: { id: true, email: true, name: true },
@@ -186,30 +186,30 @@ async function main() {
       });
 
       console.log(
-        `✅ Created 2 pulse cohorts (Weekday: ${weekdayUsers.length}, Weekend: ${weekendUsers.length})\n`
+        `[OK] Created 2 pulse cohorts (Weekday: ${weekdayUsers.length}, Weekend: ${weekendUsers.length})\n`
       );
     } else {
-      console.log('⚠️  No users found, skipping cohort creation\n');
+      console.log('[WARNING]  No users found, skipping cohort creation\n');
     }
 
     // Step 6: Seed 8 weeks of pulse demo data
-    console.log('6️⃣  Seeding 8 weeks of pulse demo data...');
+    console.log('6⃣  Seeding 8 weeks of pulse demo data...');
     execSync('npx tsx scripts/seed-pulse-demo.ts', {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
-    console.log('✅ Pulse demo data seeded\n');
+    console.log('[OK] Pulse demo data seeded\n');
 
     // Step 7: Seed pending invites for user dashboard testing
-    console.log('7️⃣  Seeding pending pulse invites...');
+    console.log('7⃣  Seeding pending pulse invites...');
     execSync('npx tsx scripts/seed-pulse-invites.ts', {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
-    console.log('✅ Pending invites seeded\n');
+    console.log('[OK] Pending invites seeded\n');
 
     console.log('='.repeat(60));
-    console.log('🎉 Complete! Your demo environment is ready!');
+    console.log(' Complete! Your demo environment is ready!');
     console.log('='.repeat(60));
     console.log('');
     console.log('📊 What you can test now:');
@@ -240,13 +240,13 @@ async function main() {
     console.log('');
 
     // Step 8: Validate seed data
-    console.log('8️⃣  Validating seed data...');
+    console.log('8⃣  Validating seed data...');
     execSync('npx tsx scripts/test-seed-data.ts', {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('[ERROR] Error:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
