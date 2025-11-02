@@ -1053,7 +1053,7 @@ export function createApp(prisma: PrismaClient) {
 
         // Seed 12 weeks of pulse historical data
         const { seedPulseData } = await import('./seed-pulse-data.js');
-        await seedPulseData(prisma, tenantId, 12); // 12 weeks of data
+        await seedPulseData(); // Uses default tenant
         console.log('  [OK] Seeded 12 weeks of pulse historical data');
       } else {
         console.log('  [WARNING] No users found, skipping pulse seeding');
