@@ -1121,16 +1121,16 @@ export function createApp(prisma: PrismaClient) {
         console.log('[WARNING] No users found, skipping cohort creation');
       }
 
-      // Step 5: Seed pulse historical data (8 weeks)
-      console.log('  Seeding 8 weeks of pulse demo data...');
-      const { seedPulseDemoData } = await import('../scripts/seed-pulse-demo.js');
-      await seedPulseDemoData();
-      console.log('[OK] Pulse demo data seeded');
+      // Step 5: Seed pulse historical data (12 weeks)
+      console.log('  Seeding pulse data (questions, cohorts, historical responses)...');
+      const { seedPulseData } = await import('./seed-pulse-data.js');
+      await seedPulseData('default');
+      console.log('[OK] Pulse data seeded');
 
       // Step 6: Seed pending pulse invites
       console.log('  Seeding pending pulse invites...');
-      const { seedPulseInvites } = await import('../scripts/seed-pulse-invites.js');
-      await seedPulseInvites();
+      const { seedPulseInvites } = await import('./seed/pulse-invites.js');
+      await seedPulseInvites('default', 10);
       console.log('[OK] Pending invites seeded');
 
       console.log('[OK] All demo data reseeded');

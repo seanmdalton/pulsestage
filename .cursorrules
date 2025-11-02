@@ -218,6 +218,8 @@ If security scans fail:
 - Keep seed data comprehensive and realistic
 - Fix security vulnerabilities, don't ignore them
 - Use plain text for logs, documentation, and code output
+- **Put reusable logic in `src/`, keep scripts as thin wrappers** (architectural decision)
+- **Think through long-term scalability and maintainability** before implementing fixes
 
 ### DON'T
 - Use emojis in code, logs, scripts, documentation, or terminal output
@@ -232,6 +234,8 @@ If security scans fail:
 - Violate tenant isolation (missing tenantId filters)
 - Store userId in PulseResponse (breaks anonymity)
 - Make breaking changes to API contracts without versioning
+- **Apply "bandaid" fixes without considering proper architectural solutions**
+- **Import from `scripts/` in `src/` files** (breaks TypeScript compilation for Docker)
 
 ## Working Documents
 
@@ -282,6 +286,7 @@ working-docs/YYYY-MM-DD_topic_type.md
 - **Pre-Flight Script**: `api/scripts/preflight-check.ts`
 - **Seed Script**: `api/scripts/reset-and-seed-all.ts`
 - **Seed Validation**: `api/scripts/test-seed-data.ts`
+- **Seed Architecture**: Reusable logic in `api/src/seed/`, CLI wrappers in `api/scripts/`
 
 ### Handbook (Product & Architecture)
 - **Product Vision**: `docs/handbook/PRODUCT_VISION.md`

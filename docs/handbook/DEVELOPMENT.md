@@ -356,6 +356,82 @@ Code changes NOT requiring restart (hot reload):
 - API route handlers (with tsx watch)
 - Styles
 
+## 🏗️ Seed Architecture
+
+### Design Principle
+
+**Reusable logic in `src/`, CLI scripts as thin wrappers.**
+
+This architectural decision ensures:
+- Seed logic is compiled by TypeScript (`tsconfig.json` includes `src/`)
+- Functions can be imported by API endpoints (e.g., `/admin/reset-demo`)
+- CLI scripts remain simple entry points for manual execution
+- Docker builds include all necessary code in `dist/`
+
+### Directory Structure
+
+```
+api/
+├── src/
+│   ├── seed/                 # Reusable seed modules
+│   │   └── pulse-invites.ts  # Pulse invite seeding logic
+│   ├── seed-demo-data.ts     # Q&A demo data seeding
+│   ├── seed-pulse-data.ts    # Pulse historical data seeding
+│   ├── seed-teams.ts         # Team seeding
+│   └── app.ts                # API imports from src/
+└── scripts/
+    ├── reset-and-seed-all.ts # CLI wrapper
+    ├── seed-pulse-demo.ts    # CLI wrapper
+    └── seed-pulse-invites.ts # CLI wrapper
+```
+
+### Rules
+
+1. **`src/` files** contain all business logic and are compiled to `dist/`
+2. **`scripts/` files** are thin wrappers that call functions from `src/`
+3. **NEVER import from `scripts/` in `src/` files** - breaks compilation
+4. **Always test TypeScript builds** before pushing Docker changes
+
+### Example: Pulse Invites
+
+**Reusable Logic** (`src/seed/pulse-invites.ts`):
+```typescript
+export async function seedPulseInvites(tenantSlug = 'default', userLimit = 10) {
+  // Core business logic
+  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  // ... create invites ...
+  return createdCount;
+}
+```
+
+**CLI Wrapper** (`scripts/seed-pulse-invites.ts`):
+```typescript
+import { seedPulseInvites } from '../src/seed/pulse-invites.js';
+
+async function main() {
+  await seedPulseInvites('default', 10);
+}
+
+main();
+```
+
+**API Usage** (`src/app.ts`):
+```typescript
+const { seedPulseInvites } = await import('./seed/pulse-invites.js');
+await seedPulseInvites('default', 10);
+```
+
+### Why This Matters
+
+**Problem**: Importing from `scripts/` in `src/` files causes `MODULE_NOT_FOUND` errors in production because:
+- `tsconfig.json` only compiles `src/` directory (`"include": ["src"]`)
+- `scripts/` files are NOT copied to `dist/` in Docker builds
+- Runtime imports fail when deployed
+
+**Solution**: Keep all reusable logic in `src/`, use `scripts/` only for CLI entry points.
+
+---
+
 ##  Debugging Checklist
 
 When something isn't working:
