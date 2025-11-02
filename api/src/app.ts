@@ -865,6 +865,10 @@ export function createApp(prisma: PrismaClient) {
         const userCount = await tx.user.count({ where: { tenantId } });
         const tagCount = await tx.tag.count({ where: { tenantId } });
         const teamCount = await tx.team.count({ where: { tenantId } });
+        const pulseResponseCount = await tx.pulseResponse.count({ where: { tenantId } });
+        const pulseInviteCount = await tx.pulseInvite.count({ where: { tenantId } });
+        const pulseQuestionCount = await tx.pulseQuestion.count({ where: { tenantId } });
+        const pulseCohortCount = await tx.pulseCohort.count({ where: { tenantId } });
 
         // Delete in correct order to respect foreign key constraints
 
@@ -902,7 +906,24 @@ export function createApp(prisma: PrismaClient) {
           where: { tenantId },
         });
 
-        // 6. Audit logs (keep history clean)
+        // 6. Pulse data (before users/teams are deleted)
+        await tx.pulseResponse.deleteMany({
+          where: { tenantId },
+        });
+        await tx.pulseInvite.deleteMany({
+          where: { tenantId },
+        });
+        await tx.pulseQuestion.deleteMany({
+          where: { tenantId },
+        });
+        await tx.pulseCohort.deleteMany({
+          where: { tenantId },
+        });
+        await tx.pulseSchedule.deleteMany({
+          where: { tenantId },
+        });
+
+        // 7. Audit logs (keep history clean)
         await tx.auditLog.deleteMany({
           where: { tenantId },
         });
@@ -916,6 +937,10 @@ export function createApp(prisma: PrismaClient) {
           users: userCount,
           tags: tagCount,
           teams: teamCount,
+          pulseResponses: pulseResponseCount,
+          pulseInvites: pulseInviteCount,
+          pulseQuestions: pulseQuestionCount,
+          pulseCohorts: pulseCohortCount,
         });
 
         return {
@@ -927,6 +952,10 @@ export function createApp(prisma: PrismaClient) {
           users: userCount,
           tags: tagCount,
           teams: teamCount,
+          pulseResponses: pulseResponseCount,
+          pulseInvites: pulseInviteCount,
+          pulseQuestions: pulseQuestionCount,
+          pulseCohorts: pulseCohortCount,
         };
       });
 
@@ -969,6 +998,68 @@ export function createApp(prisma: PrismaClient) {
       const { seedDemoData } = await import('./seed-demo-data.js');
       await seedDemoData(prisma, tenantId);
       console.log('[OK] Re-seeded demo data');
+
+      // 5.5. Seed pulse data (cohorts, historical data, pending invites)
+      console.log('  Seeding pulse data...');
+
+      // Create pulse cohorts
+      const users = await prisma.user.findMany({
+        where: { tenantId },
+        select: { id: true, email: true, name: true },
+      });
+
+      if (users.length > 0) {
+        // Create 2 cohorts: weekday and weekend
+        const weekdayUsers = users.filter((_, i) => i % 2 === 0);
+        const weekendUsers = users.filter((_, i) => i % 2 === 1);
+
+        await prisma.pulseCohort.upsert({
+          where: {
+            tenantId_name: {
+              tenantId,
+              name: 'Weekday Team',
+            },
+          },
+          create: {
+            tenantId,
+            name: 'Weekday Team',
+            userIds: weekdayUsers.map(u => u.id),
+          },
+          update: {
+            userIds: weekdayUsers.map(u => u.id),
+          },
+        });
+
+        await prisma.pulseCohort.upsert({
+          where: {
+            tenantId_name: {
+              tenantId,
+              name: 'Weekend Team',
+            },
+          },
+          create: {
+            tenantId,
+            name: 'Weekend Team',
+            userIds: weekendUsers.map(u => u.id),
+          },
+          update: {
+            userIds: weekendUsers.map(u => u.id),
+          },
+        });
+
+        console.log(
+          `  [OK] Created pulse cohorts (Weekday: ${weekdayUsers.length}, Weekend: ${weekendUsers.length})`
+        );
+
+        // Seed 12 weeks of pulse historical data
+        const { seedPulseData } = await import('./seed-pulse-data.js');
+        await seedPulseData(prisma, tenantId, 12); // 12 weeks of data
+        console.log('  [OK] Seeded 12 weeks of pulse historical data');
+      } else {
+        console.log('  [WARNING] No users found, skipping pulse seeding');
+      }
+
+      console.log('[OK] Pulse data seeded');
 
       // 6. Log successful reset
       await auditService.log(req, {
