@@ -23,7 +23,7 @@ import { RequestHandler } from 'express';
  */
 export function securityHeadersMiddleware(): RequestHandler {
   return helmet({
-    // Content Security Policy
+    // Content Security Policy (Production - HTTPS only)
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -38,7 +38,7 @@ export function securityHeadersMiddleware(): RequestHandler {
         baseUri: ["'self'"],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
-        upgradeInsecureRequests: [],
+        upgradeInsecureRequests: [], // Force HTTPS in production
       },
     },
 
@@ -118,6 +118,8 @@ export function apiSecurityHeaders(): RequestHandler {
 /**
  * Relaxed CSP for development environment
  * Allows Vite dev server features
+ * - No upgrade-insecure-requests (allows HTTP in dev)
+ * - No HSTS (allows HTTP in dev)
  */
 export function developmentSecurityHeaders(): RequestHandler {
   return helmet({
@@ -134,7 +136,7 @@ export function developmentSecurityHeaders(): RequestHandler {
         baseUri: ["'self'"],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
-        upgradeInsecureRequests: [],
+        // upgradeInsecureRequests removed for development (allows HTTP)
       },
     },
 

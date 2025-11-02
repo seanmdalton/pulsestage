@@ -5,6 +5,8 @@
  * Thin wrapper around src/seed-pulse-data.ts
  */
 
+import { seedPulseData } from '../src/seed-pulse-data.js';
+
 async function main() {
   try {
     console.log('Seeding comprehensive Pulse demo data...');

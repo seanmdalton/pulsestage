@@ -36,7 +36,7 @@ services:
       - redis
 
   web:
-    image: pulsestage-web:latest
+    image: ghcr.io/seanmdalton/pulsestage-web:latest
     environment:
       VITE_API_URL: http://localhost:3000
       VITE_WEBSITE_TITLE: ${WEBSITE_TITLE:-PulseStage}

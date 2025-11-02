@@ -188,7 +188,7 @@ export function DashboardPage() {
                   Quick weekly check-in on team sentiment and engagement.
                 </p>
                 <button
-                  onClick={() => navigate('/admin/pulse')}
+                  onClick={() => navigate(`/${teamSlug}/pulse/dashboard`)}
                   className="w-full px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm transition-colors"
                   style={{ backgroundColor: themeColors.primary }}
                 >
