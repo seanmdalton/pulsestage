@@ -1123,13 +1123,13 @@ export function createApp(prisma: PrismaClient) {
 
       // Step 5: Seed pulse historical data (8 weeks)
       console.log('  Seeding 8 weeks of pulse demo data...');
-      const { seedPulseDemoData } = await import('./seed-pulse-demo.js');
+      const { seedPulseDemoData } = await import('../scripts/seed-pulse-demo.js');
       await seedPulseDemoData();
       console.log('[OK] Pulse demo data seeded');
 
       // Step 6: Seed pending pulse invites
       console.log('  Seeding pending pulse invites...');
-      const { seedPulseInvites } = await import('./seed-pulse-invites.js');
+      const { seedPulseInvites } = await import('../scripts/seed-pulse-invites.js');
       await seedPulseInvites();
       console.log('[OK] Pending invites seeded');
 
