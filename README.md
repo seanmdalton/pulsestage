@@ -58,7 +58,7 @@ docker compose up -d
 
 Visit `http://localhost:5173` and log in with demo credentials (admin, alice, bob, or moderator).
 
-See [Installation Guide](docs/getting-started/installation.md) for details.
+See [Installation Guide](https://seanmdalton.github.io/pulsestage/getting-started/installation/) for details.
 
 ---
 
@@ -108,29 +108,29 @@ pulsestage/
 ## Documentation
 
 ### Getting Started
-- [Installation](docs/getting-started/installation.md) - Docker Compose setup
-- [Configuration](docs/getting-started/configuration.md) - Environment variables
-- [Quick Start](docs/getting-started/quick-start.md) - 5-minute setup
-- [Troubleshooting](docs/getting-started/troubleshooting.md) - Common issues
+- [Installation](https://seanmdalton.github.io/pulsestage/getting-started/installation/) - Docker Compose setup
+- [Configuration](https://seanmdalton.github.io/pulsestage/getting-started/configuration/) - Environment variables
+- [Quick Start](https://seanmdalton.github.io/pulsestage/getting-started/quick-start/) - 5-minute setup
+- [Troubleshooting](https://seanmdalton.github.io/pulsestage/getting-started/troubleshooting/) - Common issues
 
 ### User Guides
-- [User Guide](docs/guides/user/overview.md) - Submit questions, upvote, search
-- [Moderator Guide](docs/guides/moderator/overview.md) - Answer, moderate, present
-- [Admin Guide](docs/guides/admin/overview.md) - Manage teams, users, settings
+- [User Guide](https://seanmdalton.github.io/pulsestage/guides/user/submitting-questions/) - Submit questions, upvote, search
+- [Moderator Guide](https://seanmdalton.github.io/pulsestage/guides/moderator/moderation-queue/) - Answer, moderate, present
+- [Admin Guide](https://seanmdalton.github.io/pulsestage/guides/admin/roles-permissions/) - Manage teams, users, settings
 
 ### Handbook (Architecture & Operations)
-- [Product Vision](docs/handbook/PRODUCT_VISION.md) - Features and design philosophy
-- [Data Model](docs/handbook/DATA_MODEL_SNAPSHOT.md) - Database schema
-- [Security Model](docs/handbook/SECURITY_MODEL.md) - RBAC, rate limiting, audit logging
-- [Authentication](docs/handbook/AUTHENTICATION.md) - Multi-mode auth (Demo, OAuth)
-- [Development](docs/handbook/DEVELOPMENT.md) - Workflow, testing, versioning
-- [Operations](docs/handbook/OPERATIONS.md) - Deployment, monitoring
-- [API Contracts](docs/handbook/API_CONTRACTS/events.md) - OpenAPI spec, SSE events
+- [Product Vision](https://seanmdalton.github.io/pulsestage/handbook/PRODUCT_VISION/) - Features and design philosophy
+- [Data Model](https://seanmdalton.github.io/pulsestage/handbook/DATA_MODEL_SNAPSHOT/) - Database schema
+- [Security Model](https://seanmdalton.github.io/pulsestage/handbook/SECURITY_MODEL/) - RBAC, rate limiting, audit logging
+- [Authentication](https://seanmdalton.github.io/pulsestage/handbook/AUTHENTICATION/) - Multi-mode auth (Demo, OAuth)
+- [Development](https://seanmdalton.github.io/pulsestage/handbook/DEVELOPMENT/) - Workflow, testing, versioning
+- [Operations](https://seanmdalton.github.io/pulsestage/handbook/OPERATIONS/) - Deployment, monitoring
+- [API Contracts](https://seanmdalton.github.io/pulsestage/handbook/API_CONTRACTS/events/) - OpenAPI spec, SSE events
 
 ### Deployment
-- [Production Deployment](docs/deployment/production.md) - Self-hosting guide
-- [Environment Variables](docs/deployment/environment.md) - Configuration reference
-- [Monitoring](docs/deployment/monitoring.md) - Health checks and observability
+- [Production Deployment](https://seanmdalton.github.io/pulsestage/deployment/production/) - Self-hosting guide
+- [Environment Variables](https://seanmdalton.github.io/pulsestage/deployment/environment/) - Configuration reference
+- [Monitoring](https://seanmdalton.github.io/pulsestage/deployment/monitoring/) - Health checks and observability
 
 ---
 
@@ -179,7 +179,7 @@ make preflight
 - `make validate-ci` - Run all CI checks (REQUIRED before git push)
 - `make security` - Security scans (Trivy)
 
-See [Development Guide](docs/handbook/DEVELOPMENT.md) for complete workflow.
+See [Development Guide](https://seanmdalton.github.io/pulsestage/handbook/DEVELOPMENT/) for complete workflow.
 
 ### Demo Data
 
@@ -202,7 +202,7 @@ After `make db-seed`:
 4. Run `make validate-ci` (must pass)
 5. Submit pull request
 
-See [handbook/DEVELOPMENT.md](docs/handbook/DEVELOPMENT.md) for details.
+See [Development Guide](https://seanmdalton.github.io/pulsestage/handbook/DEVELOPMENT/) for details.
 
 ---
 
