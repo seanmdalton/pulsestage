@@ -30,9 +30,11 @@ function parseRange(range?: string): number {
  */
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
+  d.setHours(0, 0, 0, 0); // Reset time to start of day
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
-  return new Date(d.setDate(diff));
+  d.setDate(diff);
+  return d;
 }
 
 /**
@@ -178,9 +180,8 @@ export async function getPulseSummary(
       const count = scores.length;
       const insufficient = count < anonThreshold;
 
-      if (!insufficient) {
-        allResponsesForQuestion.push(...scores);
-      }
+      // Always collect responses for overall calculation, regardless of weekly threshold
+      allResponsesForQuestion.push(...scores);
 
       trend.push({
         weekStart: weekKey,
