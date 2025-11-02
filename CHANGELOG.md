@@ -9,7 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### In Progress
 - Documentation reorganization and rewrite
-- Semantic versioning implementation
+
+---
+
+## [0.1.1] - 2025-11-02
+
+### Fixed
+- Fixed TypeScript build configuration for Render deployment (changed `moduleResolution` from "Bundler" to "Node")
+- Fixed Docker cache busting to ensure configuration changes are picked up in deployments
+- Aligned `/admin/reset-demo` endpoint with local seed process (now uses 2 teams instead of 4, includes pulse data)
+
+### Changed
+- Updated documentation links in README to point to published MkDocs site
 
 ---
 
