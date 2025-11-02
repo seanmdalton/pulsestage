@@ -96,10 +96,21 @@ async function main() {
     console.log('   3. You should see the "Pending Pulse" card with a badge!');
   } catch (error) {
     console.error('[ERROR] Error:', error);
-    process.exit(1);
+    throw error; // Re-throw for caller to handle
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main();
+// Export for use in API endpoints
+export async function seedPulseInvites() {
+  await main();
+}
+
+// Only run main if this is the entry point
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(e => {
+    console.error('[ERROR] Fatal error:', e);
+    process.exit(1);
+  });
+}

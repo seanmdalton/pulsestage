@@ -959,50 +959,117 @@ export function createApp(prisma: PrismaClient) {
         };
       });
 
-      // 5. Re-seed ALL demo data (teams, tags, users, questions)
-      // Re-create default teams first (after full wipe)
-      console.log('  Re-creating default teams...');
-      const defaultTeams = [
-        {
-          name: 'General',
-          slug: 'general',
-          description: 'General organizational questions',
-        },
-        {
-          name: 'Engineering',
-          slug: 'engineering',
-          description: 'Technical and development questions',
-        },
-        {
-          name: 'Product',
-          slug: 'product',
-          description: 'Product strategy and feature questions',
-        },
-        {
-          name: 'People',
-          slug: 'people',
-          description: 'HR, culture, and people-related questions',
-        },
-      ];
+      // 5. Re-seed ALL demo data (teams, tags, users, questions, pulse)
+      // This matches the local seed process exactly (reset-and-seed-all.ts)
 
-      for (const teamData of defaultTeams) {
-        await prisma.team.create({
-          data: {
-            ...teamData,
-            tenantId,
+      // Step 1: Seed teams and tags
+      console.log('  Seeding base data (teams and tags)...');
+      const { seedTeams } = await import('./seed-teams.js');
+      const { seedTags } = await import('./seed-tags.js');
+
+      await seedTeams();
+      await seedTags();
+      console.log('[OK] Base data seeded (2 teams, tags)');
+
+      // Step 2: Enable and configure Pulse
+      console.log('  Enabling and configuring Pulse...');
+      await prisma.tenantSettings.upsert({
+        where: { tenantId },
+        create: {
+          tenantId,
+          settings: {
+            pulse: {
+              enabled: true,
+              anonThreshold: 5,
+              defaultCadence: 'weekly',
+              defaultTime: '09:00',
+              rotatingCohorts: true,
+              channelSlack: false,
+              channelEmail: true,
+            },
           },
-        });
-      }
-      console.log('[OK] Re-created default teams');
+        },
+        update: {
+          settings: {
+            pulse: {
+              enabled: true,
+              anonThreshold: 5,
+              defaultCadence: 'weekly',
+              defaultTime: '09:00',
+              rotatingCohorts: true,
+              channelSlack: false,
+              channelEmail: true,
+            },
+          },
+        },
+      });
 
+      // Create pulse schedule
+      await prisma.pulseSchedule.upsert({
+        where: { tenantId },
+        create: {
+          tenantId,
+          cadence: 'WEEKLY',
+          dayOfWeek: 1,
+          timeOfDay: '09:00',
+          rotatingCohorts: true,
+          enabled: true,
+        },
+        update: {
+          enabled: true,
+        },
+      });
+
+      // Create pulse questions if they don't exist
+      const existingQuestions = await prisma.pulseQuestion.count({
+        where: { tenantId },
+      });
+
+      if (existingQuestions === 0) {
+        const questions = [
+          {
+            text: 'How recognized do you feel for your contributions this week?',
+            category: 'recognition',
+          },
+          {
+            text: 'How aligned do you feel with team goals and priorities?',
+            category: 'alignment',
+          },
+          { text: 'How supported do you feel by your manager/team?', category: 'support' },
+          { text: 'How would you rate your work-life balance this week?', category: 'wellbeing' },
+          {
+            text: 'How confident are you in the direction of the organization?',
+            category: 'confidence',
+          },
+          { text: 'How empowered do you feel to make decisions?', category: 'autonomy' },
+          { text: 'How satisfied are you with your professional growth?', category: 'growth' },
+          { text: "How clear are you on what's expected of you?", category: 'clarity' },
+          { text: 'How well do you feel your contributions are valued?', category: 'recognition' },
+          { text: 'How would you rate team collaboration this week?', category: 'collaboration' },
+        ];
+
+        for (const q of questions) {
+          await prisma.pulseQuestion.create({
+            data: {
+              tenantId,
+              text: q.text,
+              category: q.category,
+              scale: 'LIKERT_1_5',
+              active: true,
+            },
+          });
+        }
+      }
+      console.log('[OK] Pulse enabled');
+
+      // Step 3: Seed Q&A questions and users
+      console.log('  Seeding Q&A questions and demo data...');
       const { seedDemoData } = await import('./seed-demo-data.js');
       await seedDemoData(prisma, tenantId);
-      console.log('[OK] Re-seeded demo data');
+      console.log('[OK] Q&A questions seeded');
 
-      // 5.5. Seed pulse data (cohorts, historical data, pending invites)
-      console.log('  Seeding pulse data...');
-
-      // Create pulse cohorts
+      // Step 4: Create pulse cohorts (after users are created)
+      console.log('  Creating pulse cohorts...');
       const users = await prisma.user.findMany({
         where: { tenantId },
         select: { id: true, email: true, name: true },
@@ -1048,18 +1115,25 @@ export function createApp(prisma: PrismaClient) {
         });
 
         console.log(
-          `  [OK] Created pulse cohorts (Weekday: ${weekdayUsers.length}, Weekend: ${weekendUsers.length})`
+          `[OK] Created 2 pulse cohorts (Weekday: ${weekdayUsers.length}, Weekend: ${weekendUsers.length})`
         );
-
-        // Seed 12 weeks of pulse historical data
-        const { seedPulseData } = await import('./seed-pulse-data.js');
-        await seedPulseData(); // Uses default tenant
-        console.log('  [OK] Seeded 12 weeks of pulse historical data');
       } else {
-        console.log('  [WARNING] No users found, skipping pulse seeding');
+        console.log('[WARNING] No users found, skipping cohort creation');
       }
 
-      console.log('[OK] Pulse data seeded');
+      // Step 5: Seed pulse historical data (8 weeks)
+      console.log('  Seeding 8 weeks of pulse demo data...');
+      const { seedPulseDemoData } = await import('./seed-pulse-demo.js');
+      await seedPulseDemoData();
+      console.log('[OK] Pulse demo data seeded');
+
+      // Step 6: Seed pending pulse invites
+      console.log('  Seeding pending pulse invites...');
+      const { seedPulseInvites } = await import('./seed-pulse-invites.js');
+      await seedPulseInvites();
+      console.log('[OK] Pending invites seeded');
+
+      console.log('[OK] All demo data reseeded');
 
       // 6. Log successful reset
       await auditService.log(req, {

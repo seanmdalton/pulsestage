@@ -226,9 +226,17 @@ async function main() {
   console.log(`      - Weekly trends`);
 }
 
-main()
-  .catch(e => {
-    console.error('[ERROR] Error:', e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+// Export for use in API endpoints
+export async function seedPulseDemoData() {
+  await main();
+}
+
+// Only run main if this is the entry point
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main()
+    .catch(e => {
+      console.error('[ERROR] Error:', e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+}
