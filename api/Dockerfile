@@ -29,7 +29,7 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build application
+# Build application (moduleResolution: Node)
 RUN npm run build
 
 # ==============================================================================
