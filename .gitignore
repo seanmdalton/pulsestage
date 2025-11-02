@@ -8,6 +8,7 @@ coverage
 # Cursor AI artifacts (but keep .cursor/rules/)
 .cursor/screenshots/
 .cursor/*.md
+.cursor/mcp.json
 
 # Temporary documentation (session-specific, not for git)
 docs-temp/
