@@ -7,7 +7,7 @@
  * This should ALWAYS be run before asking the user to test anything.
  *
  * Checks:
- * 1. Docker services (postgres, redis, mailpit)
+ * 1. Docker services (db, redis, mailpit)
  * 2. Database connectivity
  * 3. API server health
  * 4. Frontend server accessibility
@@ -84,7 +84,7 @@ async function main() {
           .trim()
           .split('\n')
           .filter(s => s);
-        const required = ['postgres', 'redis', 'mailpit'];
+        const required = ['db', 'redis', 'mailpit'];
         const missing = required.filter(s => !running.includes(s));
 
         if (missing.length > 0) {
