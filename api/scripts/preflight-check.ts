@@ -52,7 +52,7 @@ async function check(
 
     return result.passed;
   } catch (_error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = _error instanceof Error ? _error.message : String(_error);
     results.push({ name, passed: false, message, critical });
 
     console.log(`[ERROR] ${name}: ${message}`);
