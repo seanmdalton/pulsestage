@@ -1139,14 +1139,26 @@ export function createApp(prisma: PrismaClient) {
 
       console.log('[OK] All demo data reseeded');
 
-      // 6. Log successful reset
-      await auditService.log(req, {
-        action: 'demo.reset.success',
-        entityType: 'demo',
-        metadata: {
-          deletedCounts: deleteCounts,
-        },
-      });
+      // 6. Clear all sessions to force re-login
+      // This is critical because existing sessions reference deleted user IDs
+      console.log('🔄 Clearing all sessions...');
+      const sessionStore = req.sessionStore as any;
+      if (sessionStore && typeof sessionStore.clear === 'function') {
+        await new Promise<void>((resolve, reject) => {
+          sessionStore.clear((err: Error | null) => {
+            if (err) {
+              console.error('[ERROR] Failed to clear sessions:', err);
+              reject(err);
+            } else {
+              console.log('[OK] All sessions cleared');
+              resolve();
+            }
+          });
+        });
+      }
+
+      // Note: Skip audit log here since the user who triggered the reset
+      // no longer exists (was deleted and re-seeded with a new ID)
 
       // 7. Return success
       res.json({
