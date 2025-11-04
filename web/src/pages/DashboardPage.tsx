@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { apiClient } from '../lib/api'
 import type { Question, PulseInvite, PulseHistoryWeek } from '../lib/api'
 import { useUser } from '../contexts/UserContext'
@@ -11,6 +11,7 @@ import { TeamContextBar } from '../components/TeamContextBar'
 
 export function DashboardPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useUser()
   const { currentTeam } = useTeamFromUrl()
   const { theme, colorMode } = useTheme()
@@ -39,9 +40,10 @@ export function DashboardPage() {
     setFormattedPageTitle(currentTeam?.slug, 'dashboard')
   }, [currentTeam?.slug])
 
+  // Reload dashboard data when navigating back to this page or when team changes
   useEffect(() => {
     loadDashboardData()
-  }, [currentTeam?.id])
+  }, [currentTeam?.id, location.pathname])
 
   const loadDashboardData = async () => {
     try {
@@ -93,13 +95,24 @@ export function DashboardPage() {
       }
 
       // Calculate user activity
-      // Note: For now, we'll use placeholder values since the Question type
-      // doesn't expose author information. This will be enhanced when we add
-      // a dedicated user activity endpoint
-      setUserActivity({
-        questionsAsked: 0, // TODO: Add endpoint for user's questions
-        questionsUpvoted: 0, // TODO: Add endpoint for user's upvotes
-      })
+      try {
+        const [myQuestions, upvoteData] = await Promise.all([
+          apiClient.getUserQuestions(),
+          apiClient.getMyUpvoteCount(),
+        ])
+
+        setUserActivity({
+          questionsAsked: myQuestions.length,
+          questionsUpvoted: upvoteData.count,
+        })
+      } catch (error) {
+        console.warn('Could not load user activity:', error)
+        // Keep as 0 if error occurs
+        setUserActivity({
+          questionsAsked: 0,
+          questionsUpvoted: 0,
+        })
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error)
     } finally {

@@ -8,6 +8,7 @@ import type { Request, Response } from 'express';
 import type { AuthUser, OAuthProfile } from './types.js';
 import { PrismaClient } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
+import { getOrCreateGeneralTeam } from '../teams.js';
 
 export interface OAuthConfig {
   github?: {
@@ -286,13 +287,17 @@ export class OAuthStrategy {
         },
       });
     } else {
-      // Create new user
+      // Get or create General team for new user
+      const generalTeam = await getOrCreateGeneralTeam(this.prisma, tenant.id);
+
+      // Create new user with General team as primary
       user = await this.prisma.user.create({
         data: {
           email: profile.email,
           name: profile.name,
           ssoId,
           tenantId: tenant.id,
+          primaryTeamId: generalTeam.id, // Assign to General team initially
         },
       });
 
@@ -306,20 +311,14 @@ export class OAuthStrategy {
         },
       });
 
-      // Auto-add to default team
-      const defaultTeam = await this.prisma.team.findFirst({
-        where: { tenantId: tenant.id },
+      // Add to General team membership
+      await this.prisma.teamMembership.create({
+        data: {
+          userId: user.id,
+          teamId: generalTeam.id,
+          role: 'member',
+        },
       });
-
-      if (defaultTeam) {
-        await this.prisma.teamMembership.create({
-          data: {
-            userId: user.id,
-            teamId: defaultTeam.id,
-            role: 'member',
-          },
-        });
-      }
     }
 
     return {

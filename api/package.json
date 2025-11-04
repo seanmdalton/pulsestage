@@ -1,6 +1,6 @@
 {
   "name": "ama-api",
-  "version": "0.1.1",
+  "version": "0.4.0",
   "description": "PulseStage API - Ask Me Anything (AMA) platform for organizational engagement",
   "author": "Sean M. Dalton <seanmdalton@pm.me>",
   "license": "Apache-2.0",
@@ -42,6 +42,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csrf-csrf": "^4.0.3",
+    "csv-parse": "^6.1.0",
     "esbuild": "^0.25.11",
     "express": "^4.19.2",
     "express-session": "^1.18.2",

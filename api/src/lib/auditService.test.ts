@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { testPrisma as prisma } from '../test/setup.js';
 import { AuditService } from './auditService.js';
 import { Request } from 'express';
+import { createTestUser } from '../test/testHelpers.js';
 
 describe('AuditService', () => {
   let auditService: AuditService;
@@ -34,12 +35,9 @@ describe('AuditService', () => {
     testTenantId = tenant.id;
 
     // Create a test user
-    const user = await prisma.user.create({
-      data: {
-        tenantId: testTenantId,
-        email: 'audit-test@example.com',
-        name: 'Audit Test User',
-      },
+    const user = await createTestUser(prisma, testTenantId, {
+      email: 'audit-test@example.com',
+      name: 'Audit Test User',
     });
     testUserId = user.id;
   });

@@ -10,6 +10,9 @@
 import type { Request, Response } from 'express';
 import type { AuthUser } from './types.js';
 import { PrismaClient } from '@prisma/client';
+import { getOrCreateGeneralTeam } from '../teams.js';
+import { getEmailService } from '../email/index.js';
+import { renderWelcomeEmail } from '../email/templates.js';
 
 // Default demo users (can be overridden by DEMO_USERS env var)
 const DEFAULT_DEMO_USERS = ['alice', 'bob', 'moderator', 'admin'];
@@ -82,12 +85,16 @@ export class DemoAuthStrategy {
     });
 
     if (!user) {
+      // Get or create General team for new user
+      const generalTeam = await getOrCreateGeneralTeam(this.prisma, tenant.id);
+
       user = await this.prisma.user.create({
         data: {
           email,
           name: this.getDemoUserDisplayName(username),
           ssoId,
           tenantId: tenant.id,
+          primaryTeamId: generalTeam.id, // Assign to General team initially
         },
       });
 
@@ -103,6 +110,11 @@ export class DemoAuthStrategy {
 
       // Auto-assign role based on username
       await this.assignDemoRole(user.id, tenant.id, username);
+
+      // Send welcome email (async, don't await)
+      this.sendWelcomeEmail(user, tenant, generalTeam).catch(err => {
+        console.error('Failed to send welcome email:', err);
+      });
     }
 
     return {
@@ -112,6 +124,39 @@ export class DemoAuthStrategy {
       ssoId: user.ssoId ?? undefined,
       provider: 'demo',
     };
+  }
+
+  /**
+   * Send welcome email to new user
+   */
+  private async sendWelcomeEmail(
+    user: { id: string; email: string; name: string | null },
+    tenant: { slug: string; name: string | null },
+    homeTeam: { slug: string; name: string }
+  ): Promise<void> {
+    try {
+      const emailService = getEmailService();
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const dashboardUrl = `${baseUrl}/${homeTeam.slug}/dashboard`;
+
+      const html = await renderWelcomeEmail({
+        userName: user.name || user.email,
+        tenantName: tenant.name || tenant.slug,
+        homeTeamName: homeTeam.name,
+        dashboardUrl,
+      });
+
+      await emailService.send({
+        to: { email: user.email, name: user.name || user.email },
+        subject: `Welcome to ${tenant.name || tenant.slug}!`,
+        html,
+      });
+
+      console.log(`Welcome email sent to ${user.email}`);
+    } catch (error) {
+      // Log but don't throw - welcome email failure shouldn't block authentication
+      console.error('Error sending welcome email:', error);
+    }
   }
 
   /**

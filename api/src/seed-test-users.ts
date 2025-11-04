@@ -15,6 +15,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { getOrCreateGeneralTeam } from './lib/teams.js';
 
 const prisma = new PrismaClient();
 
@@ -32,6 +33,9 @@ export async function seedTestUsers() {
   });
   console.log(`[OK] Default tenant: ${tenant.name}`);
 
+  // Ensure General team exists
+  const generalTeam = await getOrCreateGeneralTeam(prisma, tenant.id);
+
   // Get teams
   const engineeringTeam = await prisma.team.findUnique({
     where: { tenantId_slug: { tenantId: tenant.id, slug: 'engineering' } },
@@ -47,18 +51,21 @@ export async function seedTestUsers() {
       email: 'john.doe@company.com',
       name: 'John Doe',
       ssoId: 'john.doe@company.com',
+      primaryTeamId: engineeringTeam?.id || generalTeam.id,
       teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'admin' }] : [],
     },
     {
       email: 'jane.smith@company.com',
       name: 'Jane Smith',
       ssoId: 'jane.smith@company.com',
+      primaryTeamId: engineeringTeam?.id || generalTeam.id,
       teams: engineeringTeam ? [{ teamId: engineeringTeam.id, role: 'member' }] : [],
     },
     {
       email: 'bob.wilson@company.com',
       name: 'Bob Wilson',
       ssoId: 'bob.wilson@company.com',
+      primaryTeamId: productTeam?.id || generalTeam.id,
       teams: productTeam ? [{ teamId: productTeam.id, role: 'owner' }] : [],
     },
   ];

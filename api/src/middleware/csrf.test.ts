@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { testPrisma } from '../test/setup.js';
 import { createApp } from '../app.js';
+import { createTestUser } from '../test/testHelpers.js';
 
 const app = createApp(testPrisma);
 
@@ -33,13 +34,10 @@ describe('CSRF Protection', () => {
     });
 
     // Create test user and team
-    testUser = await testPrisma.user.create({
-      data: {
-        email: 'csrf-test@example.com',
-        name: 'CSRF Test User',
-        ssoId: 'csrf-test-sso',
-        tenantId: tenant!.id,
-      },
+    testUser = await createTestUser(testPrisma, tenant!.id, {
+      email: 'csrf-test@example.com',
+      name: 'CSRF Test User',
+      ssoId: 'csrf-test-sso',
     });
 
     testTeam = await testPrisma.team.create({

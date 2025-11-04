@@ -6,6 +6,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PrismaClient, PulseChannel, PulseInviteStatus } from '@prisma/client';
 import { submitPulseResponse, getPulseInviteStatus } from './responseService.js';
+import { createTestUser } from '../test/testHelpers.js';
 
 const prisma = new PrismaClient();
 
@@ -44,12 +45,9 @@ describe('Pulse Response Service', () => {
     questionId = question.id;
 
     // Create test user
-    const user = await prisma.user.create({
-      data: {
-        tenantId,
-        email: 'test-pulse@example.com',
-        name: 'Test User',
-      },
+    const user = await createTestUser(prisma, tenantId, {
+      email: 'test-pulse@example.com',
+      name: 'Test User',
     });
     userId = user.id;
 

@@ -17,9 +17,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuthStatus = async () => {
     try {
-      console.log('🔍 AdminContext: Checking auth status...')
       const status = await apiClient.getAdminStatus()
-      console.log('📊 AdminContext: Auth status received:', status)
       setIsAuthenticated(status.isAuthenticated)
     } catch (error) {
       console.error('❌ AdminContext: Failed to check admin status:', error)

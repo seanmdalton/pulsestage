@@ -92,6 +92,8 @@ export interface User {
   email: string
   name?: string
   ssoId?: string
+  primaryTeamId?: string
+  primaryTeam?: Team
   createdAt: string
   updatedAt: string
 }
@@ -1318,6 +1320,8 @@ class ApiClient {
       email: z.string().email(),
       name: z.string().optional(),
       ssoId: z.string().optional(),
+      primaryTeamId: z.string().optional(), // Optional for backwards compatibility
+      primaryTeam: TeamSchema.optional(),
       createdAt: z.string(),
       updatedAt: z.string(),
     })
@@ -1472,6 +1476,67 @@ class ApiClient {
       },
       z.array(UserQuestionSchema)
     ) as Promise<Question[]>
+  }
+
+  async getMyUpvoteCount(): Promise<{ count: number }> {
+    const ResponseSchema = z.object({
+      count: z.number(),
+    })
+
+    return this.request(
+      '/users/me/upvotes/count',
+      {
+        credentials: 'include',
+      },
+      ResponseSchema
+    )
+  }
+
+  async getAvailableTeams(): Promise<{ teams: Team[] }> {
+    const ResponseSchema = z.object({
+      teams: z.array(TeamSchema),
+    })
+
+    return this.request(
+      '/users/me/available-teams',
+      {
+        credentials: 'include',
+      },
+      ResponseSchema
+    )
+  }
+
+  async updatePrimaryTeam(teamId: string): Promise<{
+    success: boolean
+    user: {
+      id: string
+      email: string
+      name: string | null
+      primaryTeamId: string
+      primaryTeam: Team
+    }
+  }> {
+    const ResponseSchema = z.object({
+      success: z.boolean(),
+      user: z.object({
+        id: z.string(),
+        email: z.string(),
+        name: z.string().nullable(),
+        primaryTeamId: z.string(),
+        primaryTeam: TeamSchema,
+      }),
+    })
+
+    return this.request(
+      '/users/me/primary-team',
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamId }),
+        credentials: 'include',
+      },
+      ResponseSchema
+    )
   }
 
   async updateTeamMember(
@@ -1645,6 +1710,7 @@ class ApiClient {
       email: string
       name: string | null
       ssoId: string | null
+      isActive: boolean
       createdAt: string
       updatedAt: string
       memberships: Array<{
@@ -1672,6 +1738,7 @@ class ApiClient {
           email: z.string(),
           name: z.string().nullable(),
           ssoId: z.string().nullable(),
+          isActive: z.boolean(),
           createdAt: z.string(),
           updatedAt: z.string(),
           memberships: z.array(
@@ -1697,6 +1764,154 @@ class ApiClient {
     })
 
     return this.request('/admin/users', {}, AdminUsersResponseSchema)
+  }
+
+  async importUsers(
+    csvData: string,
+    dryRun: boolean = true
+  ): Promise<{
+    dryRun: boolean
+    summary: {
+      total: number
+      valid?: number
+      errors?: number
+      toCreate?: number
+      toUpdate?: number
+      imported?: number
+      failed?: number
+      skipped?: number
+    }
+    results?: Array<{
+      rowNumber: number
+      email: string
+      name: string
+      homeTeam: string
+      role: string
+      status: 'error' | 'pending' | 'success'
+      errors?: string[]
+      action: 'create' | 'update' | 'unknown'
+    }>
+    imported?: Array<unknown>
+    failed?: Array<unknown>
+  }> {
+    const ImportResponseSchema = z.object({
+      dryRun: z.boolean(),
+      summary: z.object({
+        total: z.number(),
+        valid: z.number().optional(),
+        errors: z.number().optional(),
+        toCreate: z.number().optional(),
+        toUpdate: z.number().optional(),
+        imported: z.number().optional(),
+        failed: z.number().optional(),
+        skipped: z.number().optional(),
+      }),
+      results: z
+        .array(
+          z.object({
+            rowNumber: z.number(),
+            email: z.string(),
+            name: z.string(),
+            homeTeam: z.string(),
+            role: z.string(),
+            status: z.enum(['error', 'pending', 'success']),
+            errors: z.array(z.string()).optional(),
+            action: z.enum(['create', 'update', 'unknown']),
+          })
+        )
+        .optional(),
+      imported: z.array(z.any()).optional(),
+      failed: z.array(z.any()).optional(),
+    })
+
+    return this.request(
+      '/admin/users/import',
+      {
+        method: 'POST',
+        body: JSON.stringify({ csvData, dryRun }),
+      },
+      ImportResponseSchema
+    )
+  }
+
+  async deactivateUser(
+    userId: string
+  ): Promise<{ success: boolean; user: unknown }> {
+    const schema = z.object({
+      success: z.boolean(),
+      user: z.unknown(),
+    })
+    return this.request(
+      `/admin/users/${userId}/deactivate`,
+      { method: 'PATCH' },
+      schema
+    )
+  }
+
+  async activateUser(
+    userId: string
+  ): Promise<{ success: boolean; user: unknown }> {
+    const schema = z.object({
+      success: z.boolean(),
+      user: z.unknown(),
+    })
+    return this.request(
+      `/admin/users/${userId}/activate`,
+      { method: 'PATCH' },
+      schema
+    )
+  }
+
+  async updateUserRole(
+    userId: string,
+    teamId: string,
+    role: 'viewer' | 'member' | 'moderator' | 'admin' | 'owner'
+  ): Promise<{ success: boolean }> {
+    const schema = z.object({
+      success: z.boolean(),
+      membership: z.any(),
+    })
+    return this.request(
+      `/admin/users/${userId}/role`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ teamId, role }),
+      },
+      schema
+    )
+  }
+
+  async addUserToTeam(
+    userId: string,
+    teamId: string,
+    role: 'viewer' | 'member' | 'moderator' | 'admin' | 'owner' = 'member'
+  ): Promise<{ success: boolean }> {
+    const schema = z.object({
+      success: z.boolean(),
+      membership: z.any(),
+    })
+    return this.request(
+      `/admin/users/${userId}/teams/${teamId}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ role }),
+      },
+      schema
+    )
+  }
+
+  async removeUserFromTeam(
+    userId: string,
+    teamId: string
+  ): Promise<{ success: boolean }> {
+    const schema = z.object({
+      success: z.boolean(),
+    })
+    return this.request(
+      `/admin/users/${userId}/teams/${teamId}`,
+      { method: 'DELETE' },
+      schema
+    )
   }
 
   async getTeamMembers(teamId: string): Promise<{

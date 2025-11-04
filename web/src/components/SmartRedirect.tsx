@@ -1,17 +1,19 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import { useUser } from '../contexts/UserContext'
+import { useUser, useAuth } from '../contexts/UserContext'
 
 interface SmartRedirectProps {
   fallbackTo: string
 }
 
 /**
- * SmartRedirect - Redirects authenticated users to their default team or a fallback
+ * SmartRedirect - Redirects authenticated users to their home team (primary) or fallback
+ * Priority: home team (primaryTeam) > fallback
  * Note: This component is only rendered inside AuthGuard, so user is always authenticated
  */
 export function SmartRedirect({ fallbackTo }: SmartRedirectProps) {
   const location = useLocation()
-  const { defaultTeam, isLoading } = useUser()
+  const { user } = useAuth()
+  const { isLoading } = useUser()
 
   // Show loading state while fetching user data
   if (isLoading) {
@@ -22,17 +24,17 @@ export function SmartRedirect({ fallbackTo }: SmartRedirectProps) {
     )
   }
 
-  // If user has a default team, redirect to it
-  if (defaultTeam) {
+  // Priority 1: User's home team (primary team)
+  if (user?.primaryTeam) {
     const currentPath = location.pathname
-    const defaultTeamPath =
-      currentPath === '/'
-        ? `/${defaultTeam.slug}`
-        : `/${defaultTeam.slug}${currentPath.substring(4)}` // Replace '/all' with team slug
+    const homeTeamPath =
+      currentPath === '/' || currentPath === ''
+        ? `/${user.primaryTeam.slug}/dashboard` // Always go to dashboard when redirecting from root
+        : `/${user.primaryTeam.slug}${currentPath.substring(4)}` // Replace '/all' with team slug
 
-    return <Navigate to={defaultTeamPath} replace />
+    return <Navigate to={homeTeamPath} replace />
   }
 
-  // Fallback to the provided route (usually '/all')
+  // Priority 2: Fallback to the provided route (usually '/all')
   return <Navigate to={fallbackTo} replace />
 }

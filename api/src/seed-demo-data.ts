@@ -200,8 +200,47 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
       },
     });
 
-    // Add user to all teams with appropriate role
-    for (const team of teams) {
+    // Add user to relevant teams based on their primary team
+    // More realistic: users are members of 1-3 teams, not all teams
+    const relevantTeams: { team: (typeof teams)[0]; role: string }[] = [];
+
+    // Always add to their primary team
+    relevantTeams.push({ team: primaryTeam, role: userData.defaultRole });
+
+    // Add to General team if it's not their primary
+    const generalTeam = teams.find(t => t.slug === 'general');
+    if (generalTeam && generalTeam.id !== primaryTeam.id) {
+      relevantTeams.push({ team: generalTeam, role: 'member' });
+    }
+
+    // Login users get cross-functional access
+    if (userData.canLogin) {
+      // Admin gets all teams with admin role
+      if (userData.ssoId === 'admin') {
+        for (const team of teams) {
+          if (!relevantTeams.find(rt => rt.team.id === team.id)) {
+            relevantTeams.push({ team, role: 'admin' });
+          }
+        }
+      }
+      // Moderator gets Product + Engineering with moderator role
+      else if (userData.ssoId === 'moderator') {
+        const engTeam = teams.find(t => t.slug === 'engineering');
+        if (engTeam && !relevantTeams.find(rt => rt.team.id === engTeam.id)) {
+          relevantTeams.push({ team: engTeam, role: 'moderator' });
+        }
+      }
+      // Alice (Engineering) also in Product as member
+      else if (userData.ssoId === 'alice') {
+        const productTeam = teams.find(t => t.slug === 'product');
+        if (productTeam && !relevantTeams.find(rt => rt.team.id === productTeam.id)) {
+          relevantTeams.push({ team: productTeam, role: 'member' });
+        }
+      }
+    }
+
+    // Create memberships for relevant teams only
+    for (const { team, role } of relevantTeams) {
       await prisma.teamMembership.upsert({
         where: {
           userId_teamId: {
@@ -209,13 +248,11 @@ export async function seedDemoData(prisma: PrismaClient, tenantId: string): Prom
             teamId: team.id,
           },
         },
-        update: {
-          role: userData.defaultRole,
-        },
+        update: { role },
         create: {
           userId: user.id,
           teamId: team.id,
-          role: userData.defaultRole,
+          role,
         },
       });
     }

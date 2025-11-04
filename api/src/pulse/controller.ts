@@ -35,16 +35,20 @@ export async function handleGetPulseSummary(req: Request, res: Response, prisma:
       anonThreshold,
     };
 
-    console.log('📊 Fetching Pulse summary with query:', query);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📊 Fetching Pulse summary with query:', query);
+    }
 
     const summary = await getPulseSummary(prisma, query);
 
-    console.log('[OK] Pulse summary generated:', {
-      totalResponses: summary.summary.totalResponses,
-      totalInvites: summary.summary.totalInvites,
-      participationRate: summary.summary.participationRate,
-      questionsReturned: summary.questions.length,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[OK] Pulse summary generated:', {
+        totalResponses: summary.summary.totalResponses,
+        totalInvites: summary.summary.totalInvites,
+        participationRate: summary.summary.participationRate,
+        questionsReturned: summary.questions.length,
+      });
+    }
 
     return res.json(summary);
   } catch (error) {

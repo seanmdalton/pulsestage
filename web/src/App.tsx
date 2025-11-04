@@ -34,6 +34,7 @@ import { LoginPage } from './pages/LoginPage'
 import { PulseDashboardPage } from './pages/PulseDashboardPage'
 import { PulseSettingsPage } from './pages/PulseSettingsPage'
 import { PulseRespondPage } from './pages/PulseRespondPage'
+import { OnboardingPage } from './pages/OnboardingPage'
 import { Navbar } from './components/Navbar'
 import { SmartRedirect } from './components/SmartRedirect'
 import { SetupWizard } from './components/SetupWizard'
@@ -103,6 +104,14 @@ function AppContent() {
               <Route path="/login" element={<LoginPage />} />
 
               {/* Protected standalone routes (no navbar, but require auth) */}
+              <Route
+                path="/onboarding"
+                element={
+                  <AuthGuard>
+                    <OnboardingPage />
+                  </AuthGuard>
+                }
+              />
               <Route
                 path="/:teamSlug/open/present"
                 element={
@@ -221,10 +230,6 @@ function AppContent() {
 
                         {/* Profile routes (not team-scoped) */}
                         <Route path="/profile" element={<ProfilePage />} />
-                        <Route
-                          path="/profile/favorites"
-                          element={<ProfilePage />}
-                        />
                         <Route
                           path="/profile/questions"
                           element={<ProfilePage />}

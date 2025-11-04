@@ -123,7 +123,7 @@ export function ExportPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto text-center py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <div className="text-gray-500 dark:text-gray-400">
           Loading export page...
         </div>
@@ -133,7 +133,7 @@ export function ExportPage() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
           Export Data
         </h1>
@@ -145,7 +145,7 @@ export function ExportPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

@@ -4,7 +4,7 @@
  * Reusable layout for all PulseStage emails
  */
 
-import { Html, Head, Body, Container, Section, Text, Link, Hr } from '@react-email/components';
+import { Html, Head, Body, Container, Section, Text, Hr } from '@react-email/components';
 import * as React from 'react';
 
 interface LayoutProps {
@@ -43,14 +43,6 @@ export default function Layout({ previewText, children }: LayoutProps) {
           {/* Footer */}
           <Hr style={hr} />
           <Section style={footer}>
-            <Text style={footerText}>
-              This email was sent by PulseStage. If you no longer wish to receive these
-              notifications,{' '}
-              <Link href="{{unsubscribeUrl}}" style={link}>
-                unsubscribe here
-              </Link>
-              .
-            </Text>
             <Text style={footerText}>
               © {new Date().getFullYear()} PulseStage. All rights reserved.
             </Text>
@@ -105,9 +97,4 @@ const footerText = {
   color: '#6b7280',
   lineHeight: '16px',
   margin: '4px 0',
-};
-
-const link = {
-  color: '#3b82f6',
-  textDecoration: 'underline',
 };

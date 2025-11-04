@@ -115,6 +115,9 @@ async function seedDevelopmentData() {
       return;
     }
 
+    // Get General team for user assignment
+    const generalTeam = teams.find(t => t.slug === 'general') || teams[0];
+
     for (const userData of demoUsers) {
       const user = await prisma.user.upsert({
         where: {
@@ -132,6 +135,7 @@ async function seedDevelopmentData() {
           name: userData.name,
           ssoId: userData.ssoId,
           tenantId: tenant.id,
+          primaryTeamId: generalTeam.id, // Assign to General team
         },
       });
 

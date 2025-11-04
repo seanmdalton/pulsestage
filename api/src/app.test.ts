@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from './app.js';
 import { testPrisma } from './test/setup.js';
+import { createTestUser } from './test/testHelpers.js';
 
 const app = createApp(testPrisma);
 
@@ -25,13 +26,10 @@ describe('API Tests', () => {
         where: { slug: 'default' },
       });
 
-      testUser = await testPrisma.user.create({
-        data: {
-          tenantId: tenant!.id,
-          email: 'test@example.com',
-          name: 'Test User',
-          ssoId: 'test-123',
-        },
+      testUser = await createTestUser(testPrisma, tenant!.id, {
+        email: 'test@example.com',
+        name: 'Test User',
+        ssoId: 'test-123',
       });
     });
 
@@ -102,13 +100,10 @@ describe('API Tests', () => {
         where: { slug: 'default' },
       });
 
-      testUser = await testPrisma.user.create({
-        data: {
-          tenantId: tenant!.id,
-          email: 'test@example.com',
-          name: 'Test User',
-          ssoId: 'test-123',
-        },
+      testUser = await createTestUser(testPrisma, tenant!.id, {
+        email: 'test@example.com',
+        name: 'Test User',
+        ssoId: 'test-123',
       });
 
       // Create test team
@@ -245,13 +240,10 @@ describe('API Tests', () => {
       });
 
       // Create an admin user
-      adminUser = await testPrisma.user.create({
-        data: {
-          email: 'admin@test.com',
-          name: 'Admin User',
-          ssoId: 'admin@test.com',
-          tenantId: tenant!.id,
-        },
+      adminUser = await createTestUser(testPrisma, tenant!.id, {
+        email: 'admin@test.com',
+        name: 'Admin User',
+        ssoId: 'admin@test.com',
       });
 
       // Create team membership with admin role
@@ -354,13 +346,10 @@ describe('API Tests', () => {
       });
 
       // Create admin user
-      adminUser = await testPrisma.user.create({
-        data: {
-          tenantId: tenant.id,
-          email: 'admin@test.com',
-          name: 'Admin User',
-          ssoId: 'admin-123',
-        },
+      adminUser = await createTestUser(testPrisma, tenant.id, {
+        email: 'admin@test.com',
+        name: 'Admin User',
+        ssoId: 'admin-123',
       });
 
       // Create admin membership
@@ -373,13 +362,10 @@ describe('API Tests', () => {
       });
 
       // Create regular user
-      regularUser = await testPrisma.user.create({
-        data: {
-          tenantId: tenant.id,
-          email: 'user@test.com',
-          name: 'Regular User',
-          ssoId: 'user-123',
-        },
+      regularUser = await createTestUser(testPrisma, tenant.id, {
+        email: 'user@test.com',
+        name: 'Regular User',
+        ssoId: 'user-123',
       });
 
       // Create member membership
@@ -424,13 +410,10 @@ describe('API Tests', () => {
       });
 
       it('should reject non-admin users', async () => {
-        const memberUser = await testPrisma.user.create({
-          data: {
-            tenantId: tenant.id,
-            email: 'member@test.com',
-            name: 'Member User',
-            ssoId: 'member-123',
-          },
+        const memberUser = await createTestUser(testPrisma, tenant.id, {
+          email: 'member@test.com',
+          name: 'Member User',
+          ssoId: 'member-123',
         });
 
         const response = await request(app)
@@ -489,13 +472,10 @@ describe('API Tests', () => {
       let newUser: any;
 
       beforeEach(async () => {
-        newUser = await testPrisma.user.create({
-          data: {
-            tenantId: tenant.id,
-            email: 'newuser@test.com',
-            name: 'New User',
-            ssoId: 'newuser-123',
-          },
+        newUser = await createTestUser(testPrisma, tenant.id, {
+          email: 'newuser@test.com',
+          name: 'New User',
+          ssoId: 'newuser-123',
         });
       });
 
@@ -516,13 +496,10 @@ describe('API Tests', () => {
       });
 
       it('should default to member role if not specified', async () => {
-        const anotherUser = await testPrisma.user.create({
-          data: {
-            tenantId: tenant.id,
-            email: 'another@test.com',
-            name: 'Another User',
-            ssoId: 'another-123',
-          },
+        const anotherUser = await createTestUser(testPrisma, tenant.id, {
+          email: 'another@test.com',
+          name: 'Another User',
+          ssoId: 'another-123',
         });
 
         const response = await request(app)
@@ -593,13 +570,10 @@ describe('API Tests', () => {
       });
 
       it('should return 404 for non-member user', async () => {
-        const nonMember = await testPrisma.user.create({
-          data: {
-            tenantId: tenant.id,
-            email: 'nonmember@test.com',
-            name: 'Non Member',
-            ssoId: 'nonmember-123',
-          },
+        const nonMember = await createTestUser(testPrisma, tenant.id, {
+          email: 'nonmember@test.com',
+          name: 'Non Member',
+          ssoId: 'nonmember-123',
         });
 
         const response = await request(app)
@@ -656,13 +630,10 @@ describe('API Tests', () => {
       });
 
       it('should return 404 for non-member user', async () => {
-        const nonMember = await testPrisma.user.create({
-          data: {
-            tenantId: tenant.id,
-            email: 'nonmember2@test.com',
-            name: 'Non Member 2',
-            ssoId: 'nonmember2-123',
-          },
+        const nonMember = await createTestUser(testPrisma, tenant.id, {
+          email: 'nonmember2@test.com',
+          name: 'Non Member 2',
+          ssoId: 'nonmember2-123',
         });
 
         const response = await request(app)

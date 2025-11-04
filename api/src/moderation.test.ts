@@ -4,6 +4,7 @@ import { createApp } from './app.js';
 import { testPrisma } from './test/setup.js';
 import { type Question, type Team, type Tag, type User } from '@prisma/client';
 import type { Express } from 'express';
+import { createTestUser } from './test/testHelpers.js';
 
 let app: Express;
 let adminUser: User;
@@ -22,14 +23,15 @@ beforeAll(async () => {
 
 afterEach(async () => {
   // Clean up after each test
+  // Order matters: delete users before teams due to primaryTeamId foreign key
   await testPrisma.auditLog.deleteMany();
   await testPrisma.questionTag.deleteMany();
   await testPrisma.upvote.deleteMany();
   await testPrisma.question.deleteMany();
   await testPrisma.teamMembership.deleteMany();
   await testPrisma.userPreferences.deleteMany();
+  await testPrisma.user.deleteMany(); // Delete users BEFORE teams
   await testPrisma.team.deleteMany();
-  await testPrisma.user.deleteMany();
   await testPrisma.tag.deleteMany();
   await testPrisma.tenant.deleteMany({
     where: {
@@ -53,29 +55,23 @@ describe('Moderation Features', () => {
       },
     });
 
-    adminUser = await testPrisma.user.create({
-      data: {
-        email: 'admin@example.com',
-        name: 'Admin User',
-        ssoId: 'admin-sso',
-        tenantId: defaultTenant.id,
-      },
+    adminUser = await createTestUser(testPrisma, defaultTenant.id, {
+      email: 'admin@example.com',
+      name: 'Admin User',
+      ssoId: 'admin-sso',
+      role: 'admin',
     });
-    moderatorUser = await testPrisma.user.create({
-      data: {
-        email: 'moderator@example.com',
-        name: 'Moderator User',
-        ssoId: 'moderator-sso',
-        tenantId: defaultTenant.id,
-      },
+    moderatorUser = await createTestUser(testPrisma, defaultTenant.id, {
+      email: 'moderator@example.com',
+      name: 'Moderator User',
+      ssoId: 'moderator-sso',
+      role: 'moderator',
     });
-    memberUser = await testPrisma.user.create({
-      data: {
-        email: 'member@example.com',
-        name: 'Member User',
-        ssoId: 'member-sso',
-        tenantId: defaultTenant.id,
-      },
+    memberUser = await createTestUser(testPrisma, defaultTenant.id, {
+      email: 'member@example.com',
+      name: 'Member User',
+      ssoId: 'member-sso',
+      role: 'member',
     });
 
     await testPrisma.teamMembership.createMany({

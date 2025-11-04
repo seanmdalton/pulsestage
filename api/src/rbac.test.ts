@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { testPrisma } from './test/setup.js';
 import { createApp } from './app.js';
+import { createTestUser } from './test/testHelpers.js';
 
 const app = createApp(testPrisma);
 
@@ -55,31 +56,25 @@ describe('RBAC & Team Scoping Tests', () => {
     });
 
     // Create users
-    adminUser = await testPrisma.user.create({
-      data: {
-        email: 'admin@example.com',
-        name: 'Admin User',
-        ssoId: 'admin-sso',
-        tenantId: tenant!.id,
-      },
+    adminUser = await createTestUser(testPrisma, tenant!.id, {
+      email: 'admin@example.com',
+      name: 'Admin User',
+      ssoId: 'admin-sso',
+      role: 'admin',
     });
 
-    moderatorUser = await testPrisma.user.create({
-      data: {
-        email: 'moderator@example.com',
-        name: 'Moderator User',
-        ssoId: 'moderator-sso',
-        tenantId: tenant!.id,
-      },
+    moderatorUser = await createTestUser(testPrisma, tenant!.id, {
+      email: 'moderator@example.com',
+      name: 'Moderator User',
+      ssoId: 'moderator-sso',
+      role: 'moderator',
     });
 
-    memberUser = await testPrisma.user.create({
-      data: {
-        email: 'member@example.com',
-        name: 'Member User',
-        ssoId: 'member-sso',
-        tenantId: tenant!.id,
-      },
+    memberUser = await createTestUser(testPrisma, tenant!.id, {
+      email: 'member@example.com',
+      name: 'Member User',
+      ssoId: 'member-sso',
+      role: 'member',
     });
 
     // Create team memberships
@@ -420,13 +415,10 @@ describe('RBAC & Team Scoping Tests', () => {
       });
 
       // Create another tenant's data
-      _otherTenantUser = await testPrisma.user.create({
-        data: {
-          email: 'other@example.com',
-          name: 'Other Tenant User',
-          ssoId: 'other-sso',
-          tenantId: 'other-tenant-id',
-        },
+      _otherTenantUser = await createTestUser(testPrisma, 'other-tenant-id', {
+        email: 'other@example.com',
+        name: 'Other Tenant User',
+        ssoId: 'other-sso',
       });
 
       otherTenantQuestion = await testPrisma.question.create({

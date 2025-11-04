@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { testPrisma } from '../test/setup.js';
 import { runInTenantContext } from './tenantContext.js';
 import { applyTenantMiddleware } from './prismaMiddleware.js';
+import { createTestUser } from '../test/testHelpers.js';
 
 describe('prismaMiddleware', () => {
   let tenant1Id: string;
@@ -82,22 +83,16 @@ describe('prismaMiddleware', () => {
     it('should isolate user data between tenants', async () => {
       // Create users in different tenants
       await runInTenantContext({ tenantId: tenant1Id, tenantSlug: 'tenant1' }, async () => {
-        await testPrisma.user.create({
-          data: {
-            email: 'user1@tenant1.com',
-            name: 'User 1',
-            tenantId: tenant1Id,
-          },
+        await createTestUser(testPrisma, tenant1Id, {
+          email: 'user1@tenant1.com',
+          name: 'User 1',
         });
       });
 
       await runInTenantContext({ tenantId: tenant2Id, tenantSlug: 'tenant2' }, async () => {
-        await testPrisma.user.create({
-          data: {
-            email: 'user1@tenant2.com',
-            name: 'User 1 (Tenant 2)',
-            tenantId: tenant2Id,
-          },
+        await createTestUser(testPrisma, tenant2Id, {
+          email: 'user1@tenant2.com',
+          name: 'User 1 (Tenant 2)',
         });
       });
 

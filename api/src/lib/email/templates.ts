@@ -15,6 +15,7 @@ import QuestionApprovedEmail, {
 import QuestionRejectedEmail, {
   type QuestionRejectedEmailProps,
 } from '../../emails/QuestionRejectedEmail.js';
+import WelcomeEmail, { type WelcomeEmailProps } from '../../emails/WelcomeEmail.js';
 
 /**
  * Render QuestionAnsweredEmail template to HTML
@@ -43,6 +44,14 @@ export async function renderQuestionRejectedEmail(
   props: QuestionRejectedEmailProps
 ): Promise<string> {
   const result = await render(createElement(QuestionRejectedEmail, props));
+  return result;
+}
+
+/**
+ * Render WelcomeEmail template to HTML
+ */
+export async function renderWelcomeEmail(props: WelcomeEmailProps): Promise<string> {
+  const result = await render(createElement(WelcomeEmail, props));
   return result;
 }
 

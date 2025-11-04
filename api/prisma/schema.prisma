@@ -183,13 +183,14 @@ model User {
   email         String
   name          String?
   ssoId         String?  // For SSO provider integration
-  primaryTeamId String?  // Primary team for pulse surveys and main affiliation
+  primaryTeamId String   // Primary team for pulse surveys and main affiliation (REQUIRED)
+  isActive      Boolean  @default(true) // Soft delete: false = deactivated
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
   // Relationships
   tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  primaryTeam     Team?            @relation("PrimaryTeamMembers", fields: [primaryTeamId], references: [id], onDelete: SetNull)
+  primaryTeam     Team             @relation("PrimaryTeamMembers", fields: [primaryTeamId], references: [id], onDelete: SetNull)
   teamMemberships TeamMembership[]
   preferences     UserPreferences?
   questions       Question[]      // Questions submitted by this user

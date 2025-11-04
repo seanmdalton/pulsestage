@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { testPrisma } from './test/setup.js';
 import { createApp } from './app.js';
+import { createTestUser } from './test/testHelpers.js';
 
 const app = createApp(testPrisma);
 
@@ -36,12 +37,9 @@ describe('Enhanced Search & Filtering', () => {
     });
 
     // Create test user for authentication
-    testUser = await testPrisma.user.create({
-      data: {
-        email: 'test@example.com',
-        name: 'Test User',
-        tenantId: tenant!.id,
-      },
+    testUser = await createTestUser(testPrisma, tenant!.id, {
+      email: 'test@example.com',
+      name: 'Test User',
     });
 
     // Create team

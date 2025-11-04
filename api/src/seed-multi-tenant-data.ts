@@ -15,6 +15,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { getOrCreateGeneralTeam } from './lib/teams.js';
 
 const prisma = new PrismaClient();
 
@@ -31,6 +32,9 @@ export async function seedMultiTenantData() {
     },
   });
   console.log(`[OK] Created tenant: ${acmeTenant.name} (${acmeTenant.slug})`);
+
+  // Ensure General team exists
+  await getOrCreateGeneralTeam(prisma, acmeTenant.id);
 
   // Create teams for Acme
   const acmeEngineering = await prisma.team.upsert({
@@ -80,12 +84,14 @@ export async function seedMultiTenantData() {
       email: 'alice.admin@acme.com',
       name: 'Alice Anderson',
       ssoId: 'alice.admin@acme.com',
+      primaryTeamId: acmeEngineering.id,
       teams: [{ teamId: acmeEngineering.id, role: 'admin' }],
     },
     {
       email: 'charlie.owner@acme.com',
       name: 'Charlie Chen',
       ssoId: 'charlie.owner@acme.com',
+      primaryTeamId: acmeProduct.id,
       teams: [
         { teamId: acmeProduct.id, role: 'owner' },
         { teamId: acmeMarketing.id, role: 'admin' },
@@ -95,12 +101,14 @@ export async function seedMultiTenantData() {
       email: 'david@acme.com',
       name: 'David Martinez',
       ssoId: 'david@acme.com',
+      primaryTeamId: acmeEngineering.id,
       teams: [{ teamId: acmeEngineering.id, role: 'moderator' }],
     },
     {
       email: 'emily.member@acme.com',
       name: 'Emily Evans',
       ssoId: 'emily.member@acme.com',
+      primaryTeamId: acmeEngineering.id,
       teams: [
         { teamId: acmeEngineering.id, role: 'member' },
         { teamId: acmeProduct.id, role: 'member' },

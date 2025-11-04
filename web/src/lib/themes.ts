@@ -153,8 +153,6 @@ export function applyTheme(theme: Theme, mode: 'light' | 'dark') {
   const colors = mode === 'light' ? theme.light : theme.dark
   const root = document.documentElement
 
-  console.log('🎨 Applying theme:', theme.name, mode, colors)
-
   // Apply CSS custom properties
   root.style.setProperty('--color-primary', colors.primary)
   root.style.setProperty('--color-secondary', colors.secondary)
@@ -164,13 +162,6 @@ export function applyTheme(theme: Theme, mode: 'light' | 'dark') {
   root.style.setProperty('--color-text', colors.text)
   root.style.setProperty('--color-text-secondary', colors.textSecondary)
   root.style.setProperty('--color-border', colors.border)
-
-  // Verify they were set
-  console.log('✅ CSS Variables set:', {
-    '--color-primary': root.style.getPropertyValue('--color-primary'),
-    '--color-secondary': root.style.getPropertyValue('--color-secondary'),
-    '--color-accent': root.style.getPropertyValue('--color-accent'),
-  })
 
   // Force a repaint by toggling a class
   root.classList.add('theme-changing')

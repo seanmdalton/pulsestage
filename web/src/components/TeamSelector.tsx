@@ -15,18 +15,9 @@ export function TeamSelector() {
   const { currentTeam, teams, isLoading } = useTeam()
 
   // User context
-  const { isAuthenticated } = useAuth()
-  const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    userTeams: _userTeams,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    favorites: _favorites,
-    defaultTeam,
-    getUserRoleInTeam,
-    isTeamFavorite,
-    toggleTeamFavorite,
-    setDefaultTeam,
-  } = useUser()
+  const { isAuthenticated, user } = useAuth()
+  const { userTeams, getUserRoleInTeam, isTeamFavorite, toggleTeamFavorite } =
+    useUser()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -51,27 +42,31 @@ export function TeamSelector() {
     }
   }, [isOpen])
 
+  // Show only teams the user is a member of (if authenticated)
+  // For non-authenticated users, show all teams (for public viewing)
+  const availableTeams = isAuthenticated ? userTeams : teams
+
   // Enhanced filtering with user context
-  const filteredTeams = teams
+  const filteredTeams = availableTeams
     .filter(
       (team) =>
         team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         team.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      // Sort by: favorites first, then default team, then by name
+      // Sort by: home team first, then favorites, then alphabetically
+      const aIsHome = isAuthenticated && user?.primaryTeamId === a.id
+      const bIsHome = isAuthenticated && user?.primaryTeamId === b.id
       const aIsFavorite = isAuthenticated && isTeamFavorite(a.id)
       const bIsFavorite = isAuthenticated && isTeamFavorite(b.id)
-      const aIsDefault = isAuthenticated && defaultTeam?.id === a.id
-      const bIsDefault = isAuthenticated && defaultTeam?.id === b.id
 
-      // Favorites first
+      // Home team first
+      if (aIsHome && !bIsHome) return -1
+      if (!aIsHome && bIsHome) return 1
+
+      // Favorites second
       if (aIsFavorite && !bIsFavorite) return -1
       if (!aIsFavorite && bIsFavorite) return 1
-
-      // Default team second
-      if (aIsDefault && !bIsDefault) return -1
-      if (!aIsDefault && bIsDefault) return 1
 
       // Then alphabetically
       return a.name.localeCompare(b.name)
@@ -143,24 +138,11 @@ export function TeamSelector() {
     }
   }
 
-  // Handle set as default
-  const handleSetDefault = async (e: React.MouseEvent, teamId: string) => {
-    e.stopPropagation()
-    if (!isAuthenticated) return
-
-    try {
-      await setDefaultTeam(teamId)
-    } catch (error) {
-      console.error('Failed to set default team:', error)
-      // Could add a toast notification here
-    }
-  }
-
   // Render individual team item with user context
   const renderTeamItem = (team: { id: string; name: string; slug: string }) => {
     const userRole = isAuthenticated ? getUserRoleInTeam(team.id) : null
     const isFavorite = isAuthenticated && isTeamFavorite(team.id)
-    const isDefault = isAuthenticated && defaultTeam?.id === team.id
+    const isHomeTeam = isAuthenticated && user?.primaryTeamId === team.id
     const isCurrent = currentTeam?.id === team.id
 
     return (
@@ -182,19 +164,14 @@ export function TeamSelector() {
               <div className="flex items-center space-x-1 min-w-0">
                 <span className="font-medium truncate">{team.name}</span>
 
-                {/* Default team indicator */}
-                {isDefault && (
-                  <svg
-                    className="w-3 h-3 text-blue-600 dark:text-blue-400 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                {/* Home team indicator (primary team) */}
+                {isHomeTeam && (
+                  <span
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex-shrink-0"
+                    title="Your home team"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                    🏠 Home
+                  </span>
                 )}
 
                 {/* Role indicator - Show for all roles */}
@@ -260,29 +237,6 @@ export function TeamSelector() {
                 />
               </svg>
             </button>
-
-            {/* Set as default */}
-            {!isDefault && (
-              <button
-                onClick={(e) => handleSetDefault(e, team.id)}
-                className="p-1 rounded-full text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                title="Set as default team"
-              >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </button>
-            )}
           </div>
         )}
       </div>

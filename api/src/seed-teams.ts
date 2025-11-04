@@ -4,6 +4,11 @@ const prisma = new PrismaClient();
 
 const defaultTeams = [
   {
+    name: 'General',
+    slug: 'general',
+    description: 'Default team for all users',
+  },
+  {
     name: 'Engineering',
     slug: 'engineering',
     description: 'Technical development, infrastructure, and engineering culture',

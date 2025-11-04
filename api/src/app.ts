@@ -21,11 +21,15 @@ import { z } from 'zod';
 import swaggerUi from 'swagger-ui-express';
 import { readFileSync } from 'fs';
 import { parse as parseYaml } from 'yaml';
+import { parse as parseCsv } from 'csv-parse/sync';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { env } from './env.js';
 import { requireAdminKey } from './middleware/adminAuth.js';
 import { rateLimit } from './middleware/rateLimit.js';
+import { getOrCreateGeneralTeam } from './lib/teams.js';
+import { getEmailService } from './lib/email/index.js';
+import { renderWelcomeEmail } from './lib/email/templates.js';
 import {
   RATE_LIMITS,
   HTTP_STATUS,
@@ -1998,13 +2002,17 @@ export function createApp(prisma: PrismaClient) {
         });
       }
 
-      // Create the admin user
+      // Get or create General team
+      const generalTeam = await getOrCreateGeneralTeam(prisma, tenantId);
+
+      // Create the admin user with General team as primary
       const user = await prisma.user.create({
         data: {
           email,
           name,
           tenantId,
           ssoId: email, // Use email as SSO ID for mock SSO
+          primaryTeamId: generalTeam.id, // Assign to General team initially
         },
       });
 
@@ -4714,25 +4722,46 @@ export function createApp(prisma: PrismaClient) {
   // Authentication handled by sessionAuthMiddleware
 
   // Get current user
-  app.get('/users/me', requireSessionAuth, (req, res) => {
-    res.json({
-      id: req.user!.id,
-      email: req.user!.email,
-      name: req.user!.name,
-      ssoId: req.user!.ssoId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+  app.get('/users/me', requireSessionAuth, async (req, res) => {
+    try {
+      // Fetch full user with primary team
+      const user = await prisma.user.findUnique({
+        where: { id: req.user!.id },
+        include: {
+          primaryTeam: true, // Include home team information
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        ssoId: user.ssoId,
+        primaryTeamId: user.primaryTeamId,
+        primaryTeam: user.primaryTeam,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
   });
 
   // Get user's questions
   app.get('/users/me/questions', requireSessionAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
+      const tenantId = req.user!.tenantId;
 
       const questions = await prisma.question.findMany({
         where: {
-          authorId: userId, // Query for questions authored by this user
+          authorId: userId,
+          tenantId: tenantId, // Enforce tenant isolation
         },
         include: {
           team: true,
@@ -4752,6 +4781,22 @@ export function createApp(prisma: PrismaClient) {
     } catch (error) {
       console.error('Error fetching user questions:', error);
       res.status(500).json({ error: 'Failed to fetch user questions' });
+    }
+  });
+
+  // Get user's upvote count
+  app.get('/users/me/upvotes/count', requireSessionAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+
+      const upvoteCount = await prisma.upvote.count({
+        where: { userId },
+      });
+
+      res.json({ count: upvoteCount });
+    } catch (error) {
+      console.error('Error fetching user upvote count:', error);
+      res.status(500).json({ error: 'Failed to fetch upvote count' });
     }
   });
 
@@ -4824,6 +4869,98 @@ export function createApp(prisma: PrismaClient) {
     res.json({ isFavorite });
   });
 
+  // Update user's primary team
+  app.patch('/users/me/primary-team', requireSessionAuth, async (req, res) => {
+    const { teamId } = req.body;
+    const userId = req.user!.id;
+    const tenantId = req.user!.tenantId;
+
+    try {
+      // Validate request
+      if (!teamId) {
+        return res.status(400).json({ error: 'teamId is required' });
+      }
+
+      // Verify team exists and belongs to user's tenant
+      const team = await prisma.team.findFirst({
+        where: {
+          id: teamId,
+          tenantId: tenantId,
+        },
+      });
+
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      // Check if user is already a member of this team
+      let membership = await prisma.teamMembership.findUnique({
+        where: {
+          userId_teamId: {
+            userId: userId,
+            teamId: teamId,
+          },
+        },
+      });
+
+      // If not a member, add them as a member
+      if (!membership) {
+        membership = await prisma.teamMembership.create({
+          data: {
+            userId: userId,
+            teamId: teamId,
+            role: 'member',
+          },
+        });
+      }
+
+      // Update user's primary team
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { primaryTeamId: teamId },
+        include: {
+          primaryTeam: true,
+        },
+      });
+
+      res.json({
+        success: true,
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          primaryTeamId: updatedUser.primaryTeamId,
+          primaryTeam: updatedUser.primaryTeam,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating primary team:', error);
+      res.status(500).json({ error: 'Failed to update primary team' });
+    }
+  });
+
+  // Get available teams for user to select as primary
+  app.get('/users/me/available-teams', requireSessionAuth, async (req, res) => {
+    const tenantId = req.user!.tenantId;
+
+    try {
+      // Get all teams in the tenant with complete team data
+      const teams = await prisma.team.findMany({
+        where: {
+          tenantId: tenantId,
+        },
+        orderBy: [
+          { slug: 'asc' }, // General first, then alphabetically
+        ],
+      });
+
+      res.json({ teams });
+    } catch (error) {
+      console.error('Error fetching available teams:', error);
+      res.status(500).json({ error: 'Failed to fetch teams' });
+    }
+  });
+
   // ========================================
   // Admin User Management Endpoints
   // ========================================
@@ -4870,6 +5007,7 @@ export function createApp(prisma: PrismaClient) {
           email: user.email,
           name: user.name,
           ssoId: user.ssoId,
+          isActive: user.isActive,
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
           memberships: user.teamMemberships.map(m => ({
@@ -4890,6 +5028,699 @@ export function createApp(prisma: PrismaClient) {
       });
     }
   });
+
+  // CSV Bulk Import Users (admin only)
+  const csvImportSchema = z.object({
+    csvData: z.string().min(1, 'CSV data is required'),
+    dryRun: z.boolean().default(true),
+  });
+
+  app.post(
+    '/admin/users/import',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const tenantId = req.tenant?.tenantId;
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        const { csvData, dryRun } = csvImportSchema.parse(req.body);
+
+        // Parse CSV
+        let records: any[];
+        try {
+          records = parseCsv(csvData, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+            relaxColumnCount: true,
+          });
+        } catch (parseError: any) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid CSV format',
+            message: parseError.message,
+          });
+        }
+
+        if (records.length === 0) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'CSV file is empty',
+          });
+        }
+
+        // Validate required columns
+        const requiredColumns = ['email', 'name', 'homeTeam', 'role'];
+        const firstRecord = records[0];
+        const missingColumns = requiredColumns.filter(col => !(col in firstRecord));
+
+        if (missingColumns.length > 0) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Missing required columns',
+            missing: missingColumns,
+            expected: requiredColumns,
+            found: Object.keys(firstRecord),
+          });
+        }
+
+        // Get all teams for validation
+        const teams = await prisma.team.findMany({
+          where: { tenantId },
+          select: { id: true, slug: true, name: true },
+        });
+
+        const teamsBySlug = new Map(teams.map(t => [t.slug.toLowerCase(), t]));
+        const generalTeam = await getOrCreateGeneralTeam(prisma, tenantId);
+
+        // Validate and prepare user data
+        const results: any[] = [];
+        const validRecords: any[] = [];
+
+        for (let i = 0; i < records.length; i++) {
+          const record = records[i];
+          const rowNumber = i + 2; // +2 because CSV rows start at 1 and we skip header
+
+          const errors: string[] = [];
+
+          // Validate email
+          const email = record.email?.trim().toLowerCase();
+          if (!email) {
+            errors.push('Email is required');
+          } else {
+            // Basic email validation regex
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+              errors.push('Invalid email format');
+            }
+          }
+
+          // Validate name
+          const name = record.name?.trim();
+          if (!name) {
+            errors.push('Name is required');
+          }
+
+          // Validate homeTeam
+          const homeTeamSlug = record.homeTeam?.trim().toLowerCase();
+          if (!homeTeamSlug) {
+            errors.push('Home team is required');
+          }
+
+          const homeTeam = homeTeamSlug ? teamsBySlug.get(homeTeamSlug) : null;
+          if (homeTeamSlug && !homeTeam) {
+            errors.push(`Home team '${record.homeTeam}' not found`);
+          }
+
+          // Validate role
+          const role = record.role?.trim().toLowerCase();
+          const validRoles = ['viewer', 'member', 'moderator', 'admin', 'owner'];
+          if (!role) {
+            errors.push('Role is required');
+          } else if (!validRoles.includes(role)) {
+            errors.push(`Invalid role '${record.role}'. Must be one of: ${validRoles.join(', ')}`);
+          }
+
+          // Check for duplicate email in the import batch
+          const duplicateInBatch = validRecords.find(r => r.email === email);
+          if (duplicateInBatch) {
+            errors.push(`Duplicate email in CSV (first seen at row ${duplicateInBatch.rowNumber})`);
+          }
+
+          const result = {
+            rowNumber,
+            email: email || record.email,
+            name: name || record.name,
+            homeTeam: record.homeTeam,
+            homeTeamId: homeTeam?.id,
+            role: role || record.role,
+            status: errors.length > 0 ? 'error' : 'pending',
+            errors: errors.length > 0 ? errors : undefined,
+            action: 'unknown',
+          };
+
+          // Check if user exists
+          if (email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(email)) {
+              const existingUser = await prisma.user.findUnique({
+                where: { tenantId_email: { tenantId, email } },
+                select: { id: true, name: true, primaryTeamId: true },
+              });
+
+              if (existingUser) {
+                result.action = 'update';
+              } else {
+                result.action = 'create';
+              }
+            }
+          }
+
+          results.push(result);
+
+          if (errors.length === 0) {
+            validRecords.push(result);
+          }
+        }
+
+        // If dry run, return preview
+        if (dryRun) {
+          const summary = {
+            total: records.length,
+            valid: validRecords.length,
+            errors: results.filter(r => r.status === 'error').length,
+            toCreate: results.filter(r => r.action === 'create').length,
+            toUpdate: results.filter(r => r.action === 'update').length,
+          };
+
+          return res.json({
+            dryRun: true,
+            summary,
+            results,
+          });
+        }
+
+        // Execute import (commit mode)
+        const imported: any[] = [];
+        const failed: any[] = [];
+
+        for (const record of validRecords) {
+          try {
+            // Upsert user
+            const user = await prisma.user.upsert({
+              where: {
+                tenantId_email: {
+                  tenantId,
+                  email: record.email,
+                },
+              },
+              create: {
+                email: record.email,
+                name: record.name,
+                ssoId: record.email, // Will be updated on first login
+                tenantId,
+                primaryTeamId: record.homeTeamId,
+              },
+              update: {
+                name: record.name,
+                primaryTeamId: record.homeTeamId,
+              },
+            });
+
+            // Ensure user has membership in home team
+            await prisma.teamMembership.upsert({
+              where: {
+                userId_teamId: {
+                  userId: user.id,
+                  teamId: record.homeTeamId,
+                },
+              },
+              create: {
+                userId: user.id,
+                teamId: record.homeTeamId,
+                role: record.role,
+              },
+              update: {
+                role: record.role,
+              },
+            });
+
+            // Ensure user has membership in General team (if different from home team)
+            if (generalTeam.id !== record.homeTeamId) {
+              await prisma.teamMembership.upsert({
+                where: {
+                  userId_teamId: {
+                    userId: user.id,
+                    teamId: generalTeam.id,
+                  },
+                },
+                create: {
+                  userId: user.id,
+                  teamId: generalTeam.id,
+                  role: 'member',
+                },
+                update: {},
+              });
+            }
+
+            // Audit log
+            await auditService.log(req, {
+              action: record.action === 'create' ? 'user.create' : 'user.update',
+              entityType: 'user',
+              entityId: user.id,
+              after: {
+                email: user.email,
+                name: user.name,
+                homeTeam: record.homeTeam,
+                role: record.role,
+              },
+              metadata: {
+                importedVia: 'csv',
+              },
+            });
+
+            // Send welcome email for newly created users (async, don't block import)
+            if (record.action === 'create') {
+              const tenant = await prisma.tenant.findUnique({
+                where: { id: tenantId },
+              });
+              const homeTeam = await prisma.team.findUnique({
+                where: { id: record.homeTeamId },
+              });
+
+              if (tenant && homeTeam) {
+                // Send email asynchronously
+                setImmediate(async () => {
+                  try {
+                    const emailService = getEmailService();
+                    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                    const dashboardUrl = `${baseUrl}/${homeTeam.slug}/dashboard`;
+
+                    const html = await renderWelcomeEmail({
+                      userName: user.name || user.email,
+                      tenantName: tenant.name || tenant.slug,
+                      homeTeamName: homeTeam.name,
+                      dashboardUrl,
+                    });
+
+                    await emailService.send({
+                      to: { email: user.email, name: user.name || user.email },
+                      subject: `Welcome to ${tenant.name || tenant.slug}!`,
+                      html,
+                    });
+
+                    console.log(`Welcome email sent to ${user.email}`);
+                  } catch (error) {
+                    console.error(`Failed to send welcome email to ${user.email}:`, error);
+                  }
+                });
+              }
+            }
+
+            imported.push({
+              ...record,
+              userId: user.id,
+              status: 'success',
+            });
+          } catch (error: any) {
+            console.error(`Error importing user ${record.email}:`, error);
+            failed.push({
+              ...record,
+              status: 'error',
+              errors: [error.message],
+            });
+          }
+        }
+
+        const summary = {
+          total: records.length,
+          imported: imported.length,
+          failed: failed.length,
+          skipped: results.filter(r => r.status === 'error').length,
+        };
+
+        res.json({
+          dryRun: false,
+          summary,
+          imported,
+          failed: failed.concat(results.filter(r => r.status === 'error')),
+        });
+      } catch (error: any) {
+        console.error('Error importing users:', error);
+        if (error.name === 'ZodError') {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid request data',
+            details: error.errors,
+          });
+        }
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to import users',
+          message: error.message,
+        });
+      }
+    }
+  );
+
+  // Deactivate user (admin only)
+  app.patch(
+    '/admin/users/:id/deactivate',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { id } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const existingUser = await prisma.user.findUnique({
+          where: { id },
+        });
+
+        if (!existingUser || existingUser.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Deactivate user
+        const user = await prisma.user.update({
+          where: { id },
+          data: { isActive: false },
+        });
+
+        // Audit log
+        await auditService.log(req, {
+          action: 'user.deactivate',
+          entityType: 'user',
+          entityId: user.id,
+          after: {
+            email: user.email,
+            isActive: false,
+          },
+        });
+
+        res.json({ success: true, user });
+      } catch (error: any) {
+        console.error('Error deactivating user:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to deactivate user',
+        });
+      }
+    }
+  );
+
+  // Reactivate user (admin only)
+  app.patch(
+    '/admin/users/:id/activate',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { id } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const existingUser = await prisma.user.findUnique({
+          where: { id },
+        });
+
+        if (!existingUser || existingUser.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Reactivate user
+        const user = await prisma.user.update({
+          where: { id },
+          data: { isActive: true },
+        });
+
+        // Audit log
+        await auditService.log(req, {
+          action: 'user.activate',
+          entityType: 'user',
+          entityId: user.id,
+          after: {
+            email: user.email,
+            isActive: true,
+          },
+        });
+
+        res.json({ success: true, user });
+      } catch (error: any) {
+        console.error('Error activating user:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to activate user',
+        });
+      }
+    }
+  );
+
+  // Update user role in a specific team (admin only)
+  app.patch(
+    '/admin/users/:userId/role',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { userId } = req.params;
+        const { teamId, role } = req.body;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Validate role
+        const validRoles = ['viewer', 'member', 'moderator', 'admin', 'owner'];
+        if (!validRoles.includes(role)) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid role',
+            validRoles,
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Verify team exists and belongs to tenant
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        if (!team || team.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Team not found',
+          });
+        }
+
+        // Update the membership role
+        const membership = await prisma.teamMembership.upsert({
+          where: {
+            userId_teamId: {
+              userId,
+              teamId,
+            },
+          },
+          update: {
+            role,
+          },
+          create: {
+            userId,
+            teamId,
+            role,
+          },
+        });
+
+        // Audit log
+        await auditService.log(req, {
+          action: 'user.role_update',
+          entityType: 'user',
+          entityId: userId,
+          after: {
+            teamId,
+            teamName: team.name,
+            role,
+          },
+        });
+
+        res.json({ success: true, membership });
+      } catch (error: any) {
+        console.error('Error updating user role:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to update user role',
+        });
+      }
+    }
+  );
+
+  // Add user to team (admin only)
+  app.post(
+    '/admin/users/:userId/teams/:teamId',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { userId, teamId } = req.params;
+        const { role = 'member' } = req.body;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Validate role
+        const validRoles = ['viewer', 'member', 'moderator', 'admin', 'owner'];
+        if (!validRoles.includes(role)) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Invalid role',
+            validRoles,
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Verify team exists and belongs to tenant
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        if (!team || team.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Team not found',
+          });
+        }
+
+        // Create membership (or update if already exists)
+        const membership = await prisma.teamMembership.upsert({
+          where: {
+            userId_teamId: {
+              userId,
+              teamId,
+            },
+          },
+          create: {
+            userId,
+            teamId,
+            role,
+          },
+          update: {
+            role,
+          },
+        });
+
+        // Audit log
+        await auditService.log(req, {
+          action: 'user.team_add',
+          entityType: 'user',
+          entityId: userId,
+          after: {
+            teamId,
+            teamName: team.name,
+            role,
+          },
+        });
+
+        res.json({ success: true, membership });
+      } catch (error: any) {
+        console.error('Error adding user to team:', error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to add user to team',
+        });
+      }
+    }
+  );
+
+  // Remove user from team (admin only)
+  app.delete(
+    '/admin/users/:userId/teams/:teamId',
+    validateCsrfToken(),
+    requirePermission('admin.access'),
+    async (req, res) => {
+      try {
+        const { userId, teamId } = req.params;
+        const tenantId = req.tenant?.tenantId;
+
+        if (!tenantId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Tenant not resolved',
+          });
+        }
+
+        // Verify user exists and belongs to tenant
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user || user.tenantId !== tenantId) {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'User not found',
+          });
+        }
+
+        // Don't allow removal from primary team
+        if (user.primaryTeamId === teamId) {
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            error: 'Cannot remove user from their home team. Change home team first.',
+          });
+        }
+
+        // Get team for audit log
+        const team = await prisma.team.findUnique({
+          where: { id: teamId },
+        });
+
+        // Delete membership
+        await prisma.teamMembership.delete({
+          where: {
+            userId_teamId: {
+              userId,
+              teamId,
+            },
+          },
+        });
+
+        // Audit log
+        await auditService.log(req, {
+          action: 'user.team_remove',
+          entityType: 'user',
+          entityId: userId,
+          after: {
+            teamId,
+            teamName: team?.name,
+          },
+        });
+
+        res.json({ success: true });
+      } catch (error: any) {
+        console.error('Error removing user from team:', error);
+        if (error.code === 'P2025') {
+          return res.status(HTTP_STATUS.NOT_FOUND).json({
+            error: 'Membership not found',
+          });
+        }
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to remove user from team',
+        });
+      }
+    }
+  );
 
   // Get team members (admin only)
   app.get('/teams/:teamId/members', requirePermission('admin.access'), async (req, res) => {

@@ -73,14 +73,15 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   // Clean up database before each test (preserve default tenant)
+  // Order matters: delete users before teams due to primaryTeamId foreign key
   await testPrisma.auditLog.deleteMany(); // Delete audit logs first
   await testPrisma.questionTag.deleteMany();
   await testPrisma.upvote.deleteMany();
   await testPrisma.question.deleteMany();
   await testPrisma.teamMembership.deleteMany();
   await testPrisma.userPreferences.deleteMany();
+  await testPrisma.user.deleteMany(); // Delete users BEFORE teams
   await testPrisma.team.deleteMany();
-  await testPrisma.user.deleteMany();
   await testPrisma.tag.deleteMany();
   await testPrisma.tenant.deleteMany({
     where: {

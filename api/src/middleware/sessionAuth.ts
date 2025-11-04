@@ -283,13 +283,18 @@ export async function requireSessionAuth(req: Request, res: Response, next: Next
 export async function getUserTeamsWithMembership(userId: string, prisma: any) {
   await loadMockData();
 
-  // Fetch fresh memberships from database (not from cache)
-  // This ensures role changes are reflected immediately
+  // Fetch fresh memberships from database with team data
+  // Only return teams the user is actually a member of
   const userMemberships = await prisma.teamMembership.findMany({
     where: { userId },
-    select: {
-      teamId: true,
-      role: true,
+    include: {
+      team: {
+        include: {
+          _count: {
+            select: { questions: true },
+          },
+        },
+      },
     },
   });
 
@@ -302,34 +307,24 @@ export async function getUserTeamsWithMembership(userId: string, prisma: any) {
     },
   });
 
-  // Get real teams from database
-  const realTeams = await prisma.team.findMany({
-    where: { isActive: true },
-    include: {
-      _count: {
-        select: { questions: true },
-      },
-    },
-  });
+  // Map memberships to team objects with user context
+  return userMemberships
+    .filter((membership: any) => membership.team.isActive) // Only active teams
+    .map((membership: any) => {
+      const favoriteTeamsArray = Array.isArray(userPreferences?.favoriteTeams)
+        ? userPreferences.favoriteTeams
+        : [];
+      const isFavorite = favoriteTeamsArray.includes(membership.team.id) || false;
+      const isDefault = userPreferences?.defaultTeamId === membership.team.id;
 
-  // Map real teams to user context
-  return realTeams.map((team: any) => {
-    // Use real team ID directly since we updated mock data to use real IDs
-    const membership = userMemberships.find((m: any) => m.teamId === team.id);
-    const favoriteTeamsArray = Array.isArray(userPreferences?.favoriteTeams)
-      ? userPreferences.favoriteTeams
-      : [];
-    const isFavorite = favoriteTeamsArray.includes(team.id) || false;
-    const isDefault = userPreferences?.defaultTeamId === team.id;
-
-    return {
-      ...team,
-      userRole: membership?.role || 'member', // Default to member for all teams
-      isFavorite,
-      isDefault,
-      memberCount: Math.floor(Math.random() * 10) + 1, // Mock member count
-    };
-  });
+      return {
+        ...membership.team,
+        userRole: membership.role, // Actual role from TeamMembership
+        isFavorite,
+        isDefault,
+        memberCount: Math.floor(Math.random() * 10) + 1, // Mock member count
+      };
+    });
 }
 
 // Get user preferences
