@@ -1505,14 +1505,23 @@ export function createApp(prisma: PrismaClient) {
         });
       }
 
+      console.log(
+        `[AUTH/DEMO] Login attempt for user: ${req.query.user}, tenant: ${req.query.tenant}`
+      );
+      console.log(`[AUTH/DEMO] Existing session user: ${req.session.user?.id || 'none'}`);
+      console.log(`[AUTH/DEMO] Existing session version: ${req.session.sessionVersion}`);
+
       const user = await authManager.authenticateDemo(req, res);
 
       if (!user) {
+        console.log(`[AUTH/DEMO] Authentication failed - invalid user`);
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           error: 'Invalid demo user',
           message: 'Please provide a valid username (?user=alice)',
         });
       }
+
+      console.log(`[AUTH/DEMO] Authentication succeeded - user ID: ${user.id}`);
 
       // Store user in session
       req.session.user = user;
@@ -1522,23 +1531,29 @@ export function createApp(prisma: PrismaClient) {
       const tenantSettings = await prisma.tenantSettings.findUnique({
         where: { tenantId: req.tenant!.tenantId },
       });
-      req.session.sessionVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
+      const currentVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
+      req.session.sessionVersion = currentVersion;
+
+      console.log(`[AUTH/DEMO] Setting session version to: ${currentVersion}`);
+      console.log(`[AUTH/DEMO] New session user ID: ${req.session.user.id}`);
 
       // Save session before redirect (important!)
       req.session.save(err => {
         if (err) {
-          console.error('Session save error:', err);
+          console.error('[AUTH/DEMO] Session save error:', err);
           return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
             error: 'Failed to create session',
           });
         }
+
+        console.log(`[AUTH/DEMO] Session saved successfully`);
 
         // Redirect to frontend
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         res.redirect(`${frontendUrl}?demo=true`);
       });
     } catch (error) {
-      console.error('Demo auth error:', error);
+      console.error('[AUTH/DEMO] Error:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         error: 'Authentication failed',
         message: error instanceof Error ? error.message : 'Unknown error',

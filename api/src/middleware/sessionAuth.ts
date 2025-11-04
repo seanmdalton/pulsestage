@@ -172,6 +172,10 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
         });
         const currentVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
 
+        console.log(
+          `[SESSION] Version check: session=${req.session.sessionVersion}, current=${currentVersion}, user=${sessionUser.id}`
+        );
+
         if (req.session.sessionVersion < currentVersion) {
           console.log(
             `[SESSION] Invalidating stale session (version ${req.session.sessionVersion} < ${currentVersion})`
