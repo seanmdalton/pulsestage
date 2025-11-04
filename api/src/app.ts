@@ -977,11 +977,22 @@ export function createApp(prisma: PrismaClient) {
 
       // Step 2: Enable and configure Pulse
       console.log('  Enabling and configuring Pulse...');
+
+      // Get current session version and increment it
+      const currentSettings = await prisma.tenantSettings.findUnique({
+        where: { tenantId },
+      });
+      const currentVersion = (currentSettings?.settings as any)?.sessionVersion || 0;
+      const newSessionVersion = currentVersion + 1;
+
+      console.log(`  Incrementing session version: ${currentVersion} -> ${newSessionVersion}`);
+
       await prisma.tenantSettings.upsert({
         where: { tenantId },
         create: {
           tenantId,
           settings: {
+            sessionVersion: newSessionVersion,
             pulse: {
               enabled: true,
               anonThreshold: 5,
@@ -995,6 +1006,7 @@ export function createApp(prisma: PrismaClient) {
         },
         update: {
           settings: {
+            sessionVersion: newSessionVersion,
             pulse: {
               enabled: true,
               anonThreshold: 5,
@@ -1506,6 +1518,12 @@ export function createApp(prisma: PrismaClient) {
       req.session.user = user;
       req.session.tenantSlug = (req.query.tenant as string) || 'demo';
 
+      // Get current session version from tenant settings
+      const tenantSettings = await prisma.tenantSettings.findUnique({
+        where: { tenantId: req.tenant!.tenantId },
+      });
+      req.session.sessionVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
+
       // Save session before redirect (important!)
       req.session.save(err => {
         if (err) {
@@ -1616,6 +1634,12 @@ export function createApp(prisma: PrismaClient) {
 
       // Store user in session
       req.session.user = user;
+
+      // Get current session version from tenant settings
+      const tenantSettings = await prisma.tenantSettings.findUnique({
+        where: { tenantId: req.tenant!.tenantId },
+      });
+      req.session.sessionVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
 
       // Redirect to frontend
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';

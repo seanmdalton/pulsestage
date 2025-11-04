@@ -10,5 +10,6 @@ declare module 'express-session' {
     user?: AuthUser;
     oauthState?: string;
     tenantSlug?: string;
+    sessionVersion?: number; // For invalidating sessions after demo reset
   }
 }

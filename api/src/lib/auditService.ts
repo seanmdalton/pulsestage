@@ -93,8 +93,15 @@ export class AuditService {
               ` Audit: ${entry.action} by ${req.user?.email || 'system'} on ${entry.entityType}`
             );
           }
-        } catch (error) {
-          console.error('Failed to create audit log entry:', error);
+        } catch (error: any) {
+          // Handle foreign key violations gracefully (e.g., user was deleted during demo reset)
+          if (error.code === 'P2003') {
+            console.warn(
+              `[AUDIT] Skipping audit log for deleted user (userId: ${userId}, action: ${entry.action})`
+            );
+          } else {
+            console.error('Failed to create audit log entry:', error);
+          }
           // Don't throw - audit failure shouldn't break the main operation
         }
       });

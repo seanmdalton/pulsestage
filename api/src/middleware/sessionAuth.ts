@@ -164,6 +164,27 @@ export async function sessionAuthMiddleware(req: Request, res: Response, next: N
     if (req.session?.user) {
       const sessionUser = req.session.user;
 
+      // Validate session version (invalidate sessions after demo reset)
+      const currentTenant = (req as any).tenant;
+      if (currentTenant && req.session.sessionVersion !== undefined) {
+        const tenantSettings = await prisma.tenantSettings.findUnique({
+          where: { tenantId: currentTenant.tenantId },
+        });
+        const currentVersion = (tenantSettings?.settings as any)?.sessionVersion || 0;
+
+        if (req.session.sessionVersion < currentVersion) {
+          console.log(
+            `[SESSION] Invalidating stale session (version ${req.session.sessionVersion} < ${currentVersion})`
+          );
+          // Destroy the session
+          req.session.destroy(() => {
+            // Session destroyed, continue without auth
+          });
+          req.user = undefined;
+          return next();
+        }
+      }
+
       // Find full user details from mock data
       let user = mockUsers.find(u => u.id === sessionUser.id || u.email === sessionUser.email);
 
