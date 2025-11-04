@@ -75,7 +75,7 @@ export function UserManagement() {
   const [csvContent, setCsvContent] = useState('')
   const [importPreview, setImportPreview] = useState<{
     summary: ImportSummary
-    results: ImportResult[]
+    results?: ImportResult[]
   } | null>(null)
   const [importing, setImporting] = useState(false)
 
@@ -649,7 +649,7 @@ export function UserManagement() {
                       </tr>
                     </thead>
                     <tbody>
-                      {importPreview.results.map((result, index) => (
+                      {importPreview.results?.map((result, index) => (
                         <tr
                           key={index}
                           className={`border-b border-gray-100 dark:border-gray-700 ${
